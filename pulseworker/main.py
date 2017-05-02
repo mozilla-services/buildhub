@@ -1,3 +1,4 @@
+import datetime
 import functools
 import logging
 import os
@@ -9,8 +10,9 @@ from mozillapulse.consumers import NormalizedBuildConsumer
 
 
 DEFAULT_SERVER = "https://kinto-ota.dev.mozaws.net/v1"
-DEFAULT_BUCKET = "build-hub-test"
+DEFAULT_BUCKET = "build-hub"
 DEFAULT_COLLECTION = "builds"
+PULSE_TOPIC = "build.#"
 PULSEGUARDIAN_USER = os.getenv("PULSEGUARDIAN_USER", "")
 PULSEGUARDIAN_PASSWORD = os.getenv("PULSEGUARDIAN_PASSWORD", "")
 
@@ -18,15 +20,47 @@ PULSEGUARDIAN_PASSWORD = os.getenv("PULSEGUARDIAN_PASSWORD", "")
 logger = logging.getLogger(__name__)
 
 
-def callback(body, msg, client):
-    routing_key = body['_meta']['routing_key']
+def epoch2iso(timestamp):
+    dt = datetime.datetime.utcfromtimestamp(timestamp)
+    # XXX: Python 3
+    if sys.version_info >= (3, 2):
+        dt = dt.replace(tzinfo=datetime.timezone.utc)
+    return dt.isoformat()
+
+
+def pulse2kinto(body, msg, client):
     # https://github.com/mozilla/pulsetranslator#routing-keys
-    prefix, tree = routing_key.split('.', 2)[:2]
-    if prefix == "build" and tree not in ("autoland", "try"):
-        r = client.create_record(body['payload'])
-        logger.info("Created record %s" % r)
-    else:
-        logger.debug("Skip routing key '%s'" % routing_key)
+    buildinfo = body["payload"]
+
+    if buildinfo["tree"] in ("autoland", "try"):
+        logger.debug("Skip routing key '%s'" % body["_meta"]["routing_key"])
+        return  # Do nothing.
+
+    record = {
+        "build": {
+            "id": buildinfo["buildid"],
+            "date": epoch2iso(buildinfo["builddate"]),
+            "type": buildinfo["buildtype"]
+        },
+        "source": {
+            "revision": buildinfo["revision"],
+            "tree": buildinfo["tree"],
+            "product": buildinfo["product"],
+        },
+        "target": {
+            "platform": buildinfo["platform"],
+            "locale": buildinfo["locale"],
+            "version": None,
+            "channel": None,
+        },
+        "download": {
+            "url": buildinfo["buildurl"],
+            "size": None,
+        },
+        "systemaddons": None
+    }
+    r = client.create_record(record)
+    logger.info("Created record %s" % r)
 
 
 if __name__ == "__main__":
@@ -45,12 +79,14 @@ if __name__ == "__main__":
 
     client = cli_utils.create_client_from_args(args)
 
-    public = {"read": ["system.Everyone"]}
-    client.create_bucket(permissions=public, if_not_exists=True)
+    public_perms = {"read": ["system.Everyone"]}
+    client.create_bucket(permissions=public_perms, if_not_exists=True)
     client.create_collection(if_not_exists=True)
+
+    callback = functools.partial(pulse2kinto, client=client)
 
     c = NormalizedBuildConsumer(user=PULSEGUARDIAN_USER,
                                 password=PULSEGUARDIAN_PASSWORD,
-                                topic='#',
-                                callback=functools.partial(callback, client=client))
+                                topic=PULSE_TOPIC,
+                                callback=callback)
     c.listen()
