@@ -28,7 +28,6 @@ def epoch2iso(timestamp):
         dt = dt.replace(tzinfo=datetime.timezone.utc)
     return dt.isoformat()
 
-
 def update_download_info(client, record):
     rid = record["data"]["id"]
     dlinfo = dict(record["data"]["download"])
@@ -53,6 +52,10 @@ def pulse2kinto(body, msg, client):
         logger.debug("Skip routing key '%s'" % body["_meta"]["routing_key"])
         return  # Do nothing.
 
+    # XXX: no safer way to obtain version?
+    filename = buildinfo["buildurl"].split('/')[-1]
+    version = filename.split('.' + buildinfo["locale"])[0].replace(buildinfo["product"] + '-', '')
+
     record = {
         "build": {
             "id": buildinfo["buildid"],
@@ -67,7 +70,7 @@ def pulse2kinto(body, msg, client):
         "target": {
             "platform": buildinfo["platform"],
             "locale": buildinfo["locale"],
-            "version": None,
+            "version": version,
             "channel": None,
         },
         "download": {
