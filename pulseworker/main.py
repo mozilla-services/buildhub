@@ -5,6 +5,7 @@ import os
 import sys
 import json
 
+import requests
 from kinto_http import cli_utils
 from mozillapulse.consumers import NormalizedBuildConsumer
 
@@ -28,11 +29,24 @@ def epoch2iso(timestamp):
     return dt.isoformat()
 
 
+def update_download_info(client, record):
+    rid = record["data"]["id"]
+    dlinfo = dict(record["data"]["download"])
+
+    resp = requests.head(dlinfo["url"])
+    dlinfo["size"] = int(resp.headers["Content-Length"])
+    dlinfo["mimetype"] = resp.headers["Content-Type"]
+
+    # XXX: use JSON-merge header.
+    client.patch_record({"download": dlinfo}, id=rid)
+
+
 def pulse2kinto(body, msg, client):
     # https://github.com/mozilla/pulsetranslator#routing-keys
     buildinfo = body["payload"]
 
-    if buildinfo["tree"] in ("autoland", "try"):
+    skip = buildinfo["tree"] in ("autoland", "try")
+    if skip:
         logger.debug("Skip routing key '%s'" % body["_meta"]["routing_key"])
         return  # Do nothing.
 
@@ -55,12 +69,16 @@ def pulse2kinto(body, msg, client):
         },
         "download": {
             "url": buildinfo["buildurl"],
+            "mimetype": None,
             "size": None,
         },
         "systemaddons": None
     }
     r = client.create_record(record)
     logger.info("Created record %s" % r)
+
+    # XXX: Python 3 async
+    update_download_info(client, r)
 
 
 if __name__ == "__main__":
