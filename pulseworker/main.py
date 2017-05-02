@@ -45,7 +45,10 @@ def pulse2kinto(body, msg, client):
     # https://github.com/mozilla/pulsetranslator#routing-keys
     buildinfo = body["payload"]
 
-    skip = buildinfo["tree"] in ("autoland", "try")
+    skip = (
+        buildinfo["tree"] in ("autoland", "try") or
+        buildinfo["buildtype"] in ("pgo",) or
+        buildinfo["tree"] in ("mozilla-inbound",))
     if skip:
         logger.debug("Skip routing key '%s'" % body["_meta"]["routing_key"])
         return  # Do nothing.
