@@ -1,9 +1,10 @@
 import datetime
 import functools
+import json
 import logging
 import os
+import re
 import sys
-import json
 
 import requests
 from kinto_http import cli_utils
@@ -28,6 +29,15 @@ def epoch2iso(timestamp):
         dt = dt.replace(tzinfo=datetime.timezone.utc)
     return dt.isoformat()
 
+
+def url2version(url):
+    # https://archive.mozilla.org/pub/firefox/firefox-55.0a1.en-US.win32.zip
+    match = re.search(r'\/\w+-(\d+.+)\.[a-z]+(\-[A-Z]+)?\.(.+)\.([a-z]+)$', url)
+    if not match:
+        return None
+    return match.group(1)
+
+
 def update_download_info(client, record):
     rid = record["data"]["id"]
     dlinfo = dict(record["data"]["download"])
@@ -43,19 +53,17 @@ def update_download_info(client, record):
 def pulse2kinto(body, msg, client):
     # https://github.com/mozilla/pulsetranslator#routing-keys
     buildinfo = body["payload"]
+    routing_key = body["_meta"]["routing_key"]
 
     skip = (
         buildinfo["tree"] in ("autoland", "try") or
-        buildinfo["buildtype"] in ("pgo",) or
-        buildinfo["tree"] in ("mozilla-inbound",))
+        buildinfo["buildtype"] in ("pgo", "debug") or
+        buildinfo["tree"] == "mozilla-inbound")
     if skip:
-        logger.debug("Skip routing key '%s'" % body["_meta"]["routing_key"])
+        logger.debug("Skip routing key '%s'" % routing_key)
         return  # Do nothing.
 
-    # XXX: no safer way to obtain version?
-    filename = buildinfo["buildurl"].split('/')[-1]
-    version = filename.split('.' + buildinfo["locale"])[0].replace(buildinfo["product"] + '-', '')
-
+    logger.debug("Key '%s'='%s'" % (routing_key, json.dumps(body)))
     record = {
         "build": {
             "id": buildinfo["buildid"],
@@ -70,7 +78,7 @@ def pulse2kinto(body, msg, client):
         "target": {
             "platform": buildinfo["platform"],
             "locale": buildinfo["locale"],
-            "version": version,
+            "version": url2version(buildinfo["buildurl"]),
             "channel": None,
         },
         "download": {
@@ -98,8 +106,8 @@ if __name__ == "__main__":
 
     cli_utils.setup_logger(logger, args)
 
-    logger.info("Publish at %s/buckets/%s/collections/%s/records" % (
-        args.server, args.bucket, args.collection))
+    logger.info("Publish at {server}/buckets/{bucket}/collections/{collection}"
+                .format(**args.__dict__))
 
     client = cli_utils.create_client_from_args(args)
 
