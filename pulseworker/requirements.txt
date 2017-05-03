@@ -1,0 +1,3 @@
+kinto-http==7.2.0
+MozillaPulse==1.2.2
+
