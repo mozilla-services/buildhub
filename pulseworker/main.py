@@ -90,7 +90,7 @@ def pulse2kinto(body, message, client):
         "systemaddons": None
     }
     r = client.create_record(record)
-    logger.info("Created record %s" % r)
+    logger.info("Created record %s" % json.dumps(r))
 
     # Tell the pulse queue that the message has been processed and
     # that it is safe to discard.
