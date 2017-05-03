@@ -5,6 +5,7 @@ import logging
 import os
 import re
 import sys
+import traceback
 
 import requests
 from kinto_http import cli_utils
@@ -50,7 +51,7 @@ def update_download_info(client, record):
     client.patch_record({"download": dlinfo}, id=rid)
 
 
-def pulse2kinto(body, msg, client):
+def pulse2kinto(body, message, client):
     # https://github.com/mozilla/pulsetranslator#routing-keys
     buildinfo = body["payload"]
     routing_key = body["_meta"]["routing_key"]
@@ -63,7 +64,7 @@ def pulse2kinto(body, msg, client):
         logger.debug("Skip routing key '%s'" % routing_key)
         return  # Do nothing.
 
-    logger.debug("Key '%s'='%s'" % (routing_key, json.dumps(body)))
+    logger.debug("Key '%s'=%s" % (routing_key, json.dumps(body)))
     record = {
         "build": {
             "id": buildinfo["buildid"],
@@ -90,6 +91,10 @@ def pulse2kinto(body, msg, client):
     }
     r = client.create_record(record)
     logger.info("Created record %s" % r)
+
+    # Tell the pulse queue that the message has been processed and
+    # that it is safe to discard.
+    message.ack()
 
     # XXX: Python 3 async
     update_download_info(client, r)
@@ -120,5 +125,19 @@ if __name__ == "__main__":
     c = NormalizedBuildConsumer(user=PULSEGUARDIAN_USER,
                                 password=PULSEGUARDIAN_PASSWORD,
                                 topic=PULSE_TOPIC,
+                                durable=True,  # Store messages while consumer is off.
                                 callback=callback)
-    c.listen()
+
+    while True:
+        try:
+            c.listen()
+        except KeyboardInterrupt:
+            raise
+        except IOError:
+            # Sometimes there is a socket timeout. Just call listen again; this
+            # is fairly common and not worth logging.
+            pass
+        except:
+            # It is possible for rabbitmq to throw other exceptions. Just log
+            # them and move on.
+            traceback.print_exc()
