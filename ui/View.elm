@@ -29,7 +29,13 @@ recordView record =
         [ div [ class "panel-heading" ]
             [ div [ class "row" ]
                 [ strong [ class "col-sm-6" ]
-                    [ a [ href <| "./#" ++ record.id ] [ text <| record.source.product ++ " " ++ record.target.version ] ]
+                    [ a [ href <| "./#" ++ record.id ]
+                        [ text <|
+                            record.source.product
+                                ++ " "
+                                ++ Maybe.withDefault "" record.target.version
+                        ]
+                    ]
                 , em [ class "col-sm-6 text-right" ] [ text record.build.date ]
                 ]
             ]
@@ -100,7 +106,12 @@ viewSourceDetails : Source -> Html Msg
 viewSourceDetails source =
     let
         revisionUrl =
-            "https://hg.mozilla.org/mozilla-central/rev/" ++ source.revision
+            case source.revision of
+                Just revision ->
+                    a [ href <| "https://hg.mozilla.org/mozilla-central/rev/" ++ revision ] [ text revision ]
+
+                Nothing ->
+                    text ""
     in
         table [ class "table table-stripped table-condensed" ]
             [ thead []
@@ -114,7 +125,7 @@ viewSourceDetails source =
                 [ tr []
                     [ td [] [ text source.product ]
                     , td [] [ text source.tree ]
-                    , td [] [ a [ href revisionUrl ] [ text source.revision ] ]
+                    , td [] [ revisionUrl ]
                     ]
                 ]
             ]
@@ -161,7 +172,7 @@ viewTargetDetails target =
             ]
         , tbody []
             [ tr []
-                [ td [] [ text target.version ]
+                [ td [] [ text <| Maybe.withDefault "" target.version ]
                 , td [] [ text target.platform ]
                 , td [] [ text <| Maybe.withDefault "" target.channel ]
                 , td [] [ text target.locale ]

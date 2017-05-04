@@ -18,4 +18,13 @@ main =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    model ! []
+    case msg of
+        BuildRecordsFetched (Ok buildRecordList) ->
+            { model | builds = buildRecordList, loading = False } ! []
+
+        BuildRecordsFetched (Err err) ->
+            let
+                _ =
+                    Debug.log "An error occured while fetching the build records" err
+            in
+                model ! []

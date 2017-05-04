@@ -10,6 +10,8 @@ module Types
         , Target
         )
 
+import Kinto
+
 
 type alias Model =
     { builds : List BuildRecord
@@ -45,7 +47,7 @@ type alias Download =
 type alias Source =
     { product : String
     , tree : String
-    , revision : String
+    , revision : Maybe String
     }
 
 
@@ -57,7 +59,7 @@ type alias SystemAddon =
 
 
 type alias Target =
-    { version : String
+    { version : Maybe String
     , platform : String
     , channel : Maybe String
     , locale : String
@@ -65,4 +67,4 @@ type alias Target =
 
 
 type Msg
-    = NoOp
+    = BuildRecordsFetched (Result Kinto.Error (List BuildRecord))

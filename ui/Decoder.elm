@@ -36,7 +36,7 @@ downloadDecoder =
 targetDecoder : Decoder Target
 targetDecoder =
     decode Target
-        |> required "version" string
+        |> required "version" (nullable string)
         |> required "platform" string
         |> required "channel" (nullable string)
         |> required "locale" string
@@ -47,7 +47,7 @@ sourceDecoder =
     decode Source
         |> required "product" string
         |> required "tree" string
-        |> required "revision" string
+        |> required "revision" (nullable string)
 
 
 systemAddonDecoder : Decoder SystemAddon
