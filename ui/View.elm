@@ -1,5 +1,6 @@
 module View exposing (view)
 
+import Dict
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Types exposing (..)
@@ -102,13 +103,50 @@ viewDownloadDetails download =
             ]
 
 
+treeToMozillaHgUrl : String -> Maybe String
+treeToMozillaHgUrl tree =
+    let
+        mappingTable =
+            Dict.fromList
+                [ ( "comm-aurora", "releases/comm-aurora" )
+                , ( "comm-beta", "releases/comm-beta" )
+                , ( "comm-central", "comm-central" )
+                , ( "comm-esr45", "releases/comm-esr45" )
+                , ( "comm-esr52", "releases/comm-esr52" )
+                , ( "graphics", "projects/graphics" )
+                , ( "mozilla-aurora", "releases/mozilla-aurora" )
+                , ( "mozilla-beta", "releases/mozilla-beta" )
+                , ( "mozilla-central", "mozilla-central" )
+                , ( "mozilla-esr45", "releases/mozilla-esr45" )
+                , ( "mozilla-esr52", "releases/mozilla-esr45" )
+                , ( "mozilla-release", "releases/mozilla-release" )
+                , ( "oak", "projects/oak" )
+                , ( "try-comm-central", "try-comm-central" )
+                ]
+    in
+        Maybe.map
+            (\folder ->
+                "https://hg.mozilla.org/" ++ folder ++ "/rev/"
+            )
+            (Dict.get tree mappingTable)
+
+
 viewSourceDetails : Source -> Html Msg
 viewSourceDetails source =
     let
         revisionUrl =
             case source.revision of
                 Just revision ->
-                    a [ href <| "https://hg.mozilla.org/mozilla-central/rev/" ++ revision ] [ text revision ]
+                    let
+                        mozillaHgUrl =
+                            treeToMozillaHgUrl source.tree
+                    in
+                        case mozillaHgUrl of
+                            Just url ->
+                                a [ href <| url ++ revision ] [ text revision ]
+
+                            Nothing ->
+                                text ""
 
                 Nothing ->
                     text ""
