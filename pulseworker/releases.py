@@ -23,7 +23,7 @@ async def fetch_listing(session, url):
     async with session.get(url, headers=headers) as response:
         try:
             data = await response.json()
-            return data["prefixes"], data["files"]
+            return url, data["prefixes"], data["files"]
         except (aiohttp.ClientError, KeyError) as e:
             raise ValueError("Could not fetch %s: %s" % (url, e))
 
@@ -34,55 +34,66 @@ async def walk_releases(loop, queue):
         for product in ("firefox", "thunderbird"):
             releasesurl = ARCHIVE_URL + product + "/releases/"
 
-            version_folders, _ = await fetch_listing(session, releasesurl)
-            versions = [v[:-1] for v in version_folders if re.match(r'^[0-9]', v)]
+            _, version_folders, _ = await fetch_listing(session, releasesurl)
+            versions = [v[:-1] for v in version_folders[:40] if re.match(r'^[0-9]', v)]
+            versions = [v for v in versions if "funnelcake" not in v]
             versions = sorted(versions, key=lambda v: version_parse(v), reverse=True)
+            version_urls = [releasesurl + version + "/" for version in versions]
 
-            for version in versions:
-                versionurl = releasesurl + version + "/"
+            fetch_versions = [fetch_listing(session, url) for url in version_urls]
+            version_results = await asyncio.gather(*fetch_versions)
 
-                platform_folders, _ = await fetch_listing(session, versionurl)
+            fetch_all_platforms = []
+            for version_url, platform_folders, _ in version_results:
+
                 platforms = [p[:-1] for p in platform_folders]
                 platforms = [p for p in platforms if p not in ("source", "update")]
+                platforms_urls = [version_url + platform + "/" for platform in platforms]
 
-                for platform in platforms:
-                    localeurl = versionurl + platform + "/"
+                fetch_platforms = [fetch_listing(session, url) for url in platforms_urls]
+                fetch_all_platforms.extend(fetch_platforms)
 
-                    locale_folders, _ = await fetch_listing(session, localeurl)
-                    locales = [l[:-1] for l in locale_folders]
-                    locales = [l for l in locales if l != "xpi"]
+            platform_results = await asyncio.gather(*fetch_all_platforms)
 
-                    for locale in locales:
-                        filesurl = localeurl + locale + "/"
+            fetch_all_locales = []
+            for platform_url, locale_folders, _ in platform_results:
+                locales = [l[:-1] for l in locale_folders]
+                locales = [l for l in locales if l != "xpi"]
+                locales_urls = [platform_url + locale + "/" for locale in locales]
 
-                        _, files = await fetch_listing(session, filesurl)
-                        fileregexp = re.compile("%s-(.+)(zip|gz|bz|bz2|dmg|apk)$" % product)
-                        files = [f for f in files if fileregexp.match(f["name"])]
+                fetch_locales = [fetch_listing(session, url) for url in locales_urls]
+                fetch_all_locales.extend(fetch_locales)
 
-                        for file_ in files:
-                            filename = file_["name"]
-                            record = {
-                                "build": None,
-                                "source": {
-                                    "revision": None,
-                                    "tree": None,
-                                    "product": product,
-                                },
-                                "target": {
-                                    "platform": platform,
-                                    "locale": locale,
-                                    "version": version,
-                                    "channel": None,
-                                },
-                                "download": {
-                                    "url": filesurl + filename,
-                                    "mimetype": None,
-                                    "size": None,
-                                },
-                                "systemaddons": None
-                            }
-                            logger.debug("Release found %s" % (filesurl + filename))
-                            await queue.put(record)
+            locale_results = await asyncio.gather(*fetch_all_locales)
+
+            fileregexp = re.compile("%s-(.+)(zip|gz|bz|bz2|dmg|apk)$" % product)
+            for locale_url, _, files in locale_results:
+                files = [f for f in files if fileregexp.match(f["name"])]
+
+                for file_ in files:
+                    filename = file_["name"]
+                    record = {
+                        "build": None,
+                        "source": {
+                            "revision": None,
+                            "tree": None,
+                            "product": product,
+                        },
+                        "target": {
+                            "platform": None,  # TODO
+                            "locale": None,  # TODO
+                            "version": None,  # TODO
+                            "channel": None,
+                        },
+                        "download": {
+                            "url": locale_url + filename,
+                            "mimetype": None,
+                            "size": None,
+                        },
+                        "systemaddons": None
+                    }
+                    logger.debug("Release found %s" % (locale_url + filename))
+                    await queue.put(record)
 
     logger.debug("Walking releases done.")
     await queue.put(None)
