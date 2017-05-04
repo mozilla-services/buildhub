@@ -12,7 +12,9 @@ module Types
 
 
 type alias Model =
-    { builds : List BuildRecord }
+    { builds : List BuildRecord
+    , loading : Bool
+    }
 
 
 type alias BuildRecord =
@@ -21,7 +23,7 @@ type alias BuildRecord =
     , build : Build
     , download : Download
     , source : Source
-    , systemaddons : Maybe (List SystemAddon)
+    , systemAddons : Maybe (List SystemAddon)
     , target : Target
     }
 
@@ -49,8 +51,8 @@ type alias Source =
 
 type alias SystemAddon =
     { id : String
-    , builtin_version : Maybe String
-    , updated_version : Maybe String
+    , builtinVersion : Maybe String
+    , updatedVersion : Maybe String
     }
 
 

@@ -8,7 +8,7 @@ import Types exposing (..)
 
 init : ( Model, Cmd Msg )
 init =
-    Model [testDecode] ! []
+    Model [testDecode] False ! []
 
 
 testDecode : BuildRecord
