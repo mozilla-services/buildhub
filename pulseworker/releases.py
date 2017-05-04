@@ -23,7 +23,7 @@ async def fetch_listing(session, url):
     async with session.get(url, headers=headers) as response:
         try:
             data = await response.json()
-            return url, data["prefixes"], data["files"]
+            return data["prefixes"], data["files"]
         except (aiohttp.ClientError, KeyError) as e:
             raise ValueError("Could not fetch %s: %s" % (url, e))
 
@@ -34,8 +34,8 @@ async def walk_releases(loop, queue):
         for product in ("firefox", "thunderbird"):
             releasesurl = ARCHIVE_URL + product + "/releases/"
 
-            _, version_folders, _ = await fetch_listing(session, releasesurl)
-            versions = [v[:-1] for v in version_folders[:40] if re.match(r'^[0-9]', v)]
+            version_folders, _ = await fetch_listing(session, releasesurl)
+            versions = [v[:-1] for v in version_folders if re.match(r'^[0-9]', v)]
             versions = [v for v in versions if "funnelcake" not in v]
             versions = sorted(versions, key=lambda v: version_parse(v), reverse=True)
             version_urls = [releasesurl + version + "/" for version in versions]
@@ -43,63 +43,57 @@ async def walk_releases(loop, queue):
             fetch_versions = [fetch_listing(session, url) for url in version_urls]
             version_results = await asyncio.gather(*fetch_versions)
 
-            fetch_all_platforms = []
-            for version_url, platform_folders, _ in version_results:
+            for version, version_url, (platform_folders, _) in zip(versions, version_urls, version_results):
 
                 platforms = [p[:-1] for p in platform_folders]
                 platforms = [p for p in platforms if p not in ("source", "update")]
                 platforms_urls = [version_url + platform + "/" for platform in platforms]
 
                 fetch_platforms = [fetch_listing(session, url) for url in platforms_urls]
-                fetch_all_platforms.extend(fetch_platforms)
+                platform_results = await asyncio.gather(*fetch_platforms)
 
-            platform_results = await asyncio.gather(*fetch_all_platforms)
+                for platform, platform_url, (locale_folders, _) in zip(platforms, platforms_urls, platform_results):
+                    locales = [l[:-1] for l in locale_folders]
+                    locales = [l for l in locales if l != "xpi"]
+                    locales_urls = [platform_url + locale + "/" for locale in locales]
 
-            fetch_all_locales = []
-            for platform_url, locale_folders, _ in platform_results:
-                locales = [l[:-1] for l in locale_folders]
-                locales = [l for l in locales if l != "xpi"]
-                locales_urls = [platform_url + locale + "/" for locale in locales]
+                    fetch_locales = [fetch_listing(session, url) for url in locales_urls]
+                    locale_results = await asyncio.gather(*fetch_locales)
 
-                fetch_locales = [fetch_listing(session, url) for url in locales_urls]
-                fetch_all_locales.extend(fetch_locales)
+                    fileregexp = re.compile("%s-(.+)(zip|gz|bz|bz2|dmg|apk)$" % product)
+                    for locale, locale_url, (_, files) in zip(locales, locales_urls, locale_results):
+                        files = [f for f in files if fileregexp.match(f["name"])]
 
-            locale_results = await asyncio.gather(*fetch_all_locales)
-
-            fileregexp = re.compile("%s-(.+)(zip|gz|bz|bz2|dmg|apk)$" % product)
-            for locale_url, _, files in locale_results:
-                files = [f for f in files if fileregexp.match(f["name"])]
-
-                for file_ in files:
-                    filename = file_["name"]
-                    record = {
-                        "build": None,
-                        "source": {
-                            "revision": None,
-                            "tree": None,
-                            "product": product,
-                        },
-                        "target": {
-                            "platform": None,  # TODO
-                            "locale": None,  # TODO
-                            "version": None,  # TODO
-                            "channel": None,
-                        },
-                        "download": {
-                            "url": locale_url + filename,
-                            "mimetype": None,
-                            "size": None,
-                        },
-                        "systemaddons": None
-                    }
-                    logger.debug("Release found %s" % (locale_url + filename))
-                    await queue.put(record)
+                        for file_ in files:
+                            filename = file_["name"]
+                            record = {
+                                "build": None,
+                                "source": {
+                                    "revision": None,
+                                    "tree": None,
+                                    "product": product,
+                                },
+                                "target": {
+                                    "platform": platform,
+                                    "locale": locale,
+                                    "version": version,
+                                    "channel": None,
+                                },
+                                "download": {
+                                    "url": locale_url + filename,
+                                    "mimetype": None,
+                                    "size": None,
+                                },
+                                "systemaddons": None
+                            }
+                            logger.debug("Release found %s" % (locale_url + filename))
+                            await queue.put(record)
 
     logger.debug("Walking releases done.")
     await queue.put(None)
 
 
-async def consume(client, queue):
+async def consume(i, client, queue):
     while True:
         record = await queue.get()
         if record is None:
@@ -107,7 +101,7 @@ async def consume(client, queue):
             break
 
         r = client.create_record(record)
-        logger.info("Created record %s" % json.dumps(r))
+        logger.info("%s Created record %s" % (i, json.dumps(r)))
 
 
 def main():
@@ -134,7 +128,7 @@ def main():
     queue = asyncio.Queue(loop=loop)
 
     producer_coro = walk_releases(loop, queue)
-    consumer_coros = [consume(client, queue) for i in range(5)]
+    consumer_coros = [consume(i, client, queue) for i in range(20)]
     future = asyncio.gather(producer_coro, *consumer_coros)
     loop.run_until_complete(future)
 
