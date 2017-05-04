@@ -1,6 +1,5 @@
 module Model exposing (init)
 
-
 import Decoder exposing (..)
 import Json.Decode exposing (..)
 import Types exposing (..)
@@ -8,7 +7,7 @@ import Types exposing (..)
 
 init : ( Model, Cmd Msg )
 init =
-    Model [testDecode] False ! []
+    Model [ testDecode ] True ! []
 
 
 testDecode : BuildRecord
@@ -16,8 +15,10 @@ testDecode =
     case (decodeString buildRecordDecoder record) of
         Err message ->
             Debug.crash message
+
         Ok buildRecord ->
             buildRecord
+
 
 record =
     """
