@@ -95,9 +95,9 @@ viewDownloadDetails download =
             , tbody []
                 [ tr []
                     [ td [] [ a [ href download.url ] [ text filename ] ]
-                    , td [] [ text download.mimetype ]
+                    , td [] [ text <| Maybe.withDefault "" download.mimetype ]
                       -- TODO display the size in an humanly readable format
-                    , td [] [ text <| toString download.size ]
+                    , td [] [ text <| toString <| Maybe.withDefault 0 download.size ]
                     ]
                 ]
             ]

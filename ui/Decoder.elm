@@ -28,8 +28,8 @@ buildDecoder =
 downloadDecoder : Decoder Download
 downloadDecoder =
     decode Download
-        |> required "mimetype" string
-        |> required "size" int
+        |> required "mimetype" (nullable string)
+        |> required "size" (nullable int)
         |> required "url" string
 
 

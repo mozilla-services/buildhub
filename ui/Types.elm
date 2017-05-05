@@ -38,8 +38,8 @@ type alias Build =
 
 
 type alias Download =
-    { mimetype : String
-    , size : Int
+    { mimetype : Maybe String
+    , size : Maybe Int
     , url : String
     }
 
