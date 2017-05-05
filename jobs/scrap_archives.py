@@ -7,6 +7,7 @@ import sys
 from packaging.version import parse as version_parse
 
 import aiohttp
+import kinto_http.exceptions
 from kinto_http import cli_utils
 
 
@@ -160,6 +161,7 @@ def main():
                 .format(**args.__dict__))
 
     client = cli_utils.create_client_from_args(args)
+    client.session.nb_retry = 1
 
     public_perms = {"read": ["system.Everyone"]}
     client.create_bucket(permissions=public_perms, if_not_exists=True)
