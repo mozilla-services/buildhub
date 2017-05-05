@@ -8,7 +8,7 @@ import Types exposing (..)
 
 init : ( Model, Cmd Msg )
 init =
-    Model [] True ! [ getBuildRecordList ]
+    Model [] [] [] [] [] [] [] True ! [ getBuildRecordList ]
 
 
 getBuildRecordList : Cmd Msg

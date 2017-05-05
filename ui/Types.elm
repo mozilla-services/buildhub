@@ -15,6 +15,12 @@ import Kinto
 
 type alias Model =
     { builds : List BuildRecord
+    , treeList : List String
+    , productList : List String
+    , versionList : List String
+    , platformList : List String
+    , channelList : List String
+    , localeList : List String
     , loading : Bool
     }
 

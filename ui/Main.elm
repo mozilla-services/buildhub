@@ -22,14 +22,61 @@ update msg model =
     case msg of
         BuildRecordsFetched (Ok buildRecordList) ->
             let
-                _ =
+                treeList =
                     buildRecordList
                         |> List.map .source
                         |> List.map .tree
                         |> Set.fromList
                         |> Debug.log "trees"
+
+                productList =
+                    buildRecordList
+                        |> List.map .source
+                        |> List.map .product
+                        |> Set.fromList
+                        |> Debug.log "products"
+
+                versionList =
+                    buildRecordList
+                        |> List.map .target
+                        |> List.map .version
+                        |> List.filterMap identity
+                        |> Set.fromList
+                        |> Debug.log "versions"
+
+                platformList =
+                    buildRecordList
+                        |> List.map .target
+                        |> List.map .platform
+                        |> Set.fromList
+                        |> Debug.log "platforms"
+
+                channelList =
+                    buildRecordList
+                        |> List.map .target
+                        |> List.map .channel
+                        |> List.filterMap identity
+                        |> Set.fromList
+                        |> Debug.log "channels"
+
+                localeList =
+                    buildRecordList
+                        |> List.map .target
+                        |> List.map .locale
+                        |> Set.fromList
+                        |> Debug.log "locales"
             in
-                { model | builds = buildRecordList, loading = False } ! []
+                { model
+                    | builds = buildRecordList
+                    , treeList = Set.toList treeList
+                    , productList = Set.toList productList
+                    , versionList = Set.toList versionList
+                    , platformList = Set.toList platformList
+                    , channelList = Set.toList channelList
+                    , localeList = Set.toList localeList
+                    , loading = False
+                }
+                    ! []
 
         BuildRecordsFetched (Err err) ->
             let

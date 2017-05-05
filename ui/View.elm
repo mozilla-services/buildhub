@@ -18,8 +18,52 @@ view model =
                 [ div [ class "col-sm-9" ]
                     [ div [] <| List.map recordView model.builds ]
                 , div [ class "col-sm-3" ]
-                    [ text "some filters here, someday" ]
+                    [ div
+                        [ style
+                            [ ( "position", "fixed" )
+                            , ( "max-height", "calc(100vh - 75px)" )
+                            , ( "position", "fixed" )
+                            , ( "overflow-y", "auto" )
+                            , ( "padding-right", ".1em" )
+                            ]
+                        ]
+                        [ filterSetForm model.treeList "Trees" "all"
+                        , filterSetForm model.productList "Products" "all"
+                        , filterSetForm model.versionList "Versions" "all"
+                        , filterSetForm model.platformList "Platforms" "all"
+                        , filterSetForm model.channelList "Channels" "all"
+                        , filterSetForm model.localeList "Locales" "all"
+                        ]
+                    ]
                 ]
+        ]
+
+
+filterSetForm : List String -> String -> String -> Html Msg
+filterSetForm filters filterName checkedFilter =
+    div [ class "panel panel-default" ]
+        [ div [ class "panel-heading" ] [ strong [] [ text filterName ] ]
+        , ul [ class "list-group" ] <|
+            [ (radioButton filterName "all" checkedFilter) ]
+                ++ List.map (radioButton filterName checkedFilter) filters
+        ]
+
+
+radioButton : String -> String -> String -> Html Msg
+radioButton filterName checkedFilter filterValue =
+    li [ class "list-group-item" ]
+        [ div [ class "radio", style [ ( "margin", "0px" ) ] ]
+            [ label []
+                [ input
+                    [ name filterName
+                    , type_ "radio"
+                    , value filterValue
+                    , checked <| checkedFilter == filterValue
+                    ]
+                    []
+                , text filterValue
+                ]
+            ]
         ]
 
 
