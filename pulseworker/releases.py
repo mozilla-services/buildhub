@@ -1,4 +1,5 @@
 import asyncio
+import concurrent.futures
 import json
 import logging
 import re
@@ -14,9 +15,19 @@ PRODUCTS = ("firefox", "thunderbird")
 DEFAULT_SERVER = "https://kinto-ota.dev.mozaws.net/v1"
 DEFAULT_BUCKET = "build-hub"
 DEFAULT_COLLECTION = "archives"
+NB_THREADS = 10
 
 
 logger = logging.getLogger(__name__)
+
+
+def publish_record(client, record):
+    try:
+        r = client.create_record(record)
+        logger.info("Created record %s" % json.dumps(r))
+    except kinto_http.exceptions.KintoException:
+        error_msg = "Could not create record for %s" % record["download"]["url"]
+        logger.exception(error_msg)
 
 
 def archive_url(product, version=None, platform=None, locale=None):
@@ -121,23 +132,17 @@ async def fetch_files(session, queue, product, version, platform, locale):
     return await asyncio.gather(*futures)
 
 
-async def walk_releases(loop, queue):
+async def produce(loop, queue):
     async with aiohttp.ClientSession(loop=loop) as session:
         await fetch_products(session, queue, PRODUCTS)
-
-    logger.debug("Walking releases done.")
-    await queue.put(None)
+    logger.info("Scraping releases done.")
 
 
-async def consume(client, queue):
+async def consume(loop, executor, client, queue):
     while True:
         record = await queue.get()
-        if record is None:
-            # the producer emits None to indicate that it is done
-            break
-
-        r = client.create_record(record)
-        logger.info("Created record %s" % json.dumps(r))
+        task = loop.run_in_executor(executor, publish_record, client, record)
+        task.add_done_callback(lambda fut: queue.task_done())
 
 
 def main():
@@ -163,10 +168,20 @@ def main():
     loop = asyncio.get_event_loop()
     queue = asyncio.Queue(loop=loop)
 
-    producer_coro = walk_releases(loop, queue)
-    consumer_coro = consume(client, queue)
-    future = asyncio.gather(producer_coro, consumer_coro)
-    loop.run_until_complete(future)
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=NB_THREADS)
+    consumer_coro = consume(loop, executor, client, queue)
+    consumer_task = asyncio.ensure_future(consumer_coro)
+
+    # Wait for scraping of releases and all records to be published.
+    producer = produce(loop, queue)
+    wait_queue = queue.join()
+    future = asyncio.gather(producer, wait_queue)
+    try:
+        loop.run_until_complete(future)
+    finally:
+        # Everything processed, stop consuming.
+        consumer_task.cancel()
+        loop.close()
 
 
 if __name__ == "__main__":
