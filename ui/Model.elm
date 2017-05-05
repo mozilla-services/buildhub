@@ -28,4 +28,4 @@ client =
 
 recordResource : Kinto.Resource BuildRecord
 recordResource =
-    Kinto.recordResource "build-hub" "builds" buildRecordDecoder
+    Kinto.recordResource "build-hub" "fixtures" buildRecordDecoder
