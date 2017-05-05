@@ -13,7 +13,7 @@ buildRecordDecoder =
         |> required "build" buildDecoder
         |> required "download" downloadDecoder
         |> required "source" sourceDecoder
-        |> required "systemaddons" (nullable (list systemAddonDecoder))
+        |> required "systemaddons" (maybe (list systemAddonDecoder))
         |> required "target" targetDecoder
 
 
@@ -28,17 +28,17 @@ buildDecoder =
 downloadDecoder : Decoder Download
 downloadDecoder =
     decode Download
-        |> required "mimetype" (nullable string)
-        |> required "size" (nullable int)
+        |> required "mimetype" (maybe string)
+        |> required "size" (maybe int)
         |> required "url" string
 
 
 targetDecoder : Decoder Target
 targetDecoder =
     decode Target
-        |> required "version" (nullable string)
+        |> required "version" (maybe string)
         |> required "platform" string
-        |> required "channel" (nullable string)
+        |> required "channel" (maybe string)
         |> required "locale" string
 
 
@@ -47,12 +47,12 @@ sourceDecoder =
     decode Source
         |> required "product" string
         |> required "tree" string
-        |> required "revision" (nullable string)
+        |> required "revision" (maybe string)
 
 
 systemAddonDecoder : Decoder SystemAddon
 systemAddonDecoder =
     decode SystemAddon
         |> required "id" string
-        |> required "builtin_version" (nullable string)
-        |> required "updated_version" (nullable string)
+        |> required "builtin" (maybe string)
+        |> required "updated" (maybe string)

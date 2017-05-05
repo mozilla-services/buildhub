@@ -1,7 +1,6 @@
 module Model exposing (init)
 
 import Decoder exposing (..)
-import Json.Decode exposing (..)
 import Kinto
 import Types exposing (..)
 
