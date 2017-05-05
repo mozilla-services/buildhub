@@ -125,7 +125,6 @@ if __name__ == "__main__":
     c = NormalizedBuildConsumer(user=PULSEGUARDIAN_USER,
                                 password=PULSEGUARDIAN_PASSWORD,
                                 topic=PULSE_TOPIC,
-                                durable=True,  # Store messages while consumer is off.
                                 callback=callback)
 
     while True:

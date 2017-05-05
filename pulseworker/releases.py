@@ -10,6 +10,7 @@ from kinto_http import cli_utils
 
 
 ARCHIVE_URL = "https://archive.mozilla.org/pub/"
+PRODUCTS = ("firefox", "thunderbird")
 DEFAULT_SERVER = "https://kinto-ota.dev.mozaws.net/v1"
 DEFAULT_BUCKET = "build-hub"
 DEFAULT_COLLECTION = "archives"
@@ -18,8 +19,22 @@ DEFAULT_COLLECTION = "archives"
 logger = logging.getLogger(__name__)
 
 
+def archive_url(product, version=None, platform=None, locale=None):
+    url = ARCHIVE_URL + product + "/releases/"
+    if version:
+        url += version + "/"
+    if platform:
+        url += platform + "/"
+    if locale:
+        url += locale + "/"
+    return url
+
+
 async def fetch_listing(session, url):
-    headers = {"Accept": "application/json"}
+    headers = {
+        "Accept": "application/json",
+        "User-Agent": "BuildHub;storage-team@mozilla.com"
+    }
     async with session.get(url, headers=headers) as response:
         try:
             data = await response.json()
@@ -28,72 +43,93 @@ async def fetch_listing(session, url):
             raise ValueError("Could not fetch %s: %s" % (url, e))
 
 
+async def fetch_products(session, queue, products):
+    futures = [fetch_versions(session, queue, product) for product in products]
+    return await asyncio.gather(*futures)
+
+
+async def fetch_versions(session, queue, product):
+    product_url = archive_url(product)
+    versions_folders, _ = await fetch_listing(session, product_url)
+
+    versions = [v[:-1] for v in versions_folders if re.match(r'^[0-9]', v)]
+    versions = [v for v in versions if "funnelcake" not in v]
+    versions = sorted(versions, key=lambda v: version_parse(v), reverse=True)
+
+    futures = [fetch_platforms(session, queue, product, version)
+               for version in versions]
+    return await asyncio.gather(*futures)
+
+
+async def fetch_platforms(session, queue, product, version):
+    version_url = archive_url(product, version)
+    platform_folders, _ = await fetch_listing(session, version_url)
+
+    platforms = [p[:-1] for p in platform_folders]
+    platforms = [p for p in platforms if p not in ("source", "update")]
+
+    futures = [fetch_locales(session, queue, product, version, platform)
+               for platform in platforms]
+    return await asyncio.gather(*futures)
+
+
+async def fetch_locales(session, queue, product, version, platform):
+    platform_url = archive_url(product, version, platform)
+    locale_folders, _ = await fetch_listing(session, platform_url)
+
+    locales = [l[:-1] for l in locale_folders]
+    locales = [l for l in locales if l != "xpi"]
+
+    futures = [fetch_files(session, queue, product, version, platform, locale)
+               for locale in locales]
+    return await asyncio.gather(*futures)
+
+
+async def fetch_files(session, queue, product, version, platform, locale):
+    locale_url = archive_url(product, version, platform, locale)
+    _, files = await fetch_listing(session, locale_url)
+
+    fileregexp = re.compile("%s-(.+)(zip|gz|bz|bz2|dmg|apk)$" % product)
+    files = [f for f in files if fileregexp.match(f["name"])]
+
+    futures = []
+    for file_ in files:
+        filename = file_["name"]
+        record = {
+            "build": None,
+            "source": {
+                "revision": None,
+                "tree": None,
+                "product": product,
+            },
+            "target": {
+                "platform": platform,
+                "locale": locale,
+                "version": version,
+                "channel": None,
+            },
+            "download": {
+                "url": locale_url + filename,
+                "mimetype": None,
+                "size": None,
+            },
+            "systemaddons": None
+        }
+        logger.debug("Release found %s" % record["download"]["url"])
+        futures.append(queue.put(record))
+
+    return await asyncio.gather(*futures)
+
+
 async def walk_releases(loop, queue):
     async with aiohttp.ClientSession(loop=loop) as session:
-
-        for product in ("firefox", "thunderbird"):
-            releasesurl = ARCHIVE_URL + product + "/releases/"
-
-            version_folders, _ = await fetch_listing(session, releasesurl)
-            versions = [v[:-1] for v in version_folders if re.match(r'^[0-9]', v)]
-            versions = [v for v in versions if "funnelcake" not in v]
-            versions = sorted(versions, key=lambda v: version_parse(v), reverse=True)
-            version_urls = [releasesurl + version + "/" for version in versions]
-
-            fetch_versions = [fetch_listing(session, url) for url in version_urls]
-            version_results = await asyncio.gather(*fetch_versions)
-
-            for version, version_url, (platform_folders, _) in zip(versions, version_urls, version_results):
-
-                platforms = [p[:-1] for p in platform_folders]
-                platforms = [p for p in platforms if p not in ("source", "update")]
-                platforms_urls = [version_url + platform + "/" for platform in platforms]
-
-                fetch_platforms = [fetch_listing(session, url) for url in platforms_urls]
-                platform_results = await asyncio.gather(*fetch_platforms)
-
-                for platform, platform_url, (locale_folders, _) in zip(platforms, platforms_urls, platform_results):
-                    locales = [l[:-1] for l in locale_folders]
-                    locales = [l for l in locales if l != "xpi"]
-                    locales_urls = [platform_url + locale + "/" for locale in locales]
-
-                    fetch_locales = [fetch_listing(session, url) for url in locales_urls]
-                    locale_results = await asyncio.gather(*fetch_locales)
-
-                    fileregexp = re.compile("%s-(.+)(zip|gz|bz|bz2|dmg|apk)$" % product)
-                    for locale, locale_url, (_, files) in zip(locales, locales_urls, locale_results):
-                        files = [f for f in files if fileregexp.match(f["name"])]
-
-                        for file_ in files:
-                            filename = file_["name"]
-                            record = {
-                                "build": None,
-                                "source": {
-                                    "revision": None,
-                                    "tree": None,
-                                    "product": product,
-                                },
-                                "target": {
-                                    "platform": platform,
-                                    "locale": locale,
-                                    "version": version,
-                                    "channel": None,
-                                },
-                                "download": {
-                                    "url": locale_url + filename,
-                                    "mimetype": None,
-                                    "size": None,
-                                },
-                                "systemaddons": None
-                            }
-                            logger.debug("Release found %s" % (locale_url + filename))
-                            await queue.put(record)
+        await fetch_products(session, queue, PRODUCTS)
 
     logger.debug("Walking releases done.")
     await queue.put(None)
 
 
-async def consume(i, client, queue):
+async def consume(client, queue):
     while True:
         record = await queue.get()
         if record is None:
@@ -101,7 +137,7 @@ async def consume(i, client, queue):
             break
 
         r = client.create_record(record)
-        logger.info("%s Created record %s" % (i, json.dumps(r)))
+        logger.info("Created record %s" % json.dumps(r))
 
 
 def main():
@@ -128,8 +164,8 @@ def main():
     queue = asyncio.Queue(loop=loop)
 
     producer_coro = walk_releases(loop, queue)
-    consumer_coros = [consume(i, client, queue) for i in range(20)]
-    future = asyncio.gather(producer_coro, *consumer_coros)
+    consumer_coro = consume(client, queue)
+    future = asyncio.gather(producer_coro, consumer_coro)
     loop.run_until_complete(future)
 
 
