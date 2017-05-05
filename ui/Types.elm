@@ -15,12 +15,19 @@ import Kinto
 
 type alias Model =
     { builds : List BuildRecord
+    , filteredBuilds : List BuildRecord
     , treeList : List String
     , productList : List String
     , versionList : List String
     , platformList : List String
     , channelList : List String
     , localeList : List String
+    , treeFilter : String
+    , productFilter : String
+    , versionFilter : String
+    , platformFilter : String
+    , channelFilter : String
+    , localeFilter : String
     , loading : Bool
     }
 
@@ -74,3 +81,9 @@ type alias Target =
 
 type Msg
     = BuildRecordsFetched (Result Kinto.Error (List BuildRecord))
+    | NewTreeFilter String
+    | NewProductFilter String
+    | NewVersionFilter String
+    | NewPlatformFilter String
+    | NewChannelFilter String
+    | NewLocaleFilter String

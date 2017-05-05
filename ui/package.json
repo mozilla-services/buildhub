@@ -2,7 +2,6 @@
   "name": "buildhub-ui",
   "version": "0.0.1",
   "description": "Firefox System Build info manager.",
-  "private": true,
   "scripts": {
     "build": "node_modules/.bin/elm-make Main.elm --output=build/app.js && npm run copy-assets",
     "copy-assets": "node_modules/.bin/copyfiles index.html style.css build/",

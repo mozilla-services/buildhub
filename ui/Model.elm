@@ -8,7 +8,23 @@ import Types exposing (..)
 
 init : ( Model, Cmd Msg )
 init =
-    Model [] [] [] [] [] [] [] True ! [ getBuildRecordList ]
+    { builds = []
+    , filteredBuilds = []
+    , treeList = []
+    , productList = []
+    , versionList = []
+    , platformList = []
+    , channelList = []
+    , localeList = []
+    , treeFilter = "all"
+    , productFilter = "all"
+    , versionFilter = "all"
+    , platformFilter = "all"
+    , channelFilter = "all"
+    , localeFilter = "all"
+    , loading = True
+    }
+        ! [ getBuildRecordList ]
 
 
 getBuildRecordList : Cmd Msg

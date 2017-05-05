@@ -27,14 +27,14 @@ update msg model =
                         |> List.map .source
                         |> List.map .tree
                         |> Set.fromList
-                        |> Debug.log "trees"
+                        |> Set.toList
 
                 productList =
                     buildRecordList
                         |> List.map .source
                         |> List.map .product
                         |> Set.fromList
-                        |> Debug.log "products"
+                        |> Set.toList
 
                 versionList =
                     buildRecordList
@@ -42,14 +42,14 @@ update msg model =
                         |> List.map .version
                         |> List.filterMap identity
                         |> Set.fromList
-                        |> Debug.log "versions"
+                        |> Set.toList
 
                 platformList =
                     buildRecordList
                         |> List.map .target
                         |> List.map .platform
                         |> Set.fromList
-                        |> Debug.log "platforms"
+                        |> Set.toList
 
                 channelList =
                     buildRecordList
@@ -57,23 +57,24 @@ update msg model =
                         |> List.map .channel
                         |> List.filterMap identity
                         |> Set.fromList
-                        |> Debug.log "channels"
+                        |> Set.toList
 
                 localeList =
                     buildRecordList
                         |> List.map .target
                         |> List.map .locale
                         |> Set.fromList
-                        |> Debug.log "locales"
+                        |> Set.toList
             in
                 { model
                     | builds = buildRecordList
-                    , treeList = Set.toList treeList
-                    , productList = Set.toList productList
-                    , versionList = Set.toList versionList
-                    , platformList = Set.toList platformList
-                    , channelList = Set.toList channelList
-                    , localeList = Set.toList localeList
+                    , filteredBuilds = buildRecordList
+                    , treeList = treeList
+                    , productList = productList
+                    , versionList = versionList
+                    , platformList = platformList
+                    , channelList = channelList
+                    , localeList = localeList
                     , loading = False
                 }
                     ! []
@@ -84,3 +85,78 @@ update msg model =
                     Debug.log "An error occured while fetching the build records" err
             in
                 model ! []
+
+        NewTreeFilter value ->
+            let
+                updatedModelWithFilters =
+                    { model | treeFilter = value }
+            in
+                { updatedModelWithFilters | filteredBuilds = applyFilters updatedModelWithFilters } ! []
+
+        NewProductFilter value ->
+            let
+                updatedModelWithFilters =
+                    { model | productFilter = value }
+            in
+                { updatedModelWithFilters | filteredBuilds = applyFilters updatedModelWithFilters } ! []
+
+        NewVersionFilter value ->
+            let
+                updatedModelWithFilters =
+                    { model | versionFilter = value }
+            in
+                { updatedModelWithFilters | filteredBuilds = applyFilters updatedModelWithFilters } ! []
+
+        NewPlatformFilter value ->
+            let
+                updatedModelWithFilters =
+                    { model | platformFilter = value }
+            in
+                { updatedModelWithFilters | filteredBuilds = applyFilters updatedModelWithFilters } ! []
+
+        NewChannelFilter value ->
+            let
+                updatedModelWithFilters =
+                    { model | channelFilter = value }
+            in
+                { updatedModelWithFilters | filteredBuilds = applyFilters updatedModelWithFilters } ! []
+
+        NewLocaleFilter value ->
+            let
+                updatedModelWithFilters =
+                    { model | localeFilter = value }
+            in
+                { updatedModelWithFilters | filteredBuilds = applyFilters updatedModelWithFilters } ! []
+
+
+recordStringEquals : (BuildRecord -> String) -> String -> BuildRecord -> Bool
+recordStringEquals path filterValue buildRecord =
+    (filterValue == "all")
+        || (buildRecord
+                |> path
+                |> (==) filterValue
+           )
+
+
+recordMaybeStringEquals : (BuildRecord -> Maybe String) -> String -> BuildRecord -> Bool
+recordMaybeStringEquals path filterValue buildRecord =
+    (filterValue == "all")
+        || (buildRecord
+                |> path
+                |> Maybe.withDefault ""
+                |> (==) filterValue
+           )
+
+
+applyFilters : Model -> List BuildRecord
+applyFilters model =
+    model.builds
+        |> List.filter
+            (\buildRecord ->
+                (recordStringEquals (.source >> .tree) model.treeFilter) buildRecord
+                    && (recordStringEquals (.source >> .product) model.productFilter) buildRecord
+                    && (recordMaybeStringEquals (.target >> .version) model.versionFilter) buildRecord
+                    && (recordStringEquals (.target >> .platform) model.platformFilter) buildRecord
+                    && (recordMaybeStringEquals (.target >> .channel) model.channelFilter) buildRecord
+                    && (recordStringEquals (.target >> .locale) model.localeFilter) buildRecord
+            )

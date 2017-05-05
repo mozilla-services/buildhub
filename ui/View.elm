@@ -3,6 +3,7 @@ module View exposing (view)
 import Dict
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import Types exposing (..)
 
 
@@ -16,7 +17,7 @@ view model =
                 [ spinner ]
             else
                 [ div [ class "col-sm-9" ]
-                    [ div [] <| List.map recordView model.builds ]
+                    [ div [] <| List.map recordView model.filteredBuilds ]
                 , div [ class "col-sm-3" ]
                     [ div
                         [ style
@@ -27,38 +28,42 @@ view model =
                             , ( "padding-right", ".1em" )
                             ]
                         ]
-                        [ filterSetForm model.treeList "Trees" "all"
-                        , filterSetForm model.productList "Products" "all"
-                        , filterSetForm model.versionList "Versions" "all"
-                        , filterSetForm model.platformList "Platforms" "all"
-                        , filterSetForm model.channelList "Channels" "all"
-                        , filterSetForm model.localeList "Locales" "all"
+                        [ filterSetForm model.treeList "Trees" model.treeFilter NewTreeFilter
+                        , filterSetForm model.productList "Products" model.productFilter NewProductFilter
+                        , filterSetForm model.versionList "Versions" model.versionFilter NewVersionFilter
+                        , filterSetForm model.platformList "Platforms" model.platformFilter NewPlatformFilter
+                        , filterSetForm model.channelList "Channels" model.channelFilter NewChannelFilter
+                        , filterSetForm model.localeList "Locales" model.localeFilter NewLocaleFilter
                         ]
                     ]
                 ]
         ]
 
 
-filterSetForm : List String -> String -> String -> Html Msg
-filterSetForm filters filterName checkedFilter =
+filterSetForm : List String -> String -> String -> (String -> Msg) -> Html Msg
+filterSetForm filters filterName checkedFilter onClickHandler =
     div [ class "panel panel-default" ]
         [ div [ class "panel-heading" ] [ strong [] [ text filterName ] ]
         , ul [ class "list-group" ] <|
-            [ (radioButton filterName "all" checkedFilter) ]
-                ++ List.map (radioButton filterName checkedFilter) filters
+            [ (radioButton filterName checkedFilter onClickHandler "all") ]
+                ++ List.map (radioButton filterName checkedFilter onClickHandler) filters
         ]
 
 
-radioButton : String -> String -> String -> Html Msg
-radioButton filterName checkedFilter filterValue =
+radioButton : String -> String -> (String -> Msg) -> String -> Html Msg
+radioButton filterName checkedFilter onClickHandler filterValue =
     li [ class "list-group-item" ]
-        [ div [ class "radio", style [ ( "margin", "0px" ) ] ]
+        [ div
+            [ class "radio"
+            , style [ ( "margin", "0px" ) ]
+            ]
             [ label []
                 [ input
                     [ name filterName
                     , type_ "radio"
                     , value filterValue
                     , checked <| checkedFilter == filterValue
+                    , onClick <| onClickHandler filterValue
                     ]
                     []
                 , text filterValue
