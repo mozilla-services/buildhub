@@ -28,12 +28,12 @@ view model =
                             , ( "padding-right", ".1em" )
                             ]
                         ]
-                        [ filterSetForm model.treeList "Trees" model.treeFilter NewTreeFilter
-                        , filterSetForm model.productList "Products" model.productFilter NewProductFilter
-                        , filterSetForm model.versionList "Versions" model.versionFilter NewVersionFilter
-                        , filterSetForm model.platformList "Platforms" model.platformFilter NewPlatformFilter
-                        , filterSetForm model.channelList "Channels" model.channelFilter NewChannelFilter
-                        , filterSetForm model.localeList "Locales" model.localeFilter NewLocaleFilter
+                        [ filterSetForm model.filterValues.treeList "Trees" model.treeFilter NewTreeFilter
+                        , filterSetForm model.filterValues.productList "Products" model.productFilter NewProductFilter
+                        , filterSetForm model.filterValues.versionList "Versions" model.versionFilter NewVersionFilter
+                        , filterSetForm model.filterValues.platformList "Platforms" model.platformFilter NewPlatformFilter
+                        , filterSetForm model.filterValues.channelList "Channels" model.channelFilter NewChannelFilter
+                        , filterSetForm model.filterValues.localeList "Locales" model.localeFilter NewLocaleFilter
                         ]
                     ]
                 ]

@@ -3,6 +3,7 @@ module Types
         ( Build
         , BuildRecord
         , Download
+        , FilterValues
         , Model
         , Msg(..)
         , Source
@@ -16,12 +17,7 @@ import Kinto
 type alias Model =
     { builds : List BuildRecord
     , filteredBuilds : List BuildRecord
-    , treeList : List String
-    , productList : List String
-    , versionList : List String
-    , platformList : List String
-    , channelList : List String
-    , localeList : List String
+    , filterValues : FilterValues
     , treeFilter : String
     , productFilter : String
     , versionFilter : String
@@ -29,6 +25,16 @@ type alias Model =
     , channelFilter : String
     , localeFilter : String
     , loading : Bool
+    }
+
+
+type alias FilterValues =
+    { treeList : List String
+    , productList : List String
+    , versionList : List String
+    , platformList : List String
+    , channelList : List String
+    , localeList : List String
     }
 
 

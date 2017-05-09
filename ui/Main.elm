@@ -21,63 +21,13 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         BuildRecordsFetched (Ok buildRecordList) ->
-            let
-                treeList =
-                    buildRecordList
-                        |> List.map .source
-                        |> List.map .tree
-                        |> Set.fromList
-                        |> Set.toList
-
-                productList =
-                    buildRecordList
-                        |> List.map .source
-                        |> List.map .product
-                        |> Set.fromList
-                        |> Set.toList
-
-                versionList =
-                    buildRecordList
-                        |> List.map .target
-                        |> List.map .version
-                        |> List.filterMap identity
-                        |> Set.fromList
-                        |> Set.toList
-
-                platformList =
-                    buildRecordList
-                        |> List.map .target
-                        |> List.map .platform
-                        |> Set.fromList
-                        |> Set.toList
-
-                channelList =
-                    buildRecordList
-                        |> List.map .target
-                        |> List.map .channel
-                        |> List.filterMap identity
-                        |> Set.fromList
-                        |> Set.toList
-
-                localeList =
-                    buildRecordList
-                        |> List.map .target
-                        |> List.map .locale
-                        |> Set.fromList
-                        |> Set.toList
-            in
-                { model
-                    | builds = buildRecordList
-                    , filteredBuilds = buildRecordList
-                    , treeList = treeList
-                    , productList = productList
-                    , versionList = versionList
-                    , platformList = platformList
-                    , channelList = channelList
-                    , localeList = localeList
-                    , loading = False
-                }
-                    ! []
+            { model
+                | builds = buildRecordList
+                , filteredBuilds = buildRecordList
+                , filterValues = extractFilterValues buildRecordList
+                , loading = False
+            }
+                ! []
 
         BuildRecordsFetched (Err err) ->
             let
@@ -127,6 +77,23 @@ update msg model =
                     { model | localeFilter = value }
             in
                 { updatedModelWithFilters | filteredBuilds = applyFilters updatedModelWithFilters } ! []
+
+
+extractFilterValues : List BuildRecord -> FilterValues
+extractFilterValues buildRecordList =
+    { treeList =
+        List.map (.source >> .tree) buildRecordList |> (Set.fromList >> Set.toList)
+    , productList =
+        List.map (.source >> .product) buildRecordList |> (Set.fromList >> Set.toList)
+    , versionList =
+        List.filterMap (.target >> .version >> identity) buildRecordList |> (Set.fromList >> Set.toList)
+    , platformList =
+        List.map (.target >> .platform) buildRecordList |> (Set.fromList >> Set.toList)
+    , channelList =
+        List.filterMap (.target >> .channel >> identity) buildRecordList |> (Set.fromList >> Set.toList)
+    , localeList =
+        List.map (.target >> .locale) buildRecordList |> (Set.fromList >> Set.toList)
+    }
 
 
 recordStringEquals : (BuildRecord -> String) -> String -> BuildRecord -> Bool

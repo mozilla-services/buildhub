@@ -10,12 +10,7 @@ init : ( Model, Cmd Msg )
 init =
     { builds = []
     , filteredBuilds = []
-    , treeList = []
-    , productList = []
-    , versionList = []
-    , platformList = []
-    , channelList = []
-    , localeList = []
+    , filterValues = FilterValues [] [] [] [] [] []
     , treeFilter = "all"
     , productFilter = "all"
     , versionFilter = "all"
