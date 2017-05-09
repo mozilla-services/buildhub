@@ -1,13 +1,18 @@
 import asyncio
 import configparser
 import concurrent.futures
-import copy
 import datetime
 import json
 import logging
 import os
+import re
+import signal
+import subprocess
 import sys
 import tarfile
+import tempfile
+import zipfile
+import xml.etree.ElementTree as etree
 
 import requests
 import kinto_http.exceptions
@@ -17,7 +22,7 @@ from kinto_http import cli_utils
 DEFAULT_SERVER = "https://kinto-ota.dev.mozaws.net/v1"
 DEFAULT_BUCKET = "build-hub"
 DEFAULT_COLLECTION = "archives"
-NB_WORKERS = 10
+NB_WORKERS = 5  # CPU + 1
 
 
 logger = logging.getLogger(__name__)
@@ -52,54 +57,112 @@ def cached_download(url):
     return tempname
 
 
-def process_archive(client, record):
+def extract_application_metadata(ini_content):
+    config = configparser.ConfigParser()
+    config.read_string(ini_content.decode('ascii'))
+
+
+    buildid = config["App"]["BuildID"]
+    builddate = datetime.datetime.strptime(buildid, "%Y%m%d%H%M").isoformat()
+    revision = config["App"].get("SourceStamp")
+
+    repository = config["App"].get("SourceRepository")
+    tree = repository.rsplit("/", 1)[-1] if repository else None
+
+    return {
+        "build": {
+            "id": buildid,
+            "date": builddate,
+        },
+        "source": {
+            "tree": tree,
+            "revision": revision,
+            "repository": repository,
+        }
+    }
+
+
+def extract_systemaddon_metadata(xml_content):
+    root = etree.fromstring(xml_content)
+    description = root.find('.//{http://www.w3.org/1999/02/22-rdf-syntax-ns#}Description')
+    id_ = description.find('{http://www.mozilla.org/2004/em-rdf#}id').text
+    version = description.find('{http://www.mozilla.org/2004/em-rdf#}version').text
+    return id_, version
+
+
+def process_linux_archive(client, record):
     # Download archive
     url = record["download"]["url"]
 
-    if not url.endswith("bz2"):
-        # XXX: manage old .gz etc.
-        return
+    has_sysaddons = int(record["target"]["version"].split(".", 1)[0]) > 50
+    systemaddons = [] if has_sysaddons else None
+
+    updated = record.copy()
 
     archive = cached_download(url)
 
-    updated = copy.deepcopy(record)
+    size = os.path.getsize(archive)
+    if url.endswith("bz2"):
+        mode = "r:bz2"
+        mimetype = "application/x-bzip2"
+    else:
+        mode = "r:gz"
+        mimetype = "application/gzip"
+
+    updated["download"]["size"] = size
+    updated["download"]["mimetype"] = mimetype
 
     try:
-        # Extract files from archive into tempdir.
         logger.info("Extract from %s" % url)
-        tar = tarfile.open(archive, "r:bz2")
+        tar = tarfile.open(archive, mode)
+    except tarfile.ReadError:
+        logger.error("Could not read archive %s." % archive)
+        # Will retry download next run.
+        os.remove(archive)
+        return
+    try:
         for tarinfo in tar:
             filename = tarinfo.name
+
             # Inspect metadata.ini
             if filename.endswith("application.ini"):
+                logger.info("Read %s" % filename)
                 f = tar.extractfile(tarinfo)
-                ini_content = f.read().decode('ascii')
+                ini_content = f.read()
+                metadata = extract_application_metadata(ini_content)
+                updated["build"] = {**(updated.get("build") or {}), **metadata["build"]}
+                updated["source"] = {**(updated.get("source") or {}), **metadata["source"]}
 
-                config = configparser.ConfigParser()
-                config.read_string(ini_content)
+                if not has_sysaddons:
+                    break
 
-                repository = config["App"]["SourceRepository"]
-                tree = repository.rsplit("/", 1)[-1]
-                buildid = config["App"]["BuildID"]
-                builddate = datetime.datetime.strptime(buildid, "%Y%m%d%H%M%S").isoformat()
-                revision = config["App"]["SourceStamp"]
+            # Inspect system addons
+            if has_sysaddons and re.match(r".+/browser/features/.+\.xpi$", filename):
 
-                if updated.get("build") is None:
-                    updated["build"] = {}
-                updated["build"]["id"] = buildid
-                updated["build"]["date"] = builddate
-                if updated.get("source") is None:
-                    updated["source"] = {}
-                updated["source"]["tree"] = tree
-                updated["source"]["revision"] = revision
-                updated["source"]["repository"] = repository
-                break
-            # XXX Inspect system addons
+                # XXX: Apparently Python can't unzip XPI files oO
+                # zipfile.BadZipFile: Bad magic number for central directory
+                with tempfile.TemporaryDirectory() as tmpdirname:
+                    logger.info("Introspect system-addon %s" % filename)
+                    tar.extractall(path=tmpdirname, members=[tarinfo])
+                    xpipath = os.path.join(tmpdirname, filename)
+
+                    logger.debug("Extract install manifest from %s" % xpipath)
+                    subprocess.run(["unzip", "-o", xpipath, "install.rdf", "-d", tmpdirname])
+                    xmlfile = os.path.join(tmpdirname, 'install.rdf')
+
+                    logger.debug("Read version from %s" % xmlfile)
+                    xml_content = open(xmlfile).read()
+                    id_, version = extract_systemaddon_metadata(xml_content)
+                    systemaddons.append({"id": id_, "builtin": version})
+
         tar.close()
     except:
         logger.exception("Could not introspect archive %s" % url)
 
-    if record["source"]["revision"] != updated["source"]["revision"]:
+    updated["systemaddons"] = systemaddons
+
+    has_changed = json.dumps(record, sort_keys=True) != json.dumps(updated, sort_keys=True)
+    if has_changed:
         logger.info("Update metadata of %s" % updated)
         # XXX why 412 here? why safe=False?
         client.update_record(updated, safe=False)
@@ -131,21 +194,26 @@ def main():
     records = client.get_records(**filters)
     # XXX: https://github.com/Kinto/kinto/issues/1215
     records = [r for r in records if r["source"].get("revision") is None]
+    # XXX: Currently only inspects linux tarballs
+    records = [r for r in records if re.match(".+(bz2|gz)$", r["download"]["url"])]
+
     logger.info("%s archives to process." % len(records))
     if len(records) == 0:
         return
 
     loop = asyncio.get_event_loop()
-
     executor = concurrent.futures.ProcessPoolExecutor(max_workers=NB_WORKERS)
     tasks = [
-        loop.run_in_executor(executor, process_archive, client, record)
+        loop.run_in_executor(executor, process_linux_archive, client, record)
         for record in records
     ]
     future = asyncio.wait(tasks)
     try:
         loop.run_until_complete(future)
     finally:
+        for task in tasks:
+            task.cancel()
+        executor.shutdown()
         loop.close()
 
 
