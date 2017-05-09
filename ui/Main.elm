@@ -40,43 +40,85 @@ update msg model =
             let
                 updatedModelWithFilters =
                     { model | treeFilter = value }
+
+                updatedFilteredBuilds =
+                    applyFilters updatedModelWithFilters
             in
-                { updatedModelWithFilters | filteredBuilds = applyFilters updatedModelWithFilters } ! []
+                { updatedModelWithFilters
+                    | filteredBuilds = updatedFilteredBuilds
+                    , filterValues = extractFilterValues updatedFilteredBuilds
+                }
+                    ! []
 
         NewProductFilter value ->
             let
                 updatedModelWithFilters =
                     { model | productFilter = value }
+
+                updatedFilteredBuilds =
+                    applyFilters updatedModelWithFilters
             in
-                { updatedModelWithFilters | filteredBuilds = applyFilters updatedModelWithFilters } ! []
+                { updatedModelWithFilters
+                    | filteredBuilds = updatedFilteredBuilds
+                    , filterValues = extractFilterValues updatedFilteredBuilds
+                }
+                    ! []
 
         NewVersionFilter value ->
             let
                 updatedModelWithFilters =
                     { model | versionFilter = value }
+
+                updatedFilteredBuilds =
+                    applyFilters updatedModelWithFilters
             in
-                { updatedModelWithFilters | filteredBuilds = applyFilters updatedModelWithFilters } ! []
+                { updatedModelWithFilters
+                    | filteredBuilds = updatedFilteredBuilds
+                    , filterValues = extractFilterValues updatedFilteredBuilds
+                }
+                    ! []
 
         NewPlatformFilter value ->
             let
                 updatedModelWithFilters =
                     { model | platformFilter = value }
+
+                updatedFilteredBuilds =
+                    applyFilters updatedModelWithFilters
             in
-                { updatedModelWithFilters | filteredBuilds = applyFilters updatedModelWithFilters } ! []
+                { updatedModelWithFilters
+                    | filteredBuilds = updatedFilteredBuilds
+                    , filterValues = extractFilterValues updatedFilteredBuilds
+                }
+                    ! []
 
         NewChannelFilter value ->
             let
                 updatedModelWithFilters =
                     { model | channelFilter = value }
+
+                updatedFilteredBuilds =
+                    applyFilters updatedModelWithFilters
             in
-                { updatedModelWithFilters | filteredBuilds = applyFilters updatedModelWithFilters } ! []
+                { updatedModelWithFilters
+                    | filteredBuilds = updatedFilteredBuilds
+                    , filterValues = extractFilterValues updatedFilteredBuilds
+                }
+                    ! []
 
         NewLocaleFilter value ->
             let
                 updatedModelWithFilters =
                     { model | localeFilter = value }
+
+                updatedFilteredBuilds =
+                    applyFilters updatedModelWithFilters
             in
-                { updatedModelWithFilters | filteredBuilds = applyFilters updatedModelWithFilters } ! []
+                { updatedModelWithFilters
+                    | filteredBuilds = updatedFilteredBuilds
+                    , filterValues = extractFilterValues updatedFilteredBuilds
+                }
+                    ! []
 
 
 extractFilterValues : List BuildRecord -> FilterValues
