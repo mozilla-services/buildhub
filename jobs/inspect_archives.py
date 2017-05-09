@@ -6,12 +6,10 @@ import json
 import logging
 import os
 import re
-import signal
 import subprocess
 import sys
 import tarfile
 import tempfile
-import zipfile
 import xml.etree.ElementTree as etree
 
 import requests
@@ -26,15 +24,6 @@ NB_WORKERS = 5  # CPU + 1
 
 
 logger = logging.getLogger(__name__)
-
-
-def publish_record(client, record):
-    try:
-        r = client.create_record(record)
-        logger.info("Created record %s" % json.dumps(r))
-    except kinto_http.exceptions.KintoException:
-        error_msg = "Could not create record for %s" % record["download"]["url"]
-        logger.exception(error_msg)
 
 
 def cached_download(url):
@@ -59,11 +48,10 @@ def cached_download(url):
 
 def extract_application_metadata(ini_content):
     config = configparser.ConfigParser()
-    config.read_string(ini_content.decode('ascii'))
-
+    config.read_string(ini_content.decode('utf8'))
 
     buildid = config["App"]["BuildID"]
-    builddate = datetime.datetime.strptime(buildid, "%Y%m%d%H%M").isoformat()
+    builddate = datetime.datetime.strptime(buildid[:12], "%Y%m%d%H%M").isoformat()
     revision = config["App"].get("SourceStamp")
 
     repository = config["App"].get("SourceRepository")
@@ -164,8 +152,7 @@ def process_linux_archive(client, record):
     has_changed = json.dumps(record, sort_keys=True) != json.dumps(updated, sort_keys=True)
     if has_changed:
         logger.info("Update metadata of %s" % updated)
-        # XXX why 412 here? why safe=False?
-        client.update_record(updated, safe=False)
+        client.update_record(updated)
 
 
 def main():
