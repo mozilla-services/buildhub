@@ -6,6 +6,7 @@ module Types
         , FilterValues
         , Model
         , Msg(..)
+        , NewFilter(..)
         , Source
         , SystemAddon
         , Target
@@ -85,11 +86,15 @@ type alias Target =
     }
 
 
-type Msg
-    = BuildRecordsFetched (Result Kinto.Error (List BuildRecord))
-    | NewTreeFilter String
+type NewFilter
+    = NewTreeFilter String
     | NewProductFilter String
     | NewVersionFilter String
     | NewPlatformFilter String
     | NewChannelFilter String
     | NewLocaleFilter String
+
+
+type Msg
+    = BuildRecordsFetched (Result Kinto.Error (List BuildRecord))
+    | UpdateFilter NewFilter
