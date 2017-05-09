@@ -81,19 +81,36 @@ update msg model =
 
 extractFilterValues : List BuildRecord -> FilterValues
 extractFilterValues buildRecordList =
-    { treeList =
-        List.map (.source >> .tree) buildRecordList |> (Set.fromList >> Set.toList)
-    , productList =
-        List.map (.source >> .product) buildRecordList |> (Set.fromList >> Set.toList)
-    , versionList =
-        List.filterMap (.target >> .version >> identity) buildRecordList |> (Set.fromList >> Set.toList)
-    , platformList =
-        List.map (.target >> .platform) buildRecordList |> (Set.fromList >> Set.toList)
-    , channelList =
-        List.filterMap (.target >> .channel >> identity) buildRecordList |> (Set.fromList >> Set.toList)
-    , localeList =
-        List.map (.target >> .locale) buildRecordList |> (Set.fromList >> Set.toList)
-    }
+    let
+        filterValues =
+            (List.foldl
+                (\buildRecord filterValues ->
+                    { treeList = buildRecord.source.tree :: filterValues.treeList
+                    , productList = buildRecord.source.product :: filterValues.productList
+                    , versionList = (Maybe.withDefault "" buildRecord.target.version) :: filterValues.versionList
+                    , platformList = buildRecord.target.platform :: filterValues.platformList
+                    , channelList = (Maybe.withDefault "" buildRecord.target.channel) :: filterValues.channelList
+                    , localeList = buildRecord.target.locale :: filterValues.localeList
+                    }
+                )
+                { treeList = []
+                , productList = []
+                , versionList = []
+                , platformList = []
+                , channelList = []
+                , localeList = []
+                }
+                buildRecordList
+            )
+    in
+        { filterValues
+            | treeList = filterValues.treeList |> Set.fromList |> Set.toList
+            , productList = filterValues.productList |> Set.fromList |> Set.toList
+            , versionList = filterValues.versionList |> Set.fromList |> Set.toList
+            , platformList = filterValues.platformList |> Set.fromList |> Set.toList
+            , channelList = filterValues.channelList |> Set.fromList |> Set.toList
+            , localeList = filterValues.localeList |> Set.fromList |> Set.toList
+        }
 
 
 recordStringEquals : (BuildRecord -> String) -> String -> BuildRecord -> Bool
