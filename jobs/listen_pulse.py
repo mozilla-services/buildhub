@@ -90,7 +90,7 @@ def pulse2kinto(body, message, client):
         "systemaddons": None
     }
     r = client.create_record(record)
-    logger.info("Created record %s" % r)
+    logger.info("Created record %s" % json.dumps(r))
 
     # Tell the pulse queue that the message has been processed and
     # that it is safe to discard.
@@ -125,7 +125,6 @@ if __name__ == "__main__":
     c = NormalizedBuildConsumer(user=PULSEGUARDIAN_USER,
                                 password=PULSEGUARDIAN_PASSWORD,
                                 topic=PULSE_TOPIC,
-                                durable=True,  # Store messages while consumer is off.
                                 callback=callback)
 
     while True:
