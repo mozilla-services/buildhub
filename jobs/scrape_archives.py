@@ -16,19 +16,20 @@ PRODUCTS = ("firefox", "thunderbird")
 DEFAULT_SERVER = "https://kinto-ota.dev.mozaws.net/v1"
 DEFAULT_BUCKET = "build-hub"
 DEFAULT_COLLECTION = "archives"
-NB_THREADS = 10
+NB_THREADS = 5
 
 
 logger = logging.getLogger(__name__)
 
 
-def publish_record(client, record):
+def publish_records(client, records):
     try:
-        r = client.create_record(record)
-        logger.info("Created record %s" % json.dumps(r))
+        with client.batch() as batch:
+            for record in records:
+                batch.create_record(record, safe=False)
+        logger.info("Created %s records" % len(records))
     except kinto_http.exceptions.KintoException:
-        error_msg = "Could not create record for %s" % record["download"]["url"]
-        logger.exception(error_msg)
+        logger.exception("Could not create records")
 
 
 def archive_url(product, version=None, platform=None, locale=None):
@@ -77,7 +78,7 @@ async def fetch_platforms(session, queue, product, version):
     version_url = archive_url(product, version)
     platform_folders, _ = await fetch_listing(session, version_url)
 
-    platforms = [p[:-1] for p in platform_folders]
+    platforms = [p[:-1] for p in platform_folders]  # strip trailing /
     platforms = [p for p in platforms if p not in ("source", "update")]
 
     futures = [fetch_locales(session, queue, product, version, platform)
@@ -134,15 +135,22 @@ async def fetch_files(session, queue, product, version, platform, locale):
 
 
 async def produce(loop, queue):
+    """Grab releases from the archives website."""
     async with aiohttp.ClientSession(loop=loop) as session:
         await fetch_products(session, queue, PRODUCTS)
     logger.info("Scraping releases done.")
 
 
 async def consume(loop, executor, client, queue):
+    """Store grabbed releases from the archives website in Kinto."""
+    info = client.server_info()
+    batch_size = info["settings"]["batch_max_requests"]
     while True:
-        record = await queue.get()
-        task = loop.run_in_executor(executor, publish_record, client, record)
+        records = [await queue.get()]
+        while not queue.empty() and len(records) < batch_size:
+            records.append(await queue.get())
+        task = loop.run_in_executor(executor, publish_records, client, records)
+        # Counting tasks done allows us to wait for the queue with queue.join()
         task.add_done_callback(lambda fut: queue.task_done())
 
 
@@ -161,7 +169,7 @@ def main():
                 .format(**args.__dict__))
 
     client = cli_utils.create_client_from_args(args)
-    client.session.nb_retry = 1
+    client.session.nb_retry = 3
 
     public_perms = {"read": ["system.Everyone"]}
     client.create_bucket(permissions=public_perms, if_not_exists=True)

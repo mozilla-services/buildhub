@@ -17,15 +17,15 @@ Obtain Pulse user and password at https://pulseguardian.mozilla.org
     PULSEGUARDIAN_USER="my-user" PULSEGUARDIAN_PASSWORD="XXX" python2 listen_pulse.py --auth user:pass --debug
 
 
-Scrap archives
-==============
+Scrape archives
+===============
 
-Scrap releases on https://archives.mozilla.org and publishes records on a ``archives`` collection.
+Scrape releases on https://archives.mozilla.org and publishes records on a ``archives`` collection.
 
 
 .. code-block:: bash
 
-    python3 scrap_archives.py --auth user:pass --debug
+    python3 scrape_archives.py --auth user:pass --debug
 
 
 TODO
