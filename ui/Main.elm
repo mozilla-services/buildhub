@@ -144,14 +144,21 @@ extractFilterValues buildRecordList =
                 }
                 buildRecordList
             )
+
+        normalizeFilterValues : List String -> List String
+        normalizeFilterValues values =
+            values
+                |> Set.fromList
+                |> Set.remove ""
+                |> Set.toList
     in
         { filterValues
-            | treeList = filterValues.treeList |> Set.fromList |> Set.toList
-            , productList = filterValues.productList |> Set.fromList |> Set.toList
-            , versionList = filterValues.versionList |> Set.fromList |> Set.toList
-            , platformList = filterValues.platformList |> Set.fromList |> Set.toList
-            , channelList = filterValues.channelList |> Set.fromList |> Set.toList
-            , localeList = filterValues.localeList |> Set.fromList |> Set.toList
+            | treeList = filterValues.treeList |> normalizeFilterValues
+            , productList = filterValues.productList |> normalizeFilterValues
+            , versionList = filterValues.versionList |> normalizeFilterValues
+            , platformList = filterValues.platformList |> normalizeFilterValues
+            , channelList = filterValues.channelList |> normalizeFilterValues
+            , localeList = filterValues.localeList |> normalizeFilterValues
         }
 
 
