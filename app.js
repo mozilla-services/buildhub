@@ -10324,7 +10324,9 @@ var _mozilla_services$buildhub$Types$Model = function (a) {
 							return function (h) {
 								return function (i) {
 									return function (j) {
-										return {builds: a, filteredBuilds: b, filterValues: c, treeFilter: d, productFilter: e, versionFilter: f, platformFilter: g, channelFilter: h, localeFilter: i, loading: j};
+										return function (k) {
+											return {builds: a, filteredBuilds: b, filterValues: c, treeFilter: d, productFilter: e, versionFilter: f, platformFilter: g, channelFilter: h, localeFilter: i, buildIdFilter: j, loading: k};
+										};
 									};
 								};
 							};
@@ -10363,6 +10365,9 @@ var _mozilla_services$buildhub$Types$Target = F4(
 	function (a, b, c, d) {
 		return {version: a, platform: b, channel: c, locale: d};
 	});
+var _mozilla_services$buildhub$Types$NewBuildIdSearch = function (a) {
+	return {ctor: 'NewBuildIdSearch', _0: a};
+};
 var _mozilla_services$buildhub$Types$NewLocaleFilter = function (a) {
 	return {ctor: 'NewLocaleFilter', _0: a};
 };
@@ -10525,6 +10530,7 @@ var _mozilla_services$buildhub$Model$init = A2(
 		platformFilter: 'all',
 		channelFilter: 'all',
 		localeFilter: 'all',
+		buildIdFilter: '',
 		loading: true
 	},
 	{
@@ -11513,6 +11519,94 @@ var _mozilla_services$buildhub$View$filterSetForm = F4(
 				}
 			});
 	});
+var _mozilla_services$buildhub$View$buildIdSearchForm = function (model) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('panel panel-default'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('panel-heading'),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$strong,
+						{ctor: '[]'},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text('Search build id'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$form,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('panel-body'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('form-group'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$label,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('Build id'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$input,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$type_('text'),
+											_1: {
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$class('form-control'),
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$html$Html_Events$onInput(
+														function (_p3) {
+															return _mozilla_services$buildhub$Types$UpdateFilter(
+																_mozilla_services$buildhub$Types$NewBuildIdSearch(_p3));
+														}),
+													_1: {ctor: '[]'}
+												}
+											}
+										},
+										{ctor: '[]'}),
+									_1: {ctor: '[]'}
+								}
+							}),
+						_1: {ctor: '[]'}
+					}),
+				_1: {ctor: '[]'}
+			}
+		});
+};
 var _mozilla_services$buildhub$View$view = function (model) {
 	return A2(
 		_elm_lang$html$Html$div,
@@ -11613,71 +11707,75 @@ var _mozilla_services$buildhub$View$view = function (model) {
 										},
 										{
 											ctor: '::',
-											_0: A4(
-												_mozilla_services$buildhub$View$filterSetForm,
-												model.filterValues.treeList,
-												'Trees',
-												model.treeFilter,
-												function (_p3) {
-													return _mozilla_services$buildhub$Types$UpdateFilter(
-														_mozilla_services$buildhub$Types$NewTreeFilter(_p3));
-												}),
+											_0: _mozilla_services$buildhub$View$buildIdSearchForm(model),
 											_1: {
 												ctor: '::',
 												_0: A4(
 													_mozilla_services$buildhub$View$filterSetForm,
-													model.filterValues.productList,
-													'Products',
-													model.productFilter,
+													model.filterValues.treeList,
+													'Trees',
+													model.treeFilter,
 													function (_p4) {
 														return _mozilla_services$buildhub$Types$UpdateFilter(
-															_mozilla_services$buildhub$Types$NewProductFilter(_p4));
+															_mozilla_services$buildhub$Types$NewTreeFilter(_p4));
 													}),
 												_1: {
 													ctor: '::',
 													_0: A4(
 														_mozilla_services$buildhub$View$filterSetForm,
-														model.filterValues.versionList,
-														'Versions',
-														model.versionFilter,
+														model.filterValues.productList,
+														'Products',
+														model.productFilter,
 														function (_p5) {
 															return _mozilla_services$buildhub$Types$UpdateFilter(
-																_mozilla_services$buildhub$Types$NewVersionFilter(_p5));
+																_mozilla_services$buildhub$Types$NewProductFilter(_p5));
 														}),
 													_1: {
 														ctor: '::',
 														_0: A4(
 															_mozilla_services$buildhub$View$filterSetForm,
-															model.filterValues.platformList,
-															'Platforms',
-															model.platformFilter,
+															model.filterValues.versionList,
+															'Versions',
+															model.versionFilter,
 															function (_p6) {
 																return _mozilla_services$buildhub$Types$UpdateFilter(
-																	_mozilla_services$buildhub$Types$NewPlatformFilter(_p6));
+																	_mozilla_services$buildhub$Types$NewVersionFilter(_p6));
 															}),
 														_1: {
 															ctor: '::',
 															_0: A4(
 																_mozilla_services$buildhub$View$filterSetForm,
-																model.filterValues.channelList,
-																'Channels',
-																model.channelFilter,
+																model.filterValues.platformList,
+																'Platforms',
+																model.platformFilter,
 																function (_p7) {
 																	return _mozilla_services$buildhub$Types$UpdateFilter(
-																		_mozilla_services$buildhub$Types$NewChannelFilter(_p7));
+																		_mozilla_services$buildhub$Types$NewPlatformFilter(_p7));
 																}),
 															_1: {
 																ctor: '::',
 																_0: A4(
 																	_mozilla_services$buildhub$View$filterSetForm,
-																	model.filterValues.localeList,
-																	'Locales',
-																	model.localeFilter,
+																	model.filterValues.channelList,
+																	'Channels',
+																	model.channelFilter,
 																	function (_p8) {
 																		return _mozilla_services$buildhub$Types$UpdateFilter(
-																			_mozilla_services$buildhub$Types$NewLocaleFilter(_p8));
+																			_mozilla_services$buildhub$Types$NewChannelFilter(_p8));
 																	}),
-																_1: {ctor: '[]'}
+																_1: {
+																	ctor: '::',
+																	_0: A4(
+																		_mozilla_services$buildhub$View$filterSetForm,
+																		model.filterValues.localeList,
+																		'Locales',
+																		model.localeFilter,
+																		function (_p9) {
+																			return _mozilla_services$buildhub$Types$UpdateFilter(
+																				_mozilla_services$buildhub$Types$NewLocaleFilter(_p9));
+																		}),
+																	_1: {ctor: '[]'}
+																}
 															}
 														}
 													}
@@ -11706,6 +11804,13 @@ var _mozilla_services$buildhub$Main$recordMaybeStringEquals = F3(
 				_elm_lang$core$Maybe$withDefault,
 				'',
 				path(buildRecord)));
+	});
+var _mozilla_services$buildhub$Main$recordStringStartsWith = F3(
+	function (path, filterValue, buildRecord) {
+		return _elm_lang$core$Native_Utils.eq(filterValue, 'all') || A2(
+			_elm_lang$core$String$startsWith,
+			filterValue,
+			path(buildRecord));
 	});
 var _mozilla_services$buildhub$Main$recordStringEquals = F3(
 	function (path, filterValue, buildRecord) {
@@ -11776,7 +11881,7 @@ var _mozilla_services$buildhub$Main$applyFilters = function (model) {
 						}(_p4));
 				},
 				model.channelFilter,
-				buildRecord) && A3(
+				buildRecord) && (A3(
 				_mozilla_services$buildhub$Main$recordStringEquals,
 				function (_p5) {
 					return function (_) {
@@ -11787,7 +11892,18 @@ var _mozilla_services$buildhub$Main$applyFilters = function (model) {
 						}(_p5));
 				},
 				model.localeFilter,
-				buildRecord)))));
+				buildRecord) && A3(
+				_mozilla_services$buildhub$Main$recordStringStartsWith,
+				function (_p6) {
+					return function (_) {
+						return _.id;
+					}(
+						function (_) {
+							return _.build;
+						}(_p6));
+				},
+				model.buildIdFilter,
+				buildRecord))))));
 		},
 		model.builds);
 };
@@ -11842,23 +11958,23 @@ var _mozilla_services$buildhub$Main$extractFilterValues = function (buildRecordL
 };
 var _mozilla_services$buildhub$Main$update = F2(
 	function (msg, model) {
-		var _p6 = msg;
-		if (_p6.ctor === 'BuildRecordsFetched') {
-			if (_p6._0.ctor === 'Ok') {
-				var _p7 = _p6._0._0;
+		var _p7 = msg;
+		if (_p7.ctor === 'BuildRecordsFetched') {
+			if (_p7._0.ctor === 'Ok') {
+				var _p8 = _p7._0._0;
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
 						model,
 						{
-							builds: _p7,
-							filteredBuilds: _p7,
-							filterValues: _mozilla_services$buildhub$Main$extractFilterValues(_p7),
+							builds: _p8,
+							filteredBuilds: _p8,
+							filterValues: _mozilla_services$buildhub$Main$extractFilterValues(_p8),
 							loading: false
 						}),
 					{ctor: '[]'});
 			} else {
-				var _p8 = A2(_elm_lang$core$Debug$log, 'An error occured while fetching the build records', _p6._0._0);
+				var _p9 = A2(_elm_lang$core$Debug$log, 'An error occured while fetching the build records', _p7._0._0);
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					model,
@@ -11866,32 +11982,36 @@ var _mozilla_services$buildhub$Main$update = F2(
 			}
 		} else {
 			var updatedModelWithFilters = function () {
-				var _p9 = _p6._0;
-				switch (_p9.ctor) {
+				var _p10 = _p7._0;
+				switch (_p10.ctor) {
 					case 'NewTreeFilter':
 						return _elm_lang$core$Native_Utils.update(
 							model,
-							{treeFilter: _p9._0});
+							{treeFilter: _p10._0});
 					case 'NewProductFilter':
 						return _elm_lang$core$Native_Utils.update(
 							model,
-							{productFilter: _p9._0});
+							{productFilter: _p10._0});
 					case 'NewVersionFilter':
 						return _elm_lang$core$Native_Utils.update(
 							model,
-							{versionFilter: _p9._0});
+							{versionFilter: _p10._0});
 					case 'NewPlatformFilter':
 						return _elm_lang$core$Native_Utils.update(
 							model,
-							{platformFilter: _p9._0});
+							{platformFilter: _p10._0});
 					case 'NewChannelFilter':
 						return _elm_lang$core$Native_Utils.update(
 							model,
-							{channelFilter: _p9._0});
+							{channelFilter: _p10._0});
+					case 'NewLocaleFilter':
+						return _elm_lang$core$Native_Utils.update(
+							model,
+							{localeFilter: _p10._0});
 					default:
 						return _elm_lang$core$Native_Utils.update(
 							model,
-							{localeFilter: _p9._0});
+							{buildIdFilter: _p10._0});
 				}
 			}();
 			var updatedFilteredBuilds = _mozilla_services$buildhub$Main$applyFilters(updatedModelWithFilters);
