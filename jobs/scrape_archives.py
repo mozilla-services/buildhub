@@ -7,6 +7,7 @@ import sys
 from packaging.version import parse as version_parse
 
 import aiohttp
+import backoff
 import kinto_http.exceptions
 from kinto_http import cli_utils
 
@@ -16,20 +17,20 @@ PRODUCTS = ("firefox", "thunderbird")
 DEFAULT_SERVER = "https://kinto-ota.dev.mozaws.net/v1"
 DEFAULT_BUCKET = "build-hub"
 DEFAULT_COLLECTION = "archives"
-NB_THREADS = 5
+NB_THREADS = 3
 
 
 logger = logging.getLogger(__name__)
 
 
+@backoff.on_exception(backoff.expo,
+                      kinto_http.exceptions.KintoException,
+                      max_tries=8)
 def publish_records(client, records):
-    try:
-        with client.batch() as batch:
-            for record in records:
-                batch.create_record(record, safe=False)
-        logger.info("Created %s records" % len(records))
-    except kinto_http.exceptions.KintoException:
-        logger.exception("Could not create records")
+    with client.batch() as batch:
+        for record in records:
+            batch.create_record(record)
+    logger.info("Created %s records" % len(records))
 
 
 def archive_url(product, version=None, platform=None, locale=None):
@@ -43,12 +44,17 @@ def archive_url(product, version=None, platform=None, locale=None):
     return url
 
 
+@backoff.on_exception(backoff.expo,
+                      (aiohttp.ClientError,
+                       asyncio.TimeoutError,
+                       concurrent.futures.CancelledError),
+                      max_tries=8)
 async def fetch_listing(session, url):
     headers = {
         "Accept": "application/json",
         "User-Agent": "BuildHub;storage-team@mozilla.com"
     }
-    async with session.get(url, headers=headers) as response:
+    async with session.get(url, headers=headers, timeout=30) as response:
         try:
             data = await response.json()
             return data["prefixes"], data["files"]
@@ -79,7 +85,7 @@ async def fetch_platforms(session, queue, product, version):
     platform_folders, _ = await fetch_listing(session, version_url)
 
     platforms = [p[:-1] for p in platform_folders]  # strip trailing /
-    platforms = [p for p in platforms if p not in ("source", "update")]
+    platforms = [p for p in platforms if p not in ("source", "update", "contrib")]
 
     futures = [fetch_locales(session, queue, product, version, platform)
                for platform in platforms]
@@ -103,7 +109,7 @@ async def fetch_files(session, queue, product, version, platform, locale):
     _, files = await fetch_listing(session, locale_url)
 
     fileregexp = re.compile("%s-(.+)(zip|gz|bz|bz2|dmg|apk)$" % product)
-    files = [f for f in files if fileregexp.match(f["name"])]
+    files = [f for f in files if fileregexp.match(f["name"]) and 'sdk' not in f["name"]]
 
     futures = []
     for file_ in files:
@@ -146,9 +152,11 @@ async def consume(loop, executor, client, queue):
     info = client.server_info()
     batch_size = info["settings"]["batch_max_requests"]
     while True:
+        # Gather a batch of records.
         records = [await queue.get()]
         while not queue.empty() and len(records) < batch_size:
             records.append(await queue.get())
+
         task = loop.run_in_executor(executor, publish_records, client, records)
         # Counting tasks done allows us to wait for the queue with queue.join()
         task.add_done_callback(lambda fut: queue.task_done())
@@ -159,6 +167,7 @@ def main():
         description="Send releases archives to Kinto",
         default_server=DEFAULT_SERVER,
         default_bucket=DEFAULT_BUCKET,
+        default_retry=3,
         default_collection=DEFAULT_COLLECTION)
 
     args = parser.parse_args(sys.argv[1:])
@@ -169,7 +178,6 @@ def main():
                 .format(**args.__dict__))
 
     client = cli_utils.create_client_from_args(args)
-    client.session.nb_retry = 3
 
     public_perms = {"read": ["system.Everyone"]}
     client.create_bucket(permissions=public_perms, if_not_exists=True)
