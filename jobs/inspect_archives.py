@@ -165,6 +165,8 @@ def main():
     args = parser.parse_args(sys.argv[1:])
 
     cli_utils.setup_logger(logger, args)
+    kinto_logger = logging.getLogger('kinto_http')
+    cli_utils.setup_logger(kinto_logger, args)
 
     logger.info("Inspect {server}/buckets/{bucket}/collections/{collection}"
                 .format(**args.__dict__))
@@ -180,7 +182,7 @@ def main():
     }
     records = client.get_records(**filters)
     # XXX: https://github.com/Kinto/kinto/issues/1215
-    records = [r for r in records if r["source"].get("revision") is None]
+    records = [r for r in records if (r["build"] or {}).get("id") is None]
     # XXX: Currently only inspects linux tarballs
     records = [r for r in records if re.match(".+(bz2|gz)$", r["download"]["url"])]
 
