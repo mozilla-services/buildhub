@@ -28,7 +28,8 @@ view model =
                             , ( "padding-right", ".1em" )
                             ]
                         ]
-                        [ filterSetForm model.filterValues.treeList "Trees" model.treeFilter (UpdateFilter << NewTreeFilter)
+                        [ buildIdSearchForm model
+                        , filterSetForm model.filterValues.treeList "Trees" model.treeFilter (UpdateFilter << NewTreeFilter)
                         , filterSetForm model.filterValues.productList "Products" model.productFilter (UpdateFilter << NewProductFilter)
                         , filterSetForm model.filterValues.versionList "Versions" model.versionFilter (UpdateFilter << NewVersionFilter)
                         , filterSetForm model.filterValues.platformList "Platforms" model.platformFilter (UpdateFilter << NewPlatformFilter)
@@ -37,6 +38,24 @@ view model =
                         ]
                     ]
                 ]
+        ]
+
+
+buildIdSearchForm : Model -> Html Msg
+buildIdSearchForm model =
+    div [ class "panel panel-default" ]
+        [ div [ class "panel-heading" ] [ strong [] [ text "Search build id" ] ]
+        , Html.form [ class "panel-body" ]
+            [ div [ class "form-group" ]
+                [ label [] [ text "Build id" ]
+                , input
+                    [ type_ "text"
+                    , class "form-control"
+                    , onInput <| UpdateFilter << NewBuildIdSearch
+                    ]
+                    []
+                ]
+            ]
         ]
 
 
@@ -145,7 +164,8 @@ viewDownloadDetails download =
                 [ tr []
                     [ td [] [ a [ href download.url ] [ text filename ] ]
                     , td [] [ text <| Maybe.withDefault "" download.mimetype ]
-                      -- TODO display the size in an humanly readable format
+
+                    -- TODO display the size in an humanly readable format
                     , td [] [ text <| toString <| Maybe.withDefault 0 download.size ]
                     ]
                 ]

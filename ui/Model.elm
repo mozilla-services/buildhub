@@ -16,6 +16,7 @@ init =
     , platformFilter = "all"
     , channelFilter = "all"
     , localeFilter = "all"
+    , buildIdFilter = ""
     , loading = True
     }
         ! [ getBuildRecordList ]

@@ -58,6 +58,9 @@ update msg model =
                         NewLocaleFilter value ->
                             { model | localeFilter = value }
 
+                        NewBuildIdSearch value ->
+                            { model | buildIdFilter = value }
+
                 updatedFilteredBuilds =
                     applyFilters updatedModelWithFilters
             in
@@ -118,6 +121,15 @@ recordStringEquals path filterValue buildRecord =
            )
 
 
+recordStringStartsWith : (BuildRecord -> String) -> String -> BuildRecord -> Bool
+recordStringStartsWith path filterValue buildRecord =
+    (filterValue == "all")
+        || (buildRecord
+                |> path
+                |> String.startsWith filterValue
+           )
+
+
 recordMaybeStringEquals : (BuildRecord -> Maybe String) -> String -> BuildRecord -> Bool
 recordMaybeStringEquals path filterValue buildRecord =
     (filterValue == "all")
@@ -139,4 +151,5 @@ applyFilters model =
                     && (recordStringEquals (.target >> .platform) model.platformFilter) buildRecord
                     && (recordMaybeStringEquals (.target >> .channel) model.channelFilter) buildRecord
                     && (recordStringEquals (.target >> .locale) model.localeFilter) buildRecord
+                    && (recordStringStartsWith (.build >> .id) model.buildIdFilter) buildRecord
             )
