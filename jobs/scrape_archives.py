@@ -18,6 +18,7 @@ DEFAULT_SERVER = "https://kinto-ota.dev.mozaws.net/v1"
 DEFAULT_BUCKET = "build-hub"
 DEFAULT_COLLECTION = "archives"
 NB_THREADS = 3
+TIMEOUT = 30
 
 
 logger = logging.getLogger(__name__)
@@ -54,7 +55,7 @@ async def fetch_listing(session, url):
         "Accept": "application/json",
         "User-Agent": "BuildHub;storage-team@mozilla.com"
     }
-    async with session.get(url, headers=headers, timeout=30) as response:
+    async with session.get(url, headers=headers, timeout=TIMEOUT) as response:
         try:
             data = await response.json()
             return data["prefixes"], data["files"]
