@@ -19,7 +19,7 @@ DEFAULT_BUCKET = "build-hub"
 DEFAULT_COLLECTION = "archives"
 NB_THREADS = 3
 NB_RETRY_REQUEST = 3
-TIMEOUT_SECONDS = 30
+TIMEOUT_SECONDS = 5 * 60
 
 
 logger = logging.getLogger(__name__)
@@ -44,21 +44,20 @@ def archive_url(product, version=None, platform=None, locale=None):
 
 
 @backoff.on_exception(backoff.expo,
-                      (aiohttp.ClientError,
-                       asyncio.TimeoutError,
-                       concurrent.futures.CancelledError),
+                      asyncio.TimeoutError,
                       max_tries=NB_RETRY_REQUEST)
 async def fetch_listing(session, url):
     headers = {
         "Accept": "application/json",
         "User-Agent": "BuildHub;storage-team@mozilla.com"
     }
-    async with session.get(url, headers=headers, timeout=TIMEOUT_SECONDS) as response:
-        try:
-            data = await response.json()
-            return data["prefixes"], data["files"]
-        except (aiohttp.ClientError, KeyError) as e:
-            raise ValueError("Could not fetch %s: %s" % (url, e))
+    with aiohttp.Timeout(timeout=TIMEOUT_SECONDS):
+        async with session.get(url, headers=headers, timeout=None) as response:
+            try:
+                data = await response.json()
+                return data["prefixes"], data["files"]
+            except (aiohttp.ClientError, KeyError) as e:
+                raise ValueError("Could not fetch %s: %s" % (url, e))
 
 
 async def fetch_products(session, queue, products):
