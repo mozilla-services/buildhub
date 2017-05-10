@@ -123,11 +123,9 @@ recordStringEquals path filterValue buildRecord =
 
 recordStringStartsWith : (BuildRecord -> String) -> String -> BuildRecord -> Bool
 recordStringStartsWith path filterValue buildRecord =
-    (filterValue == "all")
-        || (buildRecord
-                |> path
-                |> String.startsWith filterValue
-           )
+    buildRecord
+        |> path
+        |> String.startsWith filterValue
 
 
 recordMaybeStringEquals : (BuildRecord -> Maybe String) -> String -> BuildRecord -> Bool
