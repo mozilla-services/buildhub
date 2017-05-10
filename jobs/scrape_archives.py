@@ -18,15 +18,13 @@ DEFAULT_SERVER = "https://kinto-ota.dev.mozaws.net/v1"
 DEFAULT_BUCKET = "build-hub"
 DEFAULT_COLLECTION = "archives"
 NB_THREADS = 3
-TIMEOUT = 30
+NB_RETRY_REQUEST = 3
+TIMEOUT_SECONDS = 30
 
 
 logger = logging.getLogger(__name__)
 
 
-@backoff.on_exception(backoff.expo,
-                      kinto_http.exceptions.KintoException,
-                      max_tries=8)
 def publish_records(client, records):
     with client.batch() as batch:
         for record in records:
@@ -49,13 +47,13 @@ def archive_url(product, version=None, platform=None, locale=None):
                       (aiohttp.ClientError,
                        asyncio.TimeoutError,
                        concurrent.futures.CancelledError),
-                      max_tries=8)
+                      max_tries=NB_RETRY_REQUEST)
 async def fetch_listing(session, url):
     headers = {
         "Accept": "application/json",
         "User-Agent": "BuildHub;storage-team@mozilla.com"
     }
-    async with session.get(url, headers=headers, timeout=TIMEOUT) as response:
+    async with session.get(url, headers=headers, timeout=TIMEOUT_SECONDS) as response:
         try:
             data = await response.json()
             return data["prefixes"], data["files"]
@@ -168,7 +166,7 @@ def main():
         description="Send releases archives to Kinto",
         default_server=DEFAULT_SERVER,
         default_bucket=DEFAULT_BUCKET,
-        default_retry=3,
+        default_retry=NB_RETRY_REQUEST,
         default_collection=DEFAULT_COLLECTION)
 
     args = parser.parse_args(sys.argv[1:])
