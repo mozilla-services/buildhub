@@ -25,6 +25,7 @@ type alias Model =
     , platformFilter : String
     , channelFilter : String
     , localeFilter : String
+    , buildIdFilter : String
     , loading : Bool
     }
 
@@ -93,6 +94,7 @@ type NewFilter
     | NewPlatformFilter String
     | NewChannelFilter String
     | NewLocaleFilter String
+    | NewBuildIdSearch String
 
 
 type Msg
