@@ -54,5 +54,5 @@ systemAddonDecoder : Decoder SystemAddon
 systemAddonDecoder =
     decode SystemAddon
         |> required "id" string
-        |> required "builtin_version" (nullable string)
-        |> required "updated_version" (nullable string)
+        |> optional "builtin" string ""
+        |> optional "updated" string ""

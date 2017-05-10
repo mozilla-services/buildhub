@@ -73,8 +73,8 @@ type alias Source =
 
 type alias SystemAddon =
     { id : String
-    , builtinVersion : Maybe String
-    , updatedVersion : Maybe String
+    , builtin : String
+    , updated : String
     }
 
 

@@ -1,7 +1,6 @@
 module Model exposing (init)
 
 import Decoder exposing (..)
-import Json.Decode exposing (..)
 import Kinto
 import Types exposing (..)
 
@@ -39,4 +38,4 @@ client =
 
 recordResource : Kinto.Resource BuildRecord
 recordResource =
-    Kinto.recordResource "build-hub" "builds" buildRecordDecoder
+    Kinto.recordResource "build-hub" "fixtures" buildRecordDecoder
