@@ -233,8 +233,8 @@ viewSystemAddonsDetails systemAddons =
                         (\systemAddon ->
                             tr []
                                 [ td [] [ text systemAddon.id ]
-                                , td [] [ text <| Maybe.withDefault "" systemAddon.builtinVersion ]
-                                , td [] [ text <| Maybe.withDefault "" systemAddon.updatedVersion ]
+                                , td [] [ text systemAddon.builtin ]
+                                , td [] [ text systemAddon.updated ]
                                 ]
                         )
                 )
