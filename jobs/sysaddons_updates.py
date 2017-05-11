@@ -24,18 +24,14 @@ logger = logging.getLogger(__name__)
 
 async def fetch_updates(session, url, entry):
     # https://gecko.readthedocs.io/en/latest/toolkit/mozapps/extensions/addon-manager/SystemAddons.html#system-add-on-updates
-
-    # XXX: inspect archives for channel...
-    channel = entry["source"]["tree"].split("/")[-1]
-
-    url = url.replace("{VERSION}", entry["target"]["version"])
-    url = url.replace("{BUILD_ID}", entry["build"]["id"])
-    url = url.replace("{BUILD_TARGET}", entry["target"]["platform"])
-    url = url.replace("{LOCALE}", entry["target"]["locale"])
-    url = url.replace("{CHANNEL}", channel)
-    url = url.replace("{OS_VERSION}", "default")
-    url = url.replace("{DISTRIBUTION}", "default")
-    url = url.replace("{DISTRIBUTION_VERSION}", "default")
+    url = url.format(VERSION=entry["target"]["version"],
+                     BUILD_ID=entry["build"]["id"],
+                     BUILD_TARGET=entry["target"]["platform"],
+                     LOCALE=entry["target"]["locale"],
+                     CHANNEL=entry["target"]["channel"],
+                     OS_VERSION="default",
+                     DISTRIBUTION="default",
+                     DISTRIBUTION_VERSION="default")
 
     logger.info("Fetch updates info from {}".format(url))
 
@@ -112,12 +108,11 @@ async def main(loop):
             records_subset = with_sysaddons[(i * AUS_BATCH_SIZE):((i + 1) * AUS_BATCH_SIZE)]
 
             # Launch a bunch of parallel requests to AUS.
-            tasks = []
+            coros = []
             for record in records_subset:
                 coro = fetch_updates(session, AUS_URL, record)
-                task = asyncio.ensure_future(coro)
-                tasks.append(task)
-            results = await asyncio.gather(*tasks)
+                coros.append(coro)
+            results = await asyncio.gather(*coros)
 
             # Merge systemaddons updates with builtins.
             for record, sysaddons_updates in zip(records_subset, results):
