@@ -56,6 +56,12 @@ def extract_application_metadata(ini_content):
 
     repository = config["App"].get("SourceRepository")
     tree = repository.rsplit("/", 1)[-1] if repository else None
+    channel = {
+        "mozilla-beta": "beta",
+        "mozilla-aurora": "aurora",
+        "mozilla-release": "release",
+        "mozilla-central": "nightly"
+    }.get(tree)
 
     return {
         "build": {
@@ -66,6 +72,9 @@ def extract_application_metadata(ini_content):
             "tree": tree,
             "revision": revision,
             "repository": repository,
+        },
+        "target": {
+            "channel": channel
         }
     }
 
@@ -118,8 +127,9 @@ def process_linux_archive(client, record):
                 f = tar.extractfile(tarinfo)
                 ini_content = f.read()
                 metadata = extract_application_metadata(ini_content)
-                updated["build"] = {**(updated.get("build") or {}), **metadata["build"]}
-                updated["source"] = {**(updated.get("source") or {}), **metadata["source"]}
+                # Merge with existing info.
+                for field, value in metadata:
+                    updated[field] = {**(updated.get(field) or {}), **value}
 
                 if not has_sysaddons:
                     break
