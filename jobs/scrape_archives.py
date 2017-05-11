@@ -52,7 +52,7 @@ async def fetch_listing(session, url):
         "Accept": "application/json",
         "User-Agent": "BuildHub;storage-team@mozilla.com"
     }
-    with aiohttp.Timeout(timeout=TIMEOUT_SECONDS):
+    with async_timeout.timeout(TIMEOUT_SECONDS):
         async with session.get(url, headers=headers, timeout=None) as response:
             try:
                 data = await response.json()
