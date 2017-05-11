@@ -129,7 +129,7 @@ def process_linux_archive(client, record):
                 ini_content = f.read()
                 metadata = extract_application_metadata(ini_content)
                 # Merge with existing info.
-                for field, value in metadata:
+                for field, value in metadata.items():
                     updated[field] = {**(updated.get(field) or {}), **value}
 
                 if not has_sysaddons:
