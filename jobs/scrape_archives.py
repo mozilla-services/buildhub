@@ -1,4 +1,5 @@
 import asyncio
+import async_timeout
 import concurrent.futures
 import json
 import logging
@@ -145,22 +146,34 @@ async def produce(loop, queue):
     logger.info("Scraping releases done.")
 
 
-async def consume(loop, executor, client, queue):
+async def consume(loop, queue, executor, client):
     """Store grabbed releases from the archives website in Kinto."""
+
+    def markdone(queue, n):
+        """Returns a callback that will mark `n` queue items done."""
+        return lambda fut: [queue.task_done() for _ in range(n)]
+
     info = client.server_info()
     batch_size = info["settings"]["batch_max_requests"]
     while True:
-        # Gather a batch of records.
-        records = [await queue.get()]
-        while not queue.empty() and len(records) < batch_size:
-            records.append(await queue.get())
+        # Consume records from queue, and batch operations.
+        # But don't block if there's not enough records to fill a batch.
+        batch = []
+        try:
+            with async_timeout.timeout(2):
+                while len(batch) < batch_size:
+                    record = await queue.get()
+                    batch.append(record)
+        except asyncio.TimeoutError:
+            logger.debug("Scraping done or not fast enough, proceed.")
+            pass
 
-        task = loop.run_in_executor(executor, publish_records, client, records)
-        # Counting tasks done allows us to wait for the queue with queue.join()
-        task.add_done_callback(lambda fut: queue.task_done())
+        if batch:
+            task = loop.run_in_executor(executor, publish_records, client, batch)
+            task.add_done_callback(markdone(queue, len(batch)))
 
 
-def main():
+async def main(loop):
     parser = cli_utils.add_parser_options(
         description="Send releases archives to Kinto",
         default_server=DEFAULT_SERVER,
@@ -181,24 +194,21 @@ def main():
     client.create_bucket(permissions=public_perms, if_not_exists=True)
     client.create_collection(if_not_exists=True)
 
-    loop = asyncio.get_event_loop()
-    queue = asyncio.Queue(loop=loop)
-
+    # Start a producer and a consumer with threaded kinto requests.
+    queue = asyncio.Queue()
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=NB_THREADS)
-    consumer_coro = consume(loop, executor, client, queue)
-    consumer_task = asyncio.ensure_future(consumer_coro)
-
-    # Wait for scraping of releases and all records to be published.
-    producer = produce(loop, queue)
-    wait_queue = queue.join()
-    future = asyncio.gather(producer, wait_queue)
-    try:
-        loop.run_until_complete(future)
-    finally:
-        # Everything processed, stop consuming.
-        consumer_task.cancel()
-        loop.close()
+    # Schedule the consumer
+    consumer_coro = consume(loop, queue, executor, client)
+    consumer = asyncio.ensure_future(consumer_coro)
+    # Run the producer and wait for completion
+    await produce(loop, queue)
+    # Wait until the consumer is done consuming everything.
+    await queue.join()
+    # The consumer is still awaiting for the producer, cancel it.
+    consumer.cancel()
 
 
 if __name__ == "__main__":
-    main()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main(loop))
+    loop.close()
