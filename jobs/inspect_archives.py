@@ -11,6 +11,7 @@ import sys
 import tarfile
 import tempfile
 import xml.etree.ElementTree as etree
+from packaging.version import parse as version_parse
 
 import requests
 import kinto_http.exceptions
@@ -20,6 +21,8 @@ from kinto_http import cli_utils
 DEFAULT_SERVER = "https://kinto-ota.dev.mozaws.net/v1"
 DEFAULT_BUCKET = "build-hub"
 DEFAULT_COLLECTION = "archives"
+CACHE_FOLDER = ".cache"
+TIMESTAMP_FILE = os.path.join(CACHE_FOLDER, ".inspect-timestamp")
 NB_RETRY_REQUEST = 5
 NB_WORKERS = 5  # CPU + 1
 
@@ -29,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 def cached_download(url):
     urlpath = url.rsplit('/')[-4:]
-    tempname = os.path.join(".cache", *urlpath)
+    tempname = os.path.join(CACHE_FOLDER, *urlpath)
 
     if not os.path.exists(tempname):
         folder = os.path.dirname(tempname)
@@ -185,19 +188,27 @@ def main():
 
     client = cli_utils.create_client_from_args(args)
 
-    filters = {
-        # "_since": "1493977727760",  # XXX: store previous timestamp in a file
-        # "target.platform": "linux-x86_64",
-        # "target.locale": "en-US",
+    filters = {}
+
+    try:
+        last_run = open(TIMESTAMP_FILE).read()
+        filters["_since"] = last_run
+    except IOError:
+        pass
+
+    filters.update({
+        "target.platform": "linux-x86_64",
+        "target.locale": "en-US",
         "source.product": "firefox"
-    }
+    })
     records = client.get_records(**filters)
     # XXX: https://github.com/Kinto/kinto/issues/1215
     records = [r for r in records if (r["build"] or {}).get("id") is None]
-    # XXX: Currently only inspects linux tarballs
-    records = [r for r in records if re.match(".+(bz2|gz)$", r["download"]["url"])]
 
-    logger.info("%s archives to process." % len(records))
+    # Do latest versions first.
+    records = sorted(records, key=lambda r: version_parse(r["target"]["version"]), reverse=True)
+
+    logger.info("{} archives to process (since timestamp {}).".format(len(records), filters.get("_since")))
     if len(records) == 0:
         return
 
@@ -215,6 +226,10 @@ def main():
             task.cancel()
         executor.shutdown()
         loop.close()
+
+    latest_timestamp = max([r["last_modified"] for r in records])
+    open(TIMESTAMP_FILE, "w").write('"{}"'.format(latest_timestamp))
+    logger.debug("Timestamp {} saved in {}.".format(latest_timestamp,   TIMESTAMP_FILE))
 
 
 if __name__ == "__main__":
