@@ -11394,127 +11394,56 @@ var _mozilla_services$buildhub$View$recordView = function (record) {
 			}
 		});
 };
-var _mozilla_services$buildhub$View$radioButton = F4(
-	function (filterName, checkedFilter, onClickHandler, filterValue) {
-		return A2(
-			_elm_lang$html$Html$li,
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class('list-group-item'),
-				_1: {ctor: '[]'}
-			},
-			{
-				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$div,
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$class('radio'),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$style(
-								{
-									ctor: '::',
-									_0: {ctor: '_Tuple2', _0: 'margin', _1: '0px'},
-									_1: {ctor: '[]'}
-								}),
-							_1: {ctor: '[]'}
-						}
-					},
-					{
-						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$label,
-							{ctor: '[]'},
-							{
-								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$input,
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$name(filterName),
-										_1: {
-											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$type_('radio'),
-											_1: {
-												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$value(filterValue),
-												_1: {
-													ctor: '::',
-													_0: _elm_lang$html$Html_Attributes$checked(
-														_elm_lang$core$Native_Utils.eq(checkedFilter, filterValue)),
-													_1: {
-														ctor: '::',
-														_0: _elm_lang$html$Html_Events$onClick(
-															onClickHandler(filterValue)),
-														_1: {ctor: '[]'}
-													}
-												}
-											}
-										}
-									},
-									{ctor: '[]'}),
-								_1: {
-									ctor: '::',
-									_0: _elm_lang$html$Html$text(filterValue),
-									_1: {ctor: '[]'}
-								}
-							}),
-						_1: {ctor: '[]'}
-					}),
-				_1: {ctor: '[]'}
-			});
-	});
-var _mozilla_services$buildhub$View$filterSetForm = F4(
+var _mozilla_services$buildhub$View$filterSelector = F4(
 	function (filters, filterName, checkedFilter, onClickHandler) {
+		var optionView = function (value) {
+			return A2(
+				_elm_lang$html$Html$option,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(value),
+					_1: {ctor: '[]'}
+				});
+		};
 		return A2(
 			_elm_lang$html$Html$div,
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class('panel panel-default'),
+				_0: _elm_lang$html$Html_Attributes$class('form-group'),
 				_1: {ctor: '[]'}
 			},
 			{
 				ctor: '::',
 				_0: A2(
-					_elm_lang$html$Html$div,
+					_elm_lang$html$Html$label,
+					{ctor: '[]'},
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$class('panel-heading'),
-						_1: {ctor: '[]'}
-					},
-					{
-						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$strong,
-							{ctor: '[]'},
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html$text(filterName),
-								_1: {ctor: '[]'}
-							}),
+						_0: _elm_lang$html$Html$text(filterName),
 						_1: {ctor: '[]'}
 					}),
 				_1: {
 					ctor: '::',
 					_0: A2(
-						_elm_lang$html$Html$ul,
+						_elm_lang$html$Html$select,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('list-group'),
-							_1: {ctor: '[]'}
+							_0: _elm_lang$html$Html_Attributes$class('form-control'),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Events$onInput(onClickHandler),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$value(checkedFilter),
+									_1: {ctor: '[]'}
+								}
+							}
 						},
 						A2(
-							_elm_lang$core$Basics_ops['++'],
-							{
-								ctor: '::',
-								_0: A4(_mozilla_services$buildhub$View$radioButton, filterName, checkedFilter, onClickHandler, 'all'),
-								_1: {ctor: '[]'}
-							},
-							A2(
-								_elm_lang$core$List$map,
-								A3(_mozilla_services$buildhub$View$radioButton, filterName, checkedFilter, onClickHandler),
-								filters))),
+							_elm_lang$core$List$map,
+							optionView,
+							{ctor: '::', _0: 'all', _1: filters})),
 					_1: {ctor: '[]'}
 				}
 			});
@@ -11524,7 +11453,55 @@ var _mozilla_services$buildhub$View$buildIdSearchForm = function (model) {
 		_elm_lang$html$Html$div,
 		{
 			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('panel panel-default'),
+			_0: _elm_lang$html$Html_Attributes$class('form-group'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$label,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('Build id'),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$input,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$type_('text'),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('form-control'),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$placeholder('Eg. 201705011233'),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onInput(
+										function (_p3) {
+											return _mozilla_services$buildhub$Types$UpdateFilter(
+												_mozilla_services$buildhub$Types$NewBuildIdSearch(_p3));
+										}),
+									_1: {ctor: '[]'}
+								}
+							}
+						}
+					},
+					{ctor: '[]'}),
+				_1: {ctor: '[]'}
+			}
+		});
+};
+var _mozilla_services$buildhub$View$headerView = function (model) {
+	return A2(
+		_elm_lang$html$Html$nav,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('navbar navbar-default'),
 			_1: {ctor: '[]'}
 		},
 		{
@@ -11533,78 +11510,107 @@ var _mozilla_services$buildhub$View$buildIdSearchForm = function (model) {
 				_elm_lang$html$Html$div,
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$class('panel-heading'),
+					_0: _elm_lang$html$Html_Attributes$class('container-fluid'),
 					_1: {ctor: '[]'}
 				},
 				{
 					ctor: '::',
 					_0: A2(
-						_elm_lang$html$Html$strong,
-						{ctor: '[]'},
+						_elm_lang$html$Html$div,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text('Search build id'),
+							_0: _elm_lang$html$Html_Attributes$class('navbar-header'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$a,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('navbar-brand'),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$href('#'),
+										_1: {ctor: '[]'}
+									}
+								},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('BuildHub'),
+									_1: {ctor: '[]'}
+								}),
 							_1: {ctor: '[]'}
 						}),
-					_1: {ctor: '[]'}
-				}),
-			_1: {
-				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$form,
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$class('panel-body'),
-						_1: {ctor: '[]'}
-					},
-					{
+					_1: {
 						ctor: '::',
 						_0: A2(
 							_elm_lang$html$Html$div,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$class('form-group'),
+								_0: _elm_lang$html$Html_Attributes$class('collapse navbar-collapse'),
 								_1: {ctor: '[]'}
 							},
 							{
 								ctor: '::',
 								_0: A2(
-									_elm_lang$html$Html$label,
-									{ctor: '[]'},
+									_elm_lang$html$Html$ul,
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html$text('Build id'),
+										_0: _elm_lang$html$Html_Attributes$class('nav navbar-nav navbar-right'),
 										_1: {ctor: '[]'}
-									}),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$input,
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$type_('text'),
-											_1: {
+									},
+									{
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$li,
+											{ctor: '[]'},
+											{
 												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$class('form-control'),
-												_1: {
+												_0: A2(
+													_elm_lang$html$Html$a,
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$href('#'),
+														_1: {ctor: '[]'}
+													},
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html$text('Builds'),
+														_1: {ctor: '[]'}
+													}),
+												_1: {ctor: '[]'}
+											}),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$li,
+												{ctor: '[]'},
+												{
 													ctor: '::',
-													_0: _elm_lang$html$Html_Events$onInput(
-														function (_p3) {
-															return _mozilla_services$buildhub$Types$UpdateFilter(
-																_mozilla_services$buildhub$Types$NewBuildIdSearch(_p3));
+													_0: A2(
+														_elm_lang$html$Html$a,
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html_Attributes$href('#'),
+															_1: {ctor: '[]'}
+														},
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html$text('Docs'),
+															_1: {ctor: '[]'}
 														}),
 													_1: {ctor: '[]'}
-												}
-											}
-										},
-										{ctor: '[]'}),
-									_1: {ctor: '[]'}
-								}
+												}),
+											_1: {ctor: '[]'}
+										}
+									}),
+								_1: {ctor: '[]'}
 							}),
 						_1: {ctor: '[]'}
-					}),
-				_1: {ctor: '[]'}
-			}
+					}
+				}),
+			_1: {ctor: '[]'}
 		});
 };
 var _mozilla_services$buildhub$View$view = function (model) {
@@ -11617,25 +11623,7 @@ var _mozilla_services$buildhub$View$view = function (model) {
 		},
 		{
 			ctor: '::',
-			_0: A2(
-				_elm_lang$html$Html$div,
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$class('header'),
-					_1: {ctor: '[]'}
-				},
-				{
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$h1,
-						{ctor: '[]'},
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html$text('Build Hub'),
-							_1: {ctor: '[]'}
-						}),
-					_1: {ctor: '[]'}
-				}),
+			_0: _mozilla_services$buildhub$View$headerView(model),
 			_1: {
 				ctor: '::',
 				_0: A2(
@@ -11681,105 +11669,117 @@ var _mozilla_services$buildhub$View$view = function (model) {
 										_elm_lang$html$Html$div,
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$style(
-												{
-													ctor: '::',
-													_0: {ctor: '_Tuple2', _0: 'position', _1: 'fixed'},
-													_1: {
-														ctor: '::',
-														_0: {ctor: '_Tuple2', _0: 'max-height', _1: 'calc(100vh - 75px)'},
-														_1: {
-															ctor: '::',
-															_0: {ctor: '_Tuple2', _0: 'position', _1: 'fixed'},
-															_1: {
-																ctor: '::',
-																_0: {ctor: '_Tuple2', _0: 'overflow-y', _1: 'auto'},
-																_1: {
-																	ctor: '::',
-																	_0: {ctor: '_Tuple2', _0: 'padding-right', _1: '.1em'},
-																	_1: {ctor: '[]'}
-																}
-															}
-														}
-													}
-												}),
+											_0: _elm_lang$html$Html_Attributes$class('panel panel-default'),
 											_1: {ctor: '[]'}
 										},
 										{
 											ctor: '::',
-											_0: _mozilla_services$buildhub$View$buildIdSearchForm(model),
+											_0: A2(
+												_elm_lang$html$Html$div,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$class('panel-heading'),
+													_1: {ctor: '[]'}
+												},
+												{
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$strong,
+														{ctor: '[]'},
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html$text('Filters'),
+															_1: {ctor: '[]'}
+														}),
+													_1: {ctor: '[]'}
+												}),
 											_1: {
 												ctor: '::',
-												_0: A4(
-													_mozilla_services$buildhub$View$filterSetForm,
-													model.filterValues.treeList,
-													'Trees',
-													model.treeFilter,
-													function (_p4) {
-														return _mozilla_services$buildhub$Types$UpdateFilter(
-															_mozilla_services$buildhub$Types$NewTreeFilter(_p4));
-													}),
-												_1: {
-													ctor: '::',
-													_0: A4(
-														_mozilla_services$buildhub$View$filterSetForm,
-														model.filterValues.productList,
-														'Products',
-														model.productFilter,
-														function (_p5) {
-															return _mozilla_services$buildhub$Types$UpdateFilter(
-																_mozilla_services$buildhub$Types$NewProductFilter(_p5));
-														}),
-													_1: {
+												_0: A2(
+													_elm_lang$html$Html$div,
+													{
 														ctor: '::',
-														_0: A4(
-															_mozilla_services$buildhub$View$filterSetForm,
-															model.filterValues.versionList,
-															'Versions',
-															model.versionFilter,
-															function (_p6) {
-																return _mozilla_services$buildhub$Types$UpdateFilter(
-																	_mozilla_services$buildhub$Types$NewVersionFilter(_p6));
-															}),
+														_0: _elm_lang$html$Html_Attributes$class('panel-body'),
+														_1: {ctor: '[]'}
+													},
+													{
+														ctor: '::',
+														_0: _mozilla_services$buildhub$View$buildIdSearchForm(model),
 														_1: {
 															ctor: '::',
 															_0: A4(
-																_mozilla_services$buildhub$View$filterSetForm,
-																model.filterValues.platformList,
-																'Platforms',
-																model.platformFilter,
-																function (_p7) {
+																_mozilla_services$buildhub$View$filterSelector,
+																model.filterValues.treeList,
+																'Trees',
+																model.treeFilter,
+																function (_p4) {
 																	return _mozilla_services$buildhub$Types$UpdateFilter(
-																		_mozilla_services$buildhub$Types$NewPlatformFilter(_p7));
+																		_mozilla_services$buildhub$Types$NewTreeFilter(_p4));
 																}),
 															_1: {
 																ctor: '::',
 																_0: A4(
-																	_mozilla_services$buildhub$View$filterSetForm,
-																	model.filterValues.channelList,
-																	'Channels',
-																	model.channelFilter,
-																	function (_p8) {
+																	_mozilla_services$buildhub$View$filterSelector,
+																	model.filterValues.productList,
+																	'Products',
+																	model.productFilter,
+																	function (_p5) {
 																		return _mozilla_services$buildhub$Types$UpdateFilter(
-																			_mozilla_services$buildhub$Types$NewChannelFilter(_p8));
+																			_mozilla_services$buildhub$Types$NewProductFilter(_p5));
 																	}),
 																_1: {
 																	ctor: '::',
 																	_0: A4(
-																		_mozilla_services$buildhub$View$filterSetForm,
-																		model.filterValues.localeList,
-																		'Locales',
-																		model.localeFilter,
-																		function (_p9) {
+																		_mozilla_services$buildhub$View$filterSelector,
+																		model.filterValues.versionList,
+																		'Versions',
+																		model.versionFilter,
+																		function (_p6) {
 																			return _mozilla_services$buildhub$Types$UpdateFilter(
-																				_mozilla_services$buildhub$Types$NewLocaleFilter(_p9));
+																				_mozilla_services$buildhub$Types$NewVersionFilter(_p6));
 																		}),
-																	_1: {ctor: '[]'}
+																	_1: {
+																		ctor: '::',
+																		_0: A4(
+																			_mozilla_services$buildhub$View$filterSelector,
+																			model.filterValues.platformList,
+																			'Platforms',
+																			model.platformFilter,
+																			function (_p7) {
+																				return _mozilla_services$buildhub$Types$UpdateFilter(
+																					_mozilla_services$buildhub$Types$NewPlatformFilter(_p7));
+																			}),
+																		_1: {
+																			ctor: '::',
+																			_0: A4(
+																				_mozilla_services$buildhub$View$filterSelector,
+																				model.filterValues.channelList,
+																				'Channels',
+																				model.channelFilter,
+																				function (_p8) {
+																					return _mozilla_services$buildhub$Types$UpdateFilter(
+																						_mozilla_services$buildhub$Types$NewChannelFilter(_p8));
+																				}),
+																			_1: {
+																				ctor: '::',
+																				_0: A4(
+																					_mozilla_services$buildhub$View$filterSelector,
+																					model.filterValues.localeList,
+																					'Locales',
+																					model.localeFilter,
+																					function (_p9) {
+																						return _mozilla_services$buildhub$Types$UpdateFilter(
+																							_mozilla_services$buildhub$Types$NewLocaleFilter(_p9));
+																					}),
+																				_1: {ctor: '[]'}
+																			}
+																		}
+																	}
 																}
 															}
 														}
-													}
-												}
+													}),
+												_1: {ctor: '[]'}
 											}
 										}),
 									_1: {ctor: '[]'}
@@ -11807,7 +11807,7 @@ var _mozilla_services$buildhub$Main$recordMaybeStringEquals = F3(
 	});
 var _mozilla_services$buildhub$Main$recordStringStartsWith = F3(
 	function (path, filterValue, buildRecord) {
-		return _elm_lang$core$Native_Utils.eq(filterValue, 'all') || A2(
+		return A2(
 			_elm_lang$core$String$startsWith,
 			filterValue,
 			path(buildRecord));
