@@ -18,15 +18,17 @@ view model =
                 [ div [ class "col-sm-9" ]
                     [ div [] <| List.map recordView model.filteredBuilds ]
                 , div [ class "col-sm-3" ]
-                    [ div
-                        []
-                        [ buildIdSearchForm model
-                        , filterSetForm model.filterValues.treeList "Trees" model.treeFilter (UpdateFilter << NewTreeFilter)
-                        , filterSetForm model.filterValues.productList "Products" model.productFilter (UpdateFilter << NewProductFilter)
-                        , filterSetForm model.filterValues.versionList "Versions" model.versionFilter (UpdateFilter << NewVersionFilter)
-                        , filterSetForm model.filterValues.platformList "Platforms" model.platformFilter (UpdateFilter << NewPlatformFilter)
-                        , filterSetForm model.filterValues.channelList "Channels" model.channelFilter (UpdateFilter << NewChannelFilter)
-                        , filterSetForm model.filterValues.localeList "Locales" model.localeFilter (UpdateFilter << NewLocaleFilter)
+                    [ div [ class "panel panel-default" ]
+                        [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
+                        , div [ class "panel-body" ]
+                            [ buildIdSearchForm model
+                            , filterSelector model.filterValues.treeList "Trees" model.treeFilter (UpdateFilter << NewTreeFilter)
+                            , filterSelector model.filterValues.productList "Products" model.productFilter (UpdateFilter << NewProductFilter)
+                            , filterSelector model.filterValues.versionList "Versions" model.versionFilter (UpdateFilter << NewVersionFilter)
+                            , filterSelector model.filterValues.platformList "Platforms" model.platformFilter (UpdateFilter << NewPlatformFilter)
+                            , filterSelector model.filterValues.channelList "Channels" model.channelFilter (UpdateFilter << NewChannelFilter)
+                            , filterSelector model.filterValues.localeList "Locales" model.localeFilter (UpdateFilter << NewLocaleFilter)
+                            ]
                         ]
                     ]
                 ]
@@ -56,52 +58,29 @@ headerView model =
 
 buildIdSearchForm : Model -> Html Msg
 buildIdSearchForm model =
-    div [ class "panel panel-default" ]
-        [ div [ class "panel-heading" ] [ strong [] [ text "Search build id" ] ]
-        , Html.form [ class "panel-body" ]
-            [ div [ class "form-group" ]
-                [ label [] [ text "Build id" ]
-                , input
-                    [ type_ "text"
-                    , class "form-control"
-                    , onInput <| UpdateFilter << NewBuildIdSearch
-                    ]
-                    []
-                ]
+    div [ class "form-group" ]
+        [ label [] [ text "Build id" ]
+        , input
+            [ type_ "text"
+            , class "form-control"
+            , placeholder "Eg. 201705011233"
+            , onInput <| UpdateFilter << NewBuildIdSearch
             ]
+            []
         ]
 
 
-filterSetForm : List String -> String -> String -> (String -> Msg) -> Html Msg
-filterSetForm filters filterName checkedFilter onClickHandler =
-    div [ class "panel panel-default" ]
-        [ div [ class "panel-heading" ] [ strong [] [ text filterName ] ]
-        , ul [ class "list-group" ] <|
-            [ (radioButton filterName checkedFilter onClickHandler "all") ]
-                ++ List.map (radioButton filterName checkedFilter onClickHandler) filters
-        ]
-
-
-radioButton : String -> String -> (String -> Msg) -> String -> Html Msg
-radioButton filterName checkedFilter onClickHandler filterValue =
-    li [ class "list-group-item" ]
-        [ div
-            [ class "radio"
-            , style [ ( "margin", "0px" ) ]
+filterSelector : List String -> String -> String -> (String -> Msg) -> Html Msg
+filterSelector filters filterName checkedFilter onClickHandler =
+    let
+        optionView value =
+            option [] [ text value ]
+    in
+        div [ class "form-group" ]
+            [ label [] [ text filterName ]
+            , select [ class "form-control", onInput onClickHandler, value checkedFilter ] <|
+                List.map optionView ("all" :: filters)
             ]
-            [ label []
-                [ input
-                    [ name filterName
-                    , type_ "radio"
-                    , value filterValue
-                    , checked <| checkedFilter == filterValue
-                    , onClick <| onClickHandler filterValue
-                    ]
-                    []
-                , text filterValue
-                ]
-            ]
-        ]
 
 
 recordView : BuildRecord -> Html Msg
