@@ -20,6 +20,7 @@ from kinto_http import cli_utils
 DEFAULT_SERVER = "https://kinto-ota.dev.mozaws.net/v1"
 DEFAULT_BUCKET = "build-hub"
 DEFAULT_COLLECTION = "archives"
+NB_RETRY_REQUEST = 5
 NB_WORKERS = 5  # CPU + 1
 
 
@@ -170,6 +171,7 @@ def main():
         description="Inspect and complete archives on Kinto",
         default_server=DEFAULT_SERVER,
         default_bucket=DEFAULT_BUCKET,
+        default_retry=NB_RETRY_REQUEST,
         default_collection=DEFAULT_COLLECTION)
 
     args = parser.parse_args(sys.argv[1:])
@@ -182,7 +184,6 @@ def main():
                 .format(**args.__dict__))
 
     client = cli_utils.create_client_from_args(args)
-    client.session.nb_retry = 1
 
     filters = {
         # "_since": "1493977727760",  # XXX: store previous timestamp in a file
