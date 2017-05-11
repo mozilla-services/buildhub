@@ -10,8 +10,7 @@ import Types exposing (..)
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ div [ class "header" ]
-            [ h1 [] [ Html.text "Build Hub" ] ]
+        [ headerView model
         , div [ class "row" ] <|
             if model.loading then
                 [ spinner ]
@@ -20,14 +19,7 @@ view model =
                     [ div [] <| List.map recordView model.filteredBuilds ]
                 , div [ class "col-sm-3" ]
                     [ div
-                        [ style
-                            [ ( "position", "fixed" )
-                            , ( "max-height", "calc(100vh - 75px)" )
-                            , ( "position", "fixed" )
-                            , ( "overflow-y", "auto" )
-                            , ( "padding-right", ".1em" )
-                            ]
-                        ]
+                        []
                         [ buildIdSearchForm model
                         , filterSetForm model.filterValues.treeList "Trees" model.treeFilter (UpdateFilter << NewTreeFilter)
                         , filterSetForm model.filterValues.productList "Products" model.productFilter (UpdateFilter << NewProductFilter)
@@ -38,6 +30,27 @@ view model =
                         ]
                     ]
                 ]
+        ]
+
+
+headerView : Model -> Html Msg
+headerView model =
+    nav
+        [ class "navbar navbar-default" ]
+        [ div
+            [ class "container-fluid" ]
+            [ div
+                [ class "navbar-header" ]
+                [ a [ class "navbar-brand", href "#" ] [ text "BuildHub" ] ]
+            , div
+                [ class "collapse navbar-collapse" ]
+                [ ul
+                    [ class "nav navbar-nav navbar-right" ]
+                    [ li [] [ a [ href "#" ] [ text "Builds" ] ]
+                    , li [] [ a [ href "#" ] [ text "Docs" ] ]
+                    ]
+                ]
+            ]
         ]
 
 
