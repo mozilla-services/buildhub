@@ -115,7 +115,12 @@ headerView model =
                 [ ul
                     [ class "nav navbar-nav navbar-right" ]
                     [ li [] [ a [ href "#", onClick_ <| ChangeView MainView ] [ text "Builds" ] ]
-                    , li [] [ a [ href "#", onClick_ <| ChangeView DocsView ] [ text "Docs" ] ]
+                    , li []
+                        [ a [ href "#", onClick_ <| ChangeView DocsView ]
+                            [ i [ class "glyphicon glyphicon-question-sign" ] []
+                            , text " Docs"
+                            ]
+                        ]
                     ]
                 ]
             ]
