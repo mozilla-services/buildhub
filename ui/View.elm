@@ -30,6 +30,11 @@ view model =
                             , filterSelector model.filterValues.platformList "Platforms" model.platformFilter (UpdateFilter << NewPlatformFilter)
                             , filterSelector model.filterValues.channelList "Channels" model.channelFilter (UpdateFilter << NewChannelFilter)
                             , filterSelector model.filterValues.localeList "Locales" model.localeFilter (UpdateFilter << NewLocaleFilter)
+                            , p [ class "text-right" ]
+                                [ button
+                                    [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
+                                    [ text "Clear all filters" ]
+                                ]
                             ]
                         ]
                     ]
@@ -110,6 +115,7 @@ buildIdSearchForm model =
             [ type_ "text"
             , class "form-control"
             , placeholder "Eg. 201705011233"
+            , value model.buildIdFilter
             , onInput <| UpdateFilter << NewBuildIdSearch
             ]
             []
@@ -117,15 +123,19 @@ buildIdSearchForm model =
 
 
 filterSelector : List String -> String -> String -> (String -> Msg) -> Html Msg
-filterSelector filters filterName checkedFilter onClickHandler =
+filterSelector filters filterName checkedFilter updateHandler =
     let
-        optionView value =
-            option [] [ text value ]
+        optionView value_ =
+            option [ value value_, selected (value_ == checkedFilter) ] [ text value_ ]
     in
         div [ class "form-group" ]
             [ label [] [ text filterName ]
-            , select [ class "form-control", onInput onClickHandler, value checkedFilter ] <|
-                List.map optionView ("all" :: filters)
+            , select
+                [ class "form-control"
+                , onInput updateHandler
+                , value checkedFilter
+                ]
+                (List.map optionView ("all" :: filters))
             ]
 
 
