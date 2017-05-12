@@ -2,11 +2,13 @@ module Types
     exposing
         ( Build
         , BuildRecord
+        , CurrentView(..)
         , Download
         , FilterValues
         , Model
         , Msg(..)
         , NewFilter(..)
+        , Snippet
         , Source
         , SystemAddon
         , Target
@@ -27,6 +29,7 @@ type alias Model =
     , localeFilter : String
     , buildIdFilter : String
     , loading : Bool
+    , currentView : CurrentView
     }
 
 
@@ -65,6 +68,17 @@ type alias Download =
     }
 
 
+type alias Snippet =
+    { title : String
+    , description : String
+    , snippets :
+        { curl : String
+        , js : String
+        , python : String
+        }
+    }
+
+
 type alias Source =
     { product : String
     , tree : String
@@ -98,7 +112,13 @@ type NewFilter
     | NewBuildIdSearch String
 
 
+type CurrentView
+    = MainView
+    | DocsView
+
+
 type Msg
     = BuildRecordsFetched (Result Kinto.Error (List BuildRecord))
     | UpdateFilter NewFilter
     | ResetFilter String
+    | ChangeView CurrentView

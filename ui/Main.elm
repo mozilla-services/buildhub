@@ -20,6 +20,9 @@ main =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ filterValues } as model) =
     case msg of
+        ChangeView view ->
+            { model | currentView = view } ! []
+
         BuildRecordsFetched (Ok buildRecordList) ->
             { model
                 | builds = buildRecordList
