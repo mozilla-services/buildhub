@@ -1,6 +1,7 @@
 import asyncio
 import async_timeout
 import concurrent.futures
+import datetime
 import json
 import logging
 import re
@@ -33,8 +34,37 @@ def publish_records(client, records):
     logger.info("Created %s records" % len(records))
 
 
-def archive_url(product, version=None, platform=None, locale=None):
-    url = ARCHIVE_URL + product + "/releases/"
+def archive(product, version, platform, locale, channel, url, size, date):
+    record = {
+        "build": None,
+        "source": {
+            "revision": None,
+            "tree": None,
+            "product": product,
+        },
+        "target": {
+            "platform": platform,
+            "locale": locale,
+            "version": version,
+            "channel": channel,
+        },
+        "download": {
+            "url": url,
+            "mimetype": None,
+            "size": size,
+            "date": date,
+        },
+        "systemaddons": None
+    }
+    return record
+
+
+def archive_url(product, version=None, platform=None, locale=None, nightly=None):
+    url = ARCHIVE_URL + product
+    if nightly:
+        url += "/nightly/" + nightly + "/"
+    else:
+        url += "/releases/"
     if version:
         url += version + "/"
     if platform:
@@ -62,8 +92,48 @@ async def fetch_listing(session, url):
 
 
 async def fetch_products(session, queue, products, min_version):
+    # Nightlies
+    futures = [fetch_nightlies(session, queue, product) for product in products]
+    await asyncio.gather(*futures)
+    # Releases
     futures = [fetch_versions(session, queue, product, min_version) for product in products]
     await asyncio.gather(*futures)
+
+
+async def fetch_nightlies(session, queue, product):
+    now = datetime.date.today()
+    current_month = "{}/{:02d}".format(now.year, now.month)
+    month_url = archive_url(product, nightly=current_month)
+    days_folders, _ = await fetch_listing(session, month_url)
+
+    # Skip aurora nightlies...
+    days_urls = [archive_url(product, nightly=current_month + "/" + f[:-1])
+                 for f in days_folders if f.endswith("mozilla-central/")]
+
+    futures = [fetch_listing(session, day_url) for day_url in days_urls]
+    listings = await asyncio.gather(*futures)
+
+    channel = "nightly"
+
+    for day_url, (_, files) in zip(days_urls, listings):
+        futures = []
+        for file_ in files:
+            filename = file_["name"]
+            size = file_["size"]
+            date = file_["last_modified"]
+            url = day_url + filename
+
+            match = re.search(r'\w+-(\d+.+)\.([a-z]+(\-[A-Z]+)?)\.(.+)\.tar.bz2+$', filename)
+            if not match:
+                continue
+            version = match.group(1)
+            locale = match.group(2)
+            platform = match.group(4)
+
+            record = archive(product, version, platform, locale, channel, url, size, date)
+            logger.debug("Nightly found %s" % record["download"]["url"])
+            futures.append(queue.put(record))
+        await asyncio.gather(*futures)
 
 
 async def fetch_versions(session, queue, product, min_version):
@@ -111,29 +181,15 @@ async def fetch_files(session, queue, product, version, platform, locale):
     fileregexp = re.compile("%s-(.+)(zip|gz|bz|bz2|dmg|apk)$" % product)
     files = [f for f in files if fileregexp.match(f["name"]) and 'sdk' not in f["name"]]
 
+    channel = None  # Unknown.
+
     futures = []
     for file_ in files:
         filename = file_["name"]
-        record = {
-            "build": None,
-            "source": {
-                "revision": None,
-                "tree": None,
-                "product": product,
-            },
-            "target": {
-                "platform": platform,
-                "locale": locale,
-                "version": version,
-                "channel": None,
-            },
-            "download": {
-                "url": locale_url + filename,
-                "mimetype": None,
-                "size": None,
-            },
-            "systemaddons": None
-        }
+        url = locale_url + filename
+        size = file_["size"]
+        date = file_["last_modified"]
+        record = archive(product, version, platform, locale, channel, url, size, date)
         logger.debug("Release found %s" % record["download"]["url"])
         futures.append(queue.put(record))
 
