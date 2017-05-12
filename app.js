@@ -10387,6 +10387,9 @@ var _mozilla_services$buildhub$Types$NewTreeFilter = function (a) {
 	return {ctor: 'NewTreeFilter', _0: a};
 };
 var _mozilla_services$buildhub$Types$ClearAll = {ctor: 'ClearAll'};
+var _mozilla_services$buildhub$Types$ResetFilter = function (a) {
+	return {ctor: 'ResetFilter', _0: a};
+};
 var _mozilla_services$buildhub$Types$UpdateFilter = function (a) {
 	return {ctor: 'UpdateFilter', _0: a};
 };
@@ -10540,6 +10543,13 @@ var _mozilla_services$buildhub$Model$init = A2(
 		_1: {ctor: '[]'}
 	});
 
+var _mozilla_services$buildhub$View$onClick_ = function (msg) {
+	return A3(
+		_elm_lang$html$Html_Events$onWithOptions,
+		'click',
+		{preventDefault: true, stopPropagation: true},
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
 var _mozilla_services$buildhub$View$spinner = A2(
 	_elm_lang$html$Html$div,
 	{
@@ -11396,7 +11406,7 @@ var _mozilla_services$buildhub$View$recordView = function (record) {
 		});
 };
 var _mozilla_services$buildhub$View$filterSelector = F4(
-	function (filters, filterName, checkedFilter, updateHandler) {
+	function (filters, filterName, selectedFilter, updateHandler) {
 		var optionView = function (value_) {
 			return A2(
 				_elm_lang$html$Html$option,
@@ -11406,7 +11416,7 @@ var _mozilla_services$buildhub$View$filterSelector = F4(
 					_1: {
 						ctor: '::',
 						_0: _elm_lang$html$Html_Attributes$selected(
-							_elm_lang$core$Native_Utils.eq(value_, checkedFilter)),
+							_elm_lang$core$Native_Utils.eq(value_, selectedFilter)),
 						_1: {ctor: '[]'}
 					}
 				},
@@ -11445,7 +11455,7 @@ var _mozilla_services$buildhub$View$filterSelector = F4(
 								_0: _elm_lang$html$Html_Events$onInput(updateHandler),
 								_1: {
 									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$value(checkedFilter),
+									_0: _elm_lang$html$Html_Attributes$value(selectedFilter),
 									_1: {ctor: '[]'}
 								}
 							}
@@ -11519,6 +11529,7 @@ var _mozilla_services$buildhub$View$filterInfoView = function (model) {
 			_elm_lang$core$List$map,
 			function (_p4) {
 				var _p5 = _p4;
+				var _p6 = _p5._0;
 				return A2(
 					_elm_lang$html$Html$span,
 					{
@@ -11531,17 +11542,41 @@ var _mozilla_services$buildhub$View$filterInfoView = function (model) {
 						_0: _elm_lang$html$Html$text(
 							A2(
 								_elm_lang$core$Basics_ops['++'],
-								_p5._0,
+								_p6,
 								A2(_elm_lang$core$Basics_ops['++'], ':', _p5._1))),
-						_1: {ctor: '[]'}
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html$text(' '),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$a,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$href(''),
+										_1: {
+											ctor: '::',
+											_0: _mozilla_services$buildhub$View$onClick_(
+												_mozilla_services$buildhub$Types$ResetFilter(_p6)),
+											_1: {ctor: '[]'}
+										}
+									},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('×'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
+						}
 					});
 			},
 			A2(
 				_elm_lang$core$List$filter,
-				function (_p6) {
-					var _p7 = _p6;
-					var _p8 = _p7._1;
-					return (!_elm_lang$core$Native_Utils.eq(_p8, 'all')) && (!_elm_lang$core$Native_Utils.eq(_p8, ''));
+				function (_p7) {
+					var _p8 = _p7;
+					var _p9 = _p8._1;
+					return (!_elm_lang$core$Native_Utils.eq(_p9, 'all')) && (!_elm_lang$core$Native_Utils.eq(_p9, ''));
 				},
 				{
 					ctor: '::',
@@ -11838,9 +11873,9 @@ var _mozilla_services$buildhub$View$view = function (model) {
 																model.filterValues.treeList,
 																'Trees',
 																model.treeFilter,
-																function (_p9) {
+																function (_p10) {
 																	return _mozilla_services$buildhub$Types$UpdateFilter(
-																		_mozilla_services$buildhub$Types$NewTreeFilter(_p9));
+																		_mozilla_services$buildhub$Types$NewTreeFilter(_p10));
 																}),
 															_1: {
 																ctor: '::',
@@ -11849,9 +11884,9 @@ var _mozilla_services$buildhub$View$view = function (model) {
 																	model.filterValues.productList,
 																	'Products',
 																	model.productFilter,
-																	function (_p10) {
+																	function (_p11) {
 																		return _mozilla_services$buildhub$Types$UpdateFilter(
-																			_mozilla_services$buildhub$Types$NewProductFilter(_p10));
+																			_mozilla_services$buildhub$Types$NewProductFilter(_p11));
 																	}),
 																_1: {
 																	ctor: '::',
@@ -11860,9 +11895,9 @@ var _mozilla_services$buildhub$View$view = function (model) {
 																		model.filterValues.versionList,
 																		'Versions',
 																		model.versionFilter,
-																		function (_p11) {
+																		function (_p12) {
 																			return _mozilla_services$buildhub$Types$UpdateFilter(
-																				_mozilla_services$buildhub$Types$NewVersionFilter(_p11));
+																				_mozilla_services$buildhub$Types$NewVersionFilter(_p12));
 																		}),
 																	_1: {
 																		ctor: '::',
@@ -11871,9 +11906,9 @@ var _mozilla_services$buildhub$View$view = function (model) {
 																			model.filterValues.platformList,
 																			'Platforms',
 																			model.platformFilter,
-																			function (_p12) {
+																			function (_p13) {
 																				return _mozilla_services$buildhub$Types$UpdateFilter(
-																					_mozilla_services$buildhub$Types$NewPlatformFilter(_p12));
+																					_mozilla_services$buildhub$Types$NewPlatformFilter(_p13));
 																			}),
 																		_1: {
 																			ctor: '::',
@@ -11882,9 +11917,9 @@ var _mozilla_services$buildhub$View$view = function (model) {
 																				model.filterValues.channelList,
 																				'Channels',
 																				model.channelFilter,
-																				function (_p13) {
+																				function (_p14) {
 																					return _mozilla_services$buildhub$Types$UpdateFilter(
-																						_mozilla_services$buildhub$Types$NewChannelFilter(_p13));
+																						_mozilla_services$buildhub$Types$NewChannelFilter(_p14));
 																				}),
 																			_1: {
 																				ctor: '::',
@@ -11893,9 +11928,9 @@ var _mozilla_services$buildhub$View$view = function (model) {
 																					model.filterValues.localeList,
 																					'Locales',
 																					model.localeFilter,
-																					function (_p14) {
+																					function (_p15) {
 																						return _mozilla_services$buildhub$Types$UpdateFilter(
-																							_mozilla_services$buildhub$Types$NewLocaleFilter(_p14));
+																							_mozilla_services$buildhub$Types$NewLocaleFilter(_p15));
 																					}),
 																				_1: {
 																					ctor: '::',
@@ -12118,77 +12153,138 @@ var _mozilla_services$buildhub$Main$extractFilterValues = function (buildRecordL
 		});
 };
 var _mozilla_services$buildhub$Main$update = F2(
-	function (msg, model) {
-		var _p7 = msg;
-		if (_p7.ctor === 'BuildRecordsFetched') {
-			if (_p7._0.ctor === 'Ok') {
-				var _p8 = _p7._0._0;
+	function (msg, _p7) {
+		var _p8 = _p7;
+		var _p14 = _p8;
+		var _p9 = msg;
+		switch (_p9.ctor) {
+			case 'BuildRecordsFetched':
+				if (_p9._0.ctor === 'Ok') {
+					var _p10 = _p9._0._0;
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						_elm_lang$core$Native_Utils.update(
+							_p14,
+							{
+								builds: _p10,
+								filteredBuilds: _p10,
+								filterValues: _mozilla_services$buildhub$Main$extractFilterValues(_p10),
+								loading: false
+							}),
+						{ctor: '[]'});
+				} else {
+					var _p11 = A2(_elm_lang$core$Debug$log, 'An error occured while fetching the build records', _p9._0._0);
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						_p14,
+						{ctor: '[]'});
+				}
+			case 'ResetFilter':
+				var _p12 = _p9._0;
+				switch (_p12) {
+					case 'tree':
+						return A2(
+							_elm_lang$core$Platform_Cmd_ops['!'],
+							_elm_lang$core$Native_Utils.update(
+								_p14,
+								{treeFilter: 'all'}),
+							{ctor: '[]'});
+					case 'product':
+						return A2(
+							_elm_lang$core$Platform_Cmd_ops['!'],
+							_elm_lang$core$Native_Utils.update(
+								_p14,
+								{productFilter: 'all'}),
+							{ctor: '[]'});
+					case 'version':
+						return A2(
+							_elm_lang$core$Platform_Cmd_ops['!'],
+							_elm_lang$core$Native_Utils.update(
+								_p14,
+								{versionFilter: 'all'}),
+							{ctor: '[]'});
+					case 'platform':
+						return A2(
+							_elm_lang$core$Platform_Cmd_ops['!'],
+							_elm_lang$core$Native_Utils.update(
+								_p14,
+								{platformFilter: 'all'}),
+							{ctor: '[]'});
+					case 'channel':
+						return A2(
+							_elm_lang$core$Platform_Cmd_ops['!'],
+							_elm_lang$core$Native_Utils.update(
+								_p14,
+								{channelFilter: 'all'}),
+							{ctor: '[]'});
+					case 'locale':
+						return A2(
+							_elm_lang$core$Platform_Cmd_ops['!'],
+							_elm_lang$core$Native_Utils.update(
+								_p14,
+								{localeFilter: 'all'}),
+							{ctor: '[]'});
+					case 'buildId':
+						return A2(
+							_elm_lang$core$Platform_Cmd_ops['!'],
+							_elm_lang$core$Native_Utils.update(
+								_p14,
+								{buildIdFilter: ''}),
+							{ctor: '[]'});
+					default:
+						return A2(
+							_elm_lang$core$Platform_Cmd_ops['!'],
+							_p14,
+							{ctor: '[]'});
+				}
+			default:
+				var updatedModelWithFilters = function () {
+					var _p13 = _p9._0;
+					switch (_p13.ctor) {
+						case 'ClearAll':
+							return _elm_lang$core$Native_Utils.update(
+								_p14,
+								{treeFilter: 'all', productFilter: 'all', versionFilter: 'all', platformFilter: 'all', channelFilter: 'all', localeFilter: 'all', buildIdFilter: ''});
+						case 'NewTreeFilter':
+							return _elm_lang$core$Native_Utils.update(
+								_p14,
+								{treeFilter: _p13._0});
+						case 'NewProductFilter':
+							return _elm_lang$core$Native_Utils.update(
+								_p14,
+								{productFilter: _p13._0});
+						case 'NewVersionFilter':
+							return _elm_lang$core$Native_Utils.update(
+								_p14,
+								{versionFilter: _p13._0});
+						case 'NewPlatformFilter':
+							return _elm_lang$core$Native_Utils.update(
+								_p14,
+								{platformFilter: _p13._0});
+						case 'NewChannelFilter':
+							return _elm_lang$core$Native_Utils.update(
+								_p14,
+								{channelFilter: _p13._0});
+						case 'NewLocaleFilter':
+							return _elm_lang$core$Native_Utils.update(
+								_p14,
+								{localeFilter: _p13._0});
+						default:
+							return _elm_lang$core$Native_Utils.update(
+								_p14,
+								{buildIdFilter: _p13._0});
+					}
+				}();
+				var updatedFilteredBuilds = _mozilla_services$buildhub$Main$applyFilters(updatedModelWithFilters);
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
-						model,
+						updatedModelWithFilters,
 						{
-							builds: _p8,
-							filteredBuilds: _p8,
-							filterValues: _mozilla_services$buildhub$Main$extractFilterValues(_p8),
-							loading: false
+							filteredBuilds: updatedFilteredBuilds,
+							filterValues: _mozilla_services$buildhub$Main$extractFilterValues(updatedFilteredBuilds)
 						}),
 					{ctor: '[]'});
-			} else {
-				var _p9 = A2(_elm_lang$core$Debug$log, 'An error occured while fetching the build records', _p7._0._0);
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					model,
-					{ctor: '[]'});
-			}
-		} else {
-			var updatedModelWithFilters = function () {
-				var _p10 = _p7._0;
-				switch (_p10.ctor) {
-					case 'ClearAll':
-						return _elm_lang$core$Native_Utils.update(
-							model,
-							{treeFilter: 'all', productFilter: 'all', versionFilter: 'all', platformFilter: 'all', channelFilter: 'all', localeFilter: 'all', buildIdFilter: ''});
-					case 'NewTreeFilter':
-						return _elm_lang$core$Native_Utils.update(
-							model,
-							{treeFilter: _p10._0});
-					case 'NewProductFilter':
-						return _elm_lang$core$Native_Utils.update(
-							model,
-							{productFilter: _p10._0});
-					case 'NewVersionFilter':
-						return _elm_lang$core$Native_Utils.update(
-							model,
-							{versionFilter: _p10._0});
-					case 'NewPlatformFilter':
-						return _elm_lang$core$Native_Utils.update(
-							model,
-							{platformFilter: _p10._0});
-					case 'NewChannelFilter':
-						return _elm_lang$core$Native_Utils.update(
-							model,
-							{channelFilter: _p10._0});
-					case 'NewLocaleFilter':
-						return _elm_lang$core$Native_Utils.update(
-							model,
-							{localeFilter: _p10._0});
-					default:
-						return _elm_lang$core$Native_Utils.update(
-							model,
-							{buildIdFilter: _p10._0});
-				}
-			}();
-			var updatedFilteredBuilds = _mozilla_services$buildhub$Main$applyFilters(updatedModelWithFilters);
-			return A2(
-				_elm_lang$core$Platform_Cmd_ops['!'],
-				_elm_lang$core$Native_Utils.update(
-					updatedModelWithFilters,
-					{
-						filteredBuilds: updatedFilteredBuilds,
-						filterValues: _mozilla_services$buildhub$Main$extractFilterValues(updatedFilteredBuilds)
-					}),
-				{ctor: '[]'});
 		}
 	});
 var _mozilla_services$buildhub$Main$main = _elm_lang$html$Html$program(
