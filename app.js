@@ -10325,7 +10325,9 @@ var _mozilla_services$buildhub$Types$Model = function (a) {
 								return function (i) {
 									return function (j) {
 										return function (k) {
-											return {builds: a, filteredBuilds: b, filterValues: c, treeFilter: d, productFilter: e, versionFilter: f, platformFilter: g, channelFilter: h, localeFilter: i, buildIdFilter: j, loading: k};
+											return function (l) {
+												return {builds: a, filteredBuilds: b, filterValues: c, treeFilter: d, productFilter: e, versionFilter: f, platformFilter: g, channelFilter: h, localeFilter: i, buildIdFilter: j, loading: k, currentView: l};
+											};
 										};
 									};
 								};
@@ -10352,6 +10354,10 @@ var _mozilla_services$buildhub$Types$Build = F3(
 var _mozilla_services$buildhub$Types$Download = F3(
 	function (a, b, c) {
 		return {mimetype: a, size: b, url: c};
+	});
+var _mozilla_services$buildhub$Types$Snippet = F3(
+	function (a, b, c) {
+		return {title: a, description: b, snippets: c};
 	});
 var _mozilla_services$buildhub$Types$Source = F3(
 	function (a, b, c) {
@@ -10387,6 +10393,11 @@ var _mozilla_services$buildhub$Types$NewTreeFilter = function (a) {
 	return {ctor: 'NewTreeFilter', _0: a};
 };
 var _mozilla_services$buildhub$Types$ClearAll = {ctor: 'ClearAll'};
+var _mozilla_services$buildhub$Types$DocsView = {ctor: 'DocsView'};
+var _mozilla_services$buildhub$Types$MainView = {ctor: 'MainView'};
+var _mozilla_services$buildhub$Types$ChangeView = function (a) {
+	return {ctor: 'ChangeView', _0: a};
+};
 var _mozilla_services$buildhub$Types$ResetFilter = function (a) {
 	return {ctor: 'ResetFilter', _0: a};
 };
@@ -10535,13 +10546,40 @@ var _mozilla_services$buildhub$Model$init = A2(
 		channelFilter: 'all',
 		localeFilter: 'all',
 		buildIdFilter: '',
-		loading: true
+		loading: true,
+		currentView: _mozilla_services$buildhub$Types$MainView
 	},
 	{
 		ctor: '::',
 		_0: _mozilla_services$buildhub$Model$getBuildRecordList,
 		_1: {ctor: '[]'}
 	});
+
+var _mozilla_services$buildhub$Snippet$snippets = {
+	ctor: '::',
+	_0: {
+		title: 'Is this an official buildid?',
+		description: 'In order to check that a build id exists, we\'ll just check that it is mentionned in at least one record.',
+		snippets: {curl: 'curl -s -I \"https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/archives/records?build.id=20110110192031&_limit=1\" | grep \"Total-Records: 1\" ', js: 'import KintoClient from \"kinto-http\";\nconst client = new KintoClient(\"https://kinto-ota.dev.mozaws.net/v1\");\n\nrecords = await client.listRecords({limit: 1, filters: {\"build.id\": \"20110110192031\"}});\nconsole.log(records.length == 1);\n', python: 'import kinto_http\n\nclient = kinto_http.Client(\"https://kinto-ota.dev.mozaws.net/v1\")\nrecords = client.get_records(**{\"build.id\": \"20110110192031\", \"_limit\": 1, \"pages\": 1},\n                             bucket=\"build-hub\", collection=\"archives\")\nprint(len(records) == 1)\n'}
+	},
+	_1: {
+		ctor: '::',
+		_0: {
+			title: 'What is the revision of a build id?',
+			description: '',
+			snippets: {curl: 'curl -s \"https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/archives/records?build.id=20110110192031&_limit=1\" | grep -Po \'\"revision\":\"[^\"]+\' | sed \'s/\"revision\":\"//\'', js: 'import KintoClient from \"kinto-http\";\n\nconst client = new KintoClient(\"https://kinto-ota.dev.mozaws.net/v1\");\nconst collection = client.bucket(\"build-hub\").collection(\"archives\");\nconst records = await collection.listRecords({limit: 1, filters: {\"build.id\": \"20110110192031\"}});\nconst revision = records[0].source.revision;', python: 'client = kinto_http.Client(\"https://kinto-ota.dev.mozaws.net/v1\")\nrecords = client.get_records(**{\"build.id\": \"20110110192031\", \"_limit\": 1, \"pages\": 1},\n                             bucket=\"build-hub\", collection=\"archives\")\nrevision = records[0][\"source\"][\"revision\"]'}
+		},
+		_1: {
+			ctor: '::',
+			_0: {
+				title: 'What are the locales of a specific version?',
+				description: '',
+				snippets: {curl: 'curl -s \"https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/archives/records?target.version=53.0b9&_fields=target.locale\" | grep -Po \'\"locale\":\"[^\"]+\' | sed \'s/\"locale\":\"//\' | sort -u', js: 'import KintoClient from \"kinto-http\";\n\nconst client = new KintoClient(\"https://kinto-ota.dev.mozaws.net/v1\");\nconst collection = client.bucket(\"build-hub\").collection(\"archives\");\nconst records = await collection.listRecords({filters: {\"target.version\": \"53.0b9\"}});\nconst locales = new Set(records.map(r => r.target.locale));', python: 'import kinto_http\n\nclient = kinto_http.Client(\"https://kinto-ota.dev.mozaws.net/v1\")\nrecords = client.get_records(**{\"target.version\": \"53.0b9\"},\n                             bucket=\"build-hub\", collection=\"archives\")\nlocales = set({record[\"target\"][\"locale\"] for record in records})'}
+			},
+			_1: {ctor: '[]'}
+		}
+	}
+};
 
 var _mozilla_services$buildhub$View$onClick_ = function (msg) {
 	return A3(
@@ -11729,7 +11767,12 @@ var _mozilla_services$buildhub$View$headerView = function (model) {
 													{
 														ctor: '::',
 														_0: _elm_lang$html$Html_Attributes$href('#'),
-														_1: {ctor: '[]'}
+														_1: {
+															ctor: '::',
+															_0: _mozilla_services$buildhub$View$onClick_(
+																_mozilla_services$buildhub$Types$ChangeView(_mozilla_services$buildhub$Types$MainView)),
+															_1: {ctor: '[]'}
+														}
 													},
 													{
 														ctor: '::',
@@ -11750,7 +11793,12 @@ var _mozilla_services$buildhub$View$headerView = function (model) {
 														{
 															ctor: '::',
 															_0: _elm_lang$html$Html_Attributes$href('#'),
-															_1: {ctor: '[]'}
+															_1: {
+																ctor: '::',
+																_0: _mozilla_services$buildhub$View$onClick_(
+																	_mozilla_services$buildhub$Types$ChangeView(_mozilla_services$buildhub$Types$DocsView)),
+																_1: {ctor: '[]'}
+															}
 														},
 														{
 															ctor: '::',
@@ -11770,6 +11818,610 @@ var _mozilla_services$buildhub$View$headerView = function (model) {
 			_1: {ctor: '[]'}
 		});
 };
+var _mozilla_services$buildhub$View$snippetView = function (_p10) {
+	var _p11 = _p10;
+	var _p12 = _p11.snippets;
+	return A2(
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('panel panel-default'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('panel-heading'),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(_p11.title),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('panel-body'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$p,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text(_p11.description),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$h4,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('cURL'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$pre,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text(_p12.curl),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$h4,
+										{ctor: '[]'},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text('JavaScript'),
+											_1: {ctor: '[]'}
+										}),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$pre,
+											{ctor: '[]'},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text(_p12.js),
+												_1: {ctor: '[]'}
+											}),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$h4,
+												{ctor: '[]'},
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html$text('Python'),
+													_1: {ctor: '[]'}
+												}),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$pre,
+													{ctor: '[]'},
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html$text(_p12.python),
+														_1: {ctor: '[]'}
+													}),
+												_1: {ctor: '[]'}
+											}
+										}
+									}
+								}
+							}
+						}
+					}),
+				_1: {ctor: '[]'}
+			}
+		});
+};
+var _mozilla_services$buildhub$View$docsView = function (model) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$h2,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('About this project'),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$p,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text('BuildHub is an attempt at aggregating and federating build information at Mozilla.'),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$h2,
+						{ctor: '[]'},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text('Snippets'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$p,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text('Here are a few useful snippets for using the buildhub API, leveraging different Kinto clients.'),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$div,
+								{ctor: '[]'},
+								A2(_elm_lang$core$List$map, _mozilla_services$buildhub$View$snippetView, _mozilla_services$buildhub$Snippet$snippets)),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$h3,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('More information'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$ul,
+										{ctor: '[]'},
+										{
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$li,
+												{ctor: '[]'},
+												{
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$a,
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html_Attributes$href('http://kinto.readthedocs.io/en/stable/api/1.x/filtering.html'),
+															_1: {ctor: '[]'}
+														},
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html$text('Filtering docs'),
+															_1: {ctor: '[]'}
+														}),
+													_1: {ctor: '[]'}
+												}),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$li,
+													{ctor: '[]'},
+													{
+														ctor: '::',
+														_0: A2(
+															_elm_lang$html$Html$a,
+															{
+																ctor: '::',
+																_0: _elm_lang$html$Html_Attributes$href('http://kinto.readthedocs.io/en/stable/api/1.x/'),
+																_1: {ctor: '[]'}
+															},
+															{
+																ctor: '::',
+																_0: _elm_lang$html$Html$text('Full API reference'),
+																_1: {ctor: '[]'}
+															}),
+														_1: {ctor: '[]'}
+													}),
+												_1: {
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$li,
+														{ctor: '[]'},
+														{
+															ctor: '::',
+															_0: A2(
+																_elm_lang$html$Html$a,
+																{
+																	ctor: '::',
+																	_0: _elm_lang$html$Html_Attributes$href('https://github.com/Kinto/kinto-http.js'),
+																	_1: {ctor: '[]'}
+																},
+																{
+																	ctor: '::',
+																	_0: _elm_lang$html$Html$text('kinto-http.js (JavaScript)'),
+																	_1: {ctor: '[]'}
+																}),
+															_1: {ctor: '[]'}
+														}),
+													_1: {
+														ctor: '::',
+														_0: A2(
+															_elm_lang$html$Html$li,
+															{ctor: '[]'},
+															{
+																ctor: '::',
+																_0: A2(
+																	_elm_lang$html$Html$a,
+																	{
+																		ctor: '::',
+																		_0: _elm_lang$html$Html_Attributes$href('https://github.com/Kinto/kinto-http.py'),
+																		_1: {ctor: '[]'}
+																	},
+																	{
+																		ctor: '::',
+																		_0: _elm_lang$html$Html$text('kinto-http.py (Python)'),
+																		_1: {ctor: '[]'}
+																	}),
+																_1: {ctor: '[]'}
+															}),
+														_1: {
+															ctor: '::',
+															_0: A2(
+																_elm_lang$html$Html$li,
+																{ctor: '[]'},
+																{
+																	ctor: '::',
+																	_0: A2(
+																		_elm_lang$html$Html$a,
+																		{
+																			ctor: '::',
+																			_0: _elm_lang$html$Html_Attributes$href('https://github.com/Kinto/kinto-http.rs'),
+																			_1: {ctor: '[]'}
+																		},
+																		{
+																			ctor: '::',
+																			_0: _elm_lang$html$Html$text('kinto-http.rs (Rust)'),
+																			_1: {ctor: '[]'}
+																		}),
+																	_1: {ctor: '[]'}
+																}),
+															_1: {
+																ctor: '::',
+																_0: A2(
+																	_elm_lang$html$Html$li,
+																	{ctor: '[]'},
+																	{
+																		ctor: '::',
+																		_0: A2(
+																			_elm_lang$html$Html$a,
+																			{
+																				ctor: '::',
+																				_0: _elm_lang$html$Html_Attributes$href('https://github.com/Kinto/elm-kinto'),
+																				_1: {ctor: '[]'}
+																			},
+																			{
+																				ctor: '::',
+																				_0: _elm_lang$html$Html$text('elm-kinto (Elm)'),
+																				_1: {ctor: '[]'}
+																			}),
+																		_1: {ctor: '[]'}
+																	}),
+																_1: {
+																	ctor: '::',
+																	_0: A2(
+																		_elm_lang$html$Html$li,
+																		{ctor: '[]'},
+																		{
+																			ctor: '::',
+																			_0: A2(
+																				_elm_lang$html$Html$a,
+																				{
+																					ctor: '::',
+																					_0: _elm_lang$html$Html_Attributes$href('https://github.com/Kinto'),
+																					_1: {ctor: '[]'}
+																				},
+																				{
+																					ctor: '::',
+																					_0: _elm_lang$html$Html$text('Github organization'),
+																					_1: {ctor: '[]'}
+																				}),
+																			_1: {ctor: '[]'}
+																		}),
+																	_1: {
+																		ctor: '::',
+																		_0: A2(
+																			_elm_lang$html$Html$li,
+																			{ctor: '[]'},
+																			{
+																				ctor: '::',
+																				_0: A2(
+																					_elm_lang$html$Html$a,
+																					{
+																						ctor: '::',
+																						_0: _elm_lang$html$Html_Attributes$href('https://github.com/Kinto/kinto'),
+																						_1: {ctor: '[]'}
+																					},
+																					{
+																						ctor: '::',
+																						_0: _elm_lang$html$Html$text('Kinto Server'),
+																						_1: {ctor: '[]'}
+																					}),
+																				_1: {ctor: '[]'}
+																			}),
+																		_1: {ctor: '[]'}
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+										}),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$h3,
+											{ctor: '[]'},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('Interested? Come talk to us!'),
+												_1: {ctor: '[]'}
+											}),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$ul,
+												{ctor: '[]'},
+												{
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$li,
+														{ctor: '[]'},
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html$text('storage-team@mozilla.com'),
+															_1: {ctor: '[]'}
+														}),
+													_1: {
+														ctor: '::',
+														_0: A2(
+															_elm_lang$html$Html$li,
+															{ctor: '[]'},
+															{
+																ctor: '::',
+																_0: _elm_lang$html$Html$text('irc.freenode.net#kinto'),
+																_1: {ctor: '[]'}
+															}),
+														_1: {ctor: '[]'}
+													}
+												}),
+											_1: {ctor: '[]'}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		});
+};
+var _mozilla_services$buildhub$View$mainView = function (model) {
+	return model.loading ? _mozilla_services$buildhub$View$spinner : A2(
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('row'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('col-sm-9'),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: _mozilla_services$buildhub$View$filterInfoView(model),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{ctor: '[]'},
+							A2(_elm_lang$core$List$map, _mozilla_services$buildhub$View$recordView, model.filteredBuilds)),
+						_1: {ctor: '[]'}
+					}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('col-sm-3'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('panel panel-default'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$div,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class('panel-heading'),
+										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$strong,
+											{ctor: '[]'},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('Filters'),
+												_1: {ctor: '[]'}
+											}),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$div,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class('panel-body'),
+											_1: {ctor: '[]'}
+										},
+										{
+											ctor: '::',
+											_0: _mozilla_services$buildhub$View$buildIdSearchForm(model),
+											_1: {
+												ctor: '::',
+												_0: A4(
+													_mozilla_services$buildhub$View$filterSelector,
+													model.filterValues.treeList,
+													'Trees',
+													model.treeFilter,
+													function (_p13) {
+														return _mozilla_services$buildhub$Types$UpdateFilter(
+															_mozilla_services$buildhub$Types$NewTreeFilter(_p13));
+													}),
+												_1: {
+													ctor: '::',
+													_0: A4(
+														_mozilla_services$buildhub$View$filterSelector,
+														model.filterValues.productList,
+														'Products',
+														model.productFilter,
+														function (_p14) {
+															return _mozilla_services$buildhub$Types$UpdateFilter(
+																_mozilla_services$buildhub$Types$NewProductFilter(_p14));
+														}),
+													_1: {
+														ctor: '::',
+														_0: A4(
+															_mozilla_services$buildhub$View$filterSelector,
+															model.filterValues.versionList,
+															'Versions',
+															model.versionFilter,
+															function (_p15) {
+																return _mozilla_services$buildhub$Types$UpdateFilter(
+																	_mozilla_services$buildhub$Types$NewVersionFilter(_p15));
+															}),
+														_1: {
+															ctor: '::',
+															_0: A4(
+																_mozilla_services$buildhub$View$filterSelector,
+																model.filterValues.platformList,
+																'Platforms',
+																model.platformFilter,
+																function (_p16) {
+																	return _mozilla_services$buildhub$Types$UpdateFilter(
+																		_mozilla_services$buildhub$Types$NewPlatformFilter(_p16));
+																}),
+															_1: {
+																ctor: '::',
+																_0: A4(
+																	_mozilla_services$buildhub$View$filterSelector,
+																	model.filterValues.channelList,
+																	'Channels',
+																	model.channelFilter,
+																	function (_p17) {
+																		return _mozilla_services$buildhub$Types$UpdateFilter(
+																			_mozilla_services$buildhub$Types$NewChannelFilter(_p17));
+																	}),
+																_1: {
+																	ctor: '::',
+																	_0: A4(
+																		_mozilla_services$buildhub$View$filterSelector,
+																		model.filterValues.localeList,
+																		'Locales',
+																		model.localeFilter,
+																		function (_p18) {
+																			return _mozilla_services$buildhub$Types$UpdateFilter(
+																				_mozilla_services$buildhub$Types$NewLocaleFilter(_p18));
+																		}),
+																	_1: {
+																		ctor: '::',
+																		_0: A2(
+																			_elm_lang$html$Html$p,
+																			{
+																				ctor: '::',
+																				_0: _elm_lang$html$Html_Attributes$class('text-right'),
+																				_1: {ctor: '[]'}
+																			},
+																			{
+																				ctor: '::',
+																				_0: A2(
+																					_elm_lang$html$Html$button,
+																					{
+																						ctor: '::',
+																						_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
+																						_1: {
+																							ctor: '::',
+																							_0: _elm_lang$html$Html_Attributes$type_('button'),
+																							_1: {
+																								ctor: '::',
+																								_0: _elm_lang$html$Html_Events$onClick(
+																									_mozilla_services$buildhub$Types$UpdateFilter(_mozilla_services$buildhub$Types$ClearAll)),
+																								_1: {ctor: '[]'}
+																							}
+																						}
+																					},
+																					{
+																						ctor: '::',
+																						_0: _elm_lang$html$Html$text('Clear all filters'),
+																						_1: {ctor: '[]'}
+																					}),
+																				_1: {ctor: '[]'}
+																			}),
+																		_1: {ctor: '[]'}
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+										}),
+									_1: {ctor: '[]'}
+								}
+							}),
+						_1: {ctor: '[]'}
+					}),
+				_1: {ctor: '[]'}
+			}
+		});
+};
 var _mozilla_services$buildhub$View$view = function (model) {
 	return A2(
 		_elm_lang$html$Html$div,
@@ -11783,206 +12435,14 @@ var _mozilla_services$buildhub$View$view = function (model) {
 			_0: _mozilla_services$buildhub$View$headerView(model),
 			_1: {
 				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$div,
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$class('row'),
-						_1: {ctor: '[]'}
-					},
-					model.loading ? {
-						ctor: '::',
-						_0: _mozilla_services$buildhub$View$spinner,
-						_1: {ctor: '[]'}
-					} : {
-						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$div,
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$class('col-sm-9'),
-								_1: {ctor: '[]'}
-							},
-							{
-								ctor: '::',
-								_0: _mozilla_services$buildhub$View$filterInfoView(model),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$div,
-										{ctor: '[]'},
-										A2(_elm_lang$core$List$map, _mozilla_services$buildhub$View$recordView, model.filteredBuilds)),
-									_1: {ctor: '[]'}
-								}
-							}),
-						_1: {
-							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html$div,
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$class('col-sm-3'),
-									_1: {ctor: '[]'}
-								},
-								{
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$div,
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$class('panel panel-default'),
-											_1: {ctor: '[]'}
-										},
-										{
-											ctor: '::',
-											_0: A2(
-												_elm_lang$html$Html$div,
-												{
-													ctor: '::',
-													_0: _elm_lang$html$Html_Attributes$class('panel-heading'),
-													_1: {ctor: '[]'}
-												},
-												{
-													ctor: '::',
-													_0: A2(
-														_elm_lang$html$Html$strong,
-														{ctor: '[]'},
-														{
-															ctor: '::',
-															_0: _elm_lang$html$Html$text('Filters'),
-															_1: {ctor: '[]'}
-														}),
-													_1: {ctor: '[]'}
-												}),
-											_1: {
-												ctor: '::',
-												_0: A2(
-													_elm_lang$html$Html$div,
-													{
-														ctor: '::',
-														_0: _elm_lang$html$Html_Attributes$class('panel-body'),
-														_1: {ctor: '[]'}
-													},
-													{
-														ctor: '::',
-														_0: _mozilla_services$buildhub$View$buildIdSearchForm(model),
-														_1: {
-															ctor: '::',
-															_0: A4(
-																_mozilla_services$buildhub$View$filterSelector,
-																model.filterValues.treeList,
-																'Trees',
-																model.treeFilter,
-																function (_p10) {
-																	return _mozilla_services$buildhub$Types$UpdateFilter(
-																		_mozilla_services$buildhub$Types$NewTreeFilter(_p10));
-																}),
-															_1: {
-																ctor: '::',
-																_0: A4(
-																	_mozilla_services$buildhub$View$filterSelector,
-																	model.filterValues.productList,
-																	'Products',
-																	model.productFilter,
-																	function (_p11) {
-																		return _mozilla_services$buildhub$Types$UpdateFilter(
-																			_mozilla_services$buildhub$Types$NewProductFilter(_p11));
-																	}),
-																_1: {
-																	ctor: '::',
-																	_0: A4(
-																		_mozilla_services$buildhub$View$filterSelector,
-																		model.filterValues.versionList,
-																		'Versions',
-																		model.versionFilter,
-																		function (_p12) {
-																			return _mozilla_services$buildhub$Types$UpdateFilter(
-																				_mozilla_services$buildhub$Types$NewVersionFilter(_p12));
-																		}),
-																	_1: {
-																		ctor: '::',
-																		_0: A4(
-																			_mozilla_services$buildhub$View$filterSelector,
-																			model.filterValues.platformList,
-																			'Platforms',
-																			model.platformFilter,
-																			function (_p13) {
-																				return _mozilla_services$buildhub$Types$UpdateFilter(
-																					_mozilla_services$buildhub$Types$NewPlatformFilter(_p13));
-																			}),
-																		_1: {
-																			ctor: '::',
-																			_0: A4(
-																				_mozilla_services$buildhub$View$filterSelector,
-																				model.filterValues.channelList,
-																				'Channels',
-																				model.channelFilter,
-																				function (_p14) {
-																					return _mozilla_services$buildhub$Types$UpdateFilter(
-																						_mozilla_services$buildhub$Types$NewChannelFilter(_p14));
-																				}),
-																			_1: {
-																				ctor: '::',
-																				_0: A4(
-																					_mozilla_services$buildhub$View$filterSelector,
-																					model.filterValues.localeList,
-																					'Locales',
-																					model.localeFilter,
-																					function (_p15) {
-																						return _mozilla_services$buildhub$Types$UpdateFilter(
-																							_mozilla_services$buildhub$Types$NewLocaleFilter(_p15));
-																					}),
-																				_1: {
-																					ctor: '::',
-																					_0: A2(
-																						_elm_lang$html$Html$p,
-																						{
-																							ctor: '::',
-																							_0: _elm_lang$html$Html_Attributes$class('text-right'),
-																							_1: {ctor: '[]'}
-																						},
-																						{
-																							ctor: '::',
-																							_0: A2(
-																								_elm_lang$html$Html$button,
-																								{
-																									ctor: '::',
-																									_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
-																									_1: {
-																										ctor: '::',
-																										_0: _elm_lang$html$Html_Attributes$type_('button'),
-																										_1: {
-																											ctor: '::',
-																											_0: _elm_lang$html$Html_Events$onClick(
-																												_mozilla_services$buildhub$Types$UpdateFilter(_mozilla_services$buildhub$Types$ClearAll)),
-																											_1: {ctor: '[]'}
-																										}
-																									}
-																								},
-																								{
-																									ctor: '::',
-																									_0: _elm_lang$html$Html$text('Clear all filters'),
-																									_1: {ctor: '[]'}
-																								}),
-																							_1: {ctor: '[]'}
-																						}),
-																					_1: {ctor: '[]'}
-																				}
-																			}
-																		}
-																	}
-																}
-															}
-														}
-													}),
-												_1: {ctor: '[]'}
-											}
-										}),
-									_1: {ctor: '[]'}
-								}),
-							_1: {ctor: '[]'}
-						}
-					}),
+				_0: function () {
+					var _p19 = model.currentView;
+					if (_p19.ctor === 'MainView') {
+						return _mozilla_services$buildhub$View$mainView(model);
+					} else {
+						return _mozilla_services$buildhub$View$docsView(model);
+					}
+				}(),
 				_1: {ctor: '[]'}
 			}
 		});
@@ -12154,137 +12614,116 @@ var _mozilla_services$buildhub$Main$extractFilterValues = function (buildRecordL
 };
 var _mozilla_services$buildhub$Main$update = F2(
 	function (msg, _p7) {
-		var _p8 = _p7;
-		var _p14 = _p8;
-		var _p9 = msg;
-		switch (_p9.ctor) {
-			case 'BuildRecordsFetched':
-				if (_p9._0.ctor === 'Ok') {
-					var _p10 = _p9._0._0;
+		update:
+		while (true) {
+			var _p8 = _p7;
+			var _p14 = _p8;
+			var _p9 = msg;
+			switch (_p9.ctor) {
+				case 'ChangeView':
 					return A2(
 						_elm_lang$core$Platform_Cmd_ops['!'],
 						_elm_lang$core$Native_Utils.update(
 							_p14,
-							{
-								builds: _p10,
-								filteredBuilds: _p10,
-								filterValues: _mozilla_services$buildhub$Main$extractFilterValues(_p10),
-								loading: false
-							}),
+							{currentView: _p9._0}),
 						{ctor: '[]'});
-				} else {
-					var _p11 = A2(_elm_lang$core$Debug$log, 'An error occured while fetching the build records', _p9._0._0);
-					return A2(
-						_elm_lang$core$Platform_Cmd_ops['!'],
-						_p14,
-						{ctor: '[]'});
-				}
-			case 'ResetFilter':
-				var _p12 = _p9._0;
-				switch (_p12) {
-					case 'tree':
+				case 'BuildRecordsFetched':
+					if (_p9._0.ctor === 'Ok') {
+						var _p10 = _p9._0._0;
 						return A2(
 							_elm_lang$core$Platform_Cmd_ops['!'],
 							_elm_lang$core$Native_Utils.update(
 								_p14,
-								{treeFilter: 'all'}),
+								{
+									builds: _p10,
+									filteredBuilds: _p10,
+									filterValues: _mozilla_services$buildhub$Main$extractFilterValues(_p10),
+									loading: false
+								}),
 							{ctor: '[]'});
-					case 'product':
-						return A2(
-							_elm_lang$core$Platform_Cmd_ops['!'],
-							_elm_lang$core$Native_Utils.update(
-								_p14,
-								{productFilter: 'all'}),
-							{ctor: '[]'});
-					case 'version':
-						return A2(
-							_elm_lang$core$Platform_Cmd_ops['!'],
-							_elm_lang$core$Native_Utils.update(
-								_p14,
-								{versionFilter: 'all'}),
-							{ctor: '[]'});
-					case 'platform':
-						return A2(
-							_elm_lang$core$Platform_Cmd_ops['!'],
-							_elm_lang$core$Native_Utils.update(
-								_p14,
-								{platformFilter: 'all'}),
-							{ctor: '[]'});
-					case 'channel':
-						return A2(
-							_elm_lang$core$Platform_Cmd_ops['!'],
-							_elm_lang$core$Native_Utils.update(
-								_p14,
-								{channelFilter: 'all'}),
-							{ctor: '[]'});
-					case 'locale':
-						return A2(
-							_elm_lang$core$Platform_Cmd_ops['!'],
-							_elm_lang$core$Native_Utils.update(
-								_p14,
-								{localeFilter: 'all'}),
-							{ctor: '[]'});
-					case 'buildId':
-						return A2(
-							_elm_lang$core$Platform_Cmd_ops['!'],
-							_elm_lang$core$Native_Utils.update(
-								_p14,
-								{buildIdFilter: ''}),
-							{ctor: '[]'});
-					default:
+					} else {
+						var _p11 = A2(_elm_lang$core$Debug$log, 'An error occured while fetching the build records', _p9._0._0);
 						return A2(
 							_elm_lang$core$Platform_Cmd_ops['!'],
 							_p14,
 							{ctor: '[]'});
-				}
-			default:
-				var updatedModelWithFilters = function () {
-					var _p13 = _p9._0;
-					switch (_p13.ctor) {
-						case 'ClearAll':
-							return _elm_lang$core$Native_Utils.update(
-								_p14,
-								{treeFilter: 'all', productFilter: 'all', versionFilter: 'all', platformFilter: 'all', channelFilter: 'all', localeFilter: 'all', buildIdFilter: ''});
-						case 'NewTreeFilter':
-							return _elm_lang$core$Native_Utils.update(
-								_p14,
-								{treeFilter: _p13._0});
-						case 'NewProductFilter':
-							return _elm_lang$core$Native_Utils.update(
-								_p14,
-								{productFilter: _p13._0});
-						case 'NewVersionFilter':
-							return _elm_lang$core$Native_Utils.update(
-								_p14,
-								{versionFilter: _p13._0});
-						case 'NewPlatformFilter':
-							return _elm_lang$core$Native_Utils.update(
-								_p14,
-								{platformFilter: _p13._0});
-						case 'NewChannelFilter':
-							return _elm_lang$core$Native_Utils.update(
-								_p14,
-								{channelFilter: _p13._0});
-						case 'NewLocaleFilter':
-							return _elm_lang$core$Native_Utils.update(
-								_p14,
-								{localeFilter: _p13._0});
-						default:
-							return _elm_lang$core$Native_Utils.update(
-								_p14,
-								{buildIdFilter: _p13._0});
 					}
-				}();
-				var updatedFilteredBuilds = _mozilla_services$buildhub$Main$applyFilters(updatedModelWithFilters);
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					_elm_lang$core$Native_Utils.update(
-						updatedModelWithFilters,
-						{
-							filteredBuilds: updatedFilteredBuilds,
-							filterValues: _mozilla_services$buildhub$Main$extractFilterValues(updatedFilteredBuilds)
-						}),
-					{ctor: '[]'});
+				case 'ResetFilter':
+					var filterMsg = function () {
+						var _p12 = _p9._0;
+						switch (_p12) {
+							case 'tree':
+								return _mozilla_services$buildhub$Types$NewTreeFilter('all');
+							case 'product':
+								return _mozilla_services$buildhub$Types$NewProductFilter('all');
+							case 'version':
+								return _mozilla_services$buildhub$Types$NewVersionFilter('all');
+							case 'platform':
+								return _mozilla_services$buildhub$Types$NewPlatformFilter('all');
+							case 'channel':
+								return _mozilla_services$buildhub$Types$NewChannelFilter('all');
+							case 'locale':
+								return _mozilla_services$buildhub$Types$NewLocaleFilter('all');
+							case 'buildId':
+								return _mozilla_services$buildhub$Types$NewBuildIdSearch('');
+							default:
+								return _mozilla_services$buildhub$Types$ClearAll;
+						}
+					}();
+					var _v3 = _mozilla_services$buildhub$Types$UpdateFilter(filterMsg),
+						_v4 = _p14;
+					msg = _v3;
+					_p7 = _v4;
+					continue update;
+				default:
+					var updatedModelWithFilters = function () {
+						var _p13 = _p9._0;
+						switch (_p13.ctor) {
+							case 'ClearAll':
+								return _elm_lang$core$Native_Utils.update(
+									_p14,
+									{treeFilter: 'all', productFilter: 'all', versionFilter: 'all', platformFilter: 'all', channelFilter: 'all', localeFilter: 'all', buildIdFilter: ''});
+							case 'NewTreeFilter':
+								return _elm_lang$core$Native_Utils.update(
+									_p14,
+									{treeFilter: _p13._0});
+							case 'NewProductFilter':
+								return _elm_lang$core$Native_Utils.update(
+									_p14,
+									{productFilter: _p13._0});
+							case 'NewVersionFilter':
+								return _elm_lang$core$Native_Utils.update(
+									_p14,
+									{versionFilter: _p13._0});
+							case 'NewPlatformFilter':
+								return _elm_lang$core$Native_Utils.update(
+									_p14,
+									{platformFilter: _p13._0});
+							case 'NewChannelFilter':
+								return _elm_lang$core$Native_Utils.update(
+									_p14,
+									{channelFilter: _p13._0});
+							case 'NewLocaleFilter':
+								return _elm_lang$core$Native_Utils.update(
+									_p14,
+									{localeFilter: _p13._0});
+							default:
+								return _elm_lang$core$Native_Utils.update(
+									_p14,
+									{buildIdFilter: _p13._0});
+						}
+					}();
+					var updatedFilteredBuilds = _mozilla_services$buildhub$Main$applyFilters(updatedModelWithFilters);
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						_elm_lang$core$Native_Utils.update(
+							updatedModelWithFilters,
+							{
+								filteredBuilds: updatedFilteredBuilds,
+								filterValues: _mozilla_services$buildhub$Main$extractFilterValues(updatedFilteredBuilds)
+							}),
+						{ctor: '[]'});
+			}
 		}
 	});
 var _mozilla_services$buildhub$Main$main = _elm_lang$html$Html$program(
