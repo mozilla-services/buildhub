@@ -18,6 +18,7 @@ init =
     , localeFilter = "all"
     , buildIdFilter = ""
     , loading = True
+    , currentView = MainView
     }
         ! [ getBuildRecordList ]
 

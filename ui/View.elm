@@ -5,6 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode as Decode
+import Snippet exposing (snippets)
 import Types exposing (..)
 
 
@@ -12,34 +13,87 @@ view : Model -> Html Msg
 view model =
     div [ class "container" ]
         [ headerView model
-        , div [ class "row" ] <|
-            if model.loading then
-                [ spinner ]
-            else
-                [ div [ class "col-sm-9" ]
-                    [ filterInfoView model
-                    , div [] <| List.map recordView model.filteredBuilds
-                    ]
-                , div [ class "col-sm-3" ]
-                    [ div [ class "panel panel-default" ]
-                        [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
-                        , div [ class "panel-body" ]
-                            [ buildIdSearchForm model
-                            , filterSelector model.filterValues.treeList "Trees" model.treeFilter (UpdateFilter << NewTreeFilter)
-                            , filterSelector model.filterValues.productList "Products" model.productFilter (UpdateFilter << NewProductFilter)
-                            , filterSelector model.filterValues.versionList "Versions" model.versionFilter (UpdateFilter << NewVersionFilter)
-                            , filterSelector model.filterValues.platformList "Platforms" model.platformFilter (UpdateFilter << NewPlatformFilter)
-                            , filterSelector model.filterValues.channelList "Channels" model.channelFilter (UpdateFilter << NewChannelFilter)
-                            , filterSelector model.filterValues.localeList "Locales" model.localeFilter (UpdateFilter << NewLocaleFilter)
-                            , p [ class "text-right" ]
-                                [ button
-                                    [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
-                                    [ text "Clear all filters" ]
-                                ]
+        , case model.currentView of
+            MainView ->
+                mainView model
+
+            DocsView ->
+                docsView model
+        ]
+
+
+mainView : Model -> Html Msg
+mainView model =
+    if model.loading then
+        spinner
+    else
+        div [ class "row" ]
+            [ div [ class "col-sm-9" ]
+                [ filterInfoView model
+                , div [] <| List.map recordView model.filteredBuilds
+                ]
+            , div [ class "col-sm-3" ]
+                [ div [ class "panel panel-default" ]
+                    [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
+                    , div [ class "panel-body" ]
+                        [ buildIdSearchForm model
+                        , filterSelector model.filterValues.treeList "Trees" model.treeFilter (UpdateFilter << NewTreeFilter)
+                        , filterSelector model.filterValues.productList "Products" model.productFilter (UpdateFilter << NewProductFilter)
+                        , filterSelector model.filterValues.versionList "Versions" model.versionFilter (UpdateFilter << NewVersionFilter)
+                        , filterSelector model.filterValues.platformList "Platforms" model.platformFilter (UpdateFilter << NewPlatformFilter)
+                        , filterSelector model.filterValues.channelList "Channels" model.channelFilter (UpdateFilter << NewChannelFilter)
+                        , filterSelector model.filterValues.localeList "Locales" model.localeFilter (UpdateFilter << NewLocaleFilter)
+                        , p [ class "text-right" ]
+                            [ button
+                                [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
+                                [ text "Clear all filters" ]
                             ]
                         ]
                     ]
                 ]
+            ]
+
+
+snippetView : Snippet -> Html Msg
+snippetView { title, description, snippets } =
+    div [ class "panel panel-default" ]
+        [ div [ class "panel-heading" ] [ text title ]
+        , div [ class "panel-body" ]
+            [ p [] [ text description ]
+            , h4 [] [ text "cURL" ]
+            , pre [] [ text snippets.curl ]
+            , h4 [] [ text "JavaScript" ]
+            , pre [] [ text snippets.js ]
+            , h4 [] [ text "Python" ]
+            , pre [] [ text snippets.python ]
+            ]
+        ]
+
+
+docsView : Model -> Html Msg
+docsView model =
+    div []
+        [ h2 [] [ text "About this project" ]
+        , p [] [ text "BuildHub is an attempt at aggregating and federating build information at Mozilla." ]
+        , h2 [] [ text "Snippets" ]
+        , p [] [ text "Here are a few useful snippets for using the buildhub API, leveraging different Kinto clients." ]
+        , div [] <| List.map snippetView snippets
+        , h3 [] [ text "More information" ]
+        , ul []
+            [ li [] [ a [ href "http://kinto.readthedocs.io/en/stable/api/1.x/filtering.html" ] [ text "Filtering docs" ] ]
+            , li [] [ a [ href "http://kinto.readthedocs.io/en/stable/api/1.x/" ] [ text "Full API reference" ] ]
+            , li [] [ a [ href "https://github.com/Kinto/kinto-http.js" ] [ text "kinto-http.js (JavaScript)" ] ]
+            , li [] [ a [ href "https://github.com/Kinto/kinto-http.py" ] [ text "kinto-http.py (Python)" ] ]
+            , li [] [ a [ href "https://github.com/Kinto/kinto-http.rs" ] [ text "kinto-http.rs (Rust)" ] ]
+            , li [] [ a [ href "https://github.com/Kinto/elm-kinto" ] [ text "elm-kinto (Elm)" ] ]
+            , li [] [ a [ href "https://github.com/Kinto" ] [ text "Github organization" ] ]
+            , li [] [ a [ href "https://github.com/Kinto/kinto" ] [ text "Kinto Server" ] ]
+            ]
+        , h3 [] [ text "Interested? Come talk to us!" ]
+        , ul []
+            [ li [] [ text "storage-team@mozilla.com" ]
+            , li [] [ text "irc.freenode.net#kinto" ]
+            ]
         ]
 
 
@@ -56,8 +110,8 @@ headerView model =
                 [ class "collapse navbar-collapse" ]
                 [ ul
                     [ class "nav navbar-nav navbar-right" ]
-                    [ li [] [ a [ href "#" ] [ text "Builds" ] ]
-                    , li [] [ a [ href "#" ] [ text "Docs" ] ]
+                    [ li [] [ a [ href "#", onClick_ <| ChangeView MainView ] [ text "Builds" ] ]
+                    , li [] [ a [ href "#", onClick_ <| ChangeView DocsView ] [ text "Docs" ] ]
                     ]
                 ]
             ]
