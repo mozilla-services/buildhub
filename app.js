@@ -11802,8 +11802,19 @@ var _mozilla_services$buildhub$View$headerView = function (model) {
 														},
 														{
 															ctor: '::',
-															_0: _elm_lang$html$Html$text('Docs'),
-															_1: {ctor: '[]'}
+															_0: A2(
+																_elm_lang$html$Html$i,
+																{
+																	ctor: '::',
+																	_0: _elm_lang$html$Html_Attributes$class('glyphicon glyphicon-question-sign'),
+																	_1: {ctor: '[]'}
+																},
+																{ctor: '[]'}),
+															_1: {
+																ctor: '::',
+																_0: _elm_lang$html$Html$text(' Docs'),
+																_1: {ctor: '[]'}
+															}
 														}),
 													_1: {ctor: '[]'}
 												}),
@@ -11954,8 +11965,27 @@ var _mozilla_services$buildhub$View$docsView = function (model) {
 					{ctor: '[]'},
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html$text('BuildHub is an attempt at aggregating and federating build information at Mozilla.'),
-						_1: {ctor: '[]'}
+						_0: _elm_lang$html$Html$text('The BuildHub API is powered by '),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$a,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$href('https://www.kinto-storage.org/'),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('Kinto'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html$text('.'),
+								_1: {ctor: '[]'}
+							}
+						}
 					}),
 				_1: {
 					ctor: '::',
@@ -11974,7 +12004,7 @@ var _mozilla_services$buildhub$View$docsView = function (model) {
 							{ctor: '[]'},
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text('Here are a few useful snippets for using the buildhub API, leveraging different Kinto clients.'),
+								_0: _elm_lang$html$Html$text('Here are a few useful snippets to browse or query the API, leveraging different Kinto clients.'),
 								_1: {ctor: '[]'}
 							}),
 						_1: {
