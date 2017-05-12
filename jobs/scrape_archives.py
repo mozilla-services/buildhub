@@ -23,6 +23,7 @@ NB_THREADS = 3
 NB_RETRY_REQUEST = 3
 TIMEOUT_SECONDS = 5 * 60
 
+today = datetime.date.today()
 
 logger = logging.getLogger(__name__)
 
@@ -91,25 +92,38 @@ async def fetch_listing(session, url):
                 raise ValueError("Could not fetch %s: %s" % (url, e))
 
 
-async def fetch_products(session, queue, products, min_version):
+async def fetch_products(session, queue, products, client):
     # Nightlies
-    futures = [fetch_nightlies(session, queue, product) for product in products]
+    futures = [fetch_nightlies(session, queue, product, client) for product in products]
     await asyncio.gather(*futures)
     # Releases
-    futures = [fetch_versions(session, queue, product, min_version) for product in products]
+    futures = [fetch_versions(session, queue, product, client) for product in products]
     await asyncio.gather(*futures)
 
 
-async def fetch_nightlies(session, queue, product):
-    now = datetime.date.today()
-    current_month = "{}/{:02d}".format(now.year, now.month)
+async def fetch_nightlies(session, queue, product, client):
+    # Check latest known version on server.
+    filters = {
+        "source.product": product,
+        "target.channel": "nightly",
+        "_sort": "-download.date",
+        "_limit": 1,
+        "pages": 1
+    }
+    existing = client.get_records(**filters)
+    latest_nightly_folder = ""
+    if existing:
+        latest_nightly = existing[0]["download"]["date"]
+        nightly_datetime = datetime.datetime.strptime(latest_nightly, "%Y-%m-%dT%H:%M:%SZ")
+        latest_nightly_folder = nightly_datetime.strftime("%Y-%m-%d-%H-%M-%S")
+
+    current_month = "{}/{:02d}".format(today.year, today.month)
     month_url = archive_url(product, nightly=current_month)
     days_folders, _ = await fetch_listing(session, month_url)
 
-    # Skip aurora nightlies...
+    # Skip aurora nightlies and known nightlies...
     days_urls = [archive_url(product, nightly=current_month + "/" + f[:-1])
-                 for f in days_folders if f.endswith("mozilla-central/")]
-
+                 for f in days_folders if f > latest_nightly_folder and f.endswith("mozilla-central/")]
     futures = [fetch_listing(session, day_url) for day_url in days_urls]
     listings = await asyncio.gather(*futures)
 
@@ -136,13 +150,28 @@ async def fetch_nightlies(session, queue, product):
         await asyncio.gather(*futures)
 
 
-async def fetch_versions(session, queue, product, min_version):
+async def fetch_versions(session, queue, product, client):
+    # Check latest known version on server.
+    filters = {
+        "source.product": product,
+        "target.channel": "beta",
+        "_sort": "-download.date",
+        "_limit": 1,
+        "pages": 1
+    }
+    existing = client.get_records(**filters)
+    latest_version = ""
+    if existing:
+        latest_version = existing[0]["target"]["version"]
+        logger.info("Scrape from version {}".format(latest_version))
+
     product_url = archive_url(product)
     versions_folders, _ = await fetch_listing(session, product_url)
 
     versions = [v[:-1] for v in versions_folders if re.match(r'^[0-9]', v)]
     versions = [v for v in versions if "funnelcake" not in v]
-    versions = [v for v in versions if version_parse(v) > version_parse(min_version)]
+    # Scrape only unknown recent versions.
+    versions = [v for v in versions if version_parse(v) > version_parse(latest_version)]
     versions = sorted(versions, key=lambda v: version_parse(v), reverse=True)
 
     futures = [fetch_platforms(session, queue, product, version)
@@ -196,10 +225,10 @@ async def fetch_files(session, queue, product, version, platform, locale):
     return await asyncio.gather(*futures)
 
 
-async def produce(loop, queue, min_version):
+async def produce(loop, queue, client):
     """Grab releases from the archives website."""
     async with aiohttp.ClientSession(loop=loop) as session:
-        await fetch_products(session, queue, PRODUCTS, min_version)
+        await fetch_products(session, queue, PRODUCTS, client)
     logger.info("Scraping releases done.")
 
 
@@ -251,11 +280,6 @@ async def main(loop):
     client.create_bucket(permissions=public_perms, if_not_exists=True)
     client.create_collection(if_not_exists=True)
 
-    # Check latest known version on server.
-    filters = {"target.channel": "beta", "_sort": "-build.id", "_limit": 1, "pages": 1}
-    existing = client.get_records(**filters)
-    latest_version = existing[0]["target"]["version"] if existing else ""
-
     # Start a producer and a consumer with threaded kinto requests.
     queue = asyncio.Queue()
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=NB_THREADS)
@@ -263,7 +287,7 @@ async def main(loop):
     consumer_coro = consume(loop, queue, executor, client)
     consumer = asyncio.ensure_future(consumer_coro)
     # Run the producer and wait for completion
-    await produce(loop, queue, latest_version)
+    await produce(loop, queue, client)
     # Wait until the consumer is done consuming everything.
     await queue.join()
     # The consumer is still awaiting for the producer, cancel it.
