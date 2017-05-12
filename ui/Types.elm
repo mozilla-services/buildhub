@@ -101,3 +101,4 @@ type NewFilter
 type Msg
     = BuildRecordsFetched (Result Kinto.Error (List BuildRecord))
     | UpdateFilter NewFilter
+    | ResetFilter String

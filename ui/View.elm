@@ -4,6 +4,7 @@ import Dict
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Json.Decode as Decode
 import Types exposing (..)
 
 
@@ -78,7 +79,11 @@ filterInfoView model =
                 |> List.filter (\( _, value ) -> value /= "all" && value /= "")
                 |> List.map
                     (\( filter, value ) ->
-                        span [ class "badge" ] [ text <| filter ++ ":" ++ value ]
+                        span [ class "badge" ]
+                            [ text <| filter ++ ":" ++ value
+                            , text " "
+                            , a [ href "", onClick_ (ResetFilter filter) ] [ text "×" ]
+                            ]
                     )
                 |> List.intersperse (text " ")
 
@@ -123,17 +128,17 @@ buildIdSearchForm model =
 
 
 filterSelector : List String -> String -> String -> (String -> Msg) -> Html Msg
-filterSelector filters filterName checkedFilter updateHandler =
+filterSelector filters filterName selectedFilter updateHandler =
     let
         optionView value_ =
-            option [ value value_, selected (value_ == checkedFilter) ] [ text value_ ]
+            option [ value value_, selected (value_ == selectedFilter) ] [ text value_ ]
     in
         div [ class "form-group" ]
             [ label [] [ text filterName ]
             , select
                 [ class "form-control"
                 , onInput updateHandler
-                , value checkedFilter
+                , value selectedFilter
                 ]
                 (List.map optionView ("all" :: filters))
             ]
@@ -339,3 +344,11 @@ viewTargetDetails target =
 spinner : Html Msg
 spinner =
     div [ class "loader-wrapper" ] [ div [ class "loader" ] [] ]
+
+
+onClick_ : msg -> Attribute msg
+onClick_ msg =
+    onWithOptions
+        "click"
+        { preventDefault = True, stopPropagation = True }
+        (Decode.succeed msg)

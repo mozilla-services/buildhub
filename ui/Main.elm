@@ -18,7 +18,7 @@ main =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update msg ({ filterValues } as model) =
     case msg of
         BuildRecordsFetched (Ok buildRecordList) ->
             { model
@@ -35,6 +35,32 @@ update msg model =
                     Debug.log "An error occured while fetching the build records" err
             in
                 model ! []
+
+        ResetFilter filterName ->
+            case filterName of
+                "tree" ->
+                    { model | treeFilter = "all" } ! []
+
+                "product" ->
+                    { model | productFilter = "all" } ! []
+
+                "version" ->
+                    { model | versionFilter = "all" } ! []
+
+                "platform" ->
+                    { model | platformFilter = "all" } ! []
+
+                "channel" ->
+                    { model | channelFilter = "all" } ! []
+
+                "locale" ->
+                    { model | localeFilter = "all" } ! []
+
+                "buildId" ->
+                    { model | buildIdFilter = "" } ! []
+
+                _ ->
+                    model ! []
 
         UpdateFilter newFilter ->
             let
