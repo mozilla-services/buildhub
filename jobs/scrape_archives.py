@@ -61,17 +61,18 @@ async def fetch_listing(session, url):
                 raise ValueError("Could not fetch %s: %s" % (url, e))
 
 
-async def fetch_products(session, queue, products):
-    futures = [fetch_versions(session, queue, product) for product in products]
-    return await asyncio.gather(*futures)
+async def fetch_products(session, queue, products, min_version):
+    futures = [fetch_versions(session, queue, product, min_version) for product in products]
+    await asyncio.gather(*futures)
 
 
-async def fetch_versions(session, queue, product):
+async def fetch_versions(session, queue, product, min_version):
     product_url = archive_url(product)
     versions_folders, _ = await fetch_listing(session, product_url)
 
     versions = [v[:-1] for v in versions_folders if re.match(r'^[0-9]', v)]
     versions = [v for v in versions if "funnelcake" not in v]
+    versions = [v for v in versions if version_parse(v) > version_parse(min_version)]
     versions = sorted(versions, key=lambda v: version_parse(v), reverse=True)
 
     futures = [fetch_platforms(session, queue, product, version)
@@ -139,10 +140,10 @@ async def fetch_files(session, queue, product, version, platform, locale):
     return await asyncio.gather(*futures)
 
 
-async def produce(loop, queue):
+async def produce(loop, queue, min_version):
     """Grab releases from the archives website."""
     async with aiohttp.ClientSession(loop=loop) as session:
-        await fetch_products(session, queue, PRODUCTS)
+        await fetch_products(session, queue, PRODUCTS, min_version)
     logger.info("Scraping releases done.")
 
 
@@ -194,6 +195,11 @@ async def main(loop):
     client.create_bucket(permissions=public_perms, if_not_exists=True)
     client.create_collection(if_not_exists=True)
 
+    # Check latest known version on server.
+    filters = {"target.channel": "beta", "_sort": "-build.id", "_limit": 1, "pages": 1}
+    existing = client.get_records(**filters)
+    latest_version = existing[0]["target"]["version"] if existing else ""
+
     # Start a producer and a consumer with threaded kinto requests.
     queue = asyncio.Queue()
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=NB_THREADS)
@@ -201,7 +207,7 @@ async def main(loop):
     consumer_coro = consume(loop, queue, executor, client)
     consumer = asyncio.ensure_future(consumer_coro)
     # Run the producer and wait for completion
-    await produce(loop, queue)
+    await produce(loop, queue, latest_version)
     # Wait until the consumer is done consuming everything.
     await queue.join()
     # The consumer is still awaiting for the producer, cancel it.
