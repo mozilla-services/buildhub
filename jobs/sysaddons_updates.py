@@ -59,7 +59,7 @@ def parse_response(xml_content):
     # </updates>
     root = etree.fromstring(xml_content)
     addons = {}
-    addons_nodes = root.findall(".//addons")
+    addons_nodes = root.findall(".//addons/addon")
     for addon_node in addons_nodes:
         id_ = addon_node.attrib["id"]
         version = addon_node.attrib["version"]
@@ -91,7 +91,8 @@ async def main(loop):
     }
     records = client.get_records(**filters)
 
-    with_sysaddons = [r for r in records if r.get('systemaddons') is not None]
+    with_sysaddons = [r for r in records if r.get('systemaddons') is not None
+                      and 'id' in (r.get('build') or {})]
     logger.info("{} entries found.".format(len(with_sysaddons)))
 
     # Check kinto maximum batch size (can differ from AUS_BATCH_SIZE).
@@ -117,8 +118,10 @@ async def main(loop):
             # Merge systemaddons updates with builtins.
             for record, sysaddons_updates in zip(records_subset, results):
                 by_id = {s["id"]: s for s in record.setdefault("systemaddons", [])}
+
                 for id_, version in sysaddons_updates.items():
                     by_id.setdefault(id_, {})
+                    by_id[id_].setdefault("id", id_)
                     by_id[id_].setdefault("builtin", None)
                     by_id[id_]["updated"] = version
 
