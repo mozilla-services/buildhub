@@ -16,7 +16,9 @@ view model =
                 [ spinner ]
             else
                 [ div [ class "col-sm-9" ]
-                    [ div [] <| List.map recordView model.filteredBuilds ]
+                    [ filterInfoView model
+                    , div [] <| List.map recordView model.filteredBuilds
+                    ]
                 , div [ class "col-sm-3" ]
                     [ div [ class "panel panel-default" ]
                         [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
@@ -54,6 +56,50 @@ headerView model =
                 ]
             ]
         ]
+
+
+filterInfoView : Model -> Html Msg
+filterInfoView model =
+    let
+        filterInfos =
+            [ ( "tree", model.treeFilter )
+            , ( "product", model.productFilter )
+            , ( "version", model.versionFilter )
+            , ( "platform", model.platformFilter )
+            , ( "channel", model.channelFilter )
+            , ( "locale", model.localeFilter )
+            , ( "buildId", model.buildIdFilter )
+            ]
+                |> List.filter (\( _, value ) -> value /= "all" && value /= "")
+                |> List.map
+                    (\( filter, value ) ->
+                        span [ class "badge" ] [ text <| filter ++ ":" ++ value ]
+                    )
+                |> List.intersperse (text " ")
+
+        nbBuilds =
+            List.length model.filteredBuilds
+    in
+        p [ class "well" ] <|
+            (List.concat
+                [ [ text <|
+                        (toString nbBuilds)
+                            ++ " build"
+                            ++ (if nbBuilds == 1 then
+                                    ""
+                                else
+                                    "s"
+                               )
+                            ++ " found. "
+                  ]
+                , (if List.length filterInfos > 0 then
+                    [ text "Filters: " ]
+                   else
+                    [ text "" ]
+                  )
+                , filterInfos
+                ]
+            )
 
 
 buildIdSearchForm : Model -> Html Msg
