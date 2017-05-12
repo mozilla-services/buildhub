@@ -88,7 +88,8 @@ type alias Target =
 
 
 type NewFilter
-    = NewTreeFilter String
+    = ClearAll
+    | NewTreeFilter String
     | NewProductFilter String
     | NewVersionFilter String
     | NewPlatformFilter String

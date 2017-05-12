@@ -40,6 +40,17 @@ update msg model =
             let
                 updatedModelWithFilters =
                     case newFilter of
+                        ClearAll ->
+                            { model
+                                | treeFilter = "all"
+                                , productFilter = "all"
+                                , versionFilter = "all"
+                                , platformFilter = "all"
+                                , channelFilter = "all"
+                                , localeFilter = "all"
+                                , buildIdFilter = ""
+                            }
+
                         NewTreeFilter value ->
                             { model | treeFilter = value }
 

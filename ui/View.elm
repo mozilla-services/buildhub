@@ -10,85 +10,133 @@ import Types exposing (..)
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ div [ class "header" ]
-            [ h1 [] [ Html.text "Build Hub" ] ]
+        [ headerView model
         , div [ class "row" ] <|
             if model.loading then
                 [ spinner ]
             else
                 [ div [ class "col-sm-9" ]
-                    [ div [] <| List.map recordView model.filteredBuilds ]
+                    [ filterInfoView model
+                    , div [] <| List.map recordView model.filteredBuilds
+                    ]
                 , div [ class "col-sm-3" ]
-                    [ div
-                        [ style
-                            [ ( "position", "fixed" )
-                            , ( "max-height", "calc(100vh - 75px)" )
-                            , ( "position", "fixed" )
-                            , ( "overflow-y", "auto" )
-                            , ( "padding-right", ".1em" )
+                    [ div [ class "panel panel-default" ]
+                        [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
+                        , div [ class "panel-body" ]
+                            [ buildIdSearchForm model
+                            , filterSelector model.filterValues.treeList "Trees" model.treeFilter (UpdateFilter << NewTreeFilter)
+                            , filterSelector model.filterValues.productList "Products" model.productFilter (UpdateFilter << NewProductFilter)
+                            , filterSelector model.filterValues.versionList "Versions" model.versionFilter (UpdateFilter << NewVersionFilter)
+                            , filterSelector model.filterValues.platformList "Platforms" model.platformFilter (UpdateFilter << NewPlatformFilter)
+                            , filterSelector model.filterValues.channelList "Channels" model.channelFilter (UpdateFilter << NewChannelFilter)
+                            , filterSelector model.filterValues.localeList "Locales" model.localeFilter (UpdateFilter << NewLocaleFilter)
+                            , p [ class "text-right" ]
+                                [ button
+                                    [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
+                                    [ text "Clear all filters" ]
+                                ]
                             ]
-                        ]
-                        [ buildIdSearchForm model
-                        , filterSetForm model.filterValues.treeList "Trees" model.treeFilter (UpdateFilter << NewTreeFilter)
-                        , filterSetForm model.filterValues.productList "Products" model.productFilter (UpdateFilter << NewProductFilter)
-                        , filterSetForm model.filterValues.versionList "Versions" model.versionFilter (UpdateFilter << NewVersionFilter)
-                        , filterSetForm model.filterValues.platformList "Platforms" model.platformFilter (UpdateFilter << NewPlatformFilter)
-                        , filterSetForm model.filterValues.channelList "Channels" model.channelFilter (UpdateFilter << NewChannelFilter)
-                        , filterSetForm model.filterValues.localeList "Locales" model.localeFilter (UpdateFilter << NewLocaleFilter)
                         ]
                     ]
                 ]
         ]
+
+
+headerView : Model -> Html Msg
+headerView model =
+    nav
+        [ class "navbar navbar-default" ]
+        [ div
+            [ class "container-fluid" ]
+            [ div
+                [ class "navbar-header" ]
+                [ a [ class "navbar-brand", href "#" ] [ text "BuildHub" ] ]
+            , div
+                [ class "collapse navbar-collapse" ]
+                [ ul
+                    [ class "nav navbar-nav navbar-right" ]
+                    [ li [] [ a [ href "#" ] [ text "Builds" ] ]
+                    , li [] [ a [ href "#" ] [ text "Docs" ] ]
+                    ]
+                ]
+            ]
+        ]
+
+
+filterInfoView : Model -> Html Msg
+filterInfoView model =
+    let
+        filterInfos =
+            [ ( "tree", model.treeFilter )
+            , ( "product", model.productFilter )
+            , ( "version", model.versionFilter )
+            , ( "platform", model.platformFilter )
+            , ( "channel", model.channelFilter )
+            , ( "locale", model.localeFilter )
+            , ( "buildId", model.buildIdFilter )
+            ]
+                |> List.filter (\( _, value ) -> value /= "all" && value /= "")
+                |> List.map
+                    (\( filter, value ) ->
+                        span [ class "badge" ] [ text <| filter ++ ":" ++ value ]
+                    )
+                |> List.intersperse (text " ")
+
+        nbBuilds =
+            List.length model.filteredBuilds
+    in
+        p [ class "well" ] <|
+            (List.concat
+                [ [ text <|
+                        (toString nbBuilds)
+                            ++ " build"
+                            ++ (if nbBuilds == 1 then
+                                    ""
+                                else
+                                    "s"
+                               )
+                            ++ " found. "
+                  ]
+                , (if List.length filterInfos > 0 then
+                    [ text "Filters: " ]
+                   else
+                    [ text "" ]
+                  )
+                , filterInfos
+                ]
+            )
 
 
 buildIdSearchForm : Model -> Html Msg
 buildIdSearchForm model =
-    div [ class "panel panel-default" ]
-        [ div [ class "panel-heading" ] [ strong [] [ text "Search build id" ] ]
-        , Html.form [ class "panel-body" ]
-            [ div [ class "form-group" ]
-                [ label [] [ text "Build id" ]
-                , input
-                    [ type_ "text"
-                    , class "form-control"
-                    , onInput <| UpdateFilter << NewBuildIdSearch
-                    ]
-                    []
+    div [ class "form-group" ]
+        [ label [] [ text "Build id" ]
+        , input
+            [ type_ "text"
+            , class "form-control"
+            , placeholder "Eg. 201705011233"
+            , value model.buildIdFilter
+            , onInput <| UpdateFilter << NewBuildIdSearch
+            ]
+            []
+        ]
+
+
+filterSelector : List String -> String -> String -> (String -> Msg) -> Html Msg
+filterSelector filters filterName checkedFilter updateHandler =
+    let
+        optionView value_ =
+            option [ value value_, selected (value_ == checkedFilter) ] [ text value_ ]
+    in
+        div [ class "form-group" ]
+            [ label [] [ text filterName ]
+            , select
+                [ class "form-control"
+                , onInput updateHandler
+                , value checkedFilter
                 ]
+                (List.map optionView ("all" :: filters))
             ]
-        ]
-
-
-filterSetForm : List String -> String -> String -> (String -> Msg) -> Html Msg
-filterSetForm filters filterName checkedFilter onClickHandler =
-    div [ class "panel panel-default" ]
-        [ div [ class "panel-heading" ] [ strong [] [ text filterName ] ]
-        , ul [ class "list-group" ] <|
-            [ (radioButton filterName checkedFilter onClickHandler "all") ]
-                ++ List.map (radioButton filterName checkedFilter onClickHandler) filters
-        ]
-
-
-radioButton : String -> String -> (String -> Msg) -> String -> Html Msg
-radioButton filterName checkedFilter onClickHandler filterValue =
-    li [ class "list-group-item" ]
-        [ div
-            [ class "radio"
-            , style [ ( "margin", "0px" ) ]
-            ]
-            [ label []
-                [ input
-                    [ name filterName
-                    , type_ "radio"
-                    , value filterValue
-                    , checked <| checkedFilter == filterValue
-                    , onClick <| onClickHandler filterValue
-                    ]
-                    []
-                , text filterValue
-                ]
-            ]
-        ]
 
 
 recordView : BuildRecord -> Html Msg
