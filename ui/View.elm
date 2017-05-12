@@ -74,9 +74,13 @@ docsView : Model -> Html Msg
 docsView model =
     div []
         [ h2 [] [ text "About this project" ]
-        , p [] [ text "BuildHub is an attempt at aggregating and federating build information at Mozilla." ]
+        , p []
+            [ text "The BuildHub API is powered by "
+            , a [ href "https://www.kinto-storage.org/" ] [ text "Kinto" ]
+            , text "."
+            ]
         , h2 [] [ text "Snippets" ]
-        , p [] [ text "Here are a few useful snippets for using the buildhub API, leveraging different Kinto clients." ]
+        , p [] [ text "Here are a few useful snippets to browse or query the API, leveraging different Kinto clients." ]
         , div [] <| List.map snippetView snippets
         , h3 [] [ text "More information" ]
         , ul []
