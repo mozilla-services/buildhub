@@ -37,30 +37,34 @@ update msg ({ filterValues } as model) =
                 model ! []
 
         ResetFilter filterName ->
-            case filterName of
-                "tree" ->
-                    { model | treeFilter = "all" } ! []
+            let
+                filterMsg =
+                    case filterName of
+                        "tree" ->
+                            NewTreeFilter "all"
 
-                "product" ->
-                    { model | productFilter = "all" } ! []
+                        "product" ->
+                            NewProductFilter "all"
 
-                "version" ->
-                    { model | versionFilter = "all" } ! []
+                        "version" ->
+                            NewVersionFilter "all"
 
-                "platform" ->
-                    { model | platformFilter = "all" } ! []
+                        "platform" ->
+                            NewPlatformFilter "all"
 
-                "channel" ->
-                    { model | channelFilter = "all" } ! []
+                        "channel" ->
+                            NewChannelFilter "all"
 
-                "locale" ->
-                    { model | localeFilter = "all" } ! []
+                        "locale" ->
+                            NewLocaleFilter "all"
 
-                "buildId" ->
-                    { model | buildIdFilter = "" } ! []
+                        "buildId" ->
+                            NewBuildIdSearch ""
 
-                _ ->
-                    model ! []
+                        _ ->
+                            ClearAll
+            in
+                update (UpdateFilter filterMsg) model
 
         UpdateFilter newFilter ->
             let
