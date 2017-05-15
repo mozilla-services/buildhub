@@ -29,7 +29,7 @@ mainView model =
     else
         div [ class "row" ]
             [ div [ class "col-sm-9" ]
-                [ filterInfoView model
+                [ numBuilds model
                 , div [] <| List.map recordView model.filteredBuilds
                 ]
             , div [ class "col-sm-3" ]
@@ -127,52 +127,23 @@ headerView model =
         ]
 
 
-filterInfoView : Model -> Html Msg
-filterInfoView model =
+numBuilds : Model -> Html Msg
+numBuilds model =
     let
-        filterInfos =
-            [ ( "tree", model.treeFilter, NewTreeFilter "all" )
-            , ( "product", model.productFilter, NewProductFilter "all" )
-            , ( "version", model.versionFilter, NewVersionFilter "all" )
-            , ( "platform", model.platformFilter, NewPlatformFilter "all" )
-            , ( "channel", model.channelFilter, NewChannelFilter "all" )
-            , ( "locale", model.localeFilter, NewLocaleFilter "all" )
-            , ( "buildId", model.buildIdFilter, NewBuildIdSearch "" )
-            ]
-                |> List.filter (\( _, value, resetHandler ) -> value /= "all" && value /= "")
-                |> List.map
-                    (\( filter, value, resetHandler ) ->
-                        span [ class "badge" ]
-                            [ text <| filter ++ ":" ++ value
-                            , text " "
-                            , a [ href "", onClick_ (UpdateFilter <| resetHandler) ] [ text "×" ]
-                            ]
-                    )
-                |> List.intersperse (text " ")
-
         nbBuilds =
             List.length model.filteredBuilds
     in
         p [ class "well" ] <|
-            (List.concat
-                [ [ text <|
-                        (toString nbBuilds)
-                            ++ " build"
-                            ++ (if nbBuilds == 1 then
-                                    ""
-                                else
-                                    "s"
-                               )
-                            ++ " found. "
-                  ]
-                , (if List.length filterInfos > 0 then
-                    [ text "Filters: " ]
-                   else
-                    [ text "" ]
-                  )
-                , filterInfos
-                ]
-            )
+            [ text <|
+                (toString nbBuilds)
+                    ++ " build"
+                    ++ (if nbBuilds == 1 then
+                            ""
+                        else
+                            "s"
+                       )
+                    ++ " found. "
+            ]
 
 
 buildIdSearchForm : Model -> Html Msg
@@ -191,19 +162,39 @@ buildIdSearchForm model =
 
 
 filterSelector : List String -> String -> String -> (String -> Msg) -> Html Msg
-filterSelector filters filterName selectedFilter updateHandler =
+filterSelector filters filterTitle selectedFilter updateHandler =
     let
         optionView value_ =
             option [ value value_, selected (value_ == selectedFilter) ] [ text value_ ]
-    in
-        div [ class "form-group" ]
-            [ label [] [ text filterName ]
-            , select
+
+        selectView =
+            select
                 [ class "form-control"
                 , onInput updateHandler
                 , value selectedFilter
                 ]
                 (List.map optionView ("all" :: filters))
+
+        selectedFilterView =
+            div [ class "input-group" ]
+                [ input [ class "form-control", type_ "text", value selectedFilter, disabled True ] []
+                , span
+                    [ class "input-group-btn" ]
+                    [ button
+                        [ class "btn btn-default"
+                        , type_ "button"
+                        , onClick_ <| updateHandler "all"
+                        ]
+                        [ text "x" ]
+                    ]
+                ]
+    in
+        div [ class "form-group", style [ ( "display", "block" ) ] ]
+            [ label [] [ text filterTitle ]
+            , if selectedFilter == "all" then
+                selectView
+              else
+                selectedFilterView
             ]
 
 
