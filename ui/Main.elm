@@ -39,36 +39,6 @@ update msg ({ filterValues } as model) =
             in
                 model ! []
 
-        ResetFilter filterName ->
-            let
-                filterMsg =
-                    case filterName of
-                        "tree" ->
-                            NewTreeFilter "all"
-
-                        "product" ->
-                            NewProductFilter "all"
-
-                        "version" ->
-                            NewVersionFilter "all"
-
-                        "platform" ->
-                            NewPlatformFilter "all"
-
-                        "channel" ->
-                            NewChannelFilter "all"
-
-                        "locale" ->
-                            NewLocaleFilter "all"
-
-                        "buildId" ->
-                            NewBuildIdSearch ""
-
-                        _ ->
-                            ClearAll
-            in
-                update (UpdateFilter filterMsg) model
-
         UpdateFilter newFilter ->
             let
                 updatedModelWithFilters =

@@ -131,21 +131,21 @@ filterInfoView : Model -> Html Msg
 filterInfoView model =
     let
         filterInfos =
-            [ ( "tree", model.treeFilter )
-            , ( "product", model.productFilter )
-            , ( "version", model.versionFilter )
-            , ( "platform", model.platformFilter )
-            , ( "channel", model.channelFilter )
-            , ( "locale", model.localeFilter )
-            , ( "buildId", model.buildIdFilter )
+            [ ( "tree", model.treeFilter, NewTreeFilter "all" )
+            , ( "product", model.productFilter, NewProductFilter "all" )
+            , ( "version", model.versionFilter, NewVersionFilter "all" )
+            , ( "platform", model.platformFilter, NewPlatformFilter "all" )
+            , ( "channel", model.channelFilter, NewChannelFilter "all" )
+            , ( "locale", model.localeFilter, NewLocaleFilter "all" )
+            , ( "buildId", model.buildIdFilter, NewBuildIdSearch "" )
             ]
-                |> List.filter (\( _, value ) -> value /= "all" && value /= "")
+                |> List.filter (\( _, value, resetHandler ) -> value /= "all" && value /= "")
                 |> List.map
-                    (\( filter, value ) ->
+                    (\( filter, value, resetHandler ) ->
                         span [ class "badge" ]
                             [ text <| filter ++ ":" ++ value
                             , text " "
-                            , a [ href "", onClick_ (ResetFilter filter) ] [ text "×" ]
+                            , a [ href "", onClick_ (UpdateFilter <| resetHandler) ] [ text "×" ]
                             ]
                     )
                 |> List.intersperse (text " ")

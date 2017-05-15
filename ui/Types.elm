@@ -120,5 +120,4 @@ type CurrentView
 type Msg
     = BuildRecordsFetched (Result Kinto.Error (List BuildRecord))
     | UpdateFilter NewFilter
-    | ResetFilter String
     | ChangeView CurrentView
