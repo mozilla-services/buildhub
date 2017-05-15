@@ -176,13 +176,20 @@ filterSelector filters filterTitle selectedFilter updateHandler =
                 (List.map optionView ("all" :: filters))
 
         selectedFilterView =
-            span [ class "badge", style [ ( "display", "block" ) ] ]
-                [ text selectedFilter
-                , text " "
-                , a [ href "", onClick_ (updateHandler "all") ] [ text "×" ]
+            div [ class "input-group" ]
+                [ input [ class "form-control", type_ "text", value selectedFilter, disabled True ] []
+                , span
+                    [ class "input-group-btn" ]
+                    [ button
+                        [ class "btn btn-default"
+                        , type_ "button"
+                        , onClick_ <| updateHandler "all"
+                        ]
+                        [ text "x" ]
+                    ]
                 ]
     in
-        div [ class "form-group" ]
+        div [ class "form-group", style [ ( "display", "block" ) ] ]
             [ label [] [ text filterTitle ]
             , if selectedFilter == "all" then
                 selectView
