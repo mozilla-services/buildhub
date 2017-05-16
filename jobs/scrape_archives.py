@@ -75,18 +75,26 @@ def archive(product, version, platform, locale, channel, url, size, date, metada
     return record
 
 
-def archive_url(product, version=None, platform=None, locale=None, nightly=None):
-    url = ARCHIVE_URL + (product if product != "fennec" else "mobile")
+def archive_url(product, version=None, platform=None, locale=None, nightly=None, candidate=None):
+    product = product if product != "fennec" else "mobile"
+
+    url = ARCHIVE_URL + product
     if nightly:
         url += "/nightly/" + nightly + "/"
+    elif candidate:
+        url += "/candidates/{}-candidates{}".format(version, candidate)
+        if platform:
+            url += platform + "/"
+        if locale:
+            url += locale + "/"
     else:
         url += "/releases/"
-    if version:
-        url += version + "/"
-    if platform:
-        url += platform + "/"
-    if locale:
-        url += locale + "/"
+        if version:
+            url += version + "/"
+        if platform:
+            url += platform + "/"
+        if locale:
+            url += locale + "/"
     return url
 
 
@@ -133,14 +141,12 @@ async def fetch_release_metadata(session, product, version, platform, locale):
     if locale != "en-US":
         return None
 
-    product_url = product if product != "fennec" else "mobile"
-
-    url = "{}{}/candidates/{}-candidates/".format(ARCHIVE_URL, product_url, version)
+    candidates_url = archive_url(product, version, candidate="/")
     try:
-        build_folders, _ = await fetch_listing(session, url)
+        build_folders, _ = await fetch_listing(session, candidates_url)
         latest_build_folder = sorted(build_folders)[-1]
 
-        url += "{}{}/{}/".format(latest_build_folder, platform, locale)
+        url = archive_url(product, version, platform, locale, candidate=latest_build_folder)
         _, files = await fetch_listing(session, url)
 
         re_metadata = re.compile("{}-{}(.*).json".format(product, version))
