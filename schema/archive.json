@@ -1,0 +1,210 @@
+{
+  "collections": {
+    "archives": {
+      "name": "archives",
+      "config": {
+        "displayFields": [
+          "id", "target.product", "target.channel", "target.version",
+          "target.platform", "target.locale"
+        ],
+        "schema": {
+          "title": "Archives",
+          "description": "Mozilla software builds.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "source",
+            "download",
+            "target"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "title": "ID",
+              "description": "Build Hub ID"
+            },
+            "schema": {
+              "type": "integer",
+              "title": "Schema version",
+              "description": "Schema version"
+            },
+            "build": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "build_id": {
+                  "type": "string",
+                  "title": "Build ID",
+                  "description": "Build ID"
+                },
+                "build_date": {
+                  "type": "string",
+                  "title": "Build date",
+                  "description": "i.e: 2017-05-11",
+                  "pattern": "^(19|2[0-5])[0-9]{2}-((0[0-9])|(1[0-2]))-(([0-2][0-9])|(3[0-1]))$"
+                },
+                "sunset_date": {
+                  "type": "string",
+                  "title": "Sunset date",
+                  "description": "i.e: 2017-08-24",
+                  "pattern": "^(19|2[0-5])[0-9]{2}-((0[0-9])|(1[0-2]))-(([0-2][0-9])|(3[0-1]))$"
+                },
+                "build_type": {
+                  "type": "string",
+                  "title": "Build type",
+                  "description": "Build type",
+                  "enum": [
+                    "nightly",
+                    "beta",
+                    "aurora",
+                    "release",
+                    "esr"
+                  ]
+                }
+              }
+            },
+            "target": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "product",
+                "version_string",
+                "major_version",
+                "release_version",
+                "version_sort"
+              ],
+              "properties": {
+                "product": {
+                  "type": "string",
+                  "title": "Product name",
+                  "description": "Name of the product the build is about"
+                },
+                "version_string": {
+                  "type": "string",
+                  "title": "Version",
+                  "description": "Version string. (i.e: 52.1.1 or 54.0b7)"
+                },
+                "major_version": {
+                  "type": "string",
+                  "title": "Major version",
+                  "description": "Major version. (i.e: 52.1 or 54.0)"
+                },
+                "release_version": {
+                  "type": "string",
+                  "title": "Release version",
+                  "description": "Release version. (i.e: 52.1.1 or 54.0)"
+                },
+                "beta_number": {
+                  "type": "integer",
+                  "title": "Beta number",
+                  "description": "Beta number (i.e: 7)"
+                },
+                "version_sort": {
+                  "type": "string",
+                  "title": "A value to sort records by version number",
+                  "description": "A value to sort records by version number. (i.e: 052001001r000 (release), 054000000a002 (nightly), 054000000b007 (beta), 045009000x000 (esr))"
+                },
+                "featured_version": {
+                  "type": "boolean",
+                  "title": "Featured version?"
+                },
+                "has_builds": {
+                  "type": "boolean",
+                  "title": "Has builds?"
+                },
+                "is_rapid_beta": {
+                  "type": "boolean",
+                  "title": "Is rapid beta?"
+                }
+              }
+            },
+            "source": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "tree": {
+                  "type": "string",
+                  "title": "Tree",
+                  "description": "i.e mozilla-central"
+                },
+                "revision": {
+                  "type": "string",
+                  "title": "Revision number in the tree"
+                }
+              }
+            },
+            "download": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "date": {
+                  "type": "date-time",
+                  "title": "Date",
+                  "description": "Date of the archive"
+                },
+                "mimetype": {
+                  "type": "string",
+                  "title": "Type of archive"
+                },
+                "size": {
+                  "type": "integer",
+                  "title": "Size",
+                  "description": "Size of the archive in bytes"
+                },
+                "url": {
+                  "type": "string",
+                  "format": "url",
+                  "title": "URL",
+                  "description": "URL of the archive"
+                }
+              }
+            }
+          }
+        },
+        "uiSchema": {
+          "ui:order": [
+            "id",
+            "schema",
+            "download",
+            "build",
+            "target",
+            "source"
+          ],
+          "download": {
+            "ui:order": [
+              "url",
+              "size",
+              "date",
+              "mimetype"
+            ]
+          },
+          "source": {
+            "ui:order": ["tree", "revision"]
+          },
+          "build": {
+            "ui:order": [
+              "build_type",
+              "build_id",
+              "build_date",
+              "sunset_date"
+            ]
+          },
+          "target": {
+            "ui:order": [
+              "product",
+              "version_string",
+              "major_version",
+              "release_version",
+              "beta_number",
+              "version_sort",
+              "featured_version",
+              "has_builds",
+              "is_rapid_beta"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
