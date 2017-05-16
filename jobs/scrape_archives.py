@@ -5,6 +5,7 @@ import datetime
 import logging
 import re
 import sys
+from os.path import dirname
 from packaging.version import parse as version_parse
 
 import aiohttp
@@ -25,6 +26,12 @@ TIMEOUT_SECONDS = 5 * 60
 today = datetime.date.today()
 
 logger = logging.getLogger(__name__)
+
+
+def build_record_id(record):
+    # Generate an ID that looks like that: firefox_release_53.0b9_linux-i686_en-US
+    return dirname(
+        record['download']['url'].replace(ARCHIVE_URL, '')).replace('/', '_').replace('.', '-')
 
 
 def publish_records(client, records):
@@ -74,7 +81,9 @@ def archive(product, version, platform, locale, channel, url, size, date, metada
     revision = None
     tree = None
     if metadata:
-        # Example of metadata: https://archive.mozilla.org/pub/thunderbird/candidates/50.0b1-candidates/build2/linux-i686/en-US/thunderbird-50.0b1.json
+        # Example of metadata:
+        #  https://archive.mozilla.org/pub/thunderbird/candidates \
+        #  /50.0b1-candidates/build2/linux-i686/en-US/thunderbird-50.0b1.json
         revision = metadata["moz_source_stamp"]
         channel = metadata["moz_update_channel"]
         repository = metadata["moz_source_repo"].replace("MOZ_SOURCE_REPO=", "")
