@@ -2,7 +2,6 @@ import asyncio
 import async_timeout
 import concurrent.futures
 import datetime
-import json
 import logging
 import re
 import sys
@@ -10,7 +9,6 @@ from packaging.version import parse as version_parse
 
 import aiohttp
 import backoff
-import kinto_http.exceptions
 from kinto_http import cli_utils
 
 
@@ -35,12 +33,28 @@ def publish_records(client, records):
     logger.info("Created %s records" % len(records))
 
 
-def archive(product, version, platform, locale, channel, url, size, date):
+def archive(product, version, platform, locale, channel, url, size, date, metadata=None):
+    build = None
+    revision = None
+    tree = None
+    if metadata:
+        # Example of metadata: https://archive.mozilla.org/pub/thunderbird/candidates/50.0b1-candidates/build2/linux-i686/en-US/thunderbird-50.0b1.json
+        revision = metadata["moz_source_stamp"]
+        channel = metadata["moz_update_channel"]
+        repository = metadata["moz_source_repo"].replace("MOZ_SOURCE_REPO=", "")
+        tree = repository.split("/")[-1]
+        buildid = metadata["buildid"]
+        builddate = datetime.datetime.strptime(buildid[:12], "%Y%m%d%H%M").isoformat()
+        build = {
+            "id": buildid,
+            "date": builddate,
+        }
+
     record = {
-        "build": None,
+        "build": build,
         "source": {
-            "revision": None,
-            "tree": None,
+            "revision": revision,
+            "tree": tree,
             "product": product,
         },
         "target": {
@@ -78,18 +92,59 @@ def archive_url(product, version=None, platform=None, locale=None, nightly=None)
 @backoff.on_exception(backoff.expo,
                       asyncio.TimeoutError,
                       max_tries=NB_RETRY_REQUEST)
-async def fetch_listing(session, url):
+async def fetch_json(session, url):
     headers = {
         "Accept": "application/json",
         "User-Agent": "BuildHub;storage-team@mozilla.com"
     }
     with async_timeout.timeout(TIMEOUT_SECONDS):
         async with session.get(url, headers=headers, timeout=None) as response:
-            try:
-                data = await response.json()
-                return data["prefixes"], data["files"]
-            except (aiohttp.ClientError, KeyError) as e:
-                raise ValueError("Could not fetch %s: %s" % (url, e))
+            return await response.json()
+
+
+async def fetch_listing(session, url):
+    try:
+        data = await fetch_json(session, url)
+        return data["prefixes"], data["files"]
+    except (aiohttp.ClientError, KeyError, ValueError) as e:
+        raise ValueError("Could not fetch %s: %s" % (url, e))
+
+
+async def fetch_nightly_metadata(session, nightly_url):
+    """A JSON file containing build info is published along the nightly archive.
+    """
+    try:
+        metadata_url = nightly_url.replace(".tar.bz2", ".json")
+        metadata = await fetch_json(session, metadata_url)
+        return metadata
+    except aiohttp.ClientError:
+        return None
+
+
+async def fetch_release_metadata(session, product, version, platform, locale):
+    """The `candidates` folder contains build info about recent released versions.
+    """
+    # XXX: It is only available for en-US though. Should we use the same for every locale?
+    if locale != "en-US":
+        return None
+
+    url = "{}{}/candidates/{}-candidates/".format(ARCHIVE_URL, product, version)
+    try:
+        build_folders, _ = await fetch_listing(session, url)
+        latest_build_folder = sorted(build_folders)[-1]
+
+        url += "{}{}/{}/".format(latest_build_folder, platform, locale)
+        _, files = await fetch_listing(session, url)
+
+        metadata_file = "{}-{}.json".format(product, version)
+        json_file = [f_["name"] for f_ in files if f_["name"].endswith(metadata_file)][0]
+        url += json_file
+        metadata = await fetch_json(session, url)
+
+        return metadata
+
+    except (IndexError, ValueError, aiohttp.ClientError) as e:
+        return None
 
 
 async def fetch_products(session, queue, products, client):
@@ -144,8 +199,10 @@ async def fetch_nightlies(session, queue, product, client):
             locale = match.group(2)
             platform = match.group(4)
 
-            record = archive(product, version, platform, locale, channel, url, size, date)
-            logger.debug("Nightly found %s" % record["download"]["url"])
+            metadata = await fetch_nightly_metadata(session, url)
+            record = archive(product, version, platform, locale, channel, url, size, date, metadata)
+            logger.debug("Nightly found %s" % url)
+
             futures.append(queue.put(record))
         await asyncio.gather(*futures)
 
@@ -163,7 +220,7 @@ async def fetch_versions(session, queue, product, client):
     latest_version = ""
     if existing:
         latest_version = existing[0]["target"]["version"]
-        logger.info("Scrape from version {}".format(latest_version))
+        logger.info("Scrape {} from version {}".format(product, latest_version))
 
     product_url = archive_url(product)
     versions_folders, _ = await fetch_listing(session, product_url)
@@ -218,8 +275,11 @@ async def fetch_files(session, queue, product, version, platform, locale):
         url = locale_url + filename
         size = file_["size"]
         date = file_["last_modified"]
-        record = archive(product, version, platform, locale, channel, url, size, date)
+
+        metadata = await fetch_release_metadata(session, product, version, platform, locale)
+        record = archive(product, version, platform, locale, channel, url, size, date, metadata)
         logger.debug("Release found %s" % record["download"]["url"])
+
         futures.append(queue.put(record))
 
     return await asyncio.gather(*futures)
