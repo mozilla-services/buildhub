@@ -1,6 +1,6 @@
 This folder contains several worker jobs.
 
-.. notes::
+.. note::
 
     The ``user:pass`` is the Basic auth on Kinto.
 
