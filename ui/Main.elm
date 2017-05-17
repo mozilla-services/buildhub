@@ -1,15 +1,17 @@
 module Main exposing (..)
 
-import Html exposing (..)
 import Model exposing (..)
+import Navigation exposing (..)
 import Set
 import Types exposing (..)
+import Url exposing (..)
 import View exposing (..)
 
 
 main : Program Never Model Msg
 main =
-    Html.program
+    Navigation.program
+        UrlChange
         { init = init
         , view = view
         , update = update
@@ -20,9 +22,6 @@ main =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ filterValues } as model) =
     case msg of
-        ChangeView view ->
-            { model | currentView = view } ! []
-
         BuildRecordsFetched (Ok buildRecordList) ->
             { model
                 | builds = buildRecordList
@@ -83,6 +82,9 @@ update msg ({ filterValues } as model) =
                     , filterValues = extractFilterValues updatedFilteredBuilds
                 }
                     ! []
+
+        UrlChange location ->
+            { model | currentView = parsePage location } ! []
 
 
 extractFilterValues : List BuildRecord -> FilterValues

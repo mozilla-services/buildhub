@@ -114,9 +114,9 @@ headerView model =
                 [ class "collapse navbar-collapse" ]
                 [ ul
                     [ class "nav navbar-nav navbar-right" ]
-                    [ li [] [ a [ href "#", onClick_ <| ChangeView MainView ] [ text "Builds" ] ]
+                    [ li [] [ a [ href "#/builds" ] [ text "Builds" ] ]
                     , li []
-                        [ a [ href "#", onClick_ <| ChangeView DocsView ]
+                        [ a [ href "#/docs" ]
                             [ i [ class "glyphicon glyphicon-question-sign" ] []
                             , text " Docs"
                             ]

@@ -2,11 +2,13 @@ module Model exposing (init)
 
 import Decoder exposing (..)
 import Kinto
+import Navigation exposing (..)
 import Types exposing (..)
+import Url exposing (..)
 
 
-init : ( Model, Cmd Msg )
-init =
+init : Location -> ( Model, Cmd Msg )
+init location =
     { builds = []
     , filteredBuilds = []
     , filterValues = FilterValues [] [] [] [] [] []
@@ -18,7 +20,7 @@ init =
     , localeFilter = "all"
     , buildIdFilter = ""
     , loading = True
-    , currentView = MainView
+    , currentView = parsePage location
     }
         ! [ getBuildRecordList ]
 

@@ -15,6 +15,7 @@ module Types
         )
 
 import Kinto
+import Navigation exposing (..)
 
 
 type alias Model =
@@ -120,4 +121,4 @@ type CurrentView
 type Msg
     = BuildRecordsFetched (Result Kinto.Error (List BuildRecord))
     | UpdateFilter NewFilter
-    | ChangeView CurrentView
+    | UrlChange Location
