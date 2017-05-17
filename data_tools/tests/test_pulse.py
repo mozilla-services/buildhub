@@ -1,6 +1,7 @@
 import unittest
 
-from main import url2version
+from buildhub.jobs.listen_pulse import url2version
+
 
 class TestUrl2Version(unittest.TestCase):
 

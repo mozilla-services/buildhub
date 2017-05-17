@@ -307,31 +307,27 @@ async def fetch_nightlies(session, queue, product, client):
     batch_size = 10
 
     for day_url, (_, files) in zip(days_urls, listings):
-        # Fetch metadata and put into queue in batch.
-        nb_batches = (len(files) // batch_size) + 1
-        for i in range(nb_batches):
-            files_subset = files[(i * batch_size):((i + 1) * batch_size)]
+        futures = []
+        for file_ in files:
+            filename = file_["name"]
+            size = file_["size"]
+            date = file_["last_modified"]
+            url = day_url + filename
 
-            # Fetch metadata in batch.
-            futures = [fetch_nightly_metadata(session, day_url + file_["name"])
-                       for file_ in files_subset]
-            metadatas = await asyncio.gather(*futures)
+            match = re.search(r'\w+-(\d+.+)\.([a-z]+(\-[A-Z]+)?)\.(.+)\.tar.bz2+$', filename)
+            if not match:
+                continue
+            version = match.group(1)
+            locale = match.group(2)
+            platform = match.group(4)
 
-            # Add to queue in batch.
-            futures = []
-            for file_, metadata in zip(files_subset, metadatas):
-                filename = file_["name"]
-                size = file_["size"]
-                date = file_["last_modified"]
-                url = day_url + filename
-                try:
-                    version, locale, platform = parse_nightly_filename(filename)
-                except ValueError:
-                    continue
-                record = archive(product, version, platform, locale, channel, url, size, date, metadata)
-                logger.debug("Nightly found {}".format(url))
-                futures.append(queue.put(record))
-            await asyncio.gather(*futures)
+            metadata = await fetch_nightly_metadata(session, url)
+            record = archive(product, version, platform, locale, channel,
+                             url, size, date, metadata)
+            logger.debug("Nightly found %s" % url)
+
+            futures.append(queue.put(record))
+        await asyncio.gather(*futures)
 
 
 async def fetch_versions(session, queue, product, client):
@@ -472,7 +468,11 @@ async def main(loop):
     consumer.cancel()
 
 
-if __name__ == "__main__":
+def run():
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main(loop))
     loop.close()
+
+
+if __name__ == "__main__":
+    run()

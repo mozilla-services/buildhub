@@ -1,16 +1,16 @@
 import asyncio
 import async_timeout
-import json
 import logging
 import sys
 import xml.etree.ElementTree as etree
 
 import aiohttp
-import backoff
 from kinto_http import cli_utils
 
 
-AUS_URL = "https://aus5.mozilla.org/update/3/SystemAddons/{VERSION}/{BUILD_ID}/{BUILD_TARGET}/{LOCALE}/{CHANNEL}/{OS_VERSION}/{DISTRIBUTION}/{DISTRIBUTION_VERSION}/update.xml"
+AUS_URL = ("https://aus5.mozilla.org/update/3/SystemAddons/{VERSION}/{BUILD_ID}/"
+           "{BUILD_TARGET}/{LOCALE}/{CHANNEL}/{OS_VERSION}/{DISTRIBUTION}/"
+           "{DISTRIBUTION_VERSION}/update.xml")
 AUS_BATCH_SIZE = 10
 DEFAULT_SERVER = "https://kinto-ota.dev.mozaws.net/v1"
 DEFAULT_BUCKET = "build-hub"
@@ -23,7 +23,8 @@ logger = logging.getLogger(__name__)
 
 
 async def fetch_updates(session, url, entry):
-    # https://gecko.readthedocs.io/en/latest/toolkit/mozapps/extensions/addon-manager/SystemAddons.html#system-add-on-updates
+    # https://gecko.readthedocs.io/en/latest/toolkit/mozapps/extensions/ \
+    #    addon-manager/SystemAddons.html#system-add-on-updates
     url = url.format(VERSION=entry["target"]["version"],
                      BUILD_ID=entry["build"]["id"],
                      BUILD_TARGET=entry["target"]["platform"],
@@ -53,8 +54,12 @@ def parse_response(xml_content):
     # <?xml version="1.0"?>
     # <updates>
     #   <addons>
-    #     <addon id="flyweb@mozilla.org" URL="https://ftp.mozilla.org/pub/system-addons/flyweb/flyweb@mozilla.org-1.0.xpi" hashFunction="sha512" hashValue="abcdef123" size="1234" version="1.0"/>
-    #     <addon id="pocket@mozilla.org" URL="https://ftp.mozilla.org/pub/system-addons/pocket/pocket@mozilla.org-1.0.xpi" hashFunction="sha512" hashValue="abcdef123" size="1234" version="1.0"/>
+    #     <addon id="flyweb@mozilla.org"
+    #            URL="https://ftp.mozilla.org/pub/system-addons/flyweb/flyweb@mozilla.org-1.0.xpi"
+    #            hashFunction="sha512" hashValue="abcdef123" size="1234" version="1.0"/>
+    #     <addon id="pocket@mozilla.org"
+    #            URL="https://ftp.mozilla.org/pub/system-addons/pocket/pocket@mozilla.org-1.0.xpi"
+    #            hashFunction="sha512" hashValue="abcdef123" size="1234" version="1.0"/>
     #   </addons>
     # </updates>
     root = etree.fromstring(xml_content)
@@ -140,7 +145,11 @@ async def main(loop):
     logger.info("Done.")
 
 
-if __name__ == "__main__":
+def run():
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main(loop))
     loop.close()
+
+
+if __name__ == "__main__":
+    run()

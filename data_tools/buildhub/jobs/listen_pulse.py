@@ -100,7 +100,7 @@ def pulse2kinto(body, message, client):
     update_download_info(client, r)
 
 
-if __name__ == "__main__":
+def main():
     parser = cli_utils.add_parser_options(
         description="Send Pulse data to Kinto",
         default_server=DEFAULT_SERVER,
@@ -140,3 +140,7 @@ if __name__ == "__main__":
             # It is possible for rabbitmq to throw other exceptions. Just log
             # them and move on.
             traceback.print_exc()
+
+
+if __name__ == "__main__":
+    main()
