@@ -82,7 +82,10 @@ def archive_url(product, version=None, platform=None, locale=None, nightly=None,
     if nightly:
         url += "/nightly/" + nightly + "/"
     elif candidate:
-        url += "/candidates/{}-candidates{}".format(version, candidate)
+        url += "/candidates"
+        if version:
+            url += "/{}-candidates".format(version)
+        url += candidate
         if platform:
             url += platform + "/"
         if locale:
@@ -134,18 +137,37 @@ async def fetch_nightly_metadata(session, nightly_url):
         return None
 
 
+_candidates = {}
+
 async def fetch_release_metadata(session, product, version, platform, locale):
     """The `candidates` folder contains build info about recent released versions.
     """
+    global _candidates
+
     # XXX: It is only available for en-US though. Should we use the same for every locale?
     if locale != "en-US":
         return None
 
-    candidates_url = archive_url(product, version, candidate="/")
-    try:
-        build_folders, _ = await fetch_listing(session, candidates_url)
-        latest_build_folder = sorted(build_folders)[-1]
+    if _candidates.get(product) is None:
+        # Keep the list of latest available candidates per product, for more efficiency.
+        candidates_url = archive_url(product, candidate="/")
+        candidates_folders, _ = await fetch_listing(session, candidates_url)
+        # For each version take the latest build.
+        _candidates[product] = {}
+        for f in candidates_folders:
+            candidate_version = f.replace("-candidates/", "")
+            builds_url = archive_url(product, candidate_version, candidate="/")
+            build_folders, _ = await fetch_listing(session, builds_url)
+            latest_build_folder = sorted(build_folders)[-1]
+            _candidates[product][candidate_version] = latest_build_folder
 
+    if version not in _candidates[product]:
+        # Candidates are only available for a subset of versions.
+        return None
+
+    latest_build_folder = _candidates[product][version]
+
+    try:
         url = archive_url(product, version, platform, locale, candidate=latest_build_folder)
         _, files = await fetch_listing(session, url)
 
