@@ -34,6 +34,41 @@ def publish_records(client, records):
     logger.info("Created {} records".format(len(records)))
 
 
+def latest_known_nightly_datetime(client, product):
+    """Check latest known nightly on server in order to resume scraping.
+    """
+    filters = {
+        "source.product": product,
+        "target.channel": "nightly",
+        "_sort": "-download.date",
+        "_limit": 1,
+        "pages": 1
+    }
+    existing = client.get_records(**filters)
+    latest = None
+    if existing:
+        latest_nightly = existing[0]["download"]["date"]
+        latest = datetime.datetime.strptime(latest_nightly, "%Y-%m-%dT%H:%M:%SZ")
+    return latest
+
+
+def latest_known_version(client, product):
+    """Check latest known version on server in order to resume scraping.
+    """
+    filters = {
+        "source.product": product,
+        "target.channel": "beta",
+        "_sort": "-download.date",
+        "_limit": 1,
+        "pages": 1
+    }
+    existing = client.get_records(**filters)
+    latest_version = ""
+    if existing:
+        latest_version = existing[0]["target"]["version"]
+    return latest_version
+
+
 def archive(product, version, platform, locale, channel, url, size, date, metadata=None):
     build = None
     revision = None
@@ -101,6 +136,53 @@ def archive_url(product, version=None, platform=None, locale=None, nightly=None,
     return url
 
 
+def parse_nightly_filename(filename):
+    """
+    Examples of nightly filenames:
+
+    - firefox-55.0a1.ach.win64.zip
+    - firefox-55.0a1.bn-IN.mac.dmg
+
+    And things we'll want to ignore:
+
+    - firefox-55.0a1.en-US.linux-i686.talos.tests.zip
+    """
+    re_nightly = re.compile(r"\w+-(\d+.+)\.([a-z]+(\-[A-Z]+)?)\.(.+)\.({})$".format(FILE_EXTENSIONS))
+    match = re_nightly.search(filename)
+    if not match or "tests" in filename:
+        raise ValueError()
+    version = match.group(1)
+    locale = match.group(2)
+    platform = match.group(4)
+    return version, locale, platform
+
+
+def is_release_filename(product, filename):
+    """
+    Examples of release filenames:
+
+    - firefox-53.0.tar.bz2
+
+    And things we'll want to ignore:
+
+    - firefox-1.5.0.5.tar.gz.asc
+    - firefox-52.0.win32.sdk.zip
+    """
+    re_filename = re.compile("{}-(.+)({})$".format(product, FILE_EXTENSIONS))
+    return re_filename.match(filename) and 'sdk' not in filename
+
+
+def is_release_metadata(product, version, filename):
+    """
+    Examples of release metadata filenames:
+
+    - firefox-52.0b7.json
+    - fennec-51.0b2.en-US.android-i386.json
+    """
+    re_metadata = re.compile("{}-{}(.*).json".format(product, version))
+    return re_metadata.match(filename)
+
+
 @backoff.on_exception(backoff.expo,
                       asyncio.TimeoutError,
                       max_tries=NB_RETRY_REQUEST)
@@ -139,6 +221,7 @@ async def fetch_nightly_metadata(session, nightly_url):
 
 _candidates = {}
 
+
 async def fetch_release_metadata(session, product, version, platform, locale):
     """The `candidates` folder contains build info about recent released versions.
     """
@@ -148,8 +231,8 @@ async def fetch_release_metadata(session, product, version, platform, locale):
     if locale != "en-US":
         return None
 
+    # Keep the list of latest available candidates per product, for more efficiency.
     if _candidates.get(product) is None:
-        # Keep the list of latest available candidates per product, for more efficiency.
         candidates_url = archive_url(product, candidate="/")
         candidates_folders, _ = await fetch_listing(session, candidates_url)
         # For each version take the latest build.
@@ -161,25 +244,25 @@ async def fetch_release_metadata(session, product, version, platform, locale):
             latest_build_folder = sorted(build_folders)[-1]
             _candidates[product][candidate_version] = latest_build_folder
 
+    # Candidates are only available for a subset of versions.
     if version not in _candidates[product]:
-        # Candidates are only available for a subset of versions.
         return None
 
     latest_build_folder = _candidates[product][version]
-
     try:
         url = archive_url(product, version, platform, locale, candidate=latest_build_folder)
         _, files = await fetch_listing(session, url)
 
-        re_metadata = re.compile("{}-{}(.*).json".format(product, version))
-        json_file = [f_["name"] for f_ in files if re_metadata.match(f_["name"])][0]
-        url += json_file
-        metadata = await fetch_json(session, url)
+        for f_ in files:
+            filename = f_["name"]
+            if is_release_metadata(filename):
+                url += filename
+                metadata = await fetch_json(session, url)
+                return metadata
 
-        return metadata
-
-    except (IndexError, ValueError, aiohttp.ClientError) as e:
-        return None
+    except (ValueError, aiohttp.ClientError) as e:
+        pass
+    return None
 
 
 async def fetch_products(session, queue, products, client):
@@ -193,19 +276,10 @@ async def fetch_products(session, queue, products, client):
 
 async def fetch_nightlies(session, queue, product, client):
     # Check latest known version on server.
-    filters = {
-        "source.product": product,
-        "target.channel": "nightly",
-        "_sort": "-download.date",
-        "_limit": 1,
-        "pages": 1
-    }
-    existing = client.get_records(**filters)
     latest_nightly_folder = ""
-    if existing:
-        latest_nightly = existing[0]["download"]["date"]
-        nightly_datetime = datetime.datetime.strptime(latest_nightly, "%Y-%m-%dT%H:%M:%SZ")
-        latest_nightly_folder = nightly_datetime.strftime("%Y-%m-%d-%H-%M-%S")
+    latest_known = latest_known_nightly_datetime(client, product)
+    if latest_known:
+        latest_nightly_folder = latest_known.strftime("%Y-%m-%d-%H-%M-%S")
 
     current_month = "{}/{:02d}".format(today.year, today.month)
     month_url = archive_url(product, nightly=current_month)
@@ -220,21 +294,19 @@ async def fetch_nightlies(session, queue, product, client):
     listings = await asyncio.gather(*futures)
 
     channel = "nightly"
-    re_filename = re.compile(r"\w+-(\d+.+)\.([a-z]+(\-[A-Z]+)?)\.(.+)\.({})$".format(FILE_EXTENSIONS))
 
     for day_url, (_, files) in zip(days_urls, listings):
         for file_ in files:
             filename = file_["name"]
+
+            try:
+                version, locale, platform = parse_nightly_filename(filename)
+            except ValueError:
+                continue
+
             size = file_["size"]
             date = file_["last_modified"]
             url = day_url + filename
-
-            match = re_filename.search(filename)
-            if not match or "tests" in filename:
-                continue
-            version = match.group(1)
-            locale = match.group(2)
-            platform = match.group(4)
 
             metadata = await fetch_nightly_metadata(session, url)
             record = archive(product, version, platform, locale, channel, url, size, date, metadata)
@@ -243,18 +315,8 @@ async def fetch_nightlies(session, queue, product, client):
 
 
 async def fetch_versions(session, queue, product, client):
-    # Check latest known version on server.
-    filters = {
-        "source.product": product,
-        "target.channel": "beta",
-        "_sort": "-download.date",
-        "_limit": 1,
-        "pages": 1
-    }
-    existing = client.get_records(**filters)
-    latest_version = ""
-    if existing:
-        latest_version = existing[0]["target"]["version"]
+    latest_version = latest_known_version(client, product)
+    if latest_version:
         logger.info("Scrape {} from version {}".format(product, latest_version))
 
     product_url = archive_url(product)
@@ -299,14 +361,15 @@ async def fetch_files(session, queue, product, version, platform, locale):
     locale_url = archive_url(product, version, platform, locale)
     _, files = await fetch_listing(session, locale_url)
 
-    re_filename = re.compile("{}-(.+)({})$".format(product, FILE_EXTENSIONS))
-    files = [f for f in files if re_filename.match(f["name"]) and 'sdk' not in f["name"]]
-
     channel = None  # Unknown.
 
     futures = []
     for file_ in files:
         filename = file_["name"]
+
+        if not is_release_filename(product, filename):
+            continue
+
         url = locale_url + filename
         size = file_["size"]
         date = file_["last_modified"]
