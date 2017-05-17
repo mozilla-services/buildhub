@@ -11100,7 +11100,7 @@ var _mozilla_services$buildhub$Decoder$buildRecordDecoder = A3(
 							_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_mozilla_services$buildhub$Types$BuildRecord))))))));
 
 var _mozilla_services$buildhub$Url$parsePage = function (location) {
-	return _elm_lang$core$Native_Utils.eq(location.hash, '#/builds') ? _mozilla_services$buildhub$Types$MainView : _mozilla_services$buildhub$Types$DocsView;
+	return _elm_lang$core$Native_Utils.eq(location.hash, '#/docs') ? _mozilla_services$buildhub$Types$DocsView : _mozilla_services$buildhub$Types$MainView;
 };
 
 var _mozilla_services$buildhub$Model$recordResource = A3(_Kinto$elm_kinto$Kinto$recordResource, 'build-hub', 'fixtures', _mozilla_services$buildhub$Decoder$buildRecordDecoder);
