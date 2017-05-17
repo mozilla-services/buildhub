@@ -19,4 +19,4 @@ def build_record_id(url):
         locale = url_parts[8]
         arch = url_parts[7]
 
-    return '{}_{}_{}_{}'.format(product_name, version, arch, locale).replace('.', '-')
+    return '{}_{}_{}_{}'.format(product_name, version, arch, locale).replace('.', '-').lower()

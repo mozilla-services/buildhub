@@ -5,14 +5,14 @@ def test_build_id_from_record_for_nightly():
     record_id = build_record_id("https://archive.mozilla.org/pub/"
                                 "firefox/nightly/2017/05/2017-05-15-10-02-38-mozilla-central/"
                                 "firefox-55.0a1.en-US.linux-x86_64.tar.bz2")
-    assert record_id == "firefox_2017-05-15-10-02-38_55-0a1_linux-x86_64_en-US"
+    assert record_id == "firefox_2017-05-15-10-02-38_55-0a1_linux-x86_64_en-us"
 
 
 def test_build_id_from_record_for_firefox_beta():
     record_id = build_record_id("https://archive.mozilla.org/pub/"
                                 "firefox/releases/52.0b6/linux-x86_64/en-US/"
                                 "firefox-52.0b6.tar.bz2")
-    assert record_id == "firefox_52-0b6_linux-x86_64_en-US"
+    assert record_id == "firefox_52-0b6_linux-x86_64_en-us"
 
 
 def test_build_id_from_record_for_thunderbird():
@@ -26,7 +26,7 @@ def test_build_id_for_firefox_esr():
     record_id = build_record_id("https://archive.mozilla.org/pub/"
                                 "firefox/releases/52.0esr/linux-x86_64/"
                                 "en-US/firefox-52.0esr.tar.bz2")
-    assert record_id == "firefox_52-0esr_linux-x86_64_en-US"
+    assert record_id == "firefox_52-0esr_linux-x86_64_en-us"
 
 
 def test_build_id_from_record_for_fennec():
