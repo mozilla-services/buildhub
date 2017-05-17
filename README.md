@@ -14,6 +14,8 @@ Currently we use [Kinto](http://kinto-storage.org) as a generic database service
 
 > More specific solutions may replace it when the product scope evolves.
 
+* [Automatic Update Service (AUS, a.k.a Balrog)](https://wiki.mozilla.org/Balrog)
+
 ## Licence
 
 Apache 2
