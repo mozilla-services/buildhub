@@ -295,24 +295,34 @@ async def fetch_nightlies(session, queue, product, client):
     listings = await asyncio.gather(*futures)
 
     channel = "nightly"
+    batch_size = 10
 
     for day_url, (_, files) in zip(days_urls, listings):
-        for file_ in files:
-            filename = file_["name"]
+        # Fetch metadata and put into queue in batch.
+        nb_batches = (len(files) // batch_size) + 1
+        for i in range(nb_batches):
+            files_subset = files[(i * batch_size):((i + 1) * batch_size)]
 
-            try:
-                version, locale, platform = parse_nightly_filename(filename)
-            except ValueError:
-                continue
+            # Fetch metadata in batch.
+            futures = [fetch_nightly_metadata(session, day_url + file_["name"])
+                       for file_ in files_subset]
+            metadatas = await asyncio.gather(*futures)
 
-            size = file_["size"]
-            date = file_["last_modified"]
-            url = day_url + filename
-
-            metadata = await fetch_nightly_metadata(session, url)
-            record = archive(product, version, platform, locale, channel, url, size, date, metadata)
-            logger.debug("Nightly found {}".format(url))
-            await queue.put(record)
+            # Add to queue in batch.
+            futures = []
+            for file_, metadata in zip(files_subset, metadatas):
+                filename = file_["name"]
+                size = file_["size"]
+                date = file_["last_modified"]
+                url = day_url + filename
+                try:
+                    version, locale, platform = parse_nightly_filename(filename)
+                except ValueError:
+                    continue
+                record = archive(product, version, platform, locale, channel, url, size, date, metadata)
+                logger.debug("Nightly found {}".format(url))
+                futures.append(queue.put(record))
+            await asyncio.gather(*futures)
 
 
 async def fetch_versions(session, queue, product, client):
