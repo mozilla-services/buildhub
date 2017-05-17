@@ -146,10 +146,11 @@ def parse_nightly_filename(filename):
     And things we'll want to ignore:
 
     - firefox-55.0a1.en-US.linux-i686.talos.tests.zip
+    - firefox-55.0a1.en-US.mac.crashreporter-symbols.zip
     """
     re_nightly = re.compile(r"\w+-(\d+.+)\.([a-z]+(\-[A-Z]+)?)\.(.+)\.({})$".format(FILE_EXTENSIONS))
     match = re_nightly.search(filename)
-    if not match or "tests" in filename:
+    if not match or "tests" in filename or "crashreporter" in filename:
         raise ValueError()
     version = match.group(1)
     locale = match.group(2)
