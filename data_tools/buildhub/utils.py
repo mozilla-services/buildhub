@@ -1,6 +1,3 @@
-from os.path import basename
-
-
 def build_record_id(record):
     version = record["target"]["version"]
     if record["target"]["channel"] == 'nightly':

@@ -152,7 +152,8 @@ def parse_nightly_filename(filename):
     - firefox-55.0a1.en-US.linux-i686.talos.tests.zip
     - firefox-55.0a1.en-US.mac.crashreporter-symbols.zip
     """
-    re_nightly = re.compile(r"\w+-(\d+.+)\.([a-z]+(\-[A-Z]+)?)\.(.+)\.({})$".format(FILE_EXTENSIONS))
+    re_nightly = re.compile(r"\w+-(\d+.+)\.([a-z]+(\-[A-Z]+)?)\.(.+)\.({})$".format(
+        FILE_EXTENSIONS))
     match = re_nightly.search(filename)
     if not match or "tests" in filename or "crashreporter" in filename:
         raise ValueError()
@@ -323,7 +324,8 @@ async def fetch_nightlies(session, queue, product, client):
                     version, locale, platform = parse_nightly_filename(filename)
                 except ValueError:
                     continue
-                record = archive(product, version, platform, locale, channel, url, size, date, metadata)
+                record = archive(product, version, platform, locale, channel, url,
+                                 size, date, metadata)
                 logger.debug("Nightly found {}".format(url))
                 futures.append(queue.put(record))
             await asyncio.gather(*futures)
