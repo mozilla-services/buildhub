@@ -14,13 +14,20 @@ from kinto_http import cli_utils
 
 ARCHIVE_URL = "https://archive.mozilla.org/pub/"
 PRODUCTS = ("fennec", "firefox", "thunderbird")
-FILE_EXTENSIONS = "zip|gz|bz|bz2|dmg|apk"
+FILE_EXTENSIONS = "zip|gz|bz2|dmg|apk"
 DEFAULT_SERVER = "https://kinto-ota.dev.mozaws.net/v1"
 DEFAULT_BUCKET = "build-hub"
 DEFAULT_COLLECTION = "archives"
 NB_THREADS = 3
 NB_RETRY_REQUEST = 3
 TIMEOUT_SECONDS = 5 * 60
+KNOWN_MIMETYPES = {
+    'apk': 'application/vnd.android.package-archive',
+    'bz2': 'application/x-bzip2',
+    'zip': 'application/zip',
+    'dmg': 'application/x-apple-diskimage',
+    'gz': 'application/x-gzip',
+    }
 
 today = datetime.date.today()
 
@@ -101,13 +108,22 @@ def archive(product, version, platform, locale, channel, url, size, date, metada
         },
         "download": {
             "url": url,
-            "mimetype": None,
+            "mimetype": guess_mimetype(url),
             "size": size,
             "date": date,
         },
         "systemaddons": None
     }
     return record
+
+
+
+
+def guess_mimetype(url):
+    """Try to guess what kind of mimetype a given archive URL would be."""
+    dot = url.rfind('.')
+    extension = url[dot+1:]
+    return KNOWN_MIMETYPES[extension]
 
 
 def archive_url(product, version=None, platform=None, locale=None, nightly=None, candidate=None):
