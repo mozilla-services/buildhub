@@ -20,7 +20,6 @@ REQUIREMENTS = [
     "aiohttp",
     "backoff",
     "kinto-http",
-    "MozillaPulse",
 ]
 
 ENTRY_POINTS = {
