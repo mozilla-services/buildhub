@@ -1,37 +1,20 @@
 # buildhub
 
-Hub that gathers build info
+This *experimental* project aims to provide a public database of comprehensive information about
+releases and builds.
 
-## Web UI
+This repository has two main folders:
 
-The Web UI is written in Elm.
+* [ui/](https://github.com/mozilla-services/buildhub/tree/master/ui#readme): A Web UI to browse the available data
+* [jobs/](https://github.com/mozilla-services/buildhub/tree/master/jobs#readme): A set of jobs in charge of aggregating and keeping the data up-to-date.
 
-### Setting up the development environment
+![](overview.png)
 
-    $ npm i
-    $ ./node_modules/.bin/elm-package install
+Currently we use [Kinto](http://kinto-storage.org) as a generic database service. It allows us to leverage its simple API for storing and querying records. It also comes with a set of client libraries for JavaScript, Python etc.
 
-### Starting the dev server
+> More specific solutions may replace it when the product scope evolves.
 
-    $ npm start
-
-### Starting the dev server in live debug mode
-
-    $ npm run debug
-
-### Building
-
-    $ npm run build
-
-### Deploying to gh-pages
-
-    $ npm run deploy
-
-The app should be deployed to https://[your-github-username].github.io/buildhub/
-
-### Launching testsuite
-
-    $ npm test
+* [Automatic Update Service (AUS, a.k.a Balrog)](https://wiki.mozilla.org/Balrog)
 
 ## Licence
 
