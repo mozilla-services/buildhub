@@ -24,6 +24,13 @@ DEFAULT_COLLECTION = "archives"
 NB_THREADS = 3
 NB_RETRY_REQUEST = 3
 TIMEOUT_SECONDS = 5 * 60
+KNOWN_MIMETYPES = {
+    'apk': 'application/vnd.android.package-archive',
+    'bz2': 'application/x-bzip2',
+    'zip': 'application/zip',
+    'dmg': 'application/x-apple-diskimage',
+    'gz': 'application/x-gzip',
+    }
 
 today = datetime.date.today()
 
@@ -106,7 +113,7 @@ def archive(product, version, platform, locale, channel, url, size, date, metada
         },
         "download": {
             "url": url,
-            "mimetype": None,
+            "mimetype": guess_mimetype(url),
             "size": size,
             "date": date,
         },
@@ -114,6 +121,15 @@ def archive(product, version, platform, locale, channel, url, size, date, metada
     }
     record['id'] = build_record_id(record)
     return record
+
+
+
+
+def guess_mimetype(url):
+    """Try to guess what kind of mimetype a given archive URL would be."""
+    dot = url.rfind('.')
+    extension = url[dot+1:]
+    return KNOWN_MIMETYPES[extension]
 
 
 def archive_url(product, version=None, platform=None, locale=None, nightly=None, candidate=None):
