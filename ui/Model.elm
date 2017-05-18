@@ -9,20 +9,23 @@ import Url exposing (..)
 
 init : Location -> ( Model, Cmd Msg )
 init location =
-    { builds = []
-    , filteredBuilds = []
-    , filterValues = FilterValues [] [] [] [] [] []
-    , treeFilter = "all"
-    , productFilter = "all"
-    , versionFilter = "all"
-    , platformFilter = "all"
-    , channelFilter = "all"
-    , localeFilter = "all"
-    , buildIdFilter = ""
-    , loading = True
-    , currentView = parsePage location
-    }
-        ! [ getBuildRecordList ]
+    let
+        defaultModel =
+            { builds = []
+            , filteredBuilds = []
+            , filterValues = FilterValues [] [] [] [] [] []
+            , treeFilter = "all"
+            , productFilter = "all"
+            , versionFilter = "all"
+            , platformFilter = "all"
+            , channelFilter = "all"
+            , localeFilter = "all"
+            , buildIdFilter = ""
+            , loading = True
+            , route = MainView
+            }
+    in
+        parsePage defaultModel location ! [ getBuildRecordList ]
 
 
 getBuildRecordList : Cmd Msg

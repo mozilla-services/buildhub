@@ -2,7 +2,7 @@ module Types
     exposing
         ( Build
         , BuildRecord
-        , CurrentView(..)
+        , Route(..)
         , Download
         , FilterValues
         , Model
@@ -30,7 +30,7 @@ type alias Model =
     , localeFilter : String
     , buildIdFilter : String
     , loading : Bool
-    , currentView : CurrentView
+    , route : Route
     }
 
 
@@ -113,8 +113,9 @@ type NewFilter
     | NewBuildIdSearch String
 
 
-type CurrentView
+type Route
     = MainView
+    | BuildIdView String
     | DocsView
 
 

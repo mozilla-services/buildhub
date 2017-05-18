@@ -13,12 +13,12 @@ view : Model -> Html Msg
 view model =
     div [ class "container" ]
         [ headerView model
-        , case model.currentView of
-            MainView ->
-                mainView model
-
+        , case model.route of
             DocsView ->
                 docsView model
+
+            _ ->
+                mainView model
         ]
 
 

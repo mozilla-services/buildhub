@@ -84,7 +84,7 @@ update msg ({ filterValues } as model) =
                     ! []
 
         UrlChange location ->
-            { model | currentView = parsePage location } ! []
+            parsePage model location ! []
 
 
 extractFilterValues : List BuildRecord -> FilterValues
