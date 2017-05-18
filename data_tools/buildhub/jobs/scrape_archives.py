@@ -9,7 +9,7 @@ from packaging.version import parse as version_parse
 
 import aiohttp
 import backoff
-from buildhub.utils import build_record_id
+from buildhub.utils import build_record_from_url
 from kinto_http import cli_utils
 
 
@@ -79,7 +79,6 @@ def archive(product, version, platform, locale, channel, url, size, date, metada
         #  https://archive.mozilla.org/pub/thunderbird/candidates \
         #  /50.0b1-candidates/build2/linux-i686/en-US/thunderbird-50.0b1.json
         revision = metadata["moz_source_stamp"]
-        channel = metadata["moz_update_channel"]
         repository = metadata["moz_source_repo"].replace("MOZ_SOURCE_REPO=", "")
         tree = repository.split("/")[-1]
         buildid = metadata["buildid"]
@@ -89,27 +88,17 @@ def archive(product, version, platform, locale, channel, url, size, date, metada
             "date": builddate,
         }
 
-    record = {
-        "build": build,
-        "source": {
+    record = build_record_from_url(url)
+    record["build"] = build,
+    record["source"].update({
             "revision": revision,
             "tree": tree,
-            "product": product,
-        },
-        "target": {
-            "platform": platform,
-            "locale": locale,
-            "version": version,
-            "channel": channel,
-        },
-        "download": {
-            "url": url,
-            "mimetype": None,
-            "size": size,
-            "date": date,
-        },
-        "systemaddons": None
-    }
+    })
+    record["download"].update({
+        "mimetype": None,
+        "size": size,
+        "date": date,
+    })
     return record
 
 
