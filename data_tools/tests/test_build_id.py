@@ -6,8 +6,10 @@ RECORDS = [
     # Firefox Nightly
     {
         "id": "firefox_2017-05-15-10-02-38_55-0a1_linux-x86_64_en-us",
-        "target": {
+        "source": {
             "product": "firefox",
+        },
+        "target": {
             "version": "55.0a1",
             "platform": "linux-x86_64",
             "locale": "en-US",
@@ -22,8 +24,10 @@ RECORDS = [
     # Firefox Aurora
     {
         "id": "firefox_54-0a2_mac_en-us",
-        "target": {
+        "source": {
             "product": "firefox",
+        },
+        "target": {
             "version": "54.0a2",
             "platform": "mac",
             "locale": "en-US",
@@ -38,8 +42,10 @@ RECORDS = [
     # Firefox Beta
     {
         "id": "firefox_52-0b6_linux-x86_64_en-us",
-        "target": {
+        "source": {
             "product": "firefox",
+        },
+        "target": {
             "version": "52.0b6",
             "platform": "linux-x86_64",
             "locale": "en-US",
@@ -54,8 +60,10 @@ RECORDS = [
     # Firefox Candidates
     {
         "id": "firefox_50-0rc1_linux-x86_64_fr",
-        "target": {
+        "source": {
             "product": "firefox",
+        },
+        "target": {
             "version": "50.0rc1",
             "platform": "linux-x86_64",
             "locale": "fr",
@@ -70,8 +78,10 @@ RECORDS = [
     # Firefox Release
     {
         "id": "firefox_52-0_linux-x86_64_fr",
-        "target": {
+        "source": {
             "product": "firefox",
+        },
+        "target": {
             "version": "52.0",
             "platform": "linux-x86_64",
             "locale": "fr",
@@ -86,8 +96,10 @@ RECORDS = [
     # Firefox ESR
     {
         "id": "firefox_52-0esr_linux-x86_64_en-us",
-        "target": {
+        "source": {
             "product": "firefox",
+        },
+        "target": {
             "version": "52.0esr",
             "platform": "linux-x86_64",
             "locale": "en-US",
@@ -102,8 +114,10 @@ RECORDS = [
     # Thunderbird Release
     {
         "id": "thunderbird_17-0-8esr_linux-x86_64_gd",
-        "target": {
+        "source": {
             "product": "thunderbird",
+        },
+        "target": {
             "version": "17.0.8esr",
             "platform": "linux-x86_64",
             "locale": "gd",
@@ -118,8 +132,10 @@ RECORDS = [
     # Fennec
     {
         "id": "fennec_39-0b5_android-api-9_sl",
-        "target": {
+        "source": {
             "product": "fennec",
+        },
+        "target": {
             "version": "39.0b5",
             "platform": "android-api-9",
             "locale": "sl",
@@ -134,8 +150,10 @@ RECORDS = [
     # Localized Fennec
     {
         "id": "fennec_42-0b2_android-api-9_fr",
-        "target": {
+        "source": {
             "product": "fennec",
+        },
+        "target": {
             "version": "42.0b2",
             "platform": "android-api-9",
             "locale": "fr",

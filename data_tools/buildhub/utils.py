@@ -32,12 +32,12 @@ def build_record_from_url(url):
             channel = 'beta'
 
     record['target'] = {
-        'product': product_name,
         'version': version,
         'platform': platform,
         'locale': locale,
         'channel': channel,
     }
+    record['source'] = {'product': product_name}
     record["download"] = {"url": url}
     record_id = build_record_id(record)
     record['id'] = record_id
@@ -51,8 +51,8 @@ def build_record_id(record):
         date_parts = url_parts[8].split('-')
         date = '-'.join(date_parts[:6])
         version = '{}_{}'.format(date, version)
-    return '{target[product]}_{version}_{target[platform]}_{target[locale]}'.format(
-        target=record['target'], version=version).replace('.', '-').lower()
+    return '{source[product]}_{version}_{target[platform]}_{target[locale]}'.format(
+        **record, version=version).replace('.', '-').lower()
 
 
 def build_record_id_from_url(url):
