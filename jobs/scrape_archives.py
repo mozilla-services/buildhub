@@ -14,7 +14,7 @@ from kinto_http import cli_utils
 
 ARCHIVE_URL = "https://archive.mozilla.org/pub/"
 PRODUCTS = ("fennec", "firefox", "thunderbird")
-FILE_EXTENSIONS = "zip|gz|bz|bz2|dmg|apk"
+FILE_EXTENSIONS = "zip|gz|bz2|dmg|apk"
 DEFAULT_SERVER = "https://kinto-ota.dev.mozaws.net/v1"
 DEFAULT_BUCKET = "build-hub"
 DEFAULT_COLLECTION = "archives"
