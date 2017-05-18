@@ -14,6 +14,11 @@ def build_record_id(url):
         version = '{}_{}'.format(build_date, version_number)
         locale = parts[2]
         arch = parts[3]
+    elif 'candidates' in url:
+        candidate_number = url_parts[7].strip('build')
+        version = '{}.{}rc{}'.format(major_version, parts[1], candidate_number)
+        locale = url_parts[9]
+        arch = url_parts[8]
     else:
         version = url_parts[6]
         locale = url_parts[8]

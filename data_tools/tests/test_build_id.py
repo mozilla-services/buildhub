@@ -8,6 +8,13 @@ def test_build_id_from_record_for_nightly():
     assert record_id == "firefox_2017-05-15-10-02-38_55-0a1_linux-x86_64_en-us"
 
 
+def test_build_id_for_firefox_candidates():
+    record_id = build_record_id("https://archive.mozilla.org/pub/"
+                                "firefox/candidates/50.0-candidates/build1/"
+                                "linux-x86_64/fr/firefox-50.0.tar.bz2")
+    assert record_id == "firefox_50-0rc1_linux-x86_64_fr"
+
+
 def test_build_id_from_record_for_firefox_beta():
     record_id = build_record_id("https://archive.mozilla.org/pub/"
                                 "firefox/releases/52.0b6/linux-x86_64/en-US/"
