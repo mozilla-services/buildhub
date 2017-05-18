@@ -10,4 +10,3 @@ This document describes changes between each past release.
 
 - Scraping tools from archive
 - Scraping tools for systemaddons
-- Listener for Pulse

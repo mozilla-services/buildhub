@@ -19,6 +19,22 @@ RECORDS = [
         }
      },
 
+    # Firefox Aurora
+    {
+        "id": "firefox_54-0a2_mac_en-us",
+        "target": {
+            "product": "firefox",
+            "version": "54.0a2",
+            "platform": "mac",
+            "locale": "en-US",
+            "channel": "aurora"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/firefox/nightly/2017/04/"
+            "2017-04-03-00-40-02-mozilla-aurora/firefox-54.0a2.en-US.mac.dmg"
+        }
+    },
+
     # Firefox Beta
     {
         "id": "firefox_52-0b6_linux-x86_64_en-us",

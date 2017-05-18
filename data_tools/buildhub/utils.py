@@ -13,7 +13,10 @@ def build_record_from_url(url):
         version = '{}.{}'.format(major_version, parts[1])
         locale = parts[2]
         platform = parts[3]
-        channel = 'nightly'
+        if 'aurora' in url:
+            channel = 'aurora'
+        else:
+            channel = 'nightly'
     elif 'candidates' in url:
         candidate_number = url_parts[7].strip('build')
         version = '{}.{}rc{}'.format(major_version, parts[1], candidate_number)
@@ -27,8 +30,6 @@ def build_record_from_url(url):
             channel = 'esr'
         elif 'b' in version:
             channel = 'beta'
-        elif 'a' in version:
-            channel = 'aurora'
 
     record['target'] = {
         'product': product_name,
@@ -61,13 +62,16 @@ def build_record_id_from_url(url):
 
     product_name, major_version = parts[0].split('-')
 
-    # Nightly URL
+    # Nightly or Aurora URL
     # https://archive.mozilla.org/pub/firefox/nightly/2017/05/
     # 2017-05-15-10-02-38-mozilla-central/firefox-55.0a1.en-US.linux-x86_64.tar.bz2
     if 'nightly' in url:
         build_date = '-'.join(url_parts[8].split('-')[:6])
-        version_number = '{}.{}'.format(major_version, parts[1])
-        version = '{}_{}'.format(build_date, version_number)
+        if 'aurora' in url:
+            version = '{}.{}'.format(major_version, parts[1])
+        else:
+            version_number = '{}.{}'.format(major_version, parts[1])
+            version = '{}_{}'.format(build_date, version_number)
         locale = parts[2]
         arch = parts[3]
     # Candidates URL
