@@ -48,7 +48,7 @@ def update_download_info(client, record):
     dlinfo["mimetype"] = resp.headers["Content-Type"]
 
     # XXX: use JSON-merge header.
-    client.patch_record({"download": dlinfo}, id=rid)
+    client.patch_record(data={"download": dlinfo}, id=rid)
 
 
 def pulse2kinto(body, message, client):
@@ -89,7 +89,7 @@ def pulse2kinto(body, message, client):
         },
         "systemaddons": None
     }
-    r = client.create_record(record)
+    r = client.create_record(data=record)
     logger.info("Created record %s" % json.dumps(r))
 
     # Tell the pulse queue that the message has been processed and

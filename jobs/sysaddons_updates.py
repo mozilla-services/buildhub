@@ -134,7 +134,7 @@ async def main(loop):
                 if len(patches) == kinto_batch_size or i == nb_batches - 1:
                     with client.batch() as batch:
                         for patch in patches:
-                            batch.patch_record(patch)
+                            batch.patch_record(data=patch)
                     patches = []
 
     logger.info("Done.")
