@@ -9,7 +9,7 @@ from packaging.version import parse as version_parse
 
 import aiohttp
 import backoff
-from buildhub.utils import build_record_from_url
+from buildhub.utils import build_record_id
 from kinto_http import cli_utils
 
 
@@ -79,6 +79,7 @@ def archive(product, version, platform, locale, channel, url, size, date, metada
         #  https://archive.mozilla.org/pub/thunderbird/candidates \
         #  /50.0b1-candidates/build2/linux-i686/en-US/thunderbird-50.0b1.json
         revision = metadata["moz_source_stamp"]
+        channel = metadata["moz_update_channel"]
         repository = metadata["moz_source_repo"].replace("MOZ_SOURCE_REPO=", "")
         tree = repository.split("/")[-1]
         buildid = metadata["buildid"]
@@ -88,17 +89,28 @@ def archive(product, version, platform, locale, channel, url, size, date, metada
             "date": builddate,
         }
 
-    record = build_record_from_url(url)
-    record["build"] = build,
-    record["source"].update({
+    record = {
+        "build": build,
+        "source": {
             "revision": revision,
             "tree": tree,
-    })
-    record["download"].update({
-        "mimetype": None,
-        "size": size,
-        "date": date,
-    })
+            "product": product,
+        },
+        "target": {
+            "platform": platform,
+            "locale": locale,
+            "version": version,
+            "channel": channel,
+        },
+        "download": {
+            "url": url,
+            "mimetype": None,
+            "size": size,
+            "date": date,
+        },
+        "systemaddons": None
+    }
+    record['id'] = build_record_id(record)
     return record
 
 
@@ -290,27 +302,31 @@ async def fetch_nightlies(session, queue, product, client):
     batch_size = 10
 
     for day_url, (_, files) in zip(days_urls, listings):
-        futures = []
-        for file_ in files:
-            filename = file_["name"]
-            size = file_["size"]
-            date = file_["last_modified"]
-            url = day_url + filename
+        # Fetch metadata and put into queue in batch.
+        nb_batches = (len(files) // batch_size) + 1
+        for i in range(nb_batches):
+            files_subset = files[(i * batch_size):((i + 1) * batch_size)]
 
-            match = re.search(r'\w+-(\d+.+)\.([a-z]+(\-[A-Z]+)?)\.(.+)\.tar.bz2+$', filename)
-            if not match:
-                continue
-            version = match.group(1)
-            locale = match.group(2)
-            platform = match.group(4)
+            # Fetch metadata in batch.
+            futures = [fetch_nightly_metadata(session, day_url + file_["name"])
+                       for file_ in files_subset]
+            metadatas = await asyncio.gather(*futures)
 
-            metadata = await fetch_nightly_metadata(session, url)
-            record = archive(product, version, platform, locale, channel,
-                             url, size, date, metadata)
-            logger.debug("Nightly found %s" % url)
-
-            futures.append(queue.put(record))
-        await asyncio.gather(*futures)
+            # Add to queue in batch.
+            futures = []
+            for file_, metadata in zip(files_subset, metadatas):
+                filename = file_["name"]
+                size = file_["size"]
+                date = file_["last_modified"]
+                url = day_url + filename
+                try:
+                    version, locale, platform = parse_nightly_filename(filename)
+                except ValueError:
+                    continue
+                record = archive(product, version, platform, locale, channel, url, size, date, metadata)
+                logger.debug("Nightly found {}".format(url))
+                futures.append(queue.put(record))
+            await asyncio.gather(*futures)
 
 
 async def fetch_versions(session, queue, product, client):

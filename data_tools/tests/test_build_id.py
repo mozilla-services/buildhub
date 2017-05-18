@@ -1,5 +1,5 @@
 import pytest
-from buildhub.utils import build_record_id_from_url, build_record_id, build_record_from_url
+from buildhub.utils import build_record_id
 
 
 RECORDS = [
@@ -167,29 +167,8 @@ RECORDS = [
 ]
 
 
-# Build record_id from url
-@pytest.mark.parametrize("record", RECORDS)
-def test_build_record_id_from_url(record):
-    record_id = build_record_id_from_url(record["download"]["url"])
-    assert record_id == record["id"]
-
-
 # Build record_id from record
 @pytest.mark.parametrize("record", RECORDS)
-def test_build_record_id_from_record(record):
+def test_build_record_id_from_url(record):
     record_id = build_record_id(record)
     assert record_id == record["id"]
-
-
-# Build record_id from url
-@pytest.mark.parametrize("record", RECORDS)
-def test_build_record_from_url(record):
-    generated_record = build_record_from_url(record["download"]["url"])
-    assert generated_record == record
-
-
-# Build record_id from build record from url
-@pytest.mark.parametrize("record", RECORDS)
-def test_build_record_id_from_record_built_from_url(record):
-    record_id = build_record_id(build_record_from_url(record["download"]["url"]))
-    assert record_id == record['id']
