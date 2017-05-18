@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 def publish_records(client, records):
     with client.batch() as batch:
         for record in records:
-            batch.create_record(record)
+            batch.create_record(data=record)
     logger.info("Created {} records".format(len(records)))
 
 

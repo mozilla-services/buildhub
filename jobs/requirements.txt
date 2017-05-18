@@ -1,4 +1,4 @@
 aiohttp==2.0.7
 backoff==1.4.2
-kinto-http==7.2.0
+kinto-http==8.0.1
 MozillaPulse==1.2.2
