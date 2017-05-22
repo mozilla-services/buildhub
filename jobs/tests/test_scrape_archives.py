@@ -18,7 +18,7 @@ ARCHIVE_INFOS = [
           },
           "download": {
               "size": 56704543,
-              "mimetype": None,
+              "mimetype": "application/zip",
               "date": "2017-05-03T12:57:55Z",
               "url": "https://archive.mozilla.org/pub/firefox/nightly/2017/05/"
               "2017-05-03-03-02-12-mozilla-central/firefox-55.0a1.en-US.win64.zip"

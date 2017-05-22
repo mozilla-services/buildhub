@@ -1,6 +1,13 @@
 import re
 
 FILE_EXTENSIONS = "zip|tar.gz|tar.bz2|dmg|apk"
+KNOWN_MIMETYPES = {
+    'apk': 'application/vnd.android.package-archive',
+    'bz2': 'application/x-bzip2',
+    'zip': 'application/zip',
+    'dmg': 'application/x-apple-diskimage',
+    'gz': 'application/x-gzip',
+    }
 
 
 def build_record_id(record):
@@ -68,3 +75,10 @@ def is_release_metadata(product, version, filename):
     """
     re_metadata = re.compile("{}-{}(.*).json".format(product, version))
     return re_metadata.match(filename)
+
+
+def guess_mimetype(url):
+    """Try to guess what kind of mimetype a given archive URL would be."""
+    dot = url.rfind('.')
+    extension = url[dot+1:]
+    return KNOWN_MIMETYPES.get(extension, None)
