@@ -24,9 +24,8 @@ REQUIREMENTS = [
 
 ENTRY_POINTS = {
     'console_scripts': [
-        'scrape_archives = buildhub.jobs.scrape_archives:run',
-        'listen_pulse = buildhub.jobs.listen_pulse:main',
-        'sysaddons_updates = buildhub.jobs.sysaddons_updates:run',
+        'scrape_archives = buildhub.scrape_archives:run',
+        'sysaddons_updates = buildhub.sysaddons_updates:run',
     ],
 }
 
