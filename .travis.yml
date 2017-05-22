@@ -7,7 +7,7 @@ env:
 install:
   - pip install tox
 script:
-  - cd data_tools; tox -e $TOX_ENV
+  - cd jobs; tox -e $TOX_ENV
 after_success:
   # Report coverage results to coveralls.io
   - pip install coveralls

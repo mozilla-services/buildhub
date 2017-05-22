@@ -3,4 +3,4 @@
 .tox/
 *.egg-info/
 __pycache__/
-data_tools/.coverage
+jobs/.coverage

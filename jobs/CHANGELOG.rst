@@ -8,5 +8,5 @@ This document describes changes between each past release.
 
 **Initial version**
 
-- Scraping tools from archive
-- Scraping tools for systemaddons
+- Scrape product releases and nightlies from https://archives.mozilla.org
+- Fetch system addons update information from Balrog

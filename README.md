@@ -5,8 +5,8 @@ releases and builds.
 
 This repository has two main folders:
 
-* [web_ui/](https://github.com/mozilla-services/buildhub/tree/master/web_ui#readme): A Web UI to browse the available data
-* [data_tools/](https://github.com/mozilla-services/buildhub/tree/master/data_tools#readme): Python tools in charge of aggregating and keeping the data up-to-date.
+* [ui/](https://github.com/mozilla-services/buildhub/tree/master/ui#readme): A Web UI to browse the available data
+* [jobs/](https://github.com/mozilla-services/buildhub/tree/master/jobs#readme): Python tools in charge of aggregating and keeping the data up-to-date.
 
 ![](overview.png)
 
