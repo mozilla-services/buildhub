@@ -1,3 +1,4 @@
+import os.path
 import re
 
 FILE_EXTENSIONS = "zip|tar.gz|tar.bz2|dmg|apk"
@@ -79,6 +80,5 @@ def is_release_metadata(product, version, filename):
 
 def guess_mimetype(url):
     """Try to guess what kind of mimetype a given archive URL would be."""
-    dot = url.rfind('.')
-    extension = url[dot+1:]
-    return KNOWN_MIMETYPES.get(extension, None)
+    _, extension = os.path.splitext(url)
+    return KNOWN_MIMETYPES.get(extension.strip('.'), None)
