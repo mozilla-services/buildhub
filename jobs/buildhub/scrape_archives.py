@@ -9,6 +9,7 @@ from packaging.version import parse as version_parse
 
 import aiohttp
 import backoff
+from buildhub.utils import build_record_id
 from kinto_http import cli_utils
 
 
@@ -74,7 +75,9 @@ def archive(product, version, platform, locale, channel, url, size, date, metada
     revision = None
     tree = None
     if metadata:
-        # Example of metadata: https://archive.mozilla.org/pub/thunderbird/candidates/50.0b1-candidates/build2/linux-i686/en-US/thunderbird-50.0b1.json
+        # Example of metadata:
+        #  https://archive.mozilla.org/pub/thunderbird/candidates \
+        #  /50.0b1-candidates/build2/linux-i686/en-US/thunderbird-50.0b1.json
         revision = metadata["moz_source_stamp"]
         channel = metadata["moz_update_channel"]
         repository = metadata["moz_source_repo"].replace("MOZ_SOURCE_REPO=", "")
@@ -107,6 +110,7 @@ def archive(product, version, platform, locale, channel, url, size, date, metada
         },
         "systemaddons": None
     }
+    record['id'] = build_record_id(record)
     return record
 
 
@@ -148,7 +152,10 @@ def parse_nightly_filename(filename):
     - firefox-55.0a1.en-US.linux-i686.talos.tests.zip
     - firefox-55.0a1.en-US.mac.crashreporter-symbols.zip
     """
-    re_nightly = re.compile(r"\w+-(\d+.+)\.([a-z]+(\-[A-Z]+)?)\.(.+)\.({})$".format(FILE_EXTENSIONS))
+    re_nightly = re.compile(r"\w+-(\d+.+)\."  # product-version
+                            r"([a-z]+(\-[A-Z]+)?)"  # locale
+                            r"\.(.+)"  # platform
+                            r"\.({})$".format(FILE_EXTENSIONS))
     match = re_nightly.search(filename)
     if not match or "tests" in filename or "crashreporter" in filename:
         raise ValueError()
@@ -319,7 +326,8 @@ async def fetch_nightlies(session, queue, product, client):
                     version, locale, platform = parse_nightly_filename(filename)
                 except ValueError:
                     continue
-                record = archive(product, version, platform, locale, channel, url, size, date, metadata)
+                record = archive(product, version, platform, locale, channel, url,
+                                 size, date, metadata)
                 logger.debug("Nightly found {}".format(url))
                 futures.append(queue.put(record))
             await asyncio.gather(*futures)
@@ -463,7 +471,11 @@ async def main(loop):
     consumer.cancel()
 
 
-if __name__ == "__main__":
+def run():
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main(loop))
     loop.close()
+
+
+if __name__ == "__main__":
+    run()

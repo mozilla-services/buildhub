@@ -1,4 +1,4 @@
-# buildhub
+# Buildhub
 
 This *experimental* project aims to provide a public database of comprehensive information about
 releases and builds.
@@ -6,7 +6,7 @@ releases and builds.
 This repository has two main folders:
 
 * [ui/](https://github.com/mozilla-services/buildhub/tree/master/ui#readme): A Web UI to browse the available data
-* [jobs/](https://github.com/mozilla-services/buildhub/tree/master/jobs#readme): A set of jobs in charge of aggregating and keeping the data up-to-date.
+* [jobs/](https://github.com/mozilla-services/buildhub/tree/master/jobs#readme): Python tools in charge of aggregating and keeping the data up-to-date.
 
 ![](overview.png)
 

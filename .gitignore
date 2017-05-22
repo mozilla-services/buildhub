@@ -1,0 +1,6 @@
+.cache/
+.coverage/
+.tox/
+*.egg-info/
+__pycache__/
+jobs/.coverage
