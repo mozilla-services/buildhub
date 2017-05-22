@@ -1,5 +1,7 @@
 import pytest
-from buildhub.utils import build_record_id
+from buildhub.utils import (
+    build_record_id, parse_nightly_filename, is_release_metadata, is_release_filename
+)
 
 
 RECORDS = [
@@ -169,6 +171,82 @@ RECORDS = [
 
 # Build record_id from record
 @pytest.mark.parametrize("record", RECORDS)
-def test_build_record_id_from_url(record):
+def test_build_record_id(record):
     record_id = build_record_id(record)
     assert record_id == record["id"]
+
+
+NIGHTLY_FILENAMES = [
+    ("firefox-55.0a1.en-US.linux-x86_64.tar.bz2", "55.0a1", "en-US", "linux-x86_64")
+]
+
+
+@pytest.mark.parametrize("filename,version,locale,platform", NIGHTLY_FILENAMES)
+def test_parse_nightly_filename(filename, version, locale, platform):
+    results = parse_nightly_filename(filename)
+    assert results == (version, locale, platform)
+
+
+NIGHTLY_WRONG_FILENAMES = [
+    "firefox-tests.bz2",
+    "firefox-crashreporter.gz",
+    "foobar.bz2",
+]
+
+
+@pytest.mark.parametrize("filename", NIGHTLY_WRONG_FILENAMES)
+def test_parse_nightly_filename_raise_a_value_error(filename):
+    with pytest.raises(ValueError):
+        parse_nightly_filename(filename)
+
+
+RELEASE_METADATA_FILENAMES = [
+    ("firefox", "52.0b7", "firefox-52.0b7.json"),
+    ("fennec", "51.0b2", "fennec-51.0b2.en-US.android-i386.json"),
+]
+
+
+@pytest.mark.parametrize("product,version,filename", RELEASE_METADATA_FILENAMES)
+def test_is_release_metadata(product, version, filename):
+    assert is_release_metadata(product, version, filename)
+
+
+WRONG_RELEASE_METADATA_FILENAMES = [
+    ("firefox", "52.0b7", "thunderbird-52.0b7.json"),
+    ("fennec", "51.0b2", "fennec-52.0.en-US.android-i386.json"),
+    ("fennec", "52.0", "fennec-52.0.en-US.android-i386.asc"),
+]
+
+
+@pytest.mark.parametrize("product,version,filename", WRONG_RELEASE_METADATA_FILENAMES)
+def test_wrong_release_metadata(product, version, filename):
+    assert not is_release_metadata(product, version, filename)
+
+
+RELEASE_FILENAMES = [
+    ("firefox", "firefox-53.0.tar.bz2"),
+    ("firefox", "firefox-54.0a2.en-US.mac.dmg"),
+    ("firefox", "firefox-52.0b6.tar.bz2"),
+    ("firefox", "firefox-50.0.tar.bz2"),
+    ("firefox", "firefox-52.0.tar.bz2"),
+    ("firefox", "firefox-52.0esr.tar.bz2"),
+    ("thunderbird", "thunderbird-17.0.8esr.tar.bz2"),
+    ("fennec", "fennec-39.0b5.sl.android-arm.apk"),
+    ("fennec", "fennec-42.0b2.fr.android-arm.apk"),
+]
+
+
+@pytest.mark.parametrize("product,filename", RELEASE_FILENAMES)
+def test_is_release_filename(product, filename):
+    assert is_release_filename(product, filename)
+
+
+WRONG_RELEASE_FILENAMES = [
+    ("firefox", "firefox-1.5.0.5.tar.gz.asc"),
+    ("firefox", "firefox-52.0.win32.sdk.zip"),
+]
+
+
+@pytest.mark.parametrize("product,filename", WRONG_RELEASE_FILENAMES)
+def test_wrong_release_filename(product, filename):
+    assert not is_release_filename(product, filename)
