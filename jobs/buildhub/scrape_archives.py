@@ -10,8 +10,8 @@ from packaging.version import parse as version_parse
 import aiohttp
 import backoff
 from buildhub.utils import (
-    build_record_id, parse_nightly_filename, is_release_metadata, is_release_filename,
-    FILE_EXTENSIONS
+    FILE_EXTENSIONS, build_record_id, parse_nightly_filename, is_release_metadata,
+    is_release_filename, guess_mimetype
 )
 from kinto_http import cli_utils
 
@@ -24,7 +24,6 @@ DEFAULT_COLLECTION = "archives"
 NB_THREADS = 3
 NB_RETRY_REQUEST = 3
 TIMEOUT_SECONDS = 5 * 60
-
 today = datetime.date.today()
 
 logger = logging.getLogger(__name__)
@@ -106,7 +105,7 @@ def archive(product, version, platform, locale, channel, url, size, date, metada
         },
         "download": {
             "url": url,
-            "mimetype": None,
+            "mimetype": guess_mimetype(url),
             "size": size,
             "date": date,
         },

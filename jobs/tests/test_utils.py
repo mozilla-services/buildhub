@@ -1,6 +1,7 @@
 import pytest
 from buildhub.utils import (
-    build_record_id, parse_nightly_filename, is_release_metadata, is_release_filename
+    build_record_id, parse_nightly_filename, is_release_metadata, is_release_filename,
+    guess_mimetype
 )
 
 
@@ -250,3 +251,19 @@ WRONG_RELEASE_FILENAMES = [
 @pytest.mark.parametrize("product,filename", WRONG_RELEASE_FILENAMES)
 def test_wrong_release_filename(product, filename):
     assert not is_release_filename(product, filename)
+
+
+URLS_MIMETYPES = [
+    ("firefox-55.0a1.en-US.linux-x86_64.tar.bz2", "application/x-bzip2"),
+    ("fennec-42.0b2.fr.android-arm.apk", "application/vnd.android.package-archive"),
+    ("firefox-52.0.win32.sdk.zip", "application/zip"),
+    ("firefox-54.0a2.en-US.mac.dmg", "application/x-apple-diskimage"),
+    ("firefox-1.5.0.5.tar.gz", "application/x-gzip"),
+    ("firefox-1.5.0.5.tar.gz.asc", None)
+]
+
+
+@pytest.mark.parametrize("url,expected_mimetype", URLS_MIMETYPES)
+def test_guess_mimetype(url, expected_mimetype):
+    mimetype = guess_mimetype(url)
+    assert mimetype == expected_mimetype
