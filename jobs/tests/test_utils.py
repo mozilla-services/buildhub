@@ -106,7 +106,7 @@ RECORDS = [
             "version": "52.0esr",
             "platform": "linux-x86_64",
             "locale": "en-US",
-            "channel": "esr"
+            "channel": "release"
         },
         "download": {
             "url": "https://archive.mozilla.org/pub/firefox/releases/52.0esr/linux-x86_64/en-US/"
@@ -124,7 +124,7 @@ RECORDS = [
             "version": "17.0.8esr",
             "platform": "linux-x86_64",
             "locale": "gd",
-            "channel": "esr"
+            "channel": "release"
         },
         "download": {
             "url": "https://archive.mozilla.org/pub/thunderbird/releases/17.0.8esr/linux-x86_64/"
