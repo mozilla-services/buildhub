@@ -66,7 +66,7 @@ ARCHIVE_INFOS = [
               "locale": "en-US",
               "version": "52.0.1",
               "platform": "linux-x86_64",
-              "channel": "esr"
+              "channel": "release"
           },
           "download": {
               "size": 56704543,
