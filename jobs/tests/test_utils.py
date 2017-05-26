@@ -1,7 +1,7 @@
 import pytest
 from buildhub.utils import (
     build_record_id, parse_nightly_filename, is_release_metadata, is_release_filename,
-    guess_mimetype
+    guess_mimetype, guess_channel
 )
 
 
@@ -267,3 +267,12 @@ URLS_MIMETYPES = [
 def test_guess_mimetype(url, expected_mimetype):
     mimetype = guess_mimetype(url)
     assert mimetype == expected_mimetype
+
+
+@pytest.mark.parametrize("record", RECORDS)
+def test_guess_channel(record):
+    url = record["download"]["url"]
+    version = record["target"]["version"]
+    expected_channel = record["target"]["channel"]
+    channel = guess_channel(url, version)
+    assert channel == expected_channel
