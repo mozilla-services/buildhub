@@ -85,7 +85,7 @@ def archive(product, version, platform, locale, url, size, date, metadata=None):
         revision = metadata["moz_source_stamp"]
         channel = metadata.get("moz_update_channel", channel)
         repository = metadata["moz_source_repo"].replace("MOZ_SOURCE_REPO=", "")
-        tree = repository.split("/")[-1]
+        tree = repository.split("hg.mozilla.org/", 1)[-1]
         buildid = metadata["buildid"]
         builddate = datetime.datetime.strptime(buildid[:12], "%Y%m%d%H%M").isoformat()
         build = {
@@ -97,6 +97,7 @@ def archive(product, version, platform, locale, url, size, date, metadata=None):
         "build": build,
         "source": {
             "revision": revision,
+            "repository": repository,
             "tree": tree,
             "product": product,
         },
