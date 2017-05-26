@@ -23,7 +23,6 @@ ARCHIVE_INFOS = [
               "url": "https://archive.mozilla.org/pub/firefox/nightly/2017/05/"
               "2017-05-03-03-02-12-mozilla-central/firefox-55.0a1.en-US.win64.zip"
           },
-          "systemaddons": None,
           "build": {
               "date": "2017-05-03T03:02:00",
               "id": "20170503030212"
@@ -75,7 +74,6 @@ ARCHIVE_INFOS = [
               "url": "https://archive.mozilla.org/pub/thunderbird/candidates/"
               "52.0.1-candidates/build3/linux-x86_64/en-US/thunderbird-52.0.1.tar.bz2"
           },
-          "systemaddons": None,
           "build": {
               "date": "2017-04-13T21:49:00",
               "id": "20170413214957"
