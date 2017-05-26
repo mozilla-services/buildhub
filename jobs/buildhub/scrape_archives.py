@@ -11,7 +11,7 @@ import aiohttp
 import backoff
 from buildhub.utils import (
     FILE_EXTENSIONS, build_record_id, parse_nightly_filename, is_release_metadata,
-    is_release_filename, guess_mimetype
+    is_release_filename, guess_mimetype, guess_channel
 )
 from kinto_http import cli_utils
 
@@ -71,16 +71,19 @@ def latest_known_version(client, product):
     return latest_version
 
 
-def archive(product, version, platform, locale, channel, url, size, date, metadata=None):
+def archive(product, version, platform, locale, url, size, date, metadata=None):
     build = None
     revision = None
     tree = None
+
+    channel = guess_channel(url, version)
+
     if metadata:
         # Example of metadata:
         #  https://archive.mozilla.org/pub/thunderbird/candidates \
         #  /50.0b1-candidates/build2/linux-i686/en-US/thunderbird-50.0b1.json
         revision = metadata["moz_source_stamp"]
-        channel = metadata["moz_update_channel"]
+        channel = metadata.get("moz_update_channel", channel)
         repository = metadata["moz_source_repo"].replace("MOZ_SOURCE_REPO=", "")
         tree = repository.split("/")[-1]
         buildid = metadata["buildid"]
@@ -251,7 +254,6 @@ async def fetch_nightlies(session, queue, product, client):
     futures = [fetch_listing(session, day_url) for day_url in days_urls]
     listings = await asyncio.gather(*futures)
 
-    channel = "nightly"
     batch_size = 10
 
     for day_url, (_, files) in zip(days_urls, listings):
@@ -276,7 +278,7 @@ async def fetch_nightlies(session, queue, product, client):
                     version, locale, platform = parse_nightly_filename(filename)
                 except ValueError:
                     continue
-                record = archive(product, version, platform, locale, channel, url,
+                record = archive(product, version, platform, locale, url,
                                  size, date, metadata)
                 logger.debug("Nightly found {}".format(url))
                 futures.append(queue.put(record))
@@ -344,7 +346,7 @@ async def fetch_files(session, queue, product, version, platform, locale):
         date = file_["last_modified"]
 
         metadata = await fetch_release_metadata(session, product, version, platform, locale)
-        record = archive(product, version, platform, locale, channel, url, size, date, metadata)
+        record = archive(product, version, platform, locale, url, size, date, metadata)
         logger.debug("Release found {}".format(url))
 
         futures.append(queue.put(record))

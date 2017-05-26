@@ -11,6 +11,21 @@ KNOWN_MIMETYPES = {
     }
 
 
+def guess_channel(url, version):
+    channel = 'release'
+    if 'nightly' in url:
+        if 'aurora' in url:
+            channel = 'aurora'
+        else:
+            channel = 'nightly'
+    else:
+        if 'esr' in url:
+            channel = 'esr'
+        elif 'b' in version:
+            channel = 'beta'
+    return channel
+
+
 def build_record_id(record):
     version = record["target"]["version"]
 
