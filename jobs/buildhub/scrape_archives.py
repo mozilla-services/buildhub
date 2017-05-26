@@ -74,6 +74,7 @@ def latest_known_version(client, product):
 def archive(product, version, platform, locale, url, size, date, metadata=None):
     build = None
     revision = None
+    repository = None
     tree = None
 
     channel = guess_channel(url, version)
@@ -112,8 +113,7 @@ def archive(product, version, platform, locale, url, size, date, metadata=None):
             "mimetype": guess_mimetype(url),
             "size": size,
             "date": date,
-        },
-        "systemaddons": None
+        }
     }
     record['id'] = build_record_id(record)
     return record
@@ -379,7 +379,7 @@ async def consume(loop, queue, executor, client):
                     record = await queue.get()
                     batch.append(record)
         except asyncio.TimeoutError:
-            logger.debug("Scraping done or not fast enough, proceed.")
+            logger.debug("Waiting for records in the queue.")
             pass
 
         if batch:
