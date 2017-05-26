@@ -332,8 +332,6 @@ async def fetch_files(session, queue, product, version, platform, locale):
     locale_url = archive_url(product, version, platform, locale)
     _, files = await fetch_listing(session, locale_url)
 
-    channel = None  # Unknown.
-
     futures = []
     for file_ in files:
         filename = file_["name"]
