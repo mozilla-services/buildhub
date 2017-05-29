@@ -14,7 +14,7 @@ Load it with:
 
 .. code-block:: bash
 
-    kinto-wizard load --server https://kinto/ --auth user:pass schema/releases.yaml
+    kinto-wizard load --server https://kinto/ --auth user:pass initialization.yaml
 
 The JSON schema validation can be enabled on the server with the following setting:
 
