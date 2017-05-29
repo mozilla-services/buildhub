@@ -113,9 +113,33 @@ type NewFilter
     | NewBuildIdSearch String
 
 
+type alias BuildId =
+    String
+
+
+type alias Product =
+    String
+
+
+type alias Channel =
+    String
+
+
+type alias Platform =
+    String
+
+
+type alias Version =
+    String
+
+
 type Route
     = MainView
-    | BuildIdView String
+    | BuildIdView BuildId
+    | ProductView Product
+    | ChannelView Product Channel
+    | PlatformView Product Channel Platform
+    | VersionView Product Channel Platform Version
     | DocsView
 
 

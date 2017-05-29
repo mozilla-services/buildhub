@@ -23,12 +23,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ filterValues } as model) =
     case msg of
         BuildRecordsFetched (Ok buildRecordList) ->
-            { model
-                | builds = buildRecordList
-                , filteredBuilds = buildRecordList
-                , filterValues = extractFilterValues buildRecordList
-                , loading = False
-            }
+            updateModelWithFilters ({ model | builds = buildRecordList, loading = False })
                 ! []
 
         BuildRecordsFetched (Err err) ->
@@ -40,7 +35,7 @@ update msg ({ filterValues } as model) =
 
         UpdateFilter newFilter ->
             let
-                updatedModelWithFilters =
+                updatedFilters =
                     case newFilter of
                         ClearAll ->
                             { model
@@ -73,97 +68,8 @@ update msg ({ filterValues } as model) =
 
                         NewBuildIdSearch value ->
                             { model | buildIdFilter = value }
-
-                updatedFilteredBuilds =
-                    applyFilters updatedModelWithFilters
             in
-                { updatedModelWithFilters
-                    | filteredBuilds = updatedFilteredBuilds
-                    , filterValues = extractFilterValues updatedFilteredBuilds
-                }
-                    ! []
+                updateModelWithFilters updatedFilters ! []
 
         UrlChange location ->
-            parsePage model location ! []
-
-
-extractFilterValues : List BuildRecord -> FilterValues
-extractFilterValues buildRecordList =
-    let
-        filterValues =
-            (List.foldl
-                (\buildRecord filterValues ->
-                    { treeList = buildRecord.source.tree :: filterValues.treeList
-                    , productList = buildRecord.source.product :: filterValues.productList
-                    , versionList = (Maybe.withDefault "" buildRecord.target.version) :: filterValues.versionList
-                    , platformList = buildRecord.target.platform :: filterValues.platformList
-                    , channelList = (Maybe.withDefault "" buildRecord.target.channel) :: filterValues.channelList
-                    , localeList = buildRecord.target.locale :: filterValues.localeList
-                    }
-                )
-                { treeList = []
-                , productList = []
-                , versionList = []
-                , platformList = []
-                , channelList = []
-                , localeList = []
-                }
-                buildRecordList
-            )
-
-        normalizeFilterValues : List String -> List String
-        normalizeFilterValues values =
-            values
-                |> Set.fromList
-                |> Set.remove ""
-                |> Set.toList
-    in
-        { filterValues
-            | treeList = filterValues.treeList |> normalizeFilterValues
-            , productList = filterValues.productList |> normalizeFilterValues
-            , versionList = filterValues.versionList |> normalizeFilterValues
-            , platformList = filterValues.platformList |> normalizeFilterValues
-            , channelList = filterValues.channelList |> normalizeFilterValues
-            , localeList = filterValues.localeList |> normalizeFilterValues
-        }
-
-
-recordStringEquals : (BuildRecord -> String) -> String -> BuildRecord -> Bool
-recordStringEquals path filterValue buildRecord =
-    (filterValue == "all")
-        || (buildRecord
-                |> path
-                |> (==) filterValue
-           )
-
-
-recordStringStartsWith : (BuildRecord -> String) -> String -> BuildRecord -> Bool
-recordStringStartsWith path filterValue buildRecord =
-    buildRecord
-        |> path
-        |> String.startsWith filterValue
-
-
-recordMaybeStringEquals : (BuildRecord -> Maybe String) -> String -> BuildRecord -> Bool
-recordMaybeStringEquals path filterValue buildRecord =
-    (filterValue == "all")
-        || (buildRecord
-                |> path
-                |> Maybe.withDefault ""
-                |> (==) filterValue
-           )
-
-
-applyFilters : Model -> List BuildRecord
-applyFilters model =
-    model.builds
-        |> List.filter
-            (\buildRecord ->
-                (recordStringEquals (.source >> .tree) model.treeFilter) buildRecord
-                    && (recordStringEquals (.source >> .product) model.productFilter) buildRecord
-                    && (recordMaybeStringEquals (.target >> .version) model.versionFilter) buildRecord
-                    && (recordStringEquals (.target >> .platform) model.platformFilter) buildRecord
-                    && (recordMaybeStringEquals (.target >> .channel) model.channelFilter) buildRecord
-                    && (recordStringEquals (.target >> .locale) model.localeFilter) buildRecord
-                    && (recordStringStartsWith (.build >> .id) model.buildIdFilter) buildRecord
-            )
+            updateModelWithFilters (parsePage model location) ! []
