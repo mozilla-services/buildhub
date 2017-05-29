@@ -200,6 +200,8 @@ async def fetch_release_metadata(session, product, version, platform, locale):
         # For each version take the latest build.
         _candidates[product] = {}
         for f in candidates_folders:
+            if f == "archived":
+                continue
             candidate_version = f.replace("-candidates/", "")
             builds_url = archive_url(product, candidate_version, candidate="/")
             build_folders, _ = await fetch_listing(session, builds_url)
