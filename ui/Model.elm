@@ -1,4 +1,4 @@
-module Model exposing (init, updateModelWithFilters)
+module Model exposing (init, getNextBuilds, updateModelWithFilters)
 
 import Decoder exposing (..)
 import Filters exposing (..)
@@ -12,7 +12,7 @@ init : Location -> ( Model, Cmd Msg )
 init location =
     let
         defaultModel =
-            { builds = []
+            { buildsPager = Kinto.emptyPager client recordResource
             , filteredBuilds = []
             , filterValues = FilterValues productList channelList platformList versionList localeList
             , productFilter = "all"
@@ -32,8 +32,19 @@ getBuildRecordList : Cmd Msg
 getBuildRecordList =
     client
         |> Kinto.getList recordResource
+        |> Kinto.limit 10
         |> Kinto.sortBy [ "-build.date" ]
         |> Kinto.send BuildRecordsFetched
+
+
+getNextBuilds : Kinto.Pager BuildRecord -> Cmd Msg
+getNextBuilds pager =
+    case Kinto.loadNextPage pager of
+        Just request ->
+            request |> Kinto.send BuildRecordsFetched
+
+        Nothing ->
+            Cmd.none
 
 
 client : Kinto.Client
@@ -66,7 +77,7 @@ recordStringStartsWith path filterValue buildRecord =
 
 applyFilters : Model -> List BuildRecord
 applyFilters model =
-    model.builds
+    model.buildsPager.objects
         |> List.filter
             (\buildRecord ->
                 (recordStringEquals (.source >> .product) model.productFilter) buildRecord

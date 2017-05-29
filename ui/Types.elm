@@ -19,7 +19,7 @@ import Navigation exposing (..)
 
 
 type alias Model =
-    { builds : List BuildRecord
+    { buildsPager : Kinto.Pager BuildRecord
     , filteredBuilds : List BuildRecord
     , filterValues : FilterValues
     , productFilter : String
@@ -147,6 +147,7 @@ type Route
 
 
 type Msg
-    = BuildRecordsFetched (Result Kinto.Error (List BuildRecord))
+    = BuildRecordsFetched (Result Kinto.Error (Kinto.Pager BuildRecord))
+    | LoadNextPage
     | UpdateFilter NewFilter
     | UrlChange Location

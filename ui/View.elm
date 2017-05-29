@@ -37,6 +37,12 @@ mainView model =
             [ div [ class "col-sm-9" ]
                 [ numBuilds model
                 , div [] <| List.map recordView model.filteredBuilds
+                , button
+                    [ class "btn btn-default"
+                    , style [ ( "width", "100%" ) ]
+                    , onClick LoadNextPage
+                    ]
+                    [ text "Load more" ]
                 ]
             , div [ class "col-sm-3" ]
                 [ div [ class "panel panel-default" ]

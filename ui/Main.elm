@@ -1,5 +1,6 @@
 module Main exposing (..)
 
+import Kinto
 import Model exposing (..)
 import Navigation exposing (..)
 import Types exposing (..)
@@ -21,9 +22,18 @@ main =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ filterValues } as model) =
     case msg of
-        BuildRecordsFetched (Ok buildRecordList) ->
-            updateModelWithFilters ({ model | builds = buildRecordList, loading = False })
-                ! []
+        BuildRecordsFetched (Ok buildsPager) ->
+            let
+                newPager =
+                    Kinto.updatePager buildsPager model.buildsPager
+            in
+                updateModelWithFilters
+                    { model
+                        | buildsPager = newPager
+                        , filteredBuilds = newPager.objects
+                        , loading = False
+                    }
+                    ! []
 
         BuildRecordsFetched (Err err) ->
             let
@@ -31,6 +41,9 @@ update msg ({ filterValues } as model) =
                     Debug.log "An error occured while fetching the build records" err
             in
                 model ! []
+
+        LoadNextPage ->
+            model ! [ getNextBuilds model.buildsPager ]
 
         UpdateFilter newFilter ->
             let
