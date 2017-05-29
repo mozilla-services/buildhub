@@ -16,10 +16,6 @@ Currently we use [Kinto](http://kinto-storage.org) as a generic database service
 
 * [Automatic Update Service (AUS, a.k.a Balrog)](https://wiki.mozilla.org/Balrog)
 
-## Load the schema
-
-    kinto-wizard load --server https://kinto/ --auth user:pass schema/releases.yaml
-
 ## Licence
 
 Apache 2

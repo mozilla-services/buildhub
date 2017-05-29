@@ -20,6 +20,7 @@ REQUIREMENTS = [
     "aiohttp",
     "backoff",
     "kinto-http",
+    "kinto-wizard",
 ]
 
 ENTRY_POINTS = {
