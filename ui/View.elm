@@ -208,10 +208,17 @@ recordView record =
                         [ text <|
                             record.source.product
                                 ++ " "
-                                ++ Maybe.withDefault "" record.target.version
+                                ++ record.target.version
                         ]
                     ]
-                , em [ class "col-sm-6 text-right" ] [ text record.build.date ]
+                , em [ class "col-sm-6 text-right" ]
+                    [ case record.build of
+                        Just build ->
+                            text build.date
+
+                        Nothing ->
+                            text "Unknown"
+                    ]
                 ]
             ]
         , div [ class "panel-body" ]
@@ -229,24 +236,29 @@ recordView record =
         ]
 
 
-viewBuildDetails : Build -> Html Msg
+viewBuildDetails : Maybe Build -> Html Msg
 viewBuildDetails build =
-    table [ class "table table-stripped table-condensed" ]
-        [ thead []
-            [ tr []
-                [ th [] [ text "Id" ]
-                , th [] [ text "Type" ]
-                , th [] [ text "Date" ]
+    case build of
+        Just build ->
+            table [ class "table table-stripped table-condensed" ]
+                [ thead []
+                    [ tr []
+                        [ th [] [ text "Id" ]
+                        , th [] [ text "Type" ]
+                        , th [] [ text "Date" ]
+                        ]
+                    ]
+                , tbody []
+                    [ tr []
+                        [ td [] [ text build.id ]
+                        , td [] [ text build.type_ ]
+                        , td [] [ text build.date ]
+                        ]
+                    ]
                 ]
-            ]
-        , tbody []
-            [ tr []
-                [ td [] [ text build.id ]
-                , td [] [ text build.type_ ]
-                , td [] [ text build.date ]
-                ]
-            ]
-        ]
+
+        Nothing ->
+            text ""
 
 
 viewDownloadDetails : Download -> Html Msg
@@ -269,10 +281,9 @@ viewDownloadDetails download =
             , tbody []
                 [ tr []
                     [ td [] [ a [ href download.url ] [ text filename ] ]
-                    , td [] [ text <| Maybe.withDefault "" download.mimetype ]
-
-                    -- TODO display the size in an humanly readable format
-                    , td [] [ text <| toString <| Maybe.withDefault 0 download.size ]
+                    , td [] [ text <| download.mimetype ]
+                      -- TODO display the size in an humanly readable format
+                    , td [] [ text <| toString download.size ]
                     ]
                 ]
             ]
@@ -314,7 +325,7 @@ viewSourceDetails source =
                 Just revision ->
                     let
                         mozillaHgUrl =
-                            treeToMozillaHgUrl source.tree
+                            treeToMozillaHgUrl <| Maybe.withDefault "" source.tree
                     in
                         case mozillaHgUrl of
                             Just url ->
@@ -337,39 +348,35 @@ viewSourceDetails source =
             , tbody []
                 [ tr []
                     [ td [] [ text source.product ]
-                    , td [] [ text source.tree ]
+                    , td [] [ text <| Maybe.withDefault "" source.tree ]
                     , td [] [ revisionUrl ]
                     ]
                 ]
             ]
 
 
-viewSystemAddonsDetails : Maybe (List SystemAddon) -> Html Msg
+viewSystemAddonsDetails : List SystemAddon -> Html Msg
 viewSystemAddonsDetails systemAddons =
-    let
-        systemAddonsList =
-            Maybe.withDefault [] systemAddons
-    in
-        table [ class "table table-stripped table-condensed" ]
-            [ thead []
-                [ tr []
-                    [ th [] [ text "Id" ]
-                    , th [] [ text "Builtin version" ]
-                    , th [] [ text "Updated version" ]
-                    ]
+    table [ class "table table-stripped table-condensed" ]
+        [ thead []
+            [ tr []
+                [ th [] [ text "Id" ]
+                , th [] [ text "Builtin version" ]
+                , th [] [ text "Updated version" ]
                 ]
-            , tbody []
-                (systemAddonsList
-                    |> List.map
-                        (\systemAddon ->
-                            tr []
-                                [ td [] [ text systemAddon.id ]
-                                , td [] [ text systemAddon.builtin ]
-                                , td [] [ text systemAddon.updated ]
-                                ]
-                        )
-                )
             ]
+        , tbody []
+            (systemAddons
+                |> List.map
+                    (\systemAddon ->
+                        tr []
+                            [ td [] [ text systemAddon.id ]
+                            , td [] [ text systemAddon.builtin ]
+                            , td [] [ text systemAddon.updated ]
+                            ]
+                    )
+            )
+        ]
 
 
 viewTargetDetails : Target -> Html Msg
@@ -385,9 +392,9 @@ viewTargetDetails target =
             ]
         , tbody []
             [ tr []
-                [ td [] [ text <| Maybe.withDefault "" target.version ]
+                [ td [] [ text <| target.version ]
                 , td [] [ text target.platform ]
-                , td [] [ text <| Maybe.withDefault "" target.channel ]
+                , td [] [ text <| target.channel ]
                 , td [] [ text target.locale ]
                 ]
             ]

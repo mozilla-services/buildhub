@@ -45,10 +45,10 @@ type alias FilterValues =
 type alias BuildRecord =
     { id : String
     , last_modified : Int
-    , build : Build
+    , build : Maybe Build
     , download : Download
     , source : Source
-    , systemAddons : Maybe (List SystemAddon)
+    , systemAddons : List SystemAddon
     , target : Target
     }
 
@@ -61,8 +61,8 @@ type alias Build =
 
 
 type alias Download =
-    { mimetype : Maybe String
-    , size : Maybe Int
+    { mimetype : String
+    , size : Int
     , url : String
     }
 
@@ -80,8 +80,9 @@ type alias Snippet =
 
 type alias Source =
     { product : String
-    , tree : String
+    , tree : Maybe String
     , revision : Maybe String
+    , repository : Maybe String
     }
 
 
@@ -93,9 +94,9 @@ type alias SystemAddon =
 
 
 type alias Target =
-    { version : Maybe String
+    { version : String
     , platform : String
-    , channel : Maybe String
+    , channel : String
     , locale : String
     }
 

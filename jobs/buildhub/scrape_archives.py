@@ -91,34 +91,10 @@ def latest_known_version(client, product):
 
 
 def archive(product, version, platform, locale, url, size, date, metadata=None):
-    build = None
-    revision = None
-    repository = None
-    tree = None
-
     channel = guess_channel(url, version)
 
-    if metadata:
-        # Example of metadata:
-        #  https://archive.mozilla.org/pub/thunderbird/candidates \
-        #  /50.0b1-candidates/build2/linux-i686/en-US/thunderbird-50.0b1.json
-        revision = metadata["moz_source_stamp"]
-        channel = metadata.get("moz_update_channel", channel)
-        repository = metadata["moz_source_repo"].replace("MOZ_SOURCE_REPO=", "")
-        tree = repository.split("hg.mozilla.org/", 1)[-1]
-        buildid = metadata["buildid"]
-        builddate = datetime.datetime.strptime(buildid[:12], "%Y%m%d%H%M").isoformat()
-        build = {
-            "id": buildid,
-            "date": builddate,
-        }
-
     record = {
-        "build": build,
         "source": {
-            "revision": revision,
-            "repository": repository,
-            "tree": tree,
             "product": product,
         },
         "target": {
@@ -134,6 +110,23 @@ def archive(product, version, platform, locale, url, size, date, metadata=None):
             "date": date,
         }
     }
+
+    if metadata:
+        # Example of metadata:
+        #  https://archive.mozilla.org/pub/thunderbird/candidates \
+        #  /50.0b1-candidates/build2/linux-i686/en-US/thunderbird-50.0b1.json
+        record['source']['revision'] = metadata["moz_source_stamp"]
+        channel = metadata.get("moz_update_channel", channel)
+        repository = metadata["moz_source_repo"].replace("MOZ_SOURCE_REPO=", "")
+        record['source']['repository'] = repository
+        record['source']['tree'] = repository.split("hg.mozilla.org/", 1)[-1]
+        buildid = metadata["buildid"]
+        builddate = datetime.datetime.strptime(buildid[:12], "%Y%m%d%H%M").isoformat()
+        record['build'] = {
+            "id": buildid,
+            "date": builddate,
+        }
+
     record['id'] = build_record_id(record)
     return record
 

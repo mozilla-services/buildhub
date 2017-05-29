@@ -55,9 +55,9 @@ extractFilterValues buildRecordList =
             (List.foldl
                 (\buildRecord filterValues ->
                     { productList = buildRecord.source.product :: filterValues.productList
-                    , versionList = (Maybe.withDefault "" buildRecord.target.version) :: filterValues.versionList
+                    , versionList = buildRecord.target.version :: filterValues.versionList
                     , platformList = buildRecord.target.platform :: filterValues.platformList
-                    , channelList = (Maybe.withDefault "" buildRecord.target.channel) :: filterValues.channelList
+                    , channelList = buildRecord.target.channel :: filterValues.channelList
                     , localeList = buildRecord.target.locale :: filterValues.localeList
                     }
                 )
@@ -118,11 +118,11 @@ applyFilters model =
         |> List.filter
             (\buildRecord ->
                 (recordStringEquals (.source >> .product) model.productFilter) buildRecord
-                    && (recordMaybeStringEquals (.target >> .version) model.versionFilter) buildRecord
+                    && (recordStringEquals (.target >> .version) model.versionFilter) buildRecord
                     && (recordStringEquals (.target >> .platform) model.platformFilter) buildRecord
-                    && (recordMaybeStringEquals (.target >> .channel) model.channelFilter) buildRecord
+                    && (recordStringEquals (.target >> .channel) model.channelFilter) buildRecord
                     && (recordStringEquals (.target >> .locale) model.localeFilter) buildRecord
-                    && (recordStringStartsWith (.build >> .id) model.buildIdFilter) buildRecord
+                    && (recordStringStartsWith (.build >> Maybe.withDefault (Build "" "" "") >> .id) model.buildIdFilter) buildRecord
             )
 
 
