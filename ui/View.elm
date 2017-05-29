@@ -275,30 +275,7 @@ treeToMozillaHgUrl : Maybe String -> Maybe String
 treeToMozillaHgUrl tree =
     case tree of
         Just tree ->
-            let
-                mappingTable =
-                    Dict.fromList
-                        [ ( "comm-aurora", "releases/comm-aurora" )
-                        , ( "comm-beta", "releases/comm-beta" )
-                        , ( "comm-central", "comm-central" )
-                        , ( "comm-esr45", "releases/comm-esr45" )
-                        , ( "comm-esr52", "releases/comm-esr52" )
-                        , ( "graphics", "projects/graphics" )
-                        , ( "mozilla-aurora", "releases/mozilla-aurora" )
-                        , ( "mozilla-beta", "releases/mozilla-beta" )
-                        , ( "mozilla-central", "mozilla-central" )
-                        , ( "mozilla-esr45", "releases/mozilla-esr45" )
-                        , ( "mozilla-esr52", "releases/mozilla-esr45" )
-                        , ( "mozilla-release", "releases/mozilla-release" )
-                        , ( "oak", "projects/oak" )
-                        , ( "try-comm-central", "try-comm-central" )
-                        ]
-            in
-                Maybe.map
-                    (\folder ->
-                        "https://hg.mozilla.org/" ++ folder ++ "/rev/"
-                    )
-                    (Dict.get tree mappingTable)
+            Just <| "https://hg.mozilla.org/" ++ tree ++ "/rev/"
 
         Nothing ->
             Nothing
