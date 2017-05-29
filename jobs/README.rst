@@ -26,7 +26,7 @@ The JSON schema validation can be enabled on the server with the following setti
 Scrape archives
 ===============
 
-Scrape nightly, beta and releases from https://archives.mozilla.org and publishes records on a ``archives`` collection.
+Scrape nightly, beta and releases from https://archives.mozilla.org and publishes records on a ``releases`` collection.
 
 The archives website is a folder tree whose folder and file listings can be obtained in JSON.
 

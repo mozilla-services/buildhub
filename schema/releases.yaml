@@ -1,4 +1,7 @@
 build-hub:
+  permissions:
+    read:
+      - system.Everyone
   collections:
     releases:
       data:

@@ -20,7 +20,7 @@ ARCHIVE_URL = "https://archive.mozilla.org/pub/"
 PRODUCTS = ("fennec", "firefox", "thunderbird")
 DEFAULT_SERVER = "https://kinto-ota.dev.mozaws.net/v1"
 DEFAULT_BUCKET = "build-hub"
-DEFAULT_COLLECTION = "archives"
+DEFAULT_COLLECTION = "releases"
 NB_THREADS = 3
 NB_RETRY_REQUEST = 3
 TIMEOUT_SECONDS = 5 * 60
@@ -403,10 +403,6 @@ async def main(loop):
                 .format(**args.__dict__))
 
     client = cli_utils.create_client_from_args(args)
-
-    public_perms = {"read": ["system.Everyone"]}
-    client.create_bucket(permissions=public_perms, if_not_exists=True)
-    client.create_collection(if_not_exists=True)
 
     # Start a producer and a consumer with threaded kinto requests.
     queue = asyncio.Queue()
