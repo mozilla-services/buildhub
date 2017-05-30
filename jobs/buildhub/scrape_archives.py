@@ -219,7 +219,7 @@ async def fetch_release_metadata(session, product, version, platform, locale):
         # For each version take the latest build.
         _candidates[product] = {}
         for f in candidates_folders:
-            if f == "archived":
+            if f == "archived/":
                 continue
             candidate_version = f.replace("-candidates/", "")
             builds_url = archive_url(product, candidate_version, candidate="/")
@@ -231,14 +231,14 @@ async def fetch_release_metadata(session, product, version, platform, locale):
     if version not in _candidates[product]:
         return None
 
-    latest_build_folder = _candidates[product][version]
+    latest_build_folder = "/" + _candidates[product][version]
     try:
         url = archive_url(product, version, platform, locale, candidate=latest_build_folder)
         _, files = await fetch_listing(session, url)
 
         for f_ in files:
             filename = f_["name"]
-            if is_release_metadata(filename):
+            if is_release_metadata(product, version, filename):
                 url += filename
                 metadata = await fetch_json(session, url)
                 return metadata
