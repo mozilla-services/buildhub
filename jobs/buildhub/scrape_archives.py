@@ -33,6 +33,24 @@ def publish_records(client, records):
     with client.batch() as batch:
         for record in records:
             batch.create_record(data=record)
+    results = batch.results()
+
+    # Batch don't fail with 4XX errors. Make sure we output a comprehensive
+    # error here when we encounter them.
+    error_msgs = []
+    for result in results:
+        error_status = result.get("code")
+        if error_status == 412:
+            error_msg = "Record '{details[existing][id]}' already exists: {details[existing]}".format_map(result)
+            error_msgs.append(error_msg)
+        elif error_status == 400:
+            error_msg = "Invalid record: {}".format(result)
+            error_msgs.append(error_msg)
+        elif error_status is not None:
+            error_msgs.append("Error: {}".format(result))
+    if error_msgs:
+        raise ValueError("\n".join(error_msgs))
+
     logger.info("Created {} records".format(len(records)))
 
 
@@ -367,7 +385,12 @@ async def consume(loop, queue, executor, client):
 
     def markdone(queue, n):
         """Returns a callback that will mark `n` queue items done."""
-        return lambda fut: [queue.task_done() for _ in range(n)]
+        def done(future):
+            exc = future.exception()
+            if exc is not None:
+                raise exc
+            return [queue.task_done() for _ in range(n)]
+        return done
 
     info = client.server_info()
     batch_size = info["settings"]["batch_max_requests"]
