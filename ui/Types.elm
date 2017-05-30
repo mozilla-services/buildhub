@@ -22,7 +22,6 @@ type alias Model =
     { builds : List BuildRecord
     , filteredBuilds : List BuildRecord
     , filterValues : FilterValues
-    , treeFilter : String
     , productFilter : String
     , versionFilter : String
     , platformFilter : String
@@ -35,8 +34,7 @@ type alias Model =
 
 
 type alias FilterValues =
-    { treeList : List String
-    , productList : List String
+    { productList : List String
     , versionList : List String
     , platformList : List String
     , channelList : List String
@@ -104,7 +102,6 @@ type alias Target =
 
 type NewFilter
     = ClearAll
-    | NewTreeFilter String
     | NewProductFilter String
     | NewVersionFilter String
     | NewPlatformFilter String

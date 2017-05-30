@@ -37,7 +37,6 @@ mainView model =
                     [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
                     , div [ class "panel-body" ]
                         [ buildIdSearchForm model
-                        , filterSelector model.filterValues.treeList "Trees" model.treeFilter (UpdateFilter << NewTreeFilter)
                         , filterSelector model.filterValues.productList "Products" model.productFilter (UpdateFilter << NewProductFilter)
                         , filterSelector model.filterValues.versionList "Versions" model.versionFilter (UpdateFilter << NewVersionFilter)
                         , filterSelector model.filterValues.platformList "Platforms" model.platformFilter (UpdateFilter << NewPlatformFilter)

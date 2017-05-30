@@ -14,8 +14,7 @@ init location =
         defaultModel =
             { builds = []
             , filteredBuilds = []
-            , filterValues = FilterValues [] [] [] [] [] []
-            , treeFilter = "all"
+            , filterValues = FilterValues [] [] [] [] []
             , productFilter = "all"
             , versionFilter = "all"
             , platformFilter = "all"
@@ -55,16 +54,14 @@ extractFilterValues buildRecordList =
         filterValues =
             (List.foldl
                 (\buildRecord filterValues ->
-                    { treeList = buildRecord.source.tree :: filterValues.treeList
-                    , productList = buildRecord.source.product :: filterValues.productList
+                    { productList = buildRecord.source.product :: filterValues.productList
                     , versionList = (Maybe.withDefault "" buildRecord.target.version) :: filterValues.versionList
                     , platformList = buildRecord.target.platform :: filterValues.platformList
                     , channelList = (Maybe.withDefault "" buildRecord.target.channel) :: filterValues.channelList
                     , localeList = buildRecord.target.locale :: filterValues.localeList
                     }
                 )
-                { treeList = []
-                , productList = []
+                { productList = []
                 , versionList = []
                 , platformList = []
                 , channelList = []
@@ -81,8 +78,7 @@ extractFilterValues buildRecordList =
                 |> Set.toList
     in
         { filterValues
-            | treeList = filterValues.treeList |> normalizeFilterValues
-            , productList = filterValues.productList |> normalizeFilterValues
+            | productList = filterValues.productList |> normalizeFilterValues
             , versionList = filterValues.versionList |> normalizeFilterValues
             , platformList = filterValues.platformList |> normalizeFilterValues
             , channelList = filterValues.channelList |> normalizeFilterValues
@@ -121,8 +117,7 @@ applyFilters model =
     model.builds
         |> List.filter
             (\buildRecord ->
-                (recordStringEquals (.source >> .tree) model.treeFilter) buildRecord
-                    && (recordStringEquals (.source >> .product) model.productFilter) buildRecord
+                (recordStringEquals (.source >> .product) model.productFilter) buildRecord
                     && (recordMaybeStringEquals (.target >> .version) model.versionFilter) buildRecord
                     && (recordStringEquals (.target >> .platform) model.platformFilter) buildRecord
                     && (recordMaybeStringEquals (.target >> .channel) model.channelFilter) buildRecord

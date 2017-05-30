@@ -38,17 +38,13 @@ update msg ({ filterValues } as model) =
                     case newFilter of
                         ClearAll ->
                             { model
-                                | treeFilter = "all"
-                                , productFilter = "all"
+                                | productFilter = "all"
                                 , versionFilter = "all"
                                 , platformFilter = "all"
                                 , channelFilter = "all"
                                 , localeFilter = "all"
                                 , buildIdFilter = ""
                             }
-
-                        NewTreeFilter value ->
-                            { model | treeFilter = value }
 
                         NewProductFilter value ->
                             { model | productFilter = value }
