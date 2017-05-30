@@ -2,7 +2,6 @@ module Main exposing (..)
 
 import Model exposing (..)
 import Navigation exposing (..)
-import Set
 import Types exposing (..)
 import Url exposing (..)
 import View exposing (..)
