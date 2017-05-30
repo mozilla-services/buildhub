@@ -186,18 +186,18 @@ urlFromRoute route =
 
 
 routeFromFilters : Model -> Route
-routeFromFilters model =
-    if model.buildIdFilter /= "" then
-        BuildIdView model.buildIdFilter
-    else if model.localeFilter /= "all" then
-        LocaleView model.productFilter model.channelFilter model.platformFilter model.versionFilter model.localeFilter
-    else if model.versionFilter /= "all" then
-        VersionView model.productFilter model.channelFilter model.platformFilter model.versionFilter
-    else if model.platformFilter /= "all" then
-        PlatformView model.productFilter model.channelFilter model.platformFilter
-    else if model.channelFilter /= "all" then
-        ChannelView model.productFilter model.channelFilter
-    else if model.productFilter /= "all" then
-        ProductView model.productFilter
+routeFromFilters { buildIdFilter, localeFilter, versionFilter, platformFilter, channelFilter, productFilter } =
+    if buildIdFilter /= "" then
+        BuildIdView buildIdFilter
+    else if localeFilter /= "all" then
+        LocaleView productFilter channelFilter platformFilter versionFilter localeFilter
+    else if versionFilter /= "all" then
+        VersionView productFilter channelFilter platformFilter versionFilter
+    else if platformFilter /= "all" then
+        PlatformView productFilter channelFilter platformFilter
+    else if channelFilter /= "all" then
+        ChannelView productFilter channelFilter
+    else if productFilter /= "all" then
+        ProductView productFilter
     else
         MainView
