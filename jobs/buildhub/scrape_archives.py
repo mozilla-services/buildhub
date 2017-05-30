@@ -91,8 +91,6 @@ def latest_known_version(client, product):
 
 
 def archive(product, version, platform, locale, url, size, date, metadata=None):
-    channel = guess_channel(url, version)
-
     record = {
         "source": {
             "product": product,
@@ -100,8 +98,7 @@ def archive(product, version, platform, locale, url, size, date, metadata=None):
         "target": {
             "platform": platform,
             "locale": locale,
-            "version": version,
-            "channel": channel,
+            "version": version
         },
         "download": {
             "url": url,
@@ -111,15 +108,19 @@ def archive(product, version, platform, locale, url, size, date, metadata=None):
         }
     }
 
+    channel = guess_channel(url, version)
+
     if metadata:
         # Example of metadata:
         #  https://archive.mozilla.org/pub/thunderbird/candidates \
         #  /50.0b1-candidates/build2/linux-i686/en-US/thunderbird-50.0b1.json
-        record['source']['revision'] = metadata["moz_source_stamp"]
+        # If the channel is present in the metadata it is more reliable than our guess.
         channel = metadata.get("moz_update_channel", channel)
         repository = metadata["moz_source_repo"].replace("MOZ_SOURCE_REPO=", "")
+        record['source']['revision'] = metadata["moz_source_stamp"]
         record['source']['repository'] = repository
         record['source']['tree'] = repository.split("hg.mozilla.org/", 1)[-1]
+
         buildid = metadata["buildid"]
         builddate = datetime.datetime.strptime(buildid[:12], "%Y%m%d%H%M").isoformat()
         record['build'] = {
@@ -127,6 +128,7 @@ def archive(product, version, platform, locale, url, size, date, metadata=None):
             "date": builddate,
         }
 
+    record['target']['channel'] = channel
     record['id'] = build_record_id(record)
     return record
 
