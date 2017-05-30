@@ -9,48 +9,47 @@ routeFromUrl : Model -> Location -> Model
 routeFromUrl model location =
     let
         route =
-            Debug.log "route" <|
-                parseHash
-                    (oneOf
-                        [ map DocsView (s "docs" </> top)
-                        , map MainView (s "builds" </> top)
-                        , map BuildIdView
-                            (s "builds"
-                                </> (s "buildId" </> string)
-                            )
-                        , map ProductView
-                            (s "builds"
-                                </> (s "product" </> string)
-                            )
-                        , map ChannelView
-                            (s "builds"
-                                </> (s "product" </> string)
-                                </> (s "channel" </> string)
-                            )
-                        , map PlatformView
-                            (s "builds"
-                                </> (s "product" </> string)
-                                </> (s "channel" </> string)
-                                </> (s "platform" </> string)
-                            )
-                        , map VersionView
-                            (s "builds"
-                                </> (s "product" </> string)
-                                </> (s "channel" </> string)
-                                </> (s "platform" </> string)
-                                </> (s "version" </> string)
-                            )
-                        , map LocaleView
-                            (s "builds"
-                                </> (s "product" </> string)
-                                </> (s "channel" </> string)
-                                </> (s "platform" </> string)
-                                </> (s "version" </> string)
-                                </> (s "locale" </> string)
-                            )
-                        ]
-                    )
-                    location
+            parseHash
+                (oneOf
+                    [ map DocsView (s "docs" </> top)
+                    , map MainView (s "builds" </> top)
+                    , map BuildIdView
+                        (s "builds"
+                            </> (s "buildId" </> string)
+                        )
+                    , map ProductView
+                        (s "builds"
+                            </> (s "product" </> string)
+                        )
+                    , map ChannelView
+                        (s "builds"
+                            </> (s "product" </> string)
+                            </> (s "channel" </> string)
+                        )
+                    , map PlatformView
+                        (s "builds"
+                            </> (s "product" </> string)
+                            </> (s "channel" </> string)
+                            </> (s "platform" </> string)
+                        )
+                    , map VersionView
+                        (s "builds"
+                            </> (s "product" </> string)
+                            </> (s "channel" </> string)
+                            </> (s "platform" </> string)
+                            </> (s "version" </> string)
+                        )
+                    , map LocaleView
+                        (s "builds"
+                            </> (s "product" </> string)
+                            </> (s "channel" </> string)
+                            </> (s "platform" </> string)
+                            </> (s "version" </> string)
+                            </> (s "locale" </> string)
+                        )
+                    ]
+                )
+                location
     in
         case route of
             Just DocsView ->
@@ -59,7 +58,7 @@ routeFromUrl model location =
             Just (BuildIdView buildId) ->
                 { model
                     | route = BuildIdView buildId
-                    , buildIdFilter = Debug.log "id filter" buildId
+                    , buildIdFilter = buildId
                     , productFilter = "all"
                     , channelFilter = "all"
                     , platformFilter = "all"
@@ -71,7 +70,7 @@ routeFromUrl model location =
                 { model
                     | route = ProductView product
                     , buildIdFilter = ""
-                    , productFilter = Debug.log "product filter" product
+                    , productFilter = product
                     , channelFilter = "all"
                     , platformFilter = "all"
                     , versionFilter = "all"
@@ -82,8 +81,8 @@ routeFromUrl model location =
                 { model
                     | route = ChannelView product channel
                     , buildIdFilter = ""
-                    , productFilter = Debug.log "product filter" product
-                    , channelFilter = Debug.log "channel filter" channel
+                    , productFilter = product
+                    , channelFilter = channel
                     , platformFilter = "all"
                     , versionFilter = "all"
                     , localeFilter = "all"
@@ -93,9 +92,9 @@ routeFromUrl model location =
                 { model
                     | route = PlatformView product channel platform
                     , buildIdFilter = ""
-                    , productFilter = Debug.log "product filter" product
-                    , channelFilter = Debug.log "channel filter" channel
-                    , platformFilter = Debug.log "platform filter" platform
+                    , productFilter = product
+                    , channelFilter = channel
+                    , platformFilter = platform
                     , versionFilter = "all"
                     , localeFilter = "all"
                 }
@@ -104,10 +103,10 @@ routeFromUrl model location =
                 { model
                     | route = VersionView product channel platform version
                     , buildIdFilter = ""
-                    , productFilter = Debug.log "product filter" product
-                    , channelFilter = Debug.log "channel filter" channel
-                    , platformFilter = Debug.log "platform filter" platform
-                    , versionFilter = Debug.log "version filter" version
+                    , productFilter = product
+                    , channelFilter = channel
+                    , platformFilter = platform
+                    , versionFilter = version
                     , localeFilter = "all"
                 }
 
@@ -115,11 +114,11 @@ routeFromUrl model location =
                 { model
                     | route = VersionView product channel platform version
                     , buildIdFilter = ""
-                    , productFilter = Debug.log "product filter" product
-                    , channelFilter = Debug.log "channel filter" channel
-                    , platformFilter = Debug.log "platform filter" platform
-                    , versionFilter = Debug.log "version filter" version
-                    , localeFilter = Debug.log "locale fitler" locale
+                    , productFilter = product
+                    , channelFilter = channel
+                    , platformFilter = platform
+                    , versionFilter = version
+                    , localeFilter = locale
                 }
 
             _ ->
