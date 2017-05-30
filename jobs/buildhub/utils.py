@@ -96,3 +96,10 @@ def guess_mimetype(url):
     """Try to guess what kind of mimetype a given archive URL would be."""
     _, extension = os.path.splitext(url)
     return KNOWN_MIMETYPES.get(extension.strip('.'), None)
+
+
+def chunked(iterable, size):
+    """Split the `iterable` into chunks of `size` elements."""
+    nb_chunks = (len(iterable) // size) + 1
+    for i in range(nb_chunks):
+        yield iterable[(i * size):((i + 1) * size)]

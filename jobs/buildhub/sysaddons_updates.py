@@ -7,6 +7,8 @@ import xml.etree.ElementTree as etree
 import aiohttp
 from kinto_http import cli_utils
 
+from .utils import chunked
+
 
 AUS_URL = ("https://aus5.mozilla.org/update/3/SystemAddons/{VERSION}/{BUILD_ID}/"
            "{BUILD_TARGET}/{LOCALE}/{CHANNEL}/{OS_VERSION}/{DISTRIBUTION}/"
@@ -104,14 +106,13 @@ async def main(loop):
     info = client.server_info()
     kinto_batch_size = info["settings"]["batch_max_requests"]
 
+    chunks = chunked(with_sysaddons, AUS_BATCH_SIZE)
+    nb_batches = len(chunks)
+
     async with aiohttp.ClientSession(loop=loop) as session:
-
         patches = []
-        nb_batches = (len(with_sysaddons) // AUS_BATCH_SIZE) + 1
-
-        for i in range(nb_batches):
+        for i, records_subset in enumerate(chunks):
             logger.debug("{}/{}".format(i, nb_batches))
-            records_subset = with_sysaddons[(i * AUS_BATCH_SIZE):((i + 1) * AUS_BATCH_SIZE)]
 
             # Launch a bunch of parallel requests to AUS.
             coros = []
