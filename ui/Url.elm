@@ -133,9 +133,9 @@ routeFromUrl model location =
                 }
 
 
-urlFromRoute : Model -> String
-urlFromRoute model =
-    case model.route of
+urlFromRoute : Route -> String
+urlFromRoute route =
+    case route of
         DocsView ->
             "#/docs/"
 
