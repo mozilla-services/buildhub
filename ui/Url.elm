@@ -61,6 +61,7 @@ routeFromUrl model location =
             Just (ProductView product) ->
                 { model
                     | route = ProductView product
+                    , buildIdFilter = ""
                     , productFilter = Debug.log "product filter" product
                     , channelFilter = "all"
                     , platformFilter = "all"
@@ -70,6 +71,7 @@ routeFromUrl model location =
             Just (ChannelView product channel) ->
                 { model
                     | route = ChannelView product channel
+                    , buildIdFilter = ""
                     , productFilter = Debug.log "product filter" product
                     , channelFilter = Debug.log "channel filter" channel
                     , platformFilter = "all"
@@ -79,6 +81,7 @@ routeFromUrl model location =
             Just (PlatformView product channel platform) ->
                 { model
                     | route = PlatformView product channel platform
+                    , buildIdFilter = ""
                     , productFilter = Debug.log "product filter" product
                     , channelFilter = Debug.log "channel filter" channel
                     , platformFilter = Debug.log "platform filter" platform
@@ -88,6 +91,7 @@ routeFromUrl model location =
             Just (VersionView product channel platform version) ->
                 { model
                     | route = VersionView product channel platform version
+                    , buildIdFilter = ""
                     , productFilter = Debug.log "product filter" product
                     , channelFilter = Debug.log "channel filter" channel
                     , platformFilter = Debug.log "platform filter" platform
@@ -97,6 +101,7 @@ routeFromUrl model location =
             _ ->
                 { model
                     | route = MainView
+                    , buildIdFilter = ""
                     , productFilter = "all"
                     , channelFilter = "all"
                     , platformFilter = "all"
@@ -146,7 +151,9 @@ urlFromRoute model =
 
 routeFromFilters : Model -> Route
 routeFromFilters model =
-    if model.versionFilter /= "all" then
+    if model.buildIdFilter /= "" then
+        BuildIdView model.buildIdFilter
+    else if model.versionFilter /= "all" then
         VersionView model.productFilter model.channelFilter model.platformFilter model.versionFilter
     else if model.platformFilter /= "all" then
         PlatformView model.productFilter model.channelFilter model.platformFilter
