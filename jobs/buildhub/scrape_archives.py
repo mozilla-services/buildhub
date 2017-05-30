@@ -20,7 +20,7 @@ ARCHIVE_URL = "https://archive.mozilla.org/pub/"
 PRODUCTS = ("fennec", "firefox", "thunderbird")
 DEFAULT_SERVER = "https://kinto-ota.dev.mozaws.net/v1"
 DEFAULT_BUCKET = "build-hub"
-DEFAULT_COLLECTION = "archives"
+DEFAULT_COLLECTION = "releases"
 NB_THREADS = 3
 NB_RETRY_REQUEST = 3
 TIMEOUT_SECONDS = 5 * 60
@@ -93,6 +93,7 @@ def latest_known_version(client, product):
 def archive(product, version, platform, locale, url, size, date, metadata=None):
     build = None
     revision = None
+    repository = None
     tree = None
 
     channel = guess_channel(url, version)
@@ -131,8 +132,7 @@ def archive(product, version, platform, locale, url, size, date, metadata=None):
             "mimetype": guess_mimetype(url),
             "size": size,
             "date": date,
-        },
-        "systemaddons": None
+        }
     }
     record['id'] = build_record_id(record)
     return record
@@ -405,7 +405,7 @@ async def consume(loop, queue, executor, client):
                     record = await queue.get()
                     batch.append(record)
         except asyncio.TimeoutError:
-            logger.debug("Scraping done or not fast enough, proceed.")
+            logger.debug("Waiting for records in the queue.")
             pass
 
         if batch:
@@ -429,10 +429,6 @@ async def main(loop):
                 .format(**args.__dict__))
 
     client = cli_utils.create_client_from_args(args)
-
-    public_perms = {"read": ["system.Everyone"]}
-    client.create_bucket(permissions=public_perms, if_not_exists=True)
-    client.create_collection(if_not_exists=True)
 
     # Start a producer and a consumer with threaded kinto requests.
     queue = asyncio.Queue()

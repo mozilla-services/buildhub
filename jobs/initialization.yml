@@ -1,0 +1,205 @@
+build-hub:
+  permissions:
+    read:
+      - system.Everyone
+  collections:
+    releases:
+      data:
+        index:schema:
+          properties:
+            id:
+              type: "keyword"
+            last_modified:
+              type: "long"
+            build:
+              properties:
+                id:
+                  type: "keyword"
+                date:
+                  type: "date"
+                  format: "date"
+            source:
+              properties:
+                product:
+                  type: "keyword"
+                repository:
+                  type: "keyword"
+                tree:
+                  type: "keyword"
+                revision:
+                  type: "keyword"
+            target:
+              properties:
+                platform:
+                  type: "keyword"
+                locale:
+                  type: "keyword"
+                version:
+                  type: "keyword"
+                channel:
+                  type: "keyword"
+            download:
+              properties:
+                url:
+                  type: "keyword"
+                mimetype:
+                  type: "keyword"
+                size:
+                  type: "long"
+                date:
+                  type: "date"
+        displayFields:
+          - id
+          - source.product
+          - target.channel
+          - target.version
+          - target.platform
+          - target.locale
+        schema:
+          title: Release
+          description: Mozilla software releases.
+          type: object
+          additionalProperties: false
+          required:
+            - id
+            - source
+            - download
+            - target
+          properties:
+            build:
+              type: object
+              additionalProperties: false
+              properties:
+                id:
+                  type: string
+                  title: Build ID
+                  description: Build ID
+                date:
+                  type: string
+                  format: date-time
+                  title: Build date
+                  description: 'i.e: 2017-04-13T21:49:00Z'
+            target:
+              type: object
+              additionalProperties: false
+              required:
+                - platform
+                - locale
+                - version
+                - channel
+              properties:
+                platform:
+                  type: string
+                  title: Platform
+                  description: Operating system and Architecture
+                locale:
+                  type: string
+                  title: Locale
+                version:
+                  type: string
+                  title: Version
+                channel:
+                  type: string
+                  title: Update channel
+            source:
+              type: object
+              additionalProperties: false
+              required:
+                - product
+              properties:
+                product:
+                  type: string
+                  title: Product
+                  description: Product name
+                repository:
+                  type: string
+                  title: Repository
+                tree:
+                  type: string
+                  title: Tree
+                  description: i.e mozilla-central
+                revision:
+                  type: string
+                  title: Revision number in the tree
+            download:
+              type: object
+              additionalProperties: false
+              required:
+                - url
+                - mimetype
+                - size
+                - date
+              properties:
+                url:
+                  type: string
+                  title: URL
+                  description: URL of the archive
+                mimetype:
+                  type: string
+                  title: Archive's mimetype
+                date:
+                  type: string
+                  format: date-time
+                  title: Date
+                  description: Date of the archive
+                size:
+                  type: integer
+                  title: Size
+                  description: Size of the archive in bytes
+            systemaddons:
+              type: array
+              title: Systemaddons
+              items:
+                type: object
+                additionalProperties: false
+                required:
+                  - id
+                  - builtin
+                  - updated
+                properties:
+                  id:
+                    type: string
+                    title: ID
+                  builtin:
+                    type: string
+                    title: Built in version
+                    description: Version in release
+                  updated:
+                    type: string
+                    title: Updated version
+                    description: Last update version
+        uiSchema:
+          ui:order:
+            - source
+            - download
+            - build
+            - target
+            - systemaddons
+          download:
+            ui:order:
+              - url
+              - size
+              - date
+              - mimetype
+          source:
+            ui:order:
+              - product
+              - repository
+              - tree
+              - revision
+          build:
+            ui:order:
+              - id
+              - date
+          target:
+            ui:order:
+              - platform
+              - locale
+              - version
+              - channel
+          systemaddons:
+            items:
+              ui:order:
+                - id
+                - builtin
+                - updated
