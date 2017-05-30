@@ -40,6 +40,14 @@ routeFromUrl model location =
                                 </> (s "platform" </> string)
                                 </> (s "version" </> string)
                             )
+                        , map LocaleView
+                            (s "builds"
+                                </> (s "product" </> string)
+                                </> (s "channel" </> string)
+                                </> (s "platform" </> string)
+                                </> (s "version" </> string)
+                                </> (s "locale" </> string)
+                            )
                         ]
                     )
                     location
@@ -56,6 +64,7 @@ routeFromUrl model location =
                     , channelFilter = "all"
                     , platformFilter = "all"
                     , versionFilter = "all"
+                    , localeFilter = "all"
                 }
 
             Just (ProductView product) ->
@@ -66,6 +75,7 @@ routeFromUrl model location =
                     , channelFilter = "all"
                     , platformFilter = "all"
                     , versionFilter = "all"
+                    , localeFilter = "all"
                 }
 
             Just (ChannelView product channel) ->
@@ -76,6 +86,7 @@ routeFromUrl model location =
                     , channelFilter = Debug.log "channel filter" channel
                     , platformFilter = "all"
                     , versionFilter = "all"
+                    , localeFilter = "all"
                 }
 
             Just (PlatformView product channel platform) ->
@@ -86,6 +97,7 @@ routeFromUrl model location =
                     , channelFilter = Debug.log "channel filter" channel
                     , platformFilter = Debug.log "platform filter" platform
                     , versionFilter = "all"
+                    , localeFilter = "all"
                 }
 
             Just (VersionView product channel platform version) ->
@@ -96,6 +108,18 @@ routeFromUrl model location =
                     , channelFilter = Debug.log "channel filter" channel
                     , platformFilter = Debug.log "platform filter" platform
                     , versionFilter = Debug.log "version filter" version
+                    , localeFilter = "all"
+                }
+
+            Just (LocaleView product channel platform version locale) ->
+                { model
+                    | route = VersionView product channel platform version
+                    , buildIdFilter = ""
+                    , productFilter = Debug.log "product filter" product
+                    , channelFilter = Debug.log "channel filter" channel
+                    , platformFilter = Debug.log "platform filter" platform
+                    , versionFilter = Debug.log "version filter" version
+                    , localeFilter = Debug.log "locale fitler" locale
                 }
 
             _ ->
@@ -106,6 +130,7 @@ routeFromUrl model location =
                     , channelFilter = "all"
                     , platformFilter = "all"
                     , versionFilter = "all"
+                    , localeFilter = "all"
                 }
 
 
@@ -145,6 +170,18 @@ urlFromRoute model =
                 ++ "/version/"
                 ++ version
 
+        LocaleView product channel platform version locale ->
+            "#/builds/product/"
+                ++ product
+                ++ "/channel/"
+                ++ channel
+                ++ "/platform/"
+                ++ platform
+                ++ "/version/"
+                ++ version
+                ++ "/locale/"
+                ++ locale
+
         _ ->
             "#/builds/"
 
@@ -153,6 +190,8 @@ routeFromFilters : Model -> Route
 routeFromFilters model =
     if model.buildIdFilter /= "" then
         BuildIdView model.buildIdFilter
+    else if model.localeFilter /= "all" then
+        LocaleView model.productFilter model.channelFilter model.platformFilter model.versionFilter model.localeFilter
     else if model.versionFilter /= "all" then
         VersionView model.productFilter model.channelFilter model.platformFilter model.versionFilter
     else if model.platformFilter /= "all" then

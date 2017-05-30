@@ -133,6 +133,10 @@ type alias Version =
     String
 
 
+type alias Locale =
+    String
+
+
 type Route
     = MainView
     | BuildIdView BuildId
@@ -140,6 +144,7 @@ type Route
     | ChannelView Product Channel
     | PlatformView Product Channel Platform
     | VersionView Product Channel Platform Version
+    | LocaleView Product Channel Platform Version Locale
     | DocsView
 
 
