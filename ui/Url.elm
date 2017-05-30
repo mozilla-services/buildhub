@@ -1,12 +1,12 @@
-module Url exposing (parsePage)
+module Url exposing (routeFromFilters, routeFromUrl, urlFromRoute)
 
 import Navigation exposing (..)
 import Types exposing (..)
 import UrlParser exposing (..)
 
 
-parsePage : Model -> Location -> Model
-parsePage model location =
+routeFromUrl : Model -> Location -> Model
+routeFromUrl model location =
     let
         route =
             Debug.log "route" <|
@@ -96,3 +96,57 @@ parsePage model location =
 
             _ ->
                 { model | route = MainView }
+
+
+urlFromRoute : Model -> String
+urlFromRoute model =
+    case model.route of
+        DocsView ->
+            "#/docs/"
+
+        BuildIdView buildId ->
+            "#/builds/buildId/" ++ buildId
+
+        ProductView product ->
+            "#/builds/product/" ++ product
+
+        ChannelView product channel ->
+            "#/builds/product/"
+                ++ product
+                ++ "/channel/"
+                ++ channel
+
+        PlatformView product channel platform ->
+            "#/builds/product/"
+                ++ product
+                ++ "/channel/"
+                ++ channel
+                ++ "/platform/"
+                ++ platform
+
+        VersionView product channel platform version ->
+            "#/builds/product/"
+                ++ product
+                ++ "/channel/"
+                ++ channel
+                ++ "/platform/"
+                ++ platform
+                ++ "/version/"
+                ++ version
+
+        _ ->
+            "#/builds/"
+
+
+routeFromFilters : Model -> Route
+routeFromFilters model =
+    if model.versionFilter /= "all" then
+        VersionView model.productFilter model.channelFilter model.platformFilter model.versionFilter
+    else if model.platformFilter /= "all" then
+        PlatformView model.productFilter model.channelFilter model.platformFilter
+    else if model.channelFilter /= "all" then
+        ChannelView model.productFilter model.channelFilter
+    else if model.productFilter /= "all" then
+        ProductView model.productFilter
+    else
+        MainView

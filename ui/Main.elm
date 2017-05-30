@@ -68,8 +68,12 @@ update msg ({ filterValues } as model) =
 
                         NewBuildIdSearch value ->
                             { model | buildIdFilter = value }
+
+                updatedRoute =
+                    { model | route = routeFromFilters updatedFilters }
             in
-                updateModelWithFilters updatedFilters ! []
+                updateModelWithFilters updatedRoute
+                    ! [ newUrl <| urlFromRoute updatedRoute ]
 
         UrlChange location ->
-            updateModelWithFilters (parsePage model location) ! []
+            updateModelWithFilters (routeFromUrl model location) ! []

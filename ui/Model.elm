@@ -26,7 +26,7 @@ init location =
             , route = MainView
             }
     in
-        updateModelWithFilters (parsePage defaultModel location) ! [ getBuildRecordList ]
+        updateModelWithFilters (routeFromUrl defaultModel location) ! [ getBuildRecordList ]
 
 
 getBuildRecordList : Cmd Msg
