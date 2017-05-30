@@ -1,7 +1,7 @@
 import pytest
 from buildhub.utils import (
     build_record_id, parse_nightly_filename, is_release_metadata, is_release_filename,
-    guess_mimetype, guess_channel
+    guess_mimetype, guess_channel, chunked
 )
 
 
@@ -278,3 +278,15 @@ def test_guess_channel(record):
     expected_channel = record["target"]["channel"]
     channel = guess_channel(url, version)
     assert channel == expected_channel
+
+
+CHUNKS = [
+    ([], 5, [[]]),
+    ([1, 2, 3], 5, [[1, 2, 3]]),
+    ([1, 2, 3, 4, 5], 2, [[1, 2], [3, 4], [5]]),
+]
+
+
+@pytest.mark.parametrize("iterable,size,chunks", CHUNKS)
+def test_chunked(iterable, size, chunks):
+    assert list(chunked(iterable, size)) == chunks
