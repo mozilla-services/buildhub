@@ -41,7 +41,8 @@ def publish_records(client, records):
     for result in results:
         error_status = result.get("code")
         if error_status == 412:
-            error_msg = "Record '{details[existing][id]}' already exists: {details[existing]}".format_map(result)
+            error_msg = ("Record '{details[existing][id]}' already exists: "
+                         "{details[existing]}").format_map(result)
             error_msgs.append(error_msg)
         elif error_status == 400:
             error_msg = "Invalid record: {}".format(result)
