@@ -77,7 +77,8 @@ def is_release_filename(product, filename):
     - firefox-52.0.win32.sdk.zip
     """
     re_filename = re.compile("{}-(.+)({})$".format(product, FILE_EXTENSIONS))
-    return re_filename.match(filename) and 'sdk' not in filename
+    re_exclude = re.compile(".+(sdk|tests|crashreporter)")
+    return re_filename.match(filename) and not re_exclude.match(filename)
 
 
 def is_release_metadata(product, version, filename):

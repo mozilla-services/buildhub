@@ -12,3 +12,4 @@ This document describes changes between each past release.
 - Fetch system addons update information from Balrog
 - Add mimetype support (#47)
 - Infer channel from URL (fixes #8)
+- Skip tests files and crashreporters symbols (fixes #57)

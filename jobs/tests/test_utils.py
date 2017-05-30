@@ -245,6 +245,8 @@ def test_is_release_filename(product, filename):
 WRONG_RELEASE_FILENAMES = [
     ("firefox", "firefox-1.5.0.5.tar.gz.asc"),
     ("firefox", "firefox-52.0.win32.sdk.zip"),
+    ("fennec", "fennec-21.0b1.multi.android-arm-armv6.tests.zip"),
+    ("fennec", "fennec-24.0b1.en-US.android-arm.crashreporter-symbols.zip"),
 ]
 
 
