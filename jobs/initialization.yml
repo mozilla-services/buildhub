@@ -50,7 +50,7 @@ build-hub:
                   type: "date"
         displayFields:
           - id
-          - target.product
+          - source.product
           - target.channel
           - target.version
           - target.platform
