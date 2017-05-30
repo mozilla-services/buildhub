@@ -35,7 +35,7 @@ update msg ({ filterValues } as model) =
 
         UpdateFilter newFilter ->
             let
-                updatedFilters =
+                updatedModelWithFilters =
                     case newFilter of
                         ClearAll ->
                             { model
@@ -69,11 +69,11 @@ update msg ({ filterValues } as model) =
                         NewBuildIdSearch value ->
                             { model | buildIdFilter = value }
 
-                updatedRoute =
-                    { model | route = routeFromFilters updatedFilters }
+                updatedModelWithRoute =
+                    { model | route = routeFromFilters updatedModelWithFilters }
             in
-                updateModelWithFilters updatedRoute
-                    ! [ newUrl <| urlFromRoute updatedRoute.route ]
+                updateModelWithFilters updatedModelWithRoute
+                    ! [ newUrl <| urlFromRoute updatedModelWithRoute.route ]
 
         UrlChange location ->
             updateModelWithFilters (routeFromUrl model location) ! []
