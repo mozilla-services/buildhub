@@ -10906,6 +10906,257 @@ var _elm_lang$navigation$Navigation$onEffects = F4(
 	});
 _elm_lang$core$Native_Platform.effectManagers['Navigation'] = {pkg: 'elm-lang/navigation', init: _elm_lang$navigation$Navigation$init, onEffects: _elm_lang$navigation$Navigation$onEffects, onSelfMsg: _elm_lang$navigation$Navigation$onSelfMsg, tag: 'fx', cmdMap: _elm_lang$navigation$Navigation$cmdMap, subMap: _elm_lang$navigation$Navigation$subMap};
 
+var _evancz$url_parser$UrlParser$toKeyValuePair = function (segment) {
+	var _p0 = A2(_elm_lang$core$String$split, '=', segment);
+	if (((_p0.ctor === '::') && (_p0._1.ctor === '::')) && (_p0._1._1.ctor === '[]')) {
+		return A3(
+			_elm_lang$core$Maybe$map2,
+			F2(
+				function (v0, v1) {
+					return {ctor: '_Tuple2', _0: v0, _1: v1};
+				}),
+			_elm_lang$http$Http$decodeUri(_p0._0),
+			_elm_lang$http$Http$decodeUri(_p0._1._0));
+	} else {
+		return _elm_lang$core$Maybe$Nothing;
+	}
+};
+var _evancz$url_parser$UrlParser$parseParams = function (queryString) {
+	return _elm_lang$core$Dict$fromList(
+		A2(
+			_elm_lang$core$List$filterMap,
+			_evancz$url_parser$UrlParser$toKeyValuePair,
+			A2(
+				_elm_lang$core$String$split,
+				'&',
+				A2(_elm_lang$core$String$dropLeft, 1, queryString))));
+};
+var _evancz$url_parser$UrlParser$splitUrl = function (url) {
+	var _p1 = A2(_elm_lang$core$String$split, '/', url);
+	if ((_p1.ctor === '::') && (_p1._0 === '')) {
+		return _p1._1;
+	} else {
+		return _p1;
+	}
+};
+var _evancz$url_parser$UrlParser$parseHelp = function (states) {
+	parseHelp:
+	while (true) {
+		var _p2 = states;
+		if (_p2.ctor === '[]') {
+			return _elm_lang$core$Maybe$Nothing;
+		} else {
+			var _p4 = _p2._0;
+			var _p3 = _p4.unvisited;
+			if (_p3.ctor === '[]') {
+				return _elm_lang$core$Maybe$Just(_p4.value);
+			} else {
+				if ((_p3._0 === '') && (_p3._1.ctor === '[]')) {
+					return _elm_lang$core$Maybe$Just(_p4.value);
+				} else {
+					var _v4 = _p2._1;
+					states = _v4;
+					continue parseHelp;
+				}
+			}
+		}
+	}
+};
+var _evancz$url_parser$UrlParser$parse = F3(
+	function (_p5, url, params) {
+		var _p6 = _p5;
+		return _evancz$url_parser$UrlParser$parseHelp(
+			_p6._0(
+				{
+					visited: {ctor: '[]'},
+					unvisited: _evancz$url_parser$UrlParser$splitUrl(url),
+					params: params,
+					value: _elm_lang$core$Basics$identity
+				}));
+	});
+var _evancz$url_parser$UrlParser$parseHash = F2(
+	function (parser, location) {
+		return A3(
+			_evancz$url_parser$UrlParser$parse,
+			parser,
+			A2(_elm_lang$core$String$dropLeft, 1, location.hash),
+			_evancz$url_parser$UrlParser$parseParams(location.search));
+	});
+var _evancz$url_parser$UrlParser$parsePath = F2(
+	function (parser, location) {
+		return A3(
+			_evancz$url_parser$UrlParser$parse,
+			parser,
+			location.pathname,
+			_evancz$url_parser$UrlParser$parseParams(location.search));
+	});
+var _evancz$url_parser$UrlParser$intParamHelp = function (maybeValue) {
+	var _p7 = maybeValue;
+	if (_p7.ctor === 'Nothing') {
+		return _elm_lang$core$Maybe$Nothing;
+	} else {
+		return _elm_lang$core$Result$toMaybe(
+			_elm_lang$core$String$toInt(_p7._0));
+	}
+};
+var _evancz$url_parser$UrlParser$mapHelp = F2(
+	function (func, _p8) {
+		var _p9 = _p8;
+		return {
+			visited: _p9.visited,
+			unvisited: _p9.unvisited,
+			params: _p9.params,
+			value: func(_p9.value)
+		};
+	});
+var _evancz$url_parser$UrlParser$State = F4(
+	function (a, b, c, d) {
+		return {visited: a, unvisited: b, params: c, value: d};
+	});
+var _evancz$url_parser$UrlParser$Parser = function (a) {
+	return {ctor: 'Parser', _0: a};
+};
+var _evancz$url_parser$UrlParser$s = function (str) {
+	return _evancz$url_parser$UrlParser$Parser(
+		function (_p10) {
+			var _p11 = _p10;
+			var _p12 = _p11.unvisited;
+			if (_p12.ctor === '[]') {
+				return {ctor: '[]'};
+			} else {
+				var _p13 = _p12._0;
+				return _elm_lang$core$Native_Utils.eq(_p13, str) ? {
+					ctor: '::',
+					_0: A4(
+						_evancz$url_parser$UrlParser$State,
+						{ctor: '::', _0: _p13, _1: _p11.visited},
+						_p12._1,
+						_p11.params,
+						_p11.value),
+					_1: {ctor: '[]'}
+				} : {ctor: '[]'};
+			}
+		});
+};
+var _evancz$url_parser$UrlParser$custom = F2(
+	function (tipe, stringToSomething) {
+		return _evancz$url_parser$UrlParser$Parser(
+			function (_p14) {
+				var _p15 = _p14;
+				var _p16 = _p15.unvisited;
+				if (_p16.ctor === '[]') {
+					return {ctor: '[]'};
+				} else {
+					var _p18 = _p16._0;
+					var _p17 = stringToSomething(_p18);
+					if (_p17.ctor === 'Ok') {
+						return {
+							ctor: '::',
+							_0: A4(
+								_evancz$url_parser$UrlParser$State,
+								{ctor: '::', _0: _p18, _1: _p15.visited},
+								_p16._1,
+								_p15.params,
+								_p15.value(_p17._0)),
+							_1: {ctor: '[]'}
+						};
+					} else {
+						return {ctor: '[]'};
+					}
+				}
+			});
+	});
+var _evancz$url_parser$UrlParser$string = A2(_evancz$url_parser$UrlParser$custom, 'STRING', _elm_lang$core$Result$Ok);
+var _evancz$url_parser$UrlParser$int = A2(_evancz$url_parser$UrlParser$custom, 'NUMBER', _elm_lang$core$String$toInt);
+var _evancz$url_parser$UrlParser_ops = _evancz$url_parser$UrlParser_ops || {};
+_evancz$url_parser$UrlParser_ops['</>'] = F2(
+	function (_p20, _p19) {
+		var _p21 = _p20;
+		var _p22 = _p19;
+		return _evancz$url_parser$UrlParser$Parser(
+			function (state) {
+				return A2(
+					_elm_lang$core$List$concatMap,
+					_p22._0,
+					_p21._0(state));
+			});
+	});
+var _evancz$url_parser$UrlParser$map = F2(
+	function (subValue, _p23) {
+		var _p24 = _p23;
+		return _evancz$url_parser$UrlParser$Parser(
+			function (_p25) {
+				var _p26 = _p25;
+				return A2(
+					_elm_lang$core$List$map,
+					_evancz$url_parser$UrlParser$mapHelp(_p26.value),
+					_p24._0(
+						{visited: _p26.visited, unvisited: _p26.unvisited, params: _p26.params, value: subValue}));
+			});
+	});
+var _evancz$url_parser$UrlParser$oneOf = function (parsers) {
+	return _evancz$url_parser$UrlParser$Parser(
+		function (state) {
+			return A2(
+				_elm_lang$core$List$concatMap,
+				function (_p27) {
+					var _p28 = _p27;
+					return _p28._0(state);
+				},
+				parsers);
+		});
+};
+var _evancz$url_parser$UrlParser$top = _evancz$url_parser$UrlParser$Parser(
+	function (state) {
+		return {
+			ctor: '::',
+			_0: state,
+			_1: {ctor: '[]'}
+		};
+	});
+var _evancz$url_parser$UrlParser_ops = _evancz$url_parser$UrlParser_ops || {};
+_evancz$url_parser$UrlParser_ops['<?>'] = F2(
+	function (_p30, _p29) {
+		var _p31 = _p30;
+		var _p32 = _p29;
+		return _evancz$url_parser$UrlParser$Parser(
+			function (state) {
+				return A2(
+					_elm_lang$core$List$concatMap,
+					_p32._0,
+					_p31._0(state));
+			});
+	});
+var _evancz$url_parser$UrlParser$QueryParser = function (a) {
+	return {ctor: 'QueryParser', _0: a};
+};
+var _evancz$url_parser$UrlParser$customParam = F2(
+	function (key, func) {
+		return _evancz$url_parser$UrlParser$QueryParser(
+			function (_p33) {
+				var _p34 = _p33;
+				var _p35 = _p34.params;
+				return {
+					ctor: '::',
+					_0: A4(
+						_evancz$url_parser$UrlParser$State,
+						_p34.visited,
+						_p34.unvisited,
+						_p35,
+						_p34.value(
+							func(
+								A2(_elm_lang$core$Dict$get, key, _p35)))),
+					_1: {ctor: '[]'}
+				};
+			});
+	});
+var _evancz$url_parser$UrlParser$stringParam = function (name) {
+	return A2(_evancz$url_parser$UrlParser$customParam, name, _elm_lang$core$Basics$identity);
+};
+var _evancz$url_parser$UrlParser$intParam = function (name) {
+	return A2(_evancz$url_parser$UrlParser$customParam, name, _evancz$url_parser$UrlParser$intParamHelp);
+};
+
 var _mozilla_services$buildhub$Types$Model = function (a) {
 	return function (b) {
 		return function (c) {
@@ -10917,9 +11168,7 @@ var _mozilla_services$buildhub$Types$Model = function (a) {
 								return function (i) {
 									return function (j) {
 										return function (k) {
-											return function (l) {
-												return {builds: a, filteredBuilds: b, filterValues: c, treeFilter: d, productFilter: e, versionFilter: f, platformFilter: g, channelFilter: h, localeFilter: i, buildIdFilter: j, loading: k, currentView: l};
-											};
+											return {builds: a, filteredBuilds: b, filterValues: c, productFilter: d, versionFilter: e, platformFilter: f, channelFilter: g, localeFilter: h, buildIdFilter: i, loading: j, route: k};
 										};
 									};
 								};
@@ -10931,9 +11180,9 @@ var _mozilla_services$buildhub$Types$Model = function (a) {
 		};
 	};
 };
-var _mozilla_services$buildhub$Types$FilterValues = F6(
-	function (a, b, c, d, e, f) {
-		return {treeList: a, productList: b, versionList: c, platformList: d, channelList: e, localeList: f};
+var _mozilla_services$buildhub$Types$FilterValues = F5(
+	function (a, b, c, d, e) {
+		return {productList: a, versionList: b, platformList: c, channelList: d, localeList: e};
 	});
 var _mozilla_services$buildhub$Types$BuildRecord = F7(
 	function (a, b, c, d, e, f, g) {
@@ -10981,11 +11230,30 @@ var _mozilla_services$buildhub$Types$NewVersionFilter = function (a) {
 var _mozilla_services$buildhub$Types$NewProductFilter = function (a) {
 	return {ctor: 'NewProductFilter', _0: a};
 };
-var _mozilla_services$buildhub$Types$NewTreeFilter = function (a) {
-	return {ctor: 'NewTreeFilter', _0: a};
-};
 var _mozilla_services$buildhub$Types$ClearAll = {ctor: 'ClearAll'};
 var _mozilla_services$buildhub$Types$DocsView = {ctor: 'DocsView'};
+var _mozilla_services$buildhub$Types$LocaleView = F5(
+	function (a, b, c, d, e) {
+		return {ctor: 'LocaleView', _0: a, _1: b, _2: c, _3: d, _4: e};
+	});
+var _mozilla_services$buildhub$Types$VersionView = F4(
+	function (a, b, c, d) {
+		return {ctor: 'VersionView', _0: a, _1: b, _2: c, _3: d};
+	});
+var _mozilla_services$buildhub$Types$PlatformView = F3(
+	function (a, b, c) {
+		return {ctor: 'PlatformView', _0: a, _1: b, _2: c};
+	});
+var _mozilla_services$buildhub$Types$ChannelView = F2(
+	function (a, b) {
+		return {ctor: 'ChannelView', _0: a, _1: b};
+	});
+var _mozilla_services$buildhub$Types$ProductView = function (a) {
+	return {ctor: 'ProductView', _0: a};
+};
+var _mozilla_services$buildhub$Types$BuildIdView = function (a) {
+	return {ctor: 'BuildIdView', _0: a};
+};
 var _mozilla_services$buildhub$Types$MainView = {ctor: 'MainView'};
 var _mozilla_services$buildhub$Types$UrlChange = function (a) {
 	return {ctor: 'UrlChange', _0: a};
@@ -11099,10 +11367,529 @@ var _mozilla_services$buildhub$Decoder$buildRecordDecoder = A3(
 							_elm_lang$core$Json_Decode$string,
 							_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_mozilla_services$buildhub$Types$BuildRecord))))))));
 
-var _mozilla_services$buildhub$Url$parsePage = function (location) {
-	return _elm_lang$core$Native_Utils.eq(location.hash, '#/docs') ? _mozilla_services$buildhub$Types$DocsView : _mozilla_services$buildhub$Types$MainView;
+var _mozilla_services$buildhub$Url$routeFromFilters = function (_p0) {
+	var _p1 = _p0;
+	var _p7 = _p1.versionFilter;
+	var _p6 = _p1.productFilter;
+	var _p5 = _p1.platformFilter;
+	var _p4 = _p1.localeFilter;
+	var _p3 = _p1.channelFilter;
+	var _p2 = _p1.buildIdFilter;
+	return (!_elm_lang$core$Native_Utils.eq(_p2, '')) ? _mozilla_services$buildhub$Types$BuildIdView(_p2) : ((!_elm_lang$core$Native_Utils.eq(_p4, 'all')) ? A5(_mozilla_services$buildhub$Types$LocaleView, _p6, _p3, _p5, _p7, _p4) : ((!_elm_lang$core$Native_Utils.eq(_p7, 'all')) ? A4(_mozilla_services$buildhub$Types$VersionView, _p6, _p3, _p5, _p7) : ((!_elm_lang$core$Native_Utils.eq(_p5, 'all')) ? A3(_mozilla_services$buildhub$Types$PlatformView, _p6, _p3, _p5) : ((!_elm_lang$core$Native_Utils.eq(_p3, 'all')) ? A2(_mozilla_services$buildhub$Types$ChannelView, _p6, _p3) : ((!_elm_lang$core$Native_Utils.eq(_p6, 'all')) ? _mozilla_services$buildhub$Types$ProductView(_p6) : _mozilla_services$buildhub$Types$MainView)))));
 };
+var _mozilla_services$buildhub$Url$urlFromRoute = function (route) {
+	var _p8 = route;
+	switch (_p8.ctor) {
+		case 'DocsView':
+			return '#/docs/';
+		case 'BuildIdView':
+			return A2(_elm_lang$core$Basics_ops['++'], '#/builds/buildId/', _p8._0);
+		case 'ProductView':
+			return A2(_elm_lang$core$Basics_ops['++'], '#/builds/product/', _p8._0);
+		case 'ChannelView':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				'#/builds/product/',
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					_p8._0,
+					A2(_elm_lang$core$Basics_ops['++'], '/channel/', _p8._1)));
+		case 'PlatformView':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				'#/builds/product/',
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					_p8._0,
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						'/channel/',
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							_p8._1,
+							A2(_elm_lang$core$Basics_ops['++'], '/platform/', _p8._2)))));
+		case 'VersionView':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				'#/builds/product/',
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					_p8._0,
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						'/channel/',
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							_p8._1,
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								'/platform/',
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									_p8._2,
+									A2(_elm_lang$core$Basics_ops['++'], '/version/', _p8._3)))))));
+		case 'LocaleView':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				'#/builds/product/',
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					_p8._0,
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						'/channel/',
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							_p8._1,
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								'/platform/',
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									_p8._2,
+									A2(
+										_elm_lang$core$Basics_ops['++'],
+										'/version/',
+										A2(
+											_elm_lang$core$Basics_ops['++'],
+											_p8._3,
+											A2(_elm_lang$core$Basics_ops['++'], '/locale/', _p8._4)))))))));
+		default:
+			return '#/builds/';
+	}
+};
+var _mozilla_services$buildhub$Url$routeFromUrl = F2(
+	function (model, location) {
+		var route = A2(
+			_evancz$url_parser$UrlParser$parseHash,
+			_evancz$url_parser$UrlParser$oneOf(
+				{
+					ctor: '::',
+					_0: A2(
+						_evancz$url_parser$UrlParser$map,
+						_mozilla_services$buildhub$Types$DocsView,
+						A2(
+							_evancz$url_parser$UrlParser_ops['</>'],
+							_evancz$url_parser$UrlParser$s('docs'),
+							_evancz$url_parser$UrlParser$top)),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_evancz$url_parser$UrlParser$map,
+							_mozilla_services$buildhub$Types$MainView,
+							A2(
+								_evancz$url_parser$UrlParser_ops['</>'],
+								_evancz$url_parser$UrlParser$s('builds'),
+								_evancz$url_parser$UrlParser$top)),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_evancz$url_parser$UrlParser$map,
+								_mozilla_services$buildhub$Types$BuildIdView,
+								A2(
+									_evancz$url_parser$UrlParser_ops['</>'],
+									_evancz$url_parser$UrlParser$s('builds'),
+									A2(
+										_evancz$url_parser$UrlParser_ops['</>'],
+										_evancz$url_parser$UrlParser$s('buildId'),
+										_evancz$url_parser$UrlParser$string))),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_evancz$url_parser$UrlParser$map,
+									_mozilla_services$buildhub$Types$ProductView,
+									A2(
+										_evancz$url_parser$UrlParser_ops['</>'],
+										_evancz$url_parser$UrlParser$s('builds'),
+										A2(
+											_evancz$url_parser$UrlParser_ops['</>'],
+											_evancz$url_parser$UrlParser$s('product'),
+											_evancz$url_parser$UrlParser$string))),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_evancz$url_parser$UrlParser$map,
+										_mozilla_services$buildhub$Types$ChannelView,
+										A2(
+											_evancz$url_parser$UrlParser_ops['</>'],
+											_evancz$url_parser$UrlParser$s('builds'),
+											A2(
+												_evancz$url_parser$UrlParser_ops['</>'],
+												A2(
+													_evancz$url_parser$UrlParser_ops['</>'],
+													_evancz$url_parser$UrlParser$s('product'),
+													_evancz$url_parser$UrlParser$string),
+												A2(
+													_evancz$url_parser$UrlParser_ops['</>'],
+													_evancz$url_parser$UrlParser$s('channel'),
+													_evancz$url_parser$UrlParser$string)))),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_evancz$url_parser$UrlParser$map,
+											_mozilla_services$buildhub$Types$PlatformView,
+											A2(
+												_evancz$url_parser$UrlParser_ops['</>'],
+												_evancz$url_parser$UrlParser$s('builds'),
+												A2(
+													_evancz$url_parser$UrlParser_ops['</>'],
+													A2(
+														_evancz$url_parser$UrlParser_ops['</>'],
+														_evancz$url_parser$UrlParser$s('product'),
+														_evancz$url_parser$UrlParser$string),
+													A2(
+														_evancz$url_parser$UrlParser_ops['</>'],
+														A2(
+															_evancz$url_parser$UrlParser_ops['</>'],
+															_evancz$url_parser$UrlParser$s('channel'),
+															_evancz$url_parser$UrlParser$string),
+														A2(
+															_evancz$url_parser$UrlParser_ops['</>'],
+															_evancz$url_parser$UrlParser$s('platform'),
+															_evancz$url_parser$UrlParser$string))))),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_evancz$url_parser$UrlParser$map,
+												_mozilla_services$buildhub$Types$VersionView,
+												A2(
+													_evancz$url_parser$UrlParser_ops['</>'],
+													_evancz$url_parser$UrlParser$s('builds'),
+													A2(
+														_evancz$url_parser$UrlParser_ops['</>'],
+														A2(
+															_evancz$url_parser$UrlParser_ops['</>'],
+															_evancz$url_parser$UrlParser$s('product'),
+															_evancz$url_parser$UrlParser$string),
+														A2(
+															_evancz$url_parser$UrlParser_ops['</>'],
+															A2(
+																_evancz$url_parser$UrlParser_ops['</>'],
+																_evancz$url_parser$UrlParser$s('channel'),
+																_evancz$url_parser$UrlParser$string),
+															A2(
+																_evancz$url_parser$UrlParser_ops['</>'],
+																A2(
+																	_evancz$url_parser$UrlParser_ops['</>'],
+																	_evancz$url_parser$UrlParser$s('platform'),
+																	_evancz$url_parser$UrlParser$string),
+																A2(
+																	_evancz$url_parser$UrlParser_ops['</>'],
+																	_evancz$url_parser$UrlParser$s('version'),
+																	_evancz$url_parser$UrlParser$string)))))),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_evancz$url_parser$UrlParser$map,
+													_mozilla_services$buildhub$Types$LocaleView,
+													A2(
+														_evancz$url_parser$UrlParser_ops['</>'],
+														_evancz$url_parser$UrlParser$s('builds'),
+														A2(
+															_evancz$url_parser$UrlParser_ops['</>'],
+															A2(
+																_evancz$url_parser$UrlParser_ops['</>'],
+																_evancz$url_parser$UrlParser$s('product'),
+																_evancz$url_parser$UrlParser$string),
+															A2(
+																_evancz$url_parser$UrlParser_ops['</>'],
+																A2(
+																	_evancz$url_parser$UrlParser_ops['</>'],
+																	_evancz$url_parser$UrlParser$s('channel'),
+																	_evancz$url_parser$UrlParser$string),
+																A2(
+																	_evancz$url_parser$UrlParser_ops['</>'],
+																	A2(
+																		_evancz$url_parser$UrlParser_ops['</>'],
+																		_evancz$url_parser$UrlParser$s('platform'),
+																		_evancz$url_parser$UrlParser$string),
+																	A2(
+																		_evancz$url_parser$UrlParser_ops['</>'],
+																		A2(
+																			_evancz$url_parser$UrlParser_ops['</>'],
+																			_evancz$url_parser$UrlParser$s('version'),
+																			_evancz$url_parser$UrlParser$string),
+																		A2(
+																			_evancz$url_parser$UrlParser_ops['</>'],
+																			_evancz$url_parser$UrlParser$s('locale'),
+																			_evancz$url_parser$UrlParser$string))))))),
+												_1: {ctor: '[]'}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}),
+			location);
+		var _p9 = route;
+		_v2_7:
+		do {
+			if (_p9.ctor === 'Just') {
+				switch (_p9._0.ctor) {
+					case 'DocsView':
+						return _elm_lang$core$Native_Utils.update(
+							model,
+							{route: _mozilla_services$buildhub$Types$DocsView});
+					case 'BuildIdView':
+						var _p10 = _p9._0._0;
+						return _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								route: _mozilla_services$buildhub$Types$BuildIdView(_p10),
+								buildIdFilter: _p10,
+								productFilter: 'all',
+								channelFilter: 'all',
+								platformFilter: 'all',
+								versionFilter: 'all',
+								localeFilter: 'all'
+							});
+					case 'ProductView':
+						var _p11 = _p9._0._0;
+						return _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								route: _mozilla_services$buildhub$Types$ProductView(_p11),
+								buildIdFilter: '',
+								productFilter: _p11,
+								channelFilter: 'all',
+								platformFilter: 'all',
+								versionFilter: 'all',
+								localeFilter: 'all'
+							});
+					case 'ChannelView':
+						var _p13 = _p9._0._0;
+						var _p12 = _p9._0._1;
+						return _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								route: A2(_mozilla_services$buildhub$Types$ChannelView, _p13, _p12),
+								buildIdFilter: '',
+								productFilter: _p13,
+								channelFilter: _p12,
+								platformFilter: 'all',
+								versionFilter: 'all',
+								localeFilter: 'all'
+							});
+					case 'PlatformView':
+						var _p16 = _p9._0._0;
+						var _p15 = _p9._0._2;
+						var _p14 = _p9._0._1;
+						return _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								route: A3(_mozilla_services$buildhub$Types$PlatformView, _p16, _p14, _p15),
+								buildIdFilter: '',
+								productFilter: _p16,
+								channelFilter: _p14,
+								platformFilter: _p15,
+								versionFilter: 'all',
+								localeFilter: 'all'
+							});
+					case 'VersionView':
+						var _p20 = _p9._0._3;
+						var _p19 = _p9._0._0;
+						var _p18 = _p9._0._2;
+						var _p17 = _p9._0._1;
+						return _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								route: A4(_mozilla_services$buildhub$Types$VersionView, _p19, _p17, _p18, _p20),
+								buildIdFilter: '',
+								productFilter: _p19,
+								channelFilter: _p17,
+								platformFilter: _p18,
+								versionFilter: _p20,
+								localeFilter: 'all'
+							});
+					case 'LocaleView':
+						var _p24 = _p9._0._3;
+						var _p23 = _p9._0._0;
+						var _p22 = _p9._0._2;
+						var _p21 = _p9._0._1;
+						return _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								route: A4(_mozilla_services$buildhub$Types$VersionView, _p23, _p21, _p22, _p24),
+								buildIdFilter: '',
+								productFilter: _p23,
+								channelFilter: _p21,
+								platformFilter: _p22,
+								versionFilter: _p24,
+								localeFilter: _p9._0._4
+							});
+					default:
+						break _v2_7;
+				}
+			} else {
+				break _v2_7;
+			}
+		} while(false);
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{route: _mozilla_services$buildhub$Types$MainView, buildIdFilter: '', productFilter: 'all', channelFilter: 'all', platformFilter: 'all', versionFilter: 'all', localeFilter: 'all'});
+	});
 
+var _mozilla_services$buildhub$Model$recordMaybeStringEquals = F3(
+	function (path, filterValue, buildRecord) {
+		return _elm_lang$core$Native_Utils.eq(filterValue, 'all') || A2(
+			F2(
+				function (x, y) {
+					return _elm_lang$core$Native_Utils.eq(x, y);
+				}),
+			filterValue,
+			A2(
+				_elm_lang$core$Maybe$withDefault,
+				'',
+				path(buildRecord)));
+	});
+var _mozilla_services$buildhub$Model$recordStringStartsWith = F3(
+	function (path, filterValue, buildRecord) {
+		return A2(
+			_elm_lang$core$String$startsWith,
+			filterValue,
+			path(buildRecord));
+	});
+var _mozilla_services$buildhub$Model$recordStringEquals = F3(
+	function (path, filterValue, buildRecord) {
+		return _elm_lang$core$Native_Utils.eq(filterValue, 'all') || A2(
+			F2(
+				function (x, y) {
+					return _elm_lang$core$Native_Utils.eq(x, y);
+				}),
+			filterValue,
+			path(buildRecord));
+	});
+var _mozilla_services$buildhub$Model$applyFilters = function (model) {
+	return A2(
+		_elm_lang$core$List$filter,
+		function (buildRecord) {
+			return A3(
+				_mozilla_services$buildhub$Model$recordStringEquals,
+				function (_p0) {
+					return function (_) {
+						return _.product;
+					}(
+						function (_) {
+							return _.source;
+						}(_p0));
+				},
+				model.productFilter,
+				buildRecord) && (A3(
+				_mozilla_services$buildhub$Model$recordMaybeStringEquals,
+				function (_p1) {
+					return function (_) {
+						return _.version;
+					}(
+						function (_) {
+							return _.target;
+						}(_p1));
+				},
+				model.versionFilter,
+				buildRecord) && (A3(
+				_mozilla_services$buildhub$Model$recordStringEquals,
+				function (_p2) {
+					return function (_) {
+						return _.platform;
+					}(
+						function (_) {
+							return _.target;
+						}(_p2));
+				},
+				model.platformFilter,
+				buildRecord) && (A3(
+				_mozilla_services$buildhub$Model$recordMaybeStringEquals,
+				function (_p3) {
+					return function (_) {
+						return _.channel;
+					}(
+						function (_) {
+							return _.target;
+						}(_p3));
+				},
+				model.channelFilter,
+				buildRecord) && (A3(
+				_mozilla_services$buildhub$Model$recordStringEquals,
+				function (_p4) {
+					return function (_) {
+						return _.locale;
+					}(
+						function (_) {
+							return _.target;
+						}(_p4));
+				},
+				model.localeFilter,
+				buildRecord) && A3(
+				_mozilla_services$buildhub$Model$recordStringStartsWith,
+				function (_p5) {
+					return function (_) {
+						return _.id;
+					}(
+						function (_) {
+							return _.build;
+						}(_p5));
+				},
+				model.buildIdFilter,
+				buildRecord)))));
+		},
+		model.builds);
+};
+var _mozilla_services$buildhub$Model$extractFilterValues = function (buildRecordList) {
+	var normalizeFilterValues = function (values) {
+		return _elm_lang$core$Set$toList(
+			A2(
+				_elm_lang$core$Set$remove,
+				'',
+				_elm_lang$core$Set$fromList(values)));
+	};
+	var filterValues = A3(
+		_elm_lang$core$List$foldl,
+		F2(
+			function (buildRecord, filterValues) {
+				return {
+					productList: {ctor: '::', _0: buildRecord.source.product, _1: filterValues.productList},
+					versionList: {
+						ctor: '::',
+						_0: A2(_elm_lang$core$Maybe$withDefault, '', buildRecord.target.version),
+						_1: filterValues.versionList
+					},
+					platformList: {ctor: '::', _0: buildRecord.target.platform, _1: filterValues.platformList},
+					channelList: {
+						ctor: '::',
+						_0: A2(_elm_lang$core$Maybe$withDefault, '', buildRecord.target.channel),
+						_1: filterValues.channelList
+					},
+					localeList: {ctor: '::', _0: buildRecord.target.locale, _1: filterValues.localeList}
+				};
+			}),
+		{
+			productList: {ctor: '[]'},
+			versionList: {ctor: '[]'},
+			platformList: {ctor: '[]'},
+			channelList: {ctor: '[]'},
+			localeList: {ctor: '[]'}
+		},
+		buildRecordList);
+	return _elm_lang$core$Native_Utils.update(
+		filterValues,
+		{
+			productList: normalizeFilterValues(filterValues.productList),
+			versionList: normalizeFilterValues(filterValues.versionList),
+			platformList: normalizeFilterValues(filterValues.platformList),
+			channelList: normalizeFilterValues(filterValues.channelList),
+			localeList: normalizeFilterValues(filterValues.localeList)
+		});
+};
+var _mozilla_services$buildhub$Model$updateModelWithFilters = function (model) {
+	var filteredBuilds = _mozilla_services$buildhub$Model$applyFilters(model);
+	return _elm_lang$core$Native_Utils.update(
+		model,
+		{
+			filteredBuilds: filteredBuilds,
+			filterValues: _mozilla_services$buildhub$Model$extractFilterValues(filteredBuilds)
+		});
+};
 var _mozilla_services$buildhub$Model$recordResource = A3(_Kinto$elm_kinto$Kinto$recordResource, 'build-hub', 'fixtures', _mozilla_services$buildhub$Decoder$buildRecordDecoder);
 var _mozilla_services$buildhub$Model$client = A2(
 	_Kinto$elm_kinto$Kinto$client,
@@ -11120,29 +11907,29 @@ var _mozilla_services$buildhub$Model$getBuildRecordList = A2(
 		},
 		A2(_Kinto$elm_kinto$Kinto$getList, _mozilla_services$buildhub$Model$recordResource, _mozilla_services$buildhub$Model$client)));
 var _mozilla_services$buildhub$Model$init = function (location) {
+	var defaultModel = {
+		builds: {ctor: '[]'},
+		filteredBuilds: {ctor: '[]'},
+		filterValues: A5(
+			_mozilla_services$buildhub$Types$FilterValues,
+			{ctor: '[]'},
+			{ctor: '[]'},
+			{ctor: '[]'},
+			{ctor: '[]'},
+			{ctor: '[]'}),
+		productFilter: 'all',
+		versionFilter: 'all',
+		platformFilter: 'all',
+		channelFilter: 'all',
+		localeFilter: 'all',
+		buildIdFilter: '',
+		loading: true,
+		route: _mozilla_services$buildhub$Types$MainView
+	};
 	return A2(
 		_elm_lang$core$Platform_Cmd_ops['!'],
-		{
-			builds: {ctor: '[]'},
-			filteredBuilds: {ctor: '[]'},
-			filterValues: A6(
-				_mozilla_services$buildhub$Types$FilterValues,
-				{ctor: '[]'},
-				{ctor: '[]'},
-				{ctor: '[]'},
-				{ctor: '[]'},
-				{ctor: '[]'},
-				{ctor: '[]'}),
-			treeFilter: 'all',
-			productFilter: 'all',
-			versionFilter: 'all',
-			platformFilter: 'all',
-			channelFilter: 'all',
-			localeFilter: 'all',
-			buildIdFilter: '',
-			loading: true,
-			currentView: _mozilla_services$buildhub$Url$parsePage(location)
-		},
+		_mozilla_services$buildhub$Model$updateModelWithFilters(
+			A2(_mozilla_services$buildhub$Url$routeFromUrl, defaultModel, location)),
 		{
 			ctor: '::',
 			_0: _mozilla_services$buildhub$Model$getBuildRecordList,
@@ -12891,104 +13678,92 @@ var _mozilla_services$buildhub$View$mainView = function (model) {
 												ctor: '::',
 												_0: A4(
 													_mozilla_services$buildhub$View$filterSelector,
-													model.filterValues.treeList,
-													'Trees',
-													model.treeFilter,
+													model.filterValues.productList,
+													'Products',
+													model.productFilter,
 													function (_p7) {
 														return _mozilla_services$buildhub$Types$UpdateFilter(
-															_mozilla_services$buildhub$Types$NewTreeFilter(_p7));
+															_mozilla_services$buildhub$Types$NewProductFilter(_p7));
 													}),
 												_1: {
 													ctor: '::',
 													_0: A4(
 														_mozilla_services$buildhub$View$filterSelector,
-														model.filterValues.productList,
-														'Products',
-														model.productFilter,
+														model.filterValues.versionList,
+														'Versions',
+														model.versionFilter,
 														function (_p8) {
 															return _mozilla_services$buildhub$Types$UpdateFilter(
-																_mozilla_services$buildhub$Types$NewProductFilter(_p8));
+																_mozilla_services$buildhub$Types$NewVersionFilter(_p8));
 														}),
 													_1: {
 														ctor: '::',
 														_0: A4(
 															_mozilla_services$buildhub$View$filterSelector,
-															model.filterValues.versionList,
-															'Versions',
-															model.versionFilter,
+															model.filterValues.platformList,
+															'Platforms',
+															model.platformFilter,
 															function (_p9) {
 																return _mozilla_services$buildhub$Types$UpdateFilter(
-																	_mozilla_services$buildhub$Types$NewVersionFilter(_p9));
+																	_mozilla_services$buildhub$Types$NewPlatformFilter(_p9));
 															}),
 														_1: {
 															ctor: '::',
 															_0: A4(
 																_mozilla_services$buildhub$View$filterSelector,
-																model.filterValues.platformList,
-																'Platforms',
-																model.platformFilter,
+																model.filterValues.channelList,
+																'Channels',
+																model.channelFilter,
 																function (_p10) {
 																	return _mozilla_services$buildhub$Types$UpdateFilter(
-																		_mozilla_services$buildhub$Types$NewPlatformFilter(_p10));
+																		_mozilla_services$buildhub$Types$NewChannelFilter(_p10));
 																}),
 															_1: {
 																ctor: '::',
 																_0: A4(
 																	_mozilla_services$buildhub$View$filterSelector,
-																	model.filterValues.channelList,
-																	'Channels',
-																	model.channelFilter,
+																	model.filterValues.localeList,
+																	'Locales',
+																	model.localeFilter,
 																	function (_p11) {
 																		return _mozilla_services$buildhub$Types$UpdateFilter(
-																			_mozilla_services$buildhub$Types$NewChannelFilter(_p11));
+																			_mozilla_services$buildhub$Types$NewLocaleFilter(_p11));
 																	}),
 																_1: {
 																	ctor: '::',
-																	_0: A4(
-																		_mozilla_services$buildhub$View$filterSelector,
-																		model.filterValues.localeList,
-																		'Locales',
-																		model.localeFilter,
-																		function (_p12) {
-																			return _mozilla_services$buildhub$Types$UpdateFilter(
-																				_mozilla_services$buildhub$Types$NewLocaleFilter(_p12));
-																		}),
-																	_1: {
-																		ctor: '::',
-																		_0: A2(
-																			_elm_lang$html$Html$p,
-																			{
-																				ctor: '::',
-																				_0: _elm_lang$html$Html_Attributes$class('text-right'),
-																				_1: {ctor: '[]'}
-																			},
-																			{
-																				ctor: '::',
-																				_0: A2(
-																					_elm_lang$html$Html$button,
-																					{
+																	_0: A2(
+																		_elm_lang$html$Html$p,
+																		{
+																			ctor: '::',
+																			_0: _elm_lang$html$Html_Attributes$class('text-right'),
+																			_1: {ctor: '[]'}
+																		},
+																		{
+																			ctor: '::',
+																			_0: A2(
+																				_elm_lang$html$Html$button,
+																				{
+																					ctor: '::',
+																					_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
+																					_1: {
 																						ctor: '::',
-																						_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
+																						_0: _elm_lang$html$Html_Attributes$type_('button'),
 																						_1: {
 																							ctor: '::',
-																							_0: _elm_lang$html$Html_Attributes$type_('button'),
-																							_1: {
-																								ctor: '::',
-																								_0: _elm_lang$html$Html_Events$onClick(
-																									_mozilla_services$buildhub$Types$UpdateFilter(_mozilla_services$buildhub$Types$ClearAll)),
-																								_1: {ctor: '[]'}
-																							}
+																							_0: _elm_lang$html$Html_Events$onClick(
+																								_mozilla_services$buildhub$Types$UpdateFilter(_mozilla_services$buildhub$Types$ClearAll)),
+																							_1: {ctor: '[]'}
 																						}
-																					},
-																					{
-																						ctor: '::',
-																						_0: _elm_lang$html$Html$text('Clear all filters'),
-																						_1: {ctor: '[]'}
-																					}),
-																				_1: {ctor: '[]'}
-																			}),
-																		_1: {ctor: '[]'}
-																	}
+																					}
+																				},
+																				{
+																					ctor: '::',
+																					_0: _elm_lang$html$Html$text('Clear all filters'),
+																					_1: {ctor: '[]'}
+																				}),
+																			_1: {ctor: '[]'}
+																		}),
+																	_1: {ctor: '[]'}
 																}
 															}
 														}
@@ -13019,11 +13794,11 @@ var _mozilla_services$buildhub$View$view = function (model) {
 			_1: {
 				ctor: '::',
 				_0: function () {
-					var _p13 = model.currentView;
-					if (_p13.ctor === 'MainView') {
-						return _mozilla_services$buildhub$View$mainView(model);
-					} else {
+					var _p12 = model.route;
+					if (_p12.ctor === 'DocsView') {
 						return _mozilla_services$buildhub$View$docsView(model);
+					} else {
+						return _mozilla_services$buildhub$View$mainView(model);
 					}
 				}(),
 				_1: {ctor: '[]'}
@@ -13031,253 +13806,81 @@ var _mozilla_services$buildhub$View$view = function (model) {
 		});
 };
 
-var _mozilla_services$buildhub$Main$recordMaybeStringEquals = F3(
-	function (path, filterValue, buildRecord) {
-		return _elm_lang$core$Native_Utils.eq(filterValue, 'all') || A2(
-			F2(
-				function (x, y) {
-					return _elm_lang$core$Native_Utils.eq(x, y);
-				}),
-			filterValue,
-			A2(
-				_elm_lang$core$Maybe$withDefault,
-				'',
-				path(buildRecord)));
-	});
-var _mozilla_services$buildhub$Main$recordStringStartsWith = F3(
-	function (path, filterValue, buildRecord) {
-		return A2(
-			_elm_lang$core$String$startsWith,
-			filterValue,
-			path(buildRecord));
-	});
-var _mozilla_services$buildhub$Main$recordStringEquals = F3(
-	function (path, filterValue, buildRecord) {
-		return _elm_lang$core$Native_Utils.eq(filterValue, 'all') || A2(
-			F2(
-				function (x, y) {
-					return _elm_lang$core$Native_Utils.eq(x, y);
-				}),
-			filterValue,
-			path(buildRecord));
-	});
-var _mozilla_services$buildhub$Main$applyFilters = function (model) {
-	return A2(
-		_elm_lang$core$List$filter,
-		function (buildRecord) {
-			return A3(
-				_mozilla_services$buildhub$Main$recordStringEquals,
-				function (_p0) {
-					return function (_) {
-						return _.tree;
-					}(
-						function (_) {
-							return _.source;
-						}(_p0));
-				},
-				model.treeFilter,
-				buildRecord) && (A3(
-				_mozilla_services$buildhub$Main$recordStringEquals,
-				function (_p1) {
-					return function (_) {
-						return _.product;
-					}(
-						function (_) {
-							return _.source;
-						}(_p1));
-				},
-				model.productFilter,
-				buildRecord) && (A3(
-				_mozilla_services$buildhub$Main$recordMaybeStringEquals,
-				function (_p2) {
-					return function (_) {
-						return _.version;
-					}(
-						function (_) {
-							return _.target;
-						}(_p2));
-				},
-				model.versionFilter,
-				buildRecord) && (A3(
-				_mozilla_services$buildhub$Main$recordStringEquals,
-				function (_p3) {
-					return function (_) {
-						return _.platform;
-					}(
-						function (_) {
-							return _.target;
-						}(_p3));
-				},
-				model.platformFilter,
-				buildRecord) && (A3(
-				_mozilla_services$buildhub$Main$recordMaybeStringEquals,
-				function (_p4) {
-					return function (_) {
-						return _.channel;
-					}(
-						function (_) {
-							return _.target;
-						}(_p4));
-				},
-				model.channelFilter,
-				buildRecord) && (A3(
-				_mozilla_services$buildhub$Main$recordStringEquals,
-				function (_p5) {
-					return function (_) {
-						return _.locale;
-					}(
-						function (_) {
-							return _.target;
-						}(_p5));
-				},
-				model.localeFilter,
-				buildRecord) && A3(
-				_mozilla_services$buildhub$Main$recordStringStartsWith,
-				function (_p6) {
-					return function (_) {
-						return _.id;
-					}(
-						function (_) {
-							return _.build;
-						}(_p6));
-				},
-				model.buildIdFilter,
-				buildRecord))))));
-		},
-		model.builds);
-};
-var _mozilla_services$buildhub$Main$extractFilterValues = function (buildRecordList) {
-	var normalizeFilterValues = function (values) {
-		return _elm_lang$core$Set$toList(
-			A2(
-				_elm_lang$core$Set$remove,
-				'',
-				_elm_lang$core$Set$fromList(values)));
-	};
-	var filterValues = A3(
-		_elm_lang$core$List$foldl,
-		F2(
-			function (buildRecord, filterValues) {
-				return {
-					treeList: {ctor: '::', _0: buildRecord.source.tree, _1: filterValues.treeList},
-					productList: {ctor: '::', _0: buildRecord.source.product, _1: filterValues.productList},
-					versionList: {
-						ctor: '::',
-						_0: A2(_elm_lang$core$Maybe$withDefault, '', buildRecord.target.version),
-						_1: filterValues.versionList
-					},
-					platformList: {ctor: '::', _0: buildRecord.target.platform, _1: filterValues.platformList},
-					channelList: {
-						ctor: '::',
-						_0: A2(_elm_lang$core$Maybe$withDefault, '', buildRecord.target.channel),
-						_1: filterValues.channelList
-					},
-					localeList: {ctor: '::', _0: buildRecord.target.locale, _1: filterValues.localeList}
-				};
-			}),
-		{
-			treeList: {ctor: '[]'},
-			productList: {ctor: '[]'},
-			versionList: {ctor: '[]'},
-			platformList: {ctor: '[]'},
-			channelList: {ctor: '[]'},
-			localeList: {ctor: '[]'}
-		},
-		buildRecordList);
-	return _elm_lang$core$Native_Utils.update(
-		filterValues,
-		{
-			treeList: normalizeFilterValues(filterValues.treeList),
-			productList: normalizeFilterValues(filterValues.productList),
-			versionList: normalizeFilterValues(filterValues.versionList),
-			platformList: normalizeFilterValues(filterValues.platformList),
-			channelList: normalizeFilterValues(filterValues.channelList),
-			localeList: normalizeFilterValues(filterValues.localeList)
-		});
-};
 var _mozilla_services$buildhub$Main$update = F2(
-	function (msg, _p7) {
-		var _p8 = _p7;
-		var _p13 = _p8;
-		var _p9 = msg;
-		switch (_p9.ctor) {
+	function (msg, _p0) {
+		var _p1 = _p0;
+		var _p5 = _p1;
+		var _p2 = msg;
+		switch (_p2.ctor) {
 			case 'BuildRecordsFetched':
-				if (_p9._0.ctor === 'Ok') {
-					var _p10 = _p9._0._0;
+				if (_p2._0.ctor === 'Ok') {
 					return A2(
 						_elm_lang$core$Platform_Cmd_ops['!'],
-						_elm_lang$core$Native_Utils.update(
-							_p13,
-							{
-								builds: _p10,
-								filteredBuilds: _p10,
-								filterValues: _mozilla_services$buildhub$Main$extractFilterValues(_p10),
-								loading: false
-							}),
+						_mozilla_services$buildhub$Model$updateModelWithFilters(
+							_elm_lang$core$Native_Utils.update(
+								_p5,
+								{builds: _p2._0._0, loading: false})),
 						{ctor: '[]'});
 				} else {
-					var _p11 = A2(_elm_lang$core$Debug$log, 'An error occured while fetching the build records', _p9._0._0);
+					var _p3 = A2(_elm_lang$core$Debug$log, 'An error occured while fetching the build records', _p2._0._0);
 					return A2(
 						_elm_lang$core$Platform_Cmd_ops['!'],
-						_p13,
+						_p5,
 						{ctor: '[]'});
 				}
 			case 'UpdateFilter':
 				var updatedModelWithFilters = function () {
-					var _p12 = _p9._0;
-					switch (_p12.ctor) {
+					var _p4 = _p2._0;
+					switch (_p4.ctor) {
 						case 'ClearAll':
 							return _elm_lang$core$Native_Utils.update(
-								_p13,
-								{treeFilter: 'all', productFilter: 'all', versionFilter: 'all', platformFilter: 'all', channelFilter: 'all', localeFilter: 'all', buildIdFilter: ''});
-						case 'NewTreeFilter':
-							return _elm_lang$core$Native_Utils.update(
-								_p13,
-								{treeFilter: _p12._0});
+								_p5,
+								{productFilter: 'all', versionFilter: 'all', platformFilter: 'all', channelFilter: 'all', localeFilter: 'all', buildIdFilter: ''});
 						case 'NewProductFilter':
 							return _elm_lang$core$Native_Utils.update(
-								_p13,
-								{productFilter: _p12._0});
+								_p5,
+								{productFilter: _p4._0});
 						case 'NewVersionFilter':
 							return _elm_lang$core$Native_Utils.update(
-								_p13,
-								{versionFilter: _p12._0});
+								_p5,
+								{versionFilter: _p4._0});
 						case 'NewPlatformFilter':
 							return _elm_lang$core$Native_Utils.update(
-								_p13,
-								{platformFilter: _p12._0});
+								_p5,
+								{platformFilter: _p4._0});
 						case 'NewChannelFilter':
 							return _elm_lang$core$Native_Utils.update(
-								_p13,
-								{channelFilter: _p12._0});
+								_p5,
+								{channelFilter: _p4._0});
 						case 'NewLocaleFilter':
 							return _elm_lang$core$Native_Utils.update(
-								_p13,
-								{localeFilter: _p12._0});
+								_p5,
+								{localeFilter: _p4._0});
 						default:
 							return _elm_lang$core$Native_Utils.update(
-								_p13,
-								{buildIdFilter: _p12._0});
+								_p5,
+								{buildIdFilter: _p4._0});
 					}
 				}();
-				var updatedFilteredBuilds = _mozilla_services$buildhub$Main$applyFilters(updatedModelWithFilters);
+				var updatedModelWithRoute = _elm_lang$core$Native_Utils.update(
+					_p5,
+					{
+						route: _mozilla_services$buildhub$Url$routeFromFilters(updatedModelWithFilters)
+					});
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					_elm_lang$core$Native_Utils.update(
-						updatedModelWithFilters,
-						{
-							filteredBuilds: updatedFilteredBuilds,
-							filterValues: _mozilla_services$buildhub$Main$extractFilterValues(updatedFilteredBuilds)
-						}),
-					{ctor: '[]'});
+					_mozilla_services$buildhub$Model$updateModelWithFilters(updatedModelWithRoute),
+					{
+						ctor: '::',
+						_0: _elm_lang$navigation$Navigation$newUrl(
+							_mozilla_services$buildhub$Url$urlFromRoute(updatedModelWithRoute.route)),
+						_1: {ctor: '[]'}
+					});
 			default:
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					_elm_lang$core$Native_Utils.update(
-						_p13,
-						{
-							currentView: _mozilla_services$buildhub$Url$parsePage(_p9._0)
-						}),
+					_mozilla_services$buildhub$Model$updateModelWithFilters(
+						A2(_mozilla_services$buildhub$Url$routeFromUrl, _p5, _p2._0)),
 					{ctor: '[]'});
 		}
 	});
