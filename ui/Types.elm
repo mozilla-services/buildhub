@@ -2,7 +2,7 @@ module Types
     exposing
         ( Build
         , BuildRecord
-        , CurrentView(..)
+        , Route(..)
         , Download
         , FilterValues
         , Model
@@ -15,13 +15,13 @@ module Types
         )
 
 import Kinto
+import Navigation exposing (..)
 
 
 type alias Model =
     { builds : List BuildRecord
     , filteredBuilds : List BuildRecord
     , filterValues : FilterValues
-    , treeFilter : String
     , productFilter : String
     , versionFilter : String
     , platformFilter : String
@@ -29,13 +29,12 @@ type alias Model =
     , localeFilter : String
     , buildIdFilter : String
     , loading : Bool
-    , currentView : CurrentView
+    , route : Route
     }
 
 
 type alias FilterValues =
-    { treeList : List String
-    , productList : List String
+    { productList : List String
     , versionList : List String
     , platformList : List String
     , channelList : List String
@@ -103,7 +102,6 @@ type alias Target =
 
 type NewFilter
     = ClearAll
-    | NewTreeFilter String
     | NewProductFilter String
     | NewVersionFilter String
     | NewPlatformFilter String
@@ -112,12 +110,42 @@ type NewFilter
     | NewBuildIdSearch String
 
 
-type CurrentView
+type alias BuildId =
+    String
+
+
+type alias Product =
+    String
+
+
+type alias Channel =
+    String
+
+
+type alias Platform =
+    String
+
+
+type alias Version =
+    String
+
+
+type alias Locale =
+    String
+
+
+type Route
     = MainView
+    | BuildIdView BuildId
+    | ProductView Product
+    | ChannelView Product Channel
+    | PlatformView Product Channel Platform
+    | VersionView Product Channel Platform Version
+    | LocaleView Product Channel Platform Version Locale
     | DocsView
 
 
 type Msg
     = BuildRecordsFetched (Result Kinto.Error (List BuildRecord))
     | UpdateFilter NewFilter
-    | ChangeView CurrentView
+    | UrlChange Location

@@ -13,12 +13,12 @@ view : Model -> Html Msg
 view model =
     div [ class "container" ]
         [ headerView model
-        , case model.currentView of
-            MainView ->
-                mainView model
-
+        , case model.route of
             DocsView ->
                 docsView model
+
+            _ ->
+                mainView model
         ]
 
 
@@ -37,7 +37,6 @@ mainView model =
                     [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
                     , div [ class "panel-body" ]
                         [ buildIdSearchForm model
-                        , filterSelector model.filterValues.treeList "Trees" model.treeFilter (UpdateFilter << NewTreeFilter)
                         , filterSelector model.filterValues.productList "Products" model.productFilter (UpdateFilter << NewProductFilter)
                         , filterSelector model.filterValues.versionList "Versions" model.versionFilter (UpdateFilter << NewVersionFilter)
                         , filterSelector model.filterValues.platformList "Platforms" model.platformFilter (UpdateFilter << NewPlatformFilter)
@@ -114,9 +113,9 @@ headerView model =
                 [ class "collapse navbar-collapse" ]
                 [ ul
                     [ class "nav navbar-nav navbar-right" ]
-                    [ li [] [ a [ href "#", onClick_ <| ChangeView MainView ] [ text "Builds" ] ]
+                    [ li [] [ a [ href "#/builds" ] [ text "Builds" ] ]
                     , li []
-                        [ a [ href "#", onClick_ <| ChangeView DocsView ]
+                        [ a [ href "#/docs" ]
                             [ i [ class "glyphicon glyphicon-question-sign" ] []
                             , text " Docs"
                             ]

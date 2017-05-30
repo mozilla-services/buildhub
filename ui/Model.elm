@@ -1,26 +1,31 @@
-module Model exposing (init)
+module Model exposing (init, updateModelWithFilters)
 
 import Decoder exposing (..)
 import Kinto
+import Navigation exposing (..)
+import Set
 import Types exposing (..)
+import Url exposing (..)
 
 
-init : ( Model, Cmd Msg )
-init =
-    { builds = []
-    , filteredBuilds = []
-    , filterValues = FilterValues [] [] [] [] [] []
-    , treeFilter = "all"
-    , productFilter = "all"
-    , versionFilter = "all"
-    , platformFilter = "all"
-    , channelFilter = "all"
-    , localeFilter = "all"
-    , buildIdFilter = ""
-    , loading = True
-    , currentView = MainView
-    }
-        ! [ getBuildRecordList ]
+init : Location -> ( Model, Cmd Msg )
+init location =
+    let
+        defaultModel =
+            { builds = []
+            , filteredBuilds = []
+            , filterValues = FilterValues [] [] [] [] []
+            , productFilter = "all"
+            , versionFilter = "all"
+            , platformFilter = "all"
+            , channelFilter = "all"
+            , localeFilter = "all"
+            , buildIdFilter = ""
+            , loading = True
+            , route = MainView
+            }
+    in
+        updateModelWithFilters (routeFromUrl defaultModel location) ! [ getBuildRecordList ]
 
 
 getBuildRecordList : Cmd Msg
@@ -41,3 +46,93 @@ client =
 recordResource : Kinto.Resource BuildRecord
 recordResource =
     Kinto.recordResource "build-hub" "fixtures" buildRecordDecoder
+
+
+extractFilterValues : List BuildRecord -> FilterValues
+extractFilterValues buildRecordList =
+    let
+        filterValues =
+            (List.foldl
+                (\buildRecord filterValues ->
+                    { productList = buildRecord.source.product :: filterValues.productList
+                    , versionList = (Maybe.withDefault "" buildRecord.target.version) :: filterValues.versionList
+                    , platformList = buildRecord.target.platform :: filterValues.platformList
+                    , channelList = (Maybe.withDefault "" buildRecord.target.channel) :: filterValues.channelList
+                    , localeList = buildRecord.target.locale :: filterValues.localeList
+                    }
+                )
+                { productList = []
+                , versionList = []
+                , platformList = []
+                , channelList = []
+                , localeList = []
+                }
+                buildRecordList
+            )
+
+        normalizeFilterValues : List String -> List String
+        normalizeFilterValues values =
+            values
+                |> Set.fromList
+                |> Set.remove ""
+                |> Set.toList
+    in
+        { filterValues
+            | productList = filterValues.productList |> normalizeFilterValues
+            , versionList = filterValues.versionList |> normalizeFilterValues
+            , platformList = filterValues.platformList |> normalizeFilterValues
+            , channelList = filterValues.channelList |> normalizeFilterValues
+            , localeList = filterValues.localeList |> normalizeFilterValues
+        }
+
+
+recordStringEquals : (BuildRecord -> String) -> String -> BuildRecord -> Bool
+recordStringEquals path filterValue buildRecord =
+    (filterValue == "all")
+        || (buildRecord
+                |> path
+                |> (==) filterValue
+           )
+
+
+recordStringStartsWith : (BuildRecord -> String) -> String -> BuildRecord -> Bool
+recordStringStartsWith path filterValue buildRecord =
+    buildRecord
+        |> path
+        |> String.startsWith filterValue
+
+
+recordMaybeStringEquals : (BuildRecord -> Maybe String) -> String -> BuildRecord -> Bool
+recordMaybeStringEquals path filterValue buildRecord =
+    (filterValue == "all")
+        || (buildRecord
+                |> path
+                |> Maybe.withDefault ""
+                |> (==) filterValue
+           )
+
+
+applyFilters : Model -> List BuildRecord
+applyFilters model =
+    model.builds
+        |> List.filter
+            (\buildRecord ->
+                (recordStringEquals (.source >> .product) model.productFilter) buildRecord
+                    && (recordMaybeStringEquals (.target >> .version) model.versionFilter) buildRecord
+                    && (recordStringEquals (.target >> .platform) model.platformFilter) buildRecord
+                    && (recordMaybeStringEquals (.target >> .channel) model.channelFilter) buildRecord
+                    && (recordStringEquals (.target >> .locale) model.localeFilter) buildRecord
+                    && (recordStringStartsWith (.build >> .id) model.buildIdFilter) buildRecord
+            )
+
+
+updateModelWithFilters : Model -> Model
+updateModelWithFilters model =
+    let
+        filteredBuilds =
+            applyFilters model
+    in
+        { model
+            | filteredBuilds = filteredBuilds
+            , filterValues = extractFilterValues filteredBuilds
+        }
