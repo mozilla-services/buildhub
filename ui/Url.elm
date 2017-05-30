@@ -95,7 +95,13 @@ routeFromUrl model location =
                 }
 
             _ ->
-                { model | route = MainView }
+                { model
+                    | route = MainView
+                    , productFilter = "all"
+                    , channelFilter = "all"
+                    , platformFilter = "all"
+                    , versionFilter = "all"
+                }
 
 
 urlFromRoute : Model -> String
