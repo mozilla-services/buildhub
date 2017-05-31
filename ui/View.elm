@@ -205,16 +205,11 @@ recordView record =
                 ]
             ]
         , div [ class "panel-body" ]
-            [ h4 [] [ text "Build" ]
-            , viewBuildDetails record.build
-            , h4 [] [ text "Download" ]
-            , viewDownloadDetails record.download
-            , h4 [] [ text "Source" ]
-            , viewSourceDetails record.source
-            , h4 [] [ text "System Addons" ]
-            , viewSystemAddonsDetails record.systemAddons
-            , h4 [] [ text "Target" ]
+            [ viewSourceDetails record.source
             , viewTargetDetails record.target
+            , viewDownloadDetails record.download
+            , viewBuildDetails record.build
+            , viewSystemAddonsDetails record.systemAddons
             ]
         ]
 
@@ -223,17 +218,20 @@ viewBuildDetails : Maybe Build -> Html Msg
 viewBuildDetails build =
     case build of
         Just build ->
-            table [ class "table table-stripped table-condensed" ]
-                [ thead []
-                    [ tr []
-                        [ th [] [ text "Id" ]
-                        , th [] [ text "Date" ]
+            div []
+                [ h4 [] [ text "Build" ]
+                , table [ class "table table-stripped table-condensed" ]
+                    [ thead []
+                        [ tr []
+                            [ th [] [ text "Id" ]
+                            , th [] [ text "Date" ]
+                            ]
                         ]
-                    ]
-                , tbody []
-                    [ tr []
-                        [ td [] [ text build.id ]
-                        , td [] [ text build.date ]
+                    , tbody []
+                        [ tr []
+                            [ td [] [ text build.id ]
+                            , td [] [ text build.date ]
+                            ]
                         ]
                     ]
                 ]
@@ -251,12 +249,15 @@ viewDownloadDetails download =
                 |> List.head
                 |> Maybe.withDefault ""
     in
-        table [ class "table table-stripped table-condensed" ]
-            [ thead []
-                [ tr []
-                    [ th [] [ text "URL" ]
-                    , th [] [ text "Mimetype" ]
-                    , th [] [ text "Size" ]
+        div []
+            [ h4 [] [ text "Download" ]
+            , table [ class "table table-stripped table-condensed" ]
+                [ thead []
+                    [ tr []
+                        [ th [] [ text "URL" ]
+                        , th [] [ text "Mimetype" ]
+                        , th [] [ text "Size" ]
+                        ]
                     ]
                 ]
             , tbody []
@@ -277,7 +278,10 @@ viewSourceDetails source =
                 Just revision ->
                     case source.repository of
                         Just url ->
-                            a [ href <| url ++ revision ] [ text revision ]
+                            div []
+                                [ h4 [] [ text "Source" ]
+                                , a [ href <| url ++ revision ] [ text revision ]
+                                ]
 
                         Nothing ->
                             text "If you see this file a bug. revision not linked to a repository."
@@ -305,45 +309,57 @@ viewSourceDetails source =
 
 viewSystemAddonsDetails : List SystemAddon -> Html Msg
 viewSystemAddonsDetails systemAddons =
-    table [ class "table table-stripped table-condensed" ]
-        [ thead []
-            [ tr []
-                [ th [] [ text "Id" ]
-                , th [] [ text "Builtin version" ]
-                , th [] [ text "Updated version" ]
-                ]
-            ]
-        , tbody []
-            (systemAddons
-                |> List.map
-                    (\systemAddon ->
-                        tr []
-                            [ td [] [ text systemAddon.id ]
-                            , td [] [ text systemAddon.builtin ]
-                            , td [] [ text systemAddon.updated ]
+    case systemAddons of
+        [] ->
+            text ""
+
+        _ ->
+            div []
+                [ h4 [] [ text "System Addons" ]
+                , table [ class "table table-stripped table-condensed" ]
+                    [ thead []
+                        [ tr []
+                            [ th [] [ text "Id" ]
+                            , th [] [ text "Builtin version" ]
+                            , th [] [ text "Updated version" ]
                             ]
-                    )
-            )
-        ]
+                        ]
+                    , tbody []
+                        (systemAddons
+                            |> List.map
+                                (\systemAddon ->
+                                    tr []
+                                        [ td [] [ text systemAddon.id ]
+                                        , td [] [ text systemAddon.builtin ]
+                                        , td [] [ text systemAddon.updated ]
+                                        ]
+                                )
+                        )
+                    ]
+                ]
 
 
 viewTargetDetails : Target -> Html Msg
 viewTargetDetails target =
-    table [ class "table table-stripped table-condensed" ]
-        [ thead []
-            [ tr []
-                [ th [] [ text "Version" ]
-                , th [] [ text "Platform" ]
-                , th [] [ text "Channel" ]
-                , th [] [ text "Locale" ]
+    div []
+        [ h4 [] [ text "Target" ]
+        , table
+            [ class "table table-stripped table-condensed" ]
+            [ thead []
+                [ tr []
+                    [ th [] [ text "Version" ]
+                    , th [] [ text "Platform" ]
+                    , th [] [ text "Channel" ]
+                    , th [] [ text "Locale" ]
+                    ]
                 ]
-            ]
-        , tbody []
-            [ tr []
-                [ td [] [ text <| target.version ]
-                , td [] [ text target.platform ]
-                , td [] [ text <| target.channel ]
-                , td [] [ text target.locale ]
+            , tbody []
+                [ tr []
+                    [ td [] [ text target.version ]
+                    , td [] [ text target.platform ]
+                    , td [] [ text target.channel ]
+                    , td [] [ text target.locale ]
+                    ]
                 ]
             ]
         ]
