@@ -289,32 +289,37 @@ viewDownloadDetails download =
             ]
 
 
-treeToMozillaHgUrl : String -> Maybe String
+treeToMozillaHgUrl : Maybe String -> Maybe String
 treeToMozillaHgUrl tree =
-    let
-        mappingTable =
-            Dict.fromList
-                [ ( "comm-aurora", "releases/comm-aurora" )
-                , ( "comm-beta", "releases/comm-beta" )
-                , ( "comm-central", "comm-central" )
-                , ( "comm-esr45", "releases/comm-esr45" )
-                , ( "comm-esr52", "releases/comm-esr52" )
-                , ( "graphics", "projects/graphics" )
-                , ( "mozilla-aurora", "releases/mozilla-aurora" )
-                , ( "mozilla-beta", "releases/mozilla-beta" )
-                , ( "mozilla-central", "mozilla-central" )
-                , ( "mozilla-esr45", "releases/mozilla-esr45" )
-                , ( "mozilla-esr52", "releases/mozilla-esr45" )
-                , ( "mozilla-release", "releases/mozilla-release" )
-                , ( "oak", "projects/oak" )
-                , ( "try-comm-central", "try-comm-central" )
-                ]
-    in
-        Maybe.map
-            (\folder ->
-                "https://hg.mozilla.org/" ++ folder ++ "/rev/"
-            )
-            (Dict.get tree mappingTable)
+    case tree of
+        Just tree ->
+            let
+                mappingTable =
+                    Dict.fromList
+                        [ ( "comm-aurora", "releases/comm-aurora" )
+                        , ( "comm-beta", "releases/comm-beta" )
+                        , ( "comm-central", "comm-central" )
+                        , ( "comm-esr45", "releases/comm-esr45" )
+                        , ( "comm-esr52", "releases/comm-esr52" )
+                        , ( "graphics", "projects/graphics" )
+                        , ( "mozilla-aurora", "releases/mozilla-aurora" )
+                        , ( "mozilla-beta", "releases/mozilla-beta" )
+                        , ( "mozilla-central", "mozilla-central" )
+                        , ( "mozilla-esr45", "releases/mozilla-esr45" )
+                        , ( "mozilla-esr52", "releases/mozilla-esr45" )
+                        , ( "mozilla-release", "releases/mozilla-release" )
+                        , ( "oak", "projects/oak" )
+                        , ( "try-comm-central", "try-comm-central" )
+                        ]
+            in
+                Maybe.map
+                    (\folder ->
+                        "https://hg.mozilla.org/" ++ folder ++ "/rev/"
+                    )
+                    (Dict.get tree mappingTable)
+
+        Nothing ->
+            Nothing
 
 
 viewSourceDetails : Source -> Html Msg
@@ -325,7 +330,7 @@ viewSourceDetails source =
                 Just revision ->
                     let
                         mozillaHgUrl =
-                            treeToMozillaHgUrl <| Maybe.withDefault "" source.tree
+                            treeToMozillaHgUrl source.tree
                     in
                         case mozillaHgUrl of
                             Just url ->
@@ -348,7 +353,7 @@ viewSourceDetails source =
             , tbody []
                 [ tr []
                     [ td [] [ text source.product ]
-                    , td [] [ text <| Maybe.withDefault "" source.tree ]
+                    , td [] [ text <| Maybe.withDefault "unknown" source.tree ]
                     , td [] [ revisionUrl ]
                     ]
                 ]

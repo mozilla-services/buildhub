@@ -102,16 +102,6 @@ recordStringStartsWith path filterValue buildRecord =
         |> String.startsWith filterValue
 
 
-recordMaybeStringEquals : (BuildRecord -> Maybe String) -> String -> BuildRecord -> Bool
-recordMaybeStringEquals path filterValue buildRecord =
-    (filterValue == "all")
-        || (buildRecord
-                |> path
-                |> Maybe.withDefault ""
-                |> (==) filterValue
-           )
-
-
 applyFilters : Model -> List BuildRecord
 applyFilters model =
     model.builds
