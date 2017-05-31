@@ -271,32 +271,18 @@ viewDownloadDetails download =
             ]
 
 
-treeToMozillaHgUrl : Maybe String -> Maybe String
-treeToMozillaHgUrl tree =
-    case tree of
-        Just tree ->
-            Just <| "https://hg.mozilla.org/" ++ tree ++ "/rev/"
-
-        Nothing ->
-            Nothing
-
-
 viewSourceDetails : Source -> Html Msg
 viewSourceDetails source =
     let
         revisionUrl =
             case source.revision of
                 Just revision ->
-                    let
-                        mozillaHgUrl =
-                            treeToMozillaHgUrl source.tree
-                    in
-                        case mozillaHgUrl of
-                            Just url ->
-                                a [ href <| url ++ revision ] [ text revision ]
+                    case source.repository of
+                        Just url ->
+                            a [ href <| url ++ revision ] [ text revision ]
 
-                            Nothing ->
-                                text ""
+                        Nothing ->
+                            text "If you see this file a bug. revision not linked to a repository."
 
                 Nothing ->
                     text ""
