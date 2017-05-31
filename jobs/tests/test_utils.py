@@ -167,6 +167,43 @@ RECORDS = [
             "fennec-42.0b2.fr.android-arm.apk",
         }
     },
+
+
+    # Fennec ARM
+    {
+        "id": "fennec_2017-05-30-10-01-27_55-0a1_android-api-15_multi",
+        "source": {
+            "product": "fennec",
+        },
+        "target": {
+            "version": "55.0a1",
+            "platform": "android-api-15",
+            "locale": "multi",
+            "channel": "nightly"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-05-30-10-01-27-"
+            "mozilla-central-android-api-15-old-id/fennec-55.0a1.multi.android-arm.apk",
+        }
+    },
+
+    # Fennec i386
+    {
+        "id": "fennec_2017-05-30-10-01-27_55-0a1_android-i386_multi",
+        "source": {
+            "product": "fennec",
+        },
+        "target": {
+            "version": "55.0a1",
+            "platform": "android-i386",
+            "locale": "multi",
+            "channel": "nightly"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-05-30-10-01-27-"
+            "mozilla-central-android-x86-old-id/fennec-55.0a1.multi.android-i386.apk",
+        }
+    },
 ]
 
 
@@ -178,7 +215,9 @@ def test_build_record_id(record):
 
 
 NIGHTLY_FILENAMES = [
-    ("firefox-55.0a1.en-US.linux-x86_64.tar.bz2", "55.0a1", "en-US", "linux-x86_64")
+    ("firefox-55.0a1.en-US.linux-x86_64.tar.bz2", "55.0a1", "en-US", "linux-x86_64"),
+    ("fennec-55.0a1.multi.android-i386.apk", "55.0a1", "multi", "android-i386"),
+    ("fennec-55.0a1.multi.android-arm.apk", "55.0a1", "multi", "android-arm"),
 ]
 
 
