@@ -1,9 +1,9 @@
 module Model exposing (init, updateModelWithFilters)
 
 import Decoder exposing (..)
+import Filters exposing (..)
 import Kinto
 import Navigation exposing (..)
-import Set
 import Types exposing (..)
 import Url exposing (..)
 
@@ -14,7 +14,7 @@ init location =
         defaultModel =
             { builds = []
             , filteredBuilds = []
-            , filterValues = FilterValues [] [] [] [] []
+            , filterValues = FilterValues productList channelList platformList versionList localeList
             , productFilter = "all"
             , versionFilter = "all"
             , platformFilter = "all"
@@ -46,44 +46,6 @@ client =
 recordResource : Kinto.Resource BuildRecord
 recordResource =
     Kinto.recordResource "build-hub" "fixtures" buildRecordDecoder
-
-
-extractFilterValues : List BuildRecord -> FilterValues
-extractFilterValues buildRecordList =
-    let
-        filterValues =
-            (List.foldl
-                (\buildRecord filterValues ->
-                    { productList = buildRecord.source.product :: filterValues.productList
-                    , versionList = buildRecord.target.version :: filterValues.versionList
-                    , platformList = buildRecord.target.platform :: filterValues.platformList
-                    , channelList = buildRecord.target.channel :: filterValues.channelList
-                    , localeList = buildRecord.target.locale :: filterValues.localeList
-                    }
-                )
-                { productList = []
-                , versionList = []
-                , platformList = []
-                , channelList = []
-                , localeList = []
-                }
-                buildRecordList
-            )
-
-        normalizeFilterValues : List String -> List String
-        normalizeFilterValues values =
-            values
-                |> Set.fromList
-                |> Set.remove ""
-                |> Set.toList
-    in
-        { filterValues
-            | productList = filterValues.productList |> normalizeFilterValues
-            , versionList = filterValues.versionList |> normalizeFilterValues
-            , platformList = filterValues.platformList |> normalizeFilterValues
-            , channelList = filterValues.channelList |> normalizeFilterValues
-            , localeList = filterValues.localeList |> normalizeFilterValues
-        }
 
 
 recordStringEquals : (BuildRecord -> String) -> String -> BuildRecord -> Bool
@@ -124,5 +86,4 @@ updateModelWithFilters model =
     in
         { model
             | filteredBuilds = filteredBuilds
-            , filterValues = extractFilterValues filteredBuilds
         }

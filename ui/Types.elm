@@ -35,9 +35,9 @@ type alias Model =
 
 type alias FilterValues =
     { productList : List String
-    , versionList : List String
-    , platformList : List String
     , channelList : List String
+    , platformList : List String
+    , versionList : List String
     , localeList : List String
     }
 
