@@ -1,18 +1,18 @@
 module Filters exposing (..)
 
 
-products : List String
-products =
+productList : List String
+productList =
     [ "firefox", "thunderbid", "fennec" ]
 
 
-channels : List String
-channels =
+channelList : List String
+channelList =
     [ "aurora", "beta", "nightly", "release" ]
 
 
-platforms : List String
-platforms =
+platformList : List String
+platformList =
     [ "linux-i686"
     , "linux-x86_64-EME-free"
     , "linux-x86_64"
@@ -27,8 +27,8 @@ platforms =
     ]
 
 
-versions : List String
-versions =
+versionList : List String
+versionList =
     [ "0.10.1"
     , "0.10"
     , "0.10rc"
@@ -931,8 +931,8 @@ versions =
     ]
 
 
-locales : List String
-locales =
+localeList : List String
+localeList =
     [ "ach"
     , "af"
     , "an"
