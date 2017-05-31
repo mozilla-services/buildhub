@@ -288,7 +288,6 @@ viewDownloadDetails download =
                 [ tr []
                     [ td [] [ a [ href download.url ] [ text filename ] ]
                     , td [] [ text <| download.mimetype ]
-                      -- TODO display the size in an humanly readable format
                     , td [] [ text <| format download.size ]
                     ]
                 ]
