@@ -7,6 +7,12 @@ import Html.Events exposing (..)
 import Json.Decode as Decode
 import Snippet exposing (snippets)
 import Types exposing (..)
+import Filesize exposing (formatWith, defaultSettings, Units(..))
+
+
+format : Int -> String
+format =
+    formatWith { defaultSettings | units = Base2 }
 
 
 view : Model -> Html Msg
@@ -283,7 +289,7 @@ viewDownloadDetails download =
                     [ td [] [ a [ href download.url ] [ text filename ] ]
                     , td [] [ text <| download.mimetype ]
                       -- TODO display the size in an humanly readable format
-                    , td [] [ text <| toString download.size ]
+                    , td [] [ text <| format download.size ]
                     ]
                 ]
             ]
