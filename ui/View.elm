@@ -208,10 +208,17 @@ recordView record =
                         [ text <|
                             record.source.product
                                 ++ " "
-                                ++ Maybe.withDefault "" record.target.version
+                                ++ record.target.version
                         ]
                     ]
-                , em [ class "col-sm-6 text-right" ] [ text record.build.date ]
+                , em [ class "col-sm-6 text-right" ]
+                    [ case record.build of
+                        Just build ->
+                            text build.date
+
+                        Nothing ->
+                            text "Unknown"
+                    ]
                 ]
             ]
         , div [ class "panel-body" ]
@@ -229,24 +236,29 @@ recordView record =
         ]
 
 
-viewBuildDetails : Build -> Html Msg
+viewBuildDetails : Maybe Build -> Html Msg
 viewBuildDetails build =
-    table [ class "table table-stripped table-condensed" ]
-        [ thead []
-            [ tr []
-                [ th [] [ text "Id" ]
-                , th [] [ text "Type" ]
-                , th [] [ text "Date" ]
+    case build of
+        Just build ->
+            table [ class "table table-stripped table-condensed" ]
+                [ thead []
+                    [ tr []
+                        [ th [] [ text "Id" ]
+                        , th [] [ text "Type" ]
+                        , th [] [ text "Date" ]
+                        ]
+                    ]
+                , tbody []
+                    [ tr []
+                        [ td [] [ text build.id ]
+                        , td [] [ text build.type_ ]
+                        , td [] [ text build.date ]
+                        ]
+                    ]
                 ]
-            ]
-        , tbody []
-            [ tr []
-                [ td [] [ text build.id ]
-                , td [] [ text build.type_ ]
-                , td [] [ text build.date ]
-                ]
-            ]
-        ]
+
+        Nothing ->
+            text ""
 
 
 viewDownloadDetails : Download -> Html Msg
@@ -269,41 +281,45 @@ viewDownloadDetails download =
             , tbody []
                 [ tr []
                     [ td [] [ a [ href download.url ] [ text filename ] ]
-                    , td [] [ text <| Maybe.withDefault "" download.mimetype ]
-
-                    -- TODO display the size in an humanly readable format
-                    , td [] [ text <| toString <| Maybe.withDefault 0 download.size ]
+                    , td [] [ text <| download.mimetype ]
+                      -- TODO display the size in an humanly readable format
+                    , td [] [ text <| toString download.size ]
                     ]
                 ]
             ]
 
 
-treeToMozillaHgUrl : String -> Maybe String
+treeToMozillaHgUrl : Maybe String -> Maybe String
 treeToMozillaHgUrl tree =
-    let
-        mappingTable =
-            Dict.fromList
-                [ ( "comm-aurora", "releases/comm-aurora" )
-                , ( "comm-beta", "releases/comm-beta" )
-                , ( "comm-central", "comm-central" )
-                , ( "comm-esr45", "releases/comm-esr45" )
-                , ( "comm-esr52", "releases/comm-esr52" )
-                , ( "graphics", "projects/graphics" )
-                , ( "mozilla-aurora", "releases/mozilla-aurora" )
-                , ( "mozilla-beta", "releases/mozilla-beta" )
-                , ( "mozilla-central", "mozilla-central" )
-                , ( "mozilla-esr45", "releases/mozilla-esr45" )
-                , ( "mozilla-esr52", "releases/mozilla-esr45" )
-                , ( "mozilla-release", "releases/mozilla-release" )
-                , ( "oak", "projects/oak" )
-                , ( "try-comm-central", "try-comm-central" )
-                ]
-    in
-        Maybe.map
-            (\folder ->
-                "https://hg.mozilla.org/" ++ folder ++ "/rev/"
-            )
-            (Dict.get tree mappingTable)
+    case tree of
+        Just tree ->
+            let
+                mappingTable =
+                    Dict.fromList
+                        [ ( "comm-aurora", "releases/comm-aurora" )
+                        , ( "comm-beta", "releases/comm-beta" )
+                        , ( "comm-central", "comm-central" )
+                        , ( "comm-esr45", "releases/comm-esr45" )
+                        , ( "comm-esr52", "releases/comm-esr52" )
+                        , ( "graphics", "projects/graphics" )
+                        , ( "mozilla-aurora", "releases/mozilla-aurora" )
+                        , ( "mozilla-beta", "releases/mozilla-beta" )
+                        , ( "mozilla-central", "mozilla-central" )
+                        , ( "mozilla-esr45", "releases/mozilla-esr45" )
+                        , ( "mozilla-esr52", "releases/mozilla-esr45" )
+                        , ( "mozilla-release", "releases/mozilla-release" )
+                        , ( "oak", "projects/oak" )
+                        , ( "try-comm-central", "try-comm-central" )
+                        ]
+            in
+                Maybe.map
+                    (\folder ->
+                        "https://hg.mozilla.org/" ++ folder ++ "/rev/"
+                    )
+                    (Dict.get tree mappingTable)
+
+        Nothing ->
+            Nothing
 
 
 viewSourceDetails : Source -> Html Msg
@@ -337,39 +353,35 @@ viewSourceDetails source =
             , tbody []
                 [ tr []
                     [ td [] [ text source.product ]
-                    , td [] [ text source.tree ]
+                    , td [] [ text <| Maybe.withDefault "unknown" source.tree ]
                     , td [] [ revisionUrl ]
                     ]
                 ]
             ]
 
 
-viewSystemAddonsDetails : Maybe (List SystemAddon) -> Html Msg
+viewSystemAddonsDetails : List SystemAddon -> Html Msg
 viewSystemAddonsDetails systemAddons =
-    let
-        systemAddonsList =
-            Maybe.withDefault [] systemAddons
-    in
-        table [ class "table table-stripped table-condensed" ]
-            [ thead []
-                [ tr []
-                    [ th [] [ text "Id" ]
-                    , th [] [ text "Builtin version" ]
-                    , th [] [ text "Updated version" ]
-                    ]
+    table [ class "table table-stripped table-condensed" ]
+        [ thead []
+            [ tr []
+                [ th [] [ text "Id" ]
+                , th [] [ text "Builtin version" ]
+                , th [] [ text "Updated version" ]
                 ]
-            , tbody []
-                (systemAddonsList
-                    |> List.map
-                        (\systemAddon ->
-                            tr []
-                                [ td [] [ text systemAddon.id ]
-                                , td [] [ text systemAddon.builtin ]
-                                , td [] [ text systemAddon.updated ]
-                                ]
-                        )
-                )
             ]
+        , tbody []
+            (systemAddons
+                |> List.map
+                    (\systemAddon ->
+                        tr []
+                            [ td [] [ text systemAddon.id ]
+                            , td [] [ text systemAddon.builtin ]
+                            , td [] [ text systemAddon.updated ]
+                            ]
+                    )
+            )
+        ]
 
 
 viewTargetDetails : Target -> Html Msg
@@ -385,9 +397,9 @@ viewTargetDetails target =
             ]
         , tbody []
             [ tr []
-                [ td [] [ text <| Maybe.withDefault "" target.version ]
+                [ td [] [ text <| target.version ]
                 , td [] [ text target.platform ]
-                , td [] [ text <| Maybe.withDefault "" target.channel ]
+                , td [] [ text <| target.channel ]
                 , td [] [ text target.locale ]
                 ]
             ]
