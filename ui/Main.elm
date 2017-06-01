@@ -81,7 +81,13 @@ update msg ({ filterValues } as model) =
                     { model | route = routeFromFilters updatedModelWithFilters }
             in
                 updateModelWithFilters updatedModelWithRoute
-                    ! [ newUrl <| urlFromRoute updatedModelWithRoute.route ]
+                    ! [ newUrl <| urlFromRoute updatedModelWithRoute.route
+                      , getBuildRecordList updatedModelWithRoute
+                      ]
 
         UrlChange location ->
-            updateModelWithFilters (routeFromUrl model location) ! []
+            let
+                updatedModel =
+                    updateModelWithFilters (routeFromUrl model location)
+            in
+                updatedModel ! [ getBuildRecordList updatedModel ]

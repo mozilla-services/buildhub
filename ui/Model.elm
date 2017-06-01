@@ -1,4 +1,10 @@
-module Model exposing (init, getNextBuilds, updateModelWithFilters)
+module Model
+    exposing
+        ( init
+        , getBuildRecordList
+        , getNextBuilds
+        , updateModelWithFilters
+        )
 
 import Decoder exposing (..)
 import Filters exposing (..)
@@ -25,16 +31,48 @@ init location =
             , route = MainView
             }
     in
-        updateModelWithFilters (routeFromUrl defaultModel location) ! [ getBuildRecordList ]
+        updateModelWithFilters (routeFromUrl defaultModel location) ! [ getBuildRecordList defaultModel ]
 
 
-getBuildRecordList : Cmd Msg
-getBuildRecordList =
-    client
-        |> Kinto.getList recordResource
-        |> Kinto.limit 10
-        |> Kinto.sortBy [ "-build.date" ]
-        |> Kinto.send BuildRecordsFetched
+getBuildRecordList : Model -> Cmd Msg
+getBuildRecordList { productFilter, channelFilter, platformFilter, versionFilter, localeFilter } =
+    let
+        request =
+            client
+                |> Kinto.getList recordResource
+                |> Kinto.limit 10
+                |> Kinto.sortBy [ "-build.date" ]
+
+        filteredRequest =
+            request
+                |> (if productFilter /= "all" then
+                        Kinto.withFilter (Kinto.Equal "source.product" productFilter)
+                    else
+                        identity
+                   )
+                |> (if channelFilter /= "all" then
+                        Kinto.withFilter (Kinto.Equal "target.channel" channelFilter)
+                    else
+                        identity
+                   )
+                |> (if platformFilter /= "all" then
+                        Kinto.withFilter (Kinto.Equal "target.platform" platformFilter)
+                    else
+                        identity
+                   )
+                |> (if versionFilter /= "all" then
+                        Kinto.withFilter (Kinto.Equal "target.version" versionFilter)
+                    else
+                        identity
+                   )
+                |> (if localeFilter /= "all" then
+                        Kinto.withFilter (Kinto.Equal "target.locale" localeFilter)
+                    else
+                        identity
+                   )
+    in
+        filteredRequest
+            |> Kinto.send BuildRecordsFetched
 
 
 getNextBuilds : Kinto.Pager BuildRecord -> Cmd Msg
