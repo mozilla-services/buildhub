@@ -37,12 +37,7 @@ mainView model =
             [ div [ class "col-sm-9" ]
                 [ numBuilds model
                 , div [] <| List.map recordView model.filteredBuilds
-                , button
-                    [ class "btn btn-default"
-                    , style [ ( "width", "100%" ) ]
-                    , onClick LoadNextPage
-                    ]
-                    [ text "Load more" ]
+                , nextPageBtn (List.length model.filteredBuilds) model.buildsPager.total
                 ]
             , div [ class "col-sm-3" ]
                 [ div [ class "panel panel-default" ]
@@ -430,3 +425,22 @@ onClick_ msg =
         "click"
         { preventDefault = True, stopPropagation = True }
         (Decode.succeed msg)
+
+
+nextPageBtn : Int -> Int -> Html Msg
+nextPageBtn displayed total =
+    if displayed < total then
+        button
+            [ class "btn btn-default"
+            , style [ ( "width", "100%" ) ]
+            , onClick LoadNextPage
+            ]
+            [ text <|
+                "Load "
+                    ++ (toString pageSize)
+                    ++ " more ("
+                    ++ (toString <| total - displayed)
+                    ++ " left)"
+            ]
+    else
+        div [] []

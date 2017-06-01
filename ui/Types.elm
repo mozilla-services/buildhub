@@ -1,6 +1,7 @@
 module Types
     exposing
-        ( Build
+        ( pageSize
+        , Build
         , BuildRecord
         , Route(..)
         , Download
@@ -16,6 +17,10 @@ module Types
 
 import Kinto
 import Navigation exposing (..)
+
+
+pageSize =
+    10
 
 
 type alias Model =

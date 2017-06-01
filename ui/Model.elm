@@ -43,7 +43,7 @@ getBuildRecordList { productFilter, channelFilter, platformFilter, versionFilter
         request =
             client
                 |> Kinto.getList recordResource
-                |> Kinto.limit 10
+                |> Kinto.limit pageSize
                 |> Kinto.sortBy [ "-build.date" ]
 
         filteredRequest =
