@@ -8,7 +8,7 @@ from buildhub.utils import (
 RECORDS = [
     # Firefox Nightly
     {
-        "id": "firefox_2017-05-15-10-02-38_55-0a1_linux-x86_64_en-us",
+        "id": "firefox_nightly_2017-05-15-10-02-38_55-0a1_linux-x86_64_en-us",
         "source": {
             "product": "firefox",
         },
@@ -26,7 +26,7 @@ RECORDS = [
 
     # Firefox Aurora
     {
-        "id": "firefox_54-0a2_mac_en-us",
+        "id": "firefox_aurora_54-0a2_mac_en-us",
         "source": {
             "product": "firefox",
         },
@@ -44,7 +44,7 @@ RECORDS = [
 
     # Firefox Beta
     {
-        "id": "firefox_52-0b6_linux-x86_64_en-us",
+        "id": "firefox_beta_52-0b6_linux-x86_64_en-us",
         "source": {
             "product": "firefox",
         },
@@ -134,7 +134,7 @@ RECORDS = [
 
     # Fennec
     {
-        "id": "fennec_39-0b5_android-api-9_sl",
+        "id": "fennec_beta_39-0b5_android-api-9_sl",
         "source": {
             "product": "fennec",
         },
@@ -152,7 +152,7 @@ RECORDS = [
 
     # Localized Fennec
     {
-        "id": "fennec_42-0b2_android-api-9_fr",
+        "id": "fennec_beta_42-0b2_android-api-9_fr",
         "source": {
             "product": "fennec",
         },
@@ -167,6 +167,75 @@ RECORDS = [
             "fennec-42.0b2.fr.android-arm.apk",
         }
     },
+
+
+    # Fennec ARM
+    {
+        "id": "fennec_nightly_2017-05-30-10-01-27_55-0a1_android-api-15_multi",
+        "source": {
+            "product": "fennec",
+        },
+        "target": {
+            "version": "55.0a1",
+            "platform": "android-api-15",
+            "locale": "multi",
+            "channel": "nightly"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-05-30-10-01-27-"
+            "mozilla-central-android-api-15/fennec-55.0a1.multi.android-arm.apk",
+        }
+    },
+    {
+        "id": "fennec_nightly-old-id_2017-05-30-10-01-27_55-0a1_android-api-15_multi",
+        "source": {
+            "product": "fennec",
+        },
+        "target": {
+            "version": "55.0a1",
+            "platform": "android-api-15",
+            "locale": "multi",
+            "channel": "nightly-old-id"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-05-30-10-01-27-"
+            "mozilla-central-android-api-15-old-id/fennec-55.0a1.multi.android-arm.apk",
+        }
+    },
+
+    # Fennec i386
+    {
+        "id": "fennec_nightly_2017-05-30-10-01-27_55-0a1_android-i386_multi",
+        "source": {
+            "product": "fennec",
+        },
+        "target": {
+            "version": "55.0a1",
+            "platform": "android-i386",
+            "locale": "multi",
+            "channel": "nightly"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-05-30-10-01-27-"
+            "mozilla-central-android-x86/fennec-55.0a1.multi.android-i386.apk",
+        }
+    },
+    {
+        "id": "fennec_nightly-old-id_2017-05-30-10-01-27_55-0a1_android-i386_multi",
+        "source": {
+            "product": "fennec",
+        },
+        "target": {
+            "version": "55.0a1",
+            "platform": "android-i386",
+            "locale": "multi",
+            "channel": "nightly-old-id"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-05-30-10-01-27-"
+            "mozilla-central-android-x86-old-id/fennec-55.0a1.multi.android-i386.apk",
+        }
+    },
 ]
 
 
@@ -178,7 +247,9 @@ def test_build_record_id(record):
 
 
 NIGHTLY_FILENAMES = [
-    ("firefox-55.0a1.en-US.linux-x86_64.tar.bz2", "55.0a1", "en-US", "linux-x86_64")
+    ("firefox-55.0a1.en-US.linux-x86_64.tar.bz2", "55.0a1", "en-US", "linux-x86_64"),
+    ("fennec-55.0a1.multi.android-i386.apk", "55.0a1", "multi", "android-i386"),
+    ("fennec-55.0a1.multi.android-arm.apk", "55.0a1", "multi", "android-arm"),
 ]
 
 

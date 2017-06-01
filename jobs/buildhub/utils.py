@@ -21,22 +21,31 @@ def guess_channel(url, version):
     else:
         if 'b' in version:
             channel = 'beta'
+
+    # Fennec can have different app store ids.
+    if 'old-id' in url:
+        channel += "-old-id"
+
     return channel
 
 
 def build_record_id(record):
     version = record["target"]["version"]
 
-    if record["target"]["channel"] == 'nightly':
+    if 'nightly' in record["target"]["channel"]:
         url_parts = record["download"]["url"].split('/')
         date_parts = url_parts[8].split('-')
         date = '-'.join(date_parts[:6])
         version = '{}_{}'.format(date, version)
 
-    id_ = '{product}_{version}_{platform}_{locale}'.format(product=record["source"]["product"],
-                                                           version=version,
-                                                           platform=record["target"]["platform"],
-                                                           locale=record["target"]["locale"])
+    channel = record["target"]["channel"]
+    channel = channel + "_" if channel != "release" else ""
+    values = dict(product=record["source"]["product"],
+                  channel=channel,
+                  version=version,
+                  platform=record["target"]["platform"],
+                  locale=record["target"]["locale"])
+    id_ = '{product}_{channel}{version}_{platform}_{locale}'.format(**values)
     return id_.replace('.', '-').lower()
 
 

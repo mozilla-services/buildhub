@@ -27,7 +27,7 @@ ARCHIVE_INFOS = [
               "date": "2017-05-03T03:02:00",
               "id": "20170503030212"
           },
-          "id": "firefox_2017-05-03-03-02-12_55-0a1_win64_en-us",
+          "id": "firefox_nightly_2017-05-03-03-02-12_55-0a1_win64_en-us",
           "source": {
               "tree": "mozilla-central",
               "repository": "https://hg.mozilla.org/mozilla-central",
