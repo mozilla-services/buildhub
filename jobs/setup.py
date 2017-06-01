@@ -19,6 +19,7 @@ CONTRIBUTORS = read_file('CONTRIBUTORS.rst')
 REQUIREMENTS = [
     "aiohttp",
     "backoff",
+    "packaging",
     "kinto-http",
     "kinto-wizard",
 ]
