@@ -30,8 +30,11 @@ init location =
             , loading = True
             , route = MainView
             }
+
+        updatedModel =
+            updateModelWithFilters (routeFromUrl defaultModel location)
     in
-        updateModelWithFilters (routeFromUrl defaultModel location) ! [ getBuildRecordList defaultModel ]
+        updatedModel ! [ getBuildRecordList updatedModel ]
 
 
 getBuildRecordList : Model -> Cmd Msg
