@@ -10,8 +10,8 @@ import Types exposing (..)
 import Filesize exposing (formatWith, defaultSettings, Units(..))
 
 
-format : Int -> String
-format =
+formatFilesize : Int -> String
+formatFilesize =
     formatWith { defaultSettings | units = Base2 }
 
 
@@ -288,7 +288,7 @@ viewDownloadDetails download =
                 [ tr []
                     [ td [] [ a [ href download.url ] [ text filename ] ]
                     , td [] [ text <| download.mimetype ]
-                    , td [] [ text <| format download.size ]
+                    , td [] [ text <| formatFilesize download.size ]
                     ]
                 ]
             ]

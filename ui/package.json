@@ -3,11 +3,11 @@
   "version": "0.0.1",
   "description": "Firefox System Build info manager.",
   "scripts": {
-    "build": "node_modules/.bin/elm-make Main.elm --output=build/app.js && npm run copy-assets",
-    "copy-assets": "node_modules/.bin/copyfiles index.html style.css build/",
-    "debug": "node_modules/.bin/elm-live Main.elm --output=app.js --debug",
-    "deploy": "npm run build && node_modules/.bin/gh-pages --dist build/",
-    "start": "node_modules/.bin/elm-live Main.elm --output=app.js",
+    "build": "elm-make Main.elm --output=build/app.js && npm run copy-assets",
+    "copy-assets": "copyfiles index.html style.css build/",
+    "debug": "elm-live Main.elm --output=app.js --debug",
+    "deploy": "npm run build && gh-pages --dist build/",
+    "start": "elm-live Main.elm --output=app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

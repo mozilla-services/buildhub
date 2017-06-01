@@ -17,3 +17,15 @@ matrix:
     - python: 3.6
       env:
         - TOX_ENV=py36
+    - language: node_js
+      node_js: 7
+      install:
+        - cd ui
+        - npm install
+        - elm-package install --yes
+      script:
+        - npm run build
+      cache:
+        directories:
+          - "node_modules"
+          - "elm-stuff"
