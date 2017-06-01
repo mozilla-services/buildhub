@@ -23,6 +23,25 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ filterValues } as model) =
     case msg of
         BuildRecordsFetched (Ok buildsPager) ->
+            updateModelWithFilters
+                { model
+                    | buildsPager = buildsPager
+                    , filteredBuilds = buildsPager.objects
+                    , loading = False
+                }
+                ! []
+
+        BuildRecordsFetched (Err err) ->
+            let
+                _ =
+                    Debug.log "An error occured while fetching the build records" err
+            in
+                model ! []
+
+        LoadNextPage ->
+            model ! [ getNextBuilds model.buildsPager ]
+
+        BuildRecordsNextPageFetched (Ok buildsPager) ->
             let
                 newPager =
                     Kinto.updatePager buildsPager model.buildsPager
@@ -35,15 +54,12 @@ update msg ({ filterValues } as model) =
                     }
                     ! []
 
-        BuildRecordsFetched (Err err) ->
+        BuildRecordsNextPageFetched (Err err) ->
             let
                 _ =
-                    Debug.log "An error occured while fetching the build records" err
+                    Debug.log "An error occured while fetching the next page of build records" err
             in
                 model ! []
-
-        LoadNextPage ->
-            model ! [ getNextBuilds model.buildsPager ]
 
         UpdateFilter newFilter ->
             let

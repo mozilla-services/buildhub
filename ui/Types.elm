@@ -149,5 +149,6 @@ type Route
 type Msg
     = BuildRecordsFetched (Result Kinto.Error (Kinto.Pager BuildRecord))
     | LoadNextPage
+    | BuildRecordsNextPageFetched (Result Kinto.Error (Kinto.Pager BuildRecord))
     | UpdateFilter NewFilter
     | UrlChange Location

@@ -79,7 +79,7 @@ getNextBuilds : Kinto.Pager BuildRecord -> Cmd Msg
 getNextBuilds pager =
     case Kinto.loadNextPage pager of
         Just request ->
-            request |> Kinto.send BuildRecordsFetched
+            request |> Kinto.send BuildRecordsNextPageFetched
 
         Nothing ->
             Cmd.none
