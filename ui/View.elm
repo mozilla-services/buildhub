@@ -153,7 +153,9 @@ numBuilds model =
                         else
                             "s"
                        )
-                    ++ " found. "
+                    ++ " displayed ("
+                    ++ toString model.buildsPager.total
+                    ++ " total)."
             ]
 
 
