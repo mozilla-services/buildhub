@@ -4,7 +4,6 @@ import Dict
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Json.Decode as Decode
 import Snippet exposing (snippets)
 import Types exposing (..)
 import Filesize
@@ -169,35 +168,15 @@ filterSelector filters filterTitle selectedFilter updateHandler =
     let
         optionView value_ =
             option [ value value_, selected (value_ == selectedFilter) ] [ text value_ ]
-
-        selectView =
-            select
+    in
+        div [ class "form-group", style [ ( "display", "block" ) ] ]
+            [ label [] [ text filterTitle ]
+            , select
                 [ class "form-control"
                 , onInput updateHandler
                 , value selectedFilter
                 ]
                 (List.map optionView ("all" :: filters))
-
-        selectedFilterView =
-            div [ class "input-group" ]
-                [ input [ class "form-control", type_ "text", value selectedFilter, disabled True ] []
-                , span
-                    [ class "input-group-btn" ]
-                    [ button
-                        [ class "btn btn-default"
-                        , type_ "button"
-                        , onClick_ <| updateHandler "all"
-                        ]
-                        [ text "x" ]
-                    ]
-                ]
-    in
-        div [ class "form-group", style [ ( "display", "block" ) ] ]
-            [ label [] [ text filterTitle ]
-            , if selectedFilter == "all" then
-                selectView
-              else
-                selectedFilterView
             ]
 
 
@@ -412,14 +391,6 @@ viewTargetDetails target =
 spinner : Html Msg
 spinner =
     div [ class "loader-wrapper" ] [ div [ class "loader" ] [] ]
-
-
-onClick_ : msg -> Attribute msg
-onClick_ msg =
-    onWithOptions
-        "click"
-        { preventDefault = True, stopPropagation = True }
-        (Decode.succeed msg)
 
 
 nextPageBtn : Int -> Int -> Html Msg
