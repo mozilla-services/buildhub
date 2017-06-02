@@ -92,7 +92,7 @@ update msg ({ filterValues } as model) =
                 updatedModelWithRoute =
                     { model | route = routeFromFilters updatedModelWithFilters }
             in
-                updatedModelWithRoute
+                { updatedModelWithRoute | loading = True }
                     ! [ newUrl <| urlFromRoute updatedModelWithRoute.route ]
 
         UrlChange location ->
@@ -100,4 +100,4 @@ update msg ({ filterValues } as model) =
                 updatedModel =
                     routeFromUrl model location
             in
-                updatedModel ! [ getBuildRecordList updatedModel ]
+                { updatedModel | loading = True } ! [ getBuildRecordList updatedModel ]

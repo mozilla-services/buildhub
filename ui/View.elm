@@ -23,34 +23,35 @@ view model =
 
 mainView : Model -> Html Msg
 mainView model =
-    if model.loading then
-        spinner
-    else
-        div [ class "row" ]
-            [ div [ class "col-sm-9" ]
+    div [ class "row" ]
+        [ div [ class "col-sm-9" ]
+            (if model.loading then
+                [ spinner ]
+             else
                 [ numBuilds model
                 , div [] <| List.map recordView model.buildsPager.objects
                 , nextPageBtn (List.length model.buildsPager.objects) model.buildsPager.total
                 ]
-            , div [ class "col-sm-3" ]
-                [ div [ class "panel panel-default" ]
-                    [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
-                    , div [ class "panel-body" ]
-                        [ buildIdSearchForm model
-                        , filterSelector model.filterValues.productList "Products" model.productFilter (UpdateFilter << NewProductFilter)
-                        , filterSelector model.filterValues.versionList "Versions" model.versionFilter (UpdateFilter << NewVersionFilter)
-                        , filterSelector model.filterValues.platformList "Platforms" model.platformFilter (UpdateFilter << NewPlatformFilter)
-                        , filterSelector model.filterValues.channelList "Channels" model.channelFilter (UpdateFilter << NewChannelFilter)
-                        , filterSelector model.filterValues.localeList "Locales" model.localeFilter (UpdateFilter << NewLocaleFilter)
-                        , p [ class "text-right" ]
-                            [ button
-                                [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
-                                [ text "Clear all filters" ]
-                            ]
+            )
+        , div [ class "col-sm-3" ]
+            [ div [ class "panel panel-default" ]
+                [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
+                , div [ class "panel-body" ]
+                    [ buildIdSearchForm model
+                    , filterSelector model.filterValues.productList "Products" model.productFilter (UpdateFilter << NewProductFilter)
+                    , filterSelector model.filterValues.versionList "Versions" model.versionFilter (UpdateFilter << NewVersionFilter)
+                    , filterSelector model.filterValues.platformList "Platforms" model.platformFilter (UpdateFilter << NewPlatformFilter)
+                    , filterSelector model.filterValues.channelList "Channels" model.channelFilter (UpdateFilter << NewChannelFilter)
+                    , filterSelector model.filterValues.localeList "Locales" model.localeFilter (UpdateFilter << NewLocaleFilter)
+                    , p [ class "text-right" ]
+                        [ button
+                            [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
+                            [ text "Clear all filters" ]
                         ]
                     ]
                 ]
             ]
+        ]
 
 
 snippetView : Snippet -> Html Msg
@@ -366,7 +367,7 @@ viewTargetDetails target =
 
 spinner : Html Msg
 spinner =
-    div [ class "loader-wrapper" ] [ div [ class "loader" ] [] ]
+    div [ class "loader" ] []
 
 
 nextPageBtn : Int -> Int -> Html Msg
