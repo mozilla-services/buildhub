@@ -18273,11 +18273,7 @@ var _mozilla_services$buildhub$Main$update = F2(
 						ctor: '::',
 						_0: _elm_lang$navigation$Navigation$newUrl(
 							_mozilla_services$buildhub$Url$urlFromRoute(updatedModelWithRoute.route)),
-						_1: {
-							ctor: '::',
-							_0: _mozilla_services$buildhub$Model$getBuildRecordList(updatedModelWithRoute),
-							_1: {ctor: '[]'}
-						}
+						_1: {ctor: '[]'}
 					});
 			default:
 				var updatedModel = A2(_mozilla_services$buildhub$Url$routeFromUrl, _p6, _p2._0);
