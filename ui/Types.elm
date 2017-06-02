@@ -60,7 +60,6 @@ type alias BuildRecord =
 type alias Build =
     { date : String
     , id : String
-    , type_ : String
     }
 
 

@@ -22,7 +22,6 @@ buildDecoder =
     decode Build
         |> required "date" string
         |> required "id" string
-        |> required "type" string
 
 
 downloadDecoder : Decoder Download
