@@ -62,7 +62,8 @@ getBuildRecordList { productFilter, channelFilter, platformFilter, versionFilter
                         identity
                    )
                 |> (if versionFilter /= "all" then
-                        Kinto.withFilter (Kinto.Equal "target.version" versionFilter)
+                        -- Temporary workaround for https://github.com/Kinto/kinto/issues/1217 : surround version with quotes
+                        Kinto.withFilter (Kinto.Equal "target.version" ("\"" ++ versionFilter ++ "\""))
                     else
                         identity
                    )
