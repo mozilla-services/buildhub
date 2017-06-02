@@ -3,7 +3,7 @@ module Filters exposing (..)
 
 productList : List String
 productList =
-    [ "firefox", "thunderbid", "fennec" ]
+    [ "firefox", "thunderbird", "fennec" ]
 
 
 channelList : List String
