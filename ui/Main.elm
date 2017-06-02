@@ -59,35 +59,41 @@ update msg ({ filterValues } as model) =
 
         UpdateFilter newFilter ->
             let
+                noFilters =
+                    { model
+                        | productFilter = "all"
+                        , versionFilter = "all"
+                        , platformFilter = "all"
+                        , channelFilter = "all"
+                        , localeFilter = "all"
+                        , buildIdFilter = ""
+                    }
+
+                noBuildId =
+                    { model | buildIdFilter = "" }
+
                 updatedModelWithFilters =
                     case newFilter of
                         ClearAll ->
-                            { model
-                                | productFilter = "all"
-                                , versionFilter = "all"
-                                , platformFilter = "all"
-                                , channelFilter = "all"
-                                , localeFilter = "all"
-                                , buildIdFilter = ""
-                            }
+                            noFilters
 
                         NewProductFilter value ->
-                            { model | productFilter = value }
+                            { noBuildId | productFilter = value }
 
                         NewVersionFilter value ->
-                            { model | versionFilter = value }
+                            { noBuildId | versionFilter = value }
 
                         NewPlatformFilter value ->
-                            { model | platformFilter = value }
+                            { noBuildId | platformFilter = value }
 
                         NewChannelFilter value ->
-                            { model | channelFilter = value }
+                            { noBuildId | channelFilter = value }
 
                         NewLocaleFilter value ->
-                            { model | localeFilter = value }
+                            { noBuildId | localeFilter = value }
 
                         NewBuildIdSearch value ->
-                            { model | buildIdFilter = value }
+                            { noFilters | buildIdFilter = value }
 
                 updatedModelWithRoute =
                     { model | route = routeFromFilters updatedModelWithFilters }
