@@ -11614,9 +11614,9 @@ var _mozilla_services$buildhub$Types$BuildRecord = F7(
 	function (a, b, c, d, e, f, g) {
 		return {id: a, last_modified: b, build: c, download: d, source: e, systemAddons: f, target: g};
 	});
-var _mozilla_services$buildhub$Types$Build = F3(
-	function (a, b, c) {
-		return {date: a, id: b, type_: c};
+var _mozilla_services$buildhub$Types$Build = F2(
+	function (a, b) {
+		return {date: a, id: b};
 	});
 var _mozilla_services$buildhub$Types$Download = F3(
 	function (a, b, c) {
@@ -11762,17 +11762,13 @@ var _mozilla_services$buildhub$Decoder$downloadDecoder = A3(
 			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_mozilla_services$buildhub$Types$Download))));
 var _mozilla_services$buildhub$Decoder$buildDecoder = A3(
 	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-	'type',
+	'id',
 	_elm_lang$core$Json_Decode$string,
 	A3(
 		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-		'id',
+		'date',
 		_elm_lang$core$Json_Decode$string,
-		A3(
-			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-			'date',
-			_elm_lang$core$Json_Decode$string,
-			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_mozilla_services$buildhub$Types$Build))));
+		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_mozilla_services$buildhub$Types$Build)));
 var _mozilla_services$buildhub$Decoder$buildRecordDecoder = A3(
 	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
 	'target',
@@ -15942,7 +15938,7 @@ var _mozilla_services$buildhub$Filters$productList = {
 	_0: 'firefox',
 	_1: {
 		ctor: '::',
-		_0: 'thunderbid',
+		_0: 'thunderbird',
 		_1: {
 			ctor: '::',
 			_0: 'fennec',
@@ -16315,7 +16311,7 @@ var _mozilla_services$buildhub$Url$routeFromUrl = F2(
 			{route: _mozilla_services$buildhub$Types$MainView, buildIdFilter: '', productFilter: 'all', channelFilter: 'all', platformFilter: 'all', versionFilter: 'all', localeFilter: 'all'});
 	});
 
-var _mozilla_services$buildhub$Model$recordResource = A3(_Kinto$elm_kinto$Kinto$recordResource, 'build-hub', 'fixtures', _mozilla_services$buildhub$Decoder$buildRecordDecoder);
+var _mozilla_services$buildhub$Model$recordResource = A3(_Kinto$elm_kinto$Kinto$recordResource, 'build-hub', 'releases', _mozilla_services$buildhub$Decoder$buildRecordDecoder);
 var _mozilla_services$buildhub$Model$client = A2(
 	_Kinto$elm_kinto$Kinto$client,
 	'https://kinto-ota.dev.mozaws.net/v1/',
@@ -16387,21 +16383,21 @@ var _mozilla_services$buildhub$Snippet$snippets = {
 	_0: {
 		title: 'Is this an official buildid?',
 		description: 'In order to check that a build id exists, we\'ll just check that it is mentionned in at least one record.',
-		snippets: {curl: 'curl -s -I \"https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/archives/records?build.id=20110110192031&_limit=1\" | grep \"Total-Records: 1\" ', js: 'import KintoClient from \"kinto-http\";\nconst client = new KintoClient(\"https://kinto-ota.dev.mozaws.net/v1\");\n\nrecords = await client.listRecords({limit: 1, filters: {\"build.id\": \"20110110192031\"}});\nconsole.log(records.length == 1);\n', python: 'import kinto_http\n\nclient = kinto_http.Client(\"https://kinto-ota.dev.mozaws.net/v1\")\nrecords = client.get_records(**{\"build.id\": \"20110110192031\", \"_limit\": 1, \"pages\": 1},\n                             bucket=\"build-hub\", collection=\"archives\")\nprint(len(records) == 1)\n'}
+		snippets: {curl: 'curl -s -I \"https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releases/records?build.id=20110110192031&_limit=1\" | grep \"Total-Records: 1\" ', js: 'import KintoClient from \"kinto-http\";\nconst client = new KintoClient(\"https://kinto-ota.dev.mozaws.net/v1\");\n\nrecords = await client.listRecords({limit: 1, filters: {\"build.id\": \"20110110192031\"}});\nconsole.log(records.length == 1);\n', python: 'import kinto_http\n\nclient = kinto_http.Client(\"https://kinto-ota.dev.mozaws.net/v1\")\nrecords = client.get_records(**{\"build.id\": \"20110110192031\", \"_limit\": 1, \"pages\": 1},\n                             bucket=\"build-hub\", collection=\"releases\")\nprint(len(records) == 1)\n'}
 	},
 	_1: {
 		ctor: '::',
 		_0: {
 			title: 'What is the revision of a build id?',
 			description: '',
-			snippets: {curl: 'curl -s \"https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/archives/records?build.id=20110110192031&_limit=1\" | grep -Po \'\"revision\":\"[^\"]+\' | sed \'s/\"revision\":\"//\'', js: 'import KintoClient from \"kinto-http\";\n\nconst client = new KintoClient(\"https://kinto-ota.dev.mozaws.net/v1\");\nconst collection = client.bucket(\"build-hub\").collection(\"archives\");\nconst records = await collection.listRecords({limit: 1, filters: {\"build.id\": \"20110110192031\"}});\nconst revision = records[0].source.revision;', python: 'client = kinto_http.Client(\"https://kinto-ota.dev.mozaws.net/v1\")\nrecords = client.get_records(**{\"build.id\": \"20110110192031\", \"_limit\": 1, \"pages\": 1},\n                             bucket=\"build-hub\", collection=\"archives\")\nrevision = records[0][\"source\"][\"revision\"]'}
+			snippets: {curl: 'curl -s \"https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releases/records?build.id=20110110192031&_limit=1\" | grep -Po \'\"revision\":\"[^\"]+\' | sed \'s/\"revision\":\"//\'', js: 'import KintoClient from \"kinto-http\";\n\nconst client = new KintoClient(\"https://kinto-ota.dev.mozaws.net/v1\");\nconst collection = client.bucket(\"build-hub\").collection(\"releases\");\nconst records = await collection.listRecords({limit: 1, filters: {\"build.id\": \"20110110192031\"}});\nconst revision = records[0].source.revision;', python: 'client = kinto_http.Client(\"https://kinto-ota.dev.mozaws.net/v1\")\nrecords = client.get_records(**{\"build.id\": \"20110110192031\", \"_limit\": 1, \"pages\": 1},\n                             bucket=\"build-hub\", collection=\"releases\")\nrevision = records[0][\"source\"][\"revision\"]'}
 		},
 		_1: {
 			ctor: '::',
 			_0: {
 				title: 'What are the locales of a specific version?',
 				description: '',
-				snippets: {curl: 'curl -s \"https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/archives/records?target.version=53.0b9&_fields=target.locale\" | grep -Po \'\"locale\":\"[^\"]+\' | sed \'s/\"locale\":\"//\' | sort -u', js: 'import KintoClient from \"kinto-http\";\n\nconst client = new KintoClient(\"https://kinto-ota.dev.mozaws.net/v1\");\nconst collection = client.bucket(\"build-hub\").collection(\"archives\");\nconst records = await collection.listRecords({filters: {\"target.version\": \"53.0b9\"}});\nconst locales = new Set(records.map(r => r.target.locale));', python: 'import kinto_http\n\nclient = kinto_http.Client(\"https://kinto-ota.dev.mozaws.net/v1\")\nrecords = client.get_records(**{\"target.version\": \"53.0b9\"},\n                             bucket=\"build-hub\", collection=\"archives\")\nlocales = set({record[\"target\"][\"locale\"] for record in records})'}
+				snippets: {curl: 'curl -s \"https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releases/records?target.version=53.0b9&_fields=target.locale\" | grep -Po \'\"locale\":\"[^\"]+\' | sed \'s/\"locale\":\"//\' | sort -u', js: 'import KintoClient from \"kinto-http\";\n\nconst client = new KintoClient(\"https://kinto-ota.dev.mozaws.net/v1\");\nconst collection = client.bucket(\"build-hub\").collection(\"releases\");\nconst records = await collection.listRecords({filters: {\"target.version\": \"53.0b9\"}});\nconst locales = new Set(records.map(r => r.target.locale));', python: 'import kinto_http\n\nclient = kinto_http.Client(\"https://kinto-ota.dev.mozaws.net/v1\")\nrecords = client.get_records(**{\"target.version\": \"53.0b9\"},\n                             bucket=\"build-hub\", collection=\"releases\")\nlocales = set({record[\"target\"][\"locale\"] for record in records})'}
 			},
 			_1: {ctor: '[]'}
 		}
@@ -16473,307 +16469,274 @@ var _mozilla_services$buildhub$View$spinner = A2(
 	});
 var _mozilla_services$buildhub$View$viewTargetDetails = function (target) {
 	return A2(
-		_elm_lang$html$Html$table,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('table table-stripped table-condensed'),
-			_1: {ctor: '[]'}
-		},
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
 		{
 			ctor: '::',
 			_0: A2(
-				_elm_lang$html$Html$thead,
+				_elm_lang$html$Html$h4,
 				{ctor: '[]'},
 				{
 					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$tr,
-						{ctor: '[]'},
-						{
-							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html$th,
-								{ctor: '[]'},
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html$text('Version'),
-									_1: {ctor: '[]'}
-								}),
-							_1: {
+					_0: _elm_lang$html$Html$text('Target'),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$table,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('table table-stripped table-condensed'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$thead,
+							{ctor: '[]'},
+							{
 								ctor: '::',
 								_0: A2(
-									_elm_lang$html$Html$th,
+									_elm_lang$html$Html$tr,
 									{ctor: '[]'},
 									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text('Platform'),
-										_1: {ctor: '[]'}
-									}),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$th,
-										{ctor: '[]'},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text('Channel'),
-											_1: {ctor: '[]'}
-										}),
-									_1: {
 										ctor: '::',
 										_0: A2(
 											_elm_lang$html$Html$th,
 											{ctor: '[]'},
 											{
 												ctor: '::',
-												_0: _elm_lang$html$Html$text('Locale'),
-												_1: {ctor: '[]'}
-											}),
-										_1: {ctor: '[]'}
-									}
-								}
-							}
-						}),
-					_1: {ctor: '[]'}
-				}),
-			_1: {
-				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$tbody,
-					{ctor: '[]'},
-					{
-						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$tr,
-							{ctor: '[]'},
-							{
-								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$td,
-									{ctor: '[]'},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text(target.version),
-										_1: {ctor: '[]'}
-									}),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$td,
-										{ctor: '[]'},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text(target.platform),
-											_1: {ctor: '[]'}
-										}),
-									_1: {
-										ctor: '::',
-										_0: A2(
-											_elm_lang$html$Html$td,
-											{ctor: '[]'},
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html$text(target.channel),
+												_0: _elm_lang$html$Html$text('Version'),
 												_1: {ctor: '[]'}
 											}),
 										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$th,
+												{ctor: '[]'},
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html$text('Platform'),
+													_1: {ctor: '[]'}
+												}),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$th,
+													{ctor: '[]'},
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html$text('Channel'),
+														_1: {ctor: '[]'}
+													}),
+												_1: {
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$th,
+														{ctor: '[]'},
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html$text('Locale'),
+															_1: {ctor: '[]'}
+														}),
+													_1: {ctor: '[]'}
+												}
+											}
+										}
+									}),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$tbody,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$tr,
+										{ctor: '[]'},
+										{
 											ctor: '::',
 											_0: A2(
 												_elm_lang$html$Html$td,
 												{ctor: '[]'},
 												{
 													ctor: '::',
-													_0: _elm_lang$html$Html$text(target.locale),
+													_0: _elm_lang$html$Html$text(target.version),
 													_1: {ctor: '[]'}
 												}),
-											_1: {ctor: '[]'}
-										}
-									}
-								}
-							}),
-						_1: {ctor: '[]'}
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$td,
+													{ctor: '[]'},
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html$text(target.platform),
+														_1: {ctor: '[]'}
+													}),
+												_1: {
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$td,
+														{ctor: '[]'},
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html$text(target.channel),
+															_1: {ctor: '[]'}
+														}),
+													_1: {
+														ctor: '::',
+														_0: A2(
+															_elm_lang$html$Html$td,
+															{ctor: '[]'},
+															{
+																ctor: '::',
+																_0: _elm_lang$html$Html$text(target.locale),
+																_1: {ctor: '[]'}
+															}),
+														_1: {ctor: '[]'}
+													}
+												}
+											}
+										}),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
 					}),
 				_1: {ctor: '[]'}
 			}
 		});
 };
 var _mozilla_services$buildhub$View$viewSystemAddonsDetails = function (systemAddons) {
-	return A2(
-		_elm_lang$html$Html$table,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('table table-stripped table-condensed'),
-			_1: {ctor: '[]'}
-		},
-		{
-			ctor: '::',
-			_0: A2(
-				_elm_lang$html$Html$thead,
-				{ctor: '[]'},
-				{
+	var _p0 = systemAddons;
+	if (_p0.ctor === '[]') {
+		return _elm_lang$html$Html$text('');
+	} else {
+		return A2(
+			_elm_lang$html$Html$div,
+			{ctor: '[]'},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$h4,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text('System Addons'),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
 					ctor: '::',
 					_0: A2(
-						_elm_lang$html$Html$tr,
-						{ctor: '[]'},
+						_elm_lang$html$Html$table,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('table table-stripped table-condensed'),
+							_1: {ctor: '[]'}
+						},
 						{
 							ctor: '::',
 							_0: A2(
-								_elm_lang$html$Html$th,
+								_elm_lang$html$Html$thead,
 								{ctor: '[]'},
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html$text('Id'),
+									_0: A2(
+										_elm_lang$html$Html$tr,
+										{ctor: '[]'},
+										{
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$th,
+												{ctor: '[]'},
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html$text('Id'),
+													_1: {ctor: '[]'}
+												}),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$th,
+													{ctor: '[]'},
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html$text('Builtin version'),
+														_1: {ctor: '[]'}
+													}),
+												_1: {
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$th,
+														{ctor: '[]'},
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html$text('Updated version'),
+															_1: {ctor: '[]'}
+														}),
+													_1: {ctor: '[]'}
+												}
+											}
+										}),
 									_1: {ctor: '[]'}
 								}),
 							_1: {
 								ctor: '::',
 								_0: A2(
-									_elm_lang$html$Html$th,
+									_elm_lang$html$Html$tbody,
 									{ctor: '[]'},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text('Builtin version'),
-										_1: {ctor: '[]'}
-									}),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$th,
-										{ctor: '[]'},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text('Updated version'),
-											_1: {ctor: '[]'}
-										}),
-									_1: {ctor: '[]'}
-								}
-							}
-						}),
-					_1: {ctor: '[]'}
-				}),
-			_1: {
-				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$tbody,
-					{ctor: '[]'},
-					A2(
-						_elm_lang$core$List$map,
-						function (systemAddon) {
-							return A2(
-								_elm_lang$html$Html$tr,
-								{ctor: '[]'},
-								{
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$td,
-										{ctor: '[]'},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text(systemAddon.id),
-											_1: {ctor: '[]'}
-										}),
-									_1: {
-										ctor: '::',
-										_0: A2(
-											_elm_lang$html$Html$td,
-											{ctor: '[]'},
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html$text(systemAddon.builtin),
-												_1: {ctor: '[]'}
-											}),
-										_1: {
-											ctor: '::',
-											_0: A2(
-												_elm_lang$html$Html$td,
+									A2(
+										_elm_lang$core$List$map,
+										function (systemAddon) {
+											return A2(
+												_elm_lang$html$Html$tr,
 												{ctor: '[]'},
 												{
 													ctor: '::',
-													_0: _elm_lang$html$Html$text(systemAddon.updated),
-													_1: {ctor: '[]'}
-												}),
-											_1: {ctor: '[]'}
-										}
-									}
-								});
-						},
-						systemAddons)),
-				_1: {ctor: '[]'}
-			}
-		});
-};
-var _mozilla_services$buildhub$View$treeToMozillaHgUrl = function (tree) {
-	var _p0 = tree;
-	if (_p0.ctor === 'Just') {
-		var mappingTable = _elm_lang$core$Dict$fromList(
-			{
-				ctor: '::',
-				_0: {ctor: '_Tuple2', _0: 'comm-aurora', _1: 'releases/comm-aurora'},
-				_1: {
-					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'comm-beta', _1: 'releases/comm-beta'},
-					_1: {
-						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'comm-central', _1: 'comm-central'},
-						_1: {
-							ctor: '::',
-							_0: {ctor: '_Tuple2', _0: 'comm-esr45', _1: 'releases/comm-esr45'},
-							_1: {
-								ctor: '::',
-								_0: {ctor: '_Tuple2', _0: 'comm-esr52', _1: 'releases/comm-esr52'},
-								_1: {
-									ctor: '::',
-									_0: {ctor: '_Tuple2', _0: 'graphics', _1: 'projects/graphics'},
-									_1: {
-										ctor: '::',
-										_0: {ctor: '_Tuple2', _0: 'mozilla-aurora', _1: 'releases/mozilla-aurora'},
-										_1: {
-											ctor: '::',
-											_0: {ctor: '_Tuple2', _0: 'mozilla-beta', _1: 'releases/mozilla-beta'},
-											_1: {
-												ctor: '::',
-												_0: {ctor: '_Tuple2', _0: 'mozilla-central', _1: 'mozilla-central'},
-												_1: {
-													ctor: '::',
-													_0: {ctor: '_Tuple2', _0: 'mozilla-esr45', _1: 'releases/mozilla-esr45'},
+													_0: A2(
+														_elm_lang$html$Html$td,
+														{ctor: '[]'},
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html$text(systemAddon.id),
+															_1: {ctor: '[]'}
+														}),
 													_1: {
 														ctor: '::',
-														_0: {ctor: '_Tuple2', _0: 'mozilla-esr52', _1: 'releases/mozilla-esr45'},
+														_0: A2(
+															_elm_lang$html$Html$td,
+															{ctor: '[]'},
+															{
+																ctor: '::',
+																_0: _elm_lang$html$Html$text(systemAddon.builtin),
+																_1: {ctor: '[]'}
+															}),
 														_1: {
 															ctor: '::',
-															_0: {ctor: '_Tuple2', _0: 'mozilla-release', _1: 'releases/mozilla-release'},
-															_1: {
-																ctor: '::',
-																_0: {ctor: '_Tuple2', _0: 'oak', _1: 'projects/oak'},
-																_1: {
+															_0: A2(
+																_elm_lang$html$Html$td,
+																{ctor: '[]'},
+																{
 																	ctor: '::',
-																	_0: {ctor: '_Tuple2', _0: 'try-comm-central', _1: 'try-comm-central'},
+																	_0: _elm_lang$html$Html$text(systemAddon.updated),
 																	_1: {ctor: '[]'}
-																}
-															}
+																}),
+															_1: {ctor: '[]'}
 														}
 													}
-												}
-											}
-										}
-									}
-								}
+												});
+										},
+										systemAddons)),
+								_1: {ctor: '[]'}
 							}
-						}
-					}
+						}),
+					_1: {ctor: '[]'}
 				}
 			});
-		return A2(
-			_elm_lang$core$Maybe$map,
-			function (folder) {
-				return A2(
-					_elm_lang$core$Basics_ops['++'],
-					'https://hg.mozilla.org/',
-					A2(_elm_lang$core$Basics_ops['++'], folder, '/rev/'));
-			},
-			A2(_elm_lang$core$Dict$get, _p0._0, mappingTable));
-	} else {
-		return _elm_lang$core$Maybe$Nothing;
 	}
 };
 var _mozilla_services$buildhub$View$viewSourceDetails = function (source) {
@@ -16781,24 +16744,41 @@ var _mozilla_services$buildhub$View$viewSourceDetails = function (source) {
 		var _p1 = source.revision;
 		if (_p1.ctor === 'Just') {
 			var _p3 = _p1._0;
-			var mozillaHgUrl = _mozilla_services$buildhub$View$treeToMozillaHgUrl(source.tree);
-			var _p2 = mozillaHgUrl;
+			var _p2 = source.repository;
 			if (_p2.ctor === 'Just') {
 				return A2(
-					_elm_lang$html$Html$a,
+					_elm_lang$html$Html$div,
+					{ctor: '[]'},
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$href(
-							A2(_elm_lang$core$Basics_ops['++'], _p2._0, _p3)),
-						_1: {ctor: '[]'}
-					},
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html$text(_p3),
-						_1: {ctor: '[]'}
+						_0: A2(
+							_elm_lang$html$Html$h4,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text('Source'),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$a,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$href(
+										A2(_elm_lang$core$Basics_ops['++'], _p2._0, _p3)),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text(_p3),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
 					});
 			} else {
-				return _elm_lang$html$Html$text('');
+				return _elm_lang$html$Html$text('If you see this file a bug. revision not linked to a repository.');
 			}
 		} else {
 			return _elm_lang$html$Html$text('');
@@ -16916,115 +16896,133 @@ var _mozilla_services$buildhub$View$viewDownloadDetails = function (download) {
 			_elm_lang$core$List$reverse(
 				A2(_elm_lang$core$String$split, '/', download.url))));
 	return A2(
-		_elm_lang$html$Html$table,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('table table-stripped table-condensed'),
-			_1: {ctor: '[]'}
-		},
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
 		{
 			ctor: '::',
 			_0: A2(
-				_elm_lang$html$Html$thead,
+				_elm_lang$html$Html$h4,
 				{ctor: '[]'},
 				{
 					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$tr,
-						{ctor: '[]'},
-						{
-							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html$th,
-								{ctor: '[]'},
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html$text('URL'),
-									_1: {ctor: '[]'}
-								}),
-							_1: {
-								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$th,
-									{ctor: '[]'},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text('Mimetype'),
-										_1: {ctor: '[]'}
-									}),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$th,
-										{ctor: '[]'},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text('Size'),
-											_1: {ctor: '[]'}
-										}),
-									_1: {ctor: '[]'}
-								}
-							}
-						}),
+					_0: _elm_lang$html$Html$text('Download'),
 					_1: {ctor: '[]'}
 				}),
 			_1: {
 				ctor: '::',
 				_0: A2(
-					_elm_lang$html$Html$tbody,
-					{ctor: '[]'},
+					_elm_lang$html$Html$table,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('table table-stripped table-condensed'),
+						_1: {ctor: '[]'}
+					},
 					{
 						ctor: '::',
 						_0: A2(
-							_elm_lang$html$Html$tr,
+							_elm_lang$html$Html$thead,
 							{ctor: '[]'},
 							{
 								ctor: '::',
 								_0: A2(
-									_elm_lang$html$Html$td,
+									_elm_lang$html$Html$tr,
 									{ctor: '[]'},
 									{
 										ctor: '::',
 										_0: A2(
-											_elm_lang$html$Html$a,
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$href(download.url),
-												_1: {ctor: '[]'}
-											},
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html$text(filename),
-												_1: {ctor: '[]'}
-											}),
-										_1: {ctor: '[]'}
-									}),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$td,
-										{ctor: '[]'},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text(download.mimetype),
-											_1: {ctor: '[]'}
-										}),
-									_1: {
-										ctor: '::',
-										_0: A2(
-											_elm_lang$html$Html$td,
+											_elm_lang$html$Html$th,
 											{ctor: '[]'},
 											{
 												ctor: '::',
-												_0: _elm_lang$html$Html$text(
-													_basti1302$elm_human_readable_filesize$Filesize$formatBase2(download.size)),
+												_0: _elm_lang$html$Html$text('URL'),
 												_1: {ctor: '[]'}
 											}),
-										_1: {ctor: '[]'}
-									}
-								}
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$th,
+												{ctor: '[]'},
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html$text('Mimetype'),
+													_1: {ctor: '[]'}
+												}),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$th,
+													{ctor: '[]'},
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html$text('Size'),
+														_1: {ctor: '[]'}
+													}),
+												_1: {ctor: '[]'}
+											}
+										}
+									}),
+								_1: {ctor: '[]'}
 							}),
-						_1: {ctor: '[]'}
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$tbody,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$tr,
+										{ctor: '[]'},
+										{
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$td,
+												{ctor: '[]'},
+												{
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$a,
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html_Attributes$href(download.url),
+															_1: {ctor: '[]'}
+														},
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html$text(filename),
+															_1: {ctor: '[]'}
+														}),
+													_1: {ctor: '[]'}
+												}),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$td,
+													{ctor: '[]'},
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html$text(download.mimetype),
+														_1: {ctor: '[]'}
+													}),
+												_1: {
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$td,
+														{ctor: '[]'},
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html$text(
+																_basti1302$elm_human_readable_filesize$Filesize$formatBase2(download.size)),
+															_1: {ctor: '[]'}
+														}),
+													_1: {ctor: '[]'}
+												}
+											}
+										}),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
 					}),
 				_1: {ctor: '[]'}
 			}
@@ -17035,103 +17033,99 @@ var _mozilla_services$buildhub$View$viewBuildDetails = function (build) {
 	if (_p4.ctor === 'Just') {
 		var _p5 = _p4._0;
 		return A2(
-			_elm_lang$html$Html$table,
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class('table table-stripped table-condensed'),
-				_1: {ctor: '[]'}
-			},
+			_elm_lang$html$Html$div,
+			{ctor: '[]'},
 			{
 				ctor: '::',
 				_0: A2(
-					_elm_lang$html$Html$thead,
+					_elm_lang$html$Html$h4,
 					{ctor: '[]'},
 					{
 						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$tr,
-							{ctor: '[]'},
-							{
-								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$th,
-									{ctor: '[]'},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text('Id'),
-										_1: {ctor: '[]'}
-									}),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$th,
-										{ctor: '[]'},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text('Type'),
-											_1: {ctor: '[]'}
-										}),
-									_1: {
-										ctor: '::',
-										_0: A2(
-											_elm_lang$html$Html$th,
-											{ctor: '[]'},
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html$text('Date'),
-												_1: {ctor: '[]'}
-											}),
-										_1: {ctor: '[]'}
-									}
-								}
-							}),
+						_0: _elm_lang$html$Html$text('Build'),
 						_1: {ctor: '[]'}
 					}),
 				_1: {
 					ctor: '::',
 					_0: A2(
-						_elm_lang$html$Html$tbody,
-						{ctor: '[]'},
+						_elm_lang$html$Html$table,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('table table-stripped table-condensed'),
+							_1: {ctor: '[]'}
+						},
 						{
 							ctor: '::',
 							_0: A2(
-								_elm_lang$html$Html$tr,
+								_elm_lang$html$Html$thead,
 								{ctor: '[]'},
 								{
 									ctor: '::',
 									_0: A2(
-										_elm_lang$html$Html$td,
+										_elm_lang$html$Html$tr,
 										{ctor: '[]'},
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html$text(_p5.id),
-											_1: {ctor: '[]'}
-										}),
-									_1: {
-										ctor: '::',
-										_0: A2(
-											_elm_lang$html$Html$td,
-											{ctor: '[]'},
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html$text(_p5.type_),
-												_1: {ctor: '[]'}
-											}),
-										_1: {
-											ctor: '::',
 											_0: A2(
-												_elm_lang$html$Html$td,
+												_elm_lang$html$Html$th,
 												{ctor: '[]'},
 												{
 													ctor: '::',
-													_0: _elm_lang$html$Html$text(_p5.date),
+													_0: _elm_lang$html$Html$text('Id'),
 													_1: {ctor: '[]'}
 												}),
-											_1: {ctor: '[]'}
-										}
-									}
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$th,
+													{ctor: '[]'},
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html$text('Date'),
+														_1: {ctor: '[]'}
+													}),
+												_1: {ctor: '[]'}
+											}
+										}),
+									_1: {ctor: '[]'}
 								}),
-							_1: {ctor: '[]'}
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$tbody,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$tr,
+											{ctor: '[]'},
+											{
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$td,
+													{ctor: '[]'},
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html$text(_p5.id),
+														_1: {ctor: '[]'}
+													}),
+												_1: {
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$td,
+														{ctor: '[]'},
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html$text(_p5.date),
+															_1: {ctor: '[]'}
+														}),
+													_1: {ctor: '[]'}
+												}
+											}),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
 						}),
 					_1: {ctor: '[]'}
 				}
@@ -17237,75 +17231,20 @@ var _mozilla_services$buildhub$View$recordView = function (record) {
 					},
 					{
 						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$h4,
-							{ctor: '[]'},
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html$text('Build'),
-								_1: {ctor: '[]'}
-							}),
+						_0: _mozilla_services$buildhub$View$viewSourceDetails(record.source),
 						_1: {
 							ctor: '::',
-							_0: _mozilla_services$buildhub$View$viewBuildDetails(record.build),
+							_0: _mozilla_services$buildhub$View$viewTargetDetails(record.target),
 							_1: {
 								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$h4,
-									{ctor: '[]'},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text('Download'),
-										_1: {ctor: '[]'}
-									}),
+								_0: _mozilla_services$buildhub$View$viewDownloadDetails(record.download),
 								_1: {
 									ctor: '::',
-									_0: _mozilla_services$buildhub$View$viewDownloadDetails(record.download),
+									_0: _mozilla_services$buildhub$View$viewBuildDetails(record.build),
 									_1: {
 										ctor: '::',
-										_0: A2(
-											_elm_lang$html$Html$h4,
-											{ctor: '[]'},
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html$text('Source'),
-												_1: {ctor: '[]'}
-											}),
-										_1: {
-											ctor: '::',
-											_0: _mozilla_services$buildhub$View$viewSourceDetails(record.source),
-											_1: {
-												ctor: '::',
-												_0: A2(
-													_elm_lang$html$Html$h4,
-													{ctor: '[]'},
-													{
-														ctor: '::',
-														_0: _elm_lang$html$Html$text('System Addons'),
-														_1: {ctor: '[]'}
-													}),
-												_1: {
-													ctor: '::',
-													_0: _mozilla_services$buildhub$View$viewSystemAddonsDetails(record.systemAddons),
-													_1: {
-														ctor: '::',
-														_0: A2(
-															_elm_lang$html$Html$h4,
-															{ctor: '[]'},
-															{
-																ctor: '::',
-																_0: _elm_lang$html$Html$text('Target'),
-																_1: {ctor: '[]'}
-															}),
-														_1: {
-															ctor: '::',
-															_0: _mozilla_services$buildhub$View$viewTargetDetails(record.target),
-															_1: {ctor: '[]'}
-														}
-													}
-												}
-											}
-										}
+										_0: _mozilla_services$buildhub$View$viewSystemAddonsDetails(record.systemAddons),
+										_1: {ctor: '[]'}
 									}
 								}
 							}
