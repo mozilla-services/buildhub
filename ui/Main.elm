@@ -23,12 +23,10 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ filterValues } as model) =
     case msg of
         BuildRecordsFetched (Ok buildsPager) ->
-            updateModelWithFilters
-                { model
-                    | buildsPager = buildsPager
-                    , filteredBuilds = buildsPager.objects
-                    , loading = False
-                }
+            { model
+                | buildsPager = buildsPager
+                , loading = False
+            }
                 ! []
 
         BuildRecordsFetched (Err err) ->
@@ -46,12 +44,10 @@ update msg ({ filterValues } as model) =
                 newPager =
                     Kinto.updatePager buildsPager model.buildsPager
             in
-                updateModelWithFilters
-                    { model
-                        | buildsPager = newPager
-                        , filteredBuilds = newPager.objects
-                        , loading = False
-                    }
+                { model
+                    | buildsPager = newPager
+                    , loading = False
+                }
                     ! []
 
         BuildRecordsNextPageFetched (Err err) ->
@@ -96,7 +92,7 @@ update msg ({ filterValues } as model) =
                 updatedModelWithRoute =
                     { model | route = routeFromFilters updatedModelWithFilters }
             in
-                updateModelWithFilters updatedModelWithRoute
+                updatedModelWithRoute
                     ! [ newUrl <| urlFromRoute updatedModelWithRoute.route
                       , getBuildRecordList updatedModelWithRoute
                       ]
@@ -104,6 +100,6 @@ update msg ({ filterValues } as model) =
         UrlChange location ->
             let
                 updatedModel =
-                    updateModelWithFilters (routeFromUrl model location)
+                    routeFromUrl model location
             in
                 updatedModel ! [ getBuildRecordList updatedModel ]

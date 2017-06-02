@@ -3,7 +3,6 @@ module Model
         ( init
         , getBuildRecordList
         , getNextBuilds
-        , updateModelWithFilters
         )
 
 import Decoder exposing (..)
@@ -19,7 +18,6 @@ init location =
     let
         defaultModel =
             { buildsPager = Kinto.emptyPager client recordResource
-            , filteredBuilds = []
             , filterValues = FilterValues productList channelList platformList versionList localeList
             , productFilter = "all"
             , versionFilter = "all"
@@ -32,7 +30,7 @@ init location =
             }
 
         updatedModel =
-            updateModelWithFilters (routeFromUrl defaultModel location)
+            routeFromUrl defaultModel location
     in
         updatedModel ! [ getBuildRecordList updatedModel ]
 
@@ -98,44 +96,3 @@ client =
 recordResource : Kinto.Resource BuildRecord
 recordResource =
     Kinto.recordResource "build-hub" "fixtures" buildRecordDecoder
-
-
-recordStringEquals : (BuildRecord -> String) -> String -> BuildRecord -> Bool
-recordStringEquals path filterValue buildRecord =
-    (filterValue == "all")
-        || (buildRecord
-                |> path
-                |> (==) filterValue
-           )
-
-
-recordStringStartsWith : (BuildRecord -> String) -> String -> BuildRecord -> Bool
-recordStringStartsWith path filterValue buildRecord =
-    buildRecord
-        |> path
-        |> String.startsWith filterValue
-
-
-applyFilters : Model -> List BuildRecord
-applyFilters model =
-    model.buildsPager.objects
-        |> List.filter
-            (\buildRecord ->
-                (recordStringEquals (.source >> .product) model.productFilter) buildRecord
-                    && (recordStringEquals (.target >> .version) model.versionFilter) buildRecord
-                    && (recordStringEquals (.target >> .platform) model.platformFilter) buildRecord
-                    && (recordStringEquals (.target >> .channel) model.channelFilter) buildRecord
-                    && (recordStringEquals (.target >> .locale) model.localeFilter) buildRecord
-                    && (recordStringStartsWith (.build >> Maybe.withDefault (Build "" "" "") >> .id) model.buildIdFilter) buildRecord
-            )
-
-
-updateModelWithFilters : Model -> Model
-updateModelWithFilters model =
-    let
-        filteredBuilds =
-            applyFilters model
-    in
-        { model
-            | filteredBuilds = filteredBuilds
-        }

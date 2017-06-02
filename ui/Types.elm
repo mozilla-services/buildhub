@@ -25,7 +25,6 @@ pageSize =
 
 type alias Model =
     { buildsPager : Kinto.Pager BuildRecord
-    , filteredBuilds : List BuildRecord
     , filterValues : FilterValues
     , productFilter : String
     , versionFilter : String

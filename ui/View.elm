@@ -36,8 +36,8 @@ mainView model =
         div [ class "row" ]
             [ div [ class "col-sm-9" ]
                 [ numBuilds model
-                , div [] <| List.map recordView model.filteredBuilds
-                , nextPageBtn (List.length model.filteredBuilds) model.buildsPager.total
+                , div [] <| List.map recordView model.buildsPager.objects
+                , nextPageBtn (List.length model.buildsPager.objects) model.buildsPager.total
                 ]
             , div [ class "col-sm-3" ]
                 [ div [ class "panel panel-default" ]
@@ -137,7 +137,7 @@ numBuilds : Model -> Html Msg
 numBuilds model =
     let
         nbBuilds =
-            List.length model.filteredBuilds
+            List.length model.buildsPager.objects
     in
         p [ class "well" ] <|
             [ text <|
