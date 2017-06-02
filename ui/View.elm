@@ -1,6 +1,5 @@
 module View exposing (view)
 
-import Dict
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
