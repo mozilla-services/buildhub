@@ -165,15 +165,17 @@ filterSelector : List String -> String -> String -> (String -> Msg) -> Html Msg
 filterSelector filters filterTitle selectedFilter updateHandler =
     let
         optionView value_ =
-            option [ value value_, selected (value_ == selectedFilter) ] [ text value_ ]
+            li [ onClick <| updateHandler value_ ] [ text value_ ]
 
         selectView =
-            select
-                [ class "form-control"
-                , onInput updateHandler
-                , value selectedFilter
+            div [ class "btn-group input-group" ]
+                [ button [ type_ "button", class "btn btn-default dropdown-toggle", attribute "data-toggle" "dropdown" ]
+                    [ text selectedFilter
+                    , span [ class "caret" ] []
+                    ]
+                , ul [ class "dropdown-menu" ]
+                    (List.map optionView filters)
                 ]
-                (List.map optionView ("all" :: filters))
 
         selectedFilterView =
             div [ class "input-group" ]
