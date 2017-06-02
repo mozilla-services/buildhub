@@ -1,6 +1,7 @@
 module Types
     exposing
-        ( Build
+        ( pageSize
+        , Build
         , BuildRecord
         , Route(..)
         , Download
@@ -18,9 +19,12 @@ import Kinto
 import Navigation exposing (..)
 
 
+pageSize =
+    10
+
+
 type alias Model =
-    { builds : List BuildRecord
-    , filteredBuilds : List BuildRecord
+    { buildsPager : Kinto.Pager BuildRecord
     , filterValues : FilterValues
     , productFilter : String
     , versionFilter : String
@@ -147,6 +151,8 @@ type Route
 
 
 type Msg
-    = BuildRecordsFetched (Result Kinto.Error (List BuildRecord))
+    = BuildRecordsFetched (Result Kinto.Error (Kinto.Pager BuildRecord))
+    | LoadNextPage
+    | BuildRecordsNextPageFetched (Result Kinto.Error (Kinto.Pager BuildRecord))
     | UpdateFilter NewFilter
     | UrlChange Location

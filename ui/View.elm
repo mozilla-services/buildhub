@@ -31,7 +31,8 @@ mainView model =
         div [ class "row" ]
             [ div [ class "col-sm-9" ]
                 [ numBuilds model
-                , div [] <| List.map recordView model.filteredBuilds
+                , div [] <| List.map recordView model.buildsPager.objects
+                , nextPageBtn (List.length model.buildsPager.objects) model.buildsPager.total
                 ]
             , div [ class "col-sm-3" ]
                 [ div [ class "panel panel-default" ]
@@ -131,7 +132,7 @@ numBuilds : Model -> Html Msg
 numBuilds model =
     let
         nbBuilds =
-            List.length model.filteredBuilds
+            List.length model.buildsPager.objects
     in
         p [ class "well" ] <|
             [ text <|
@@ -142,7 +143,9 @@ numBuilds model =
                         else
                             "s"
                        )
-                    ++ " found. "
+                    ++ " displayed ("
+                    ++ toString model.buildsPager.total
+                    ++ " total)."
             ]
 
 
@@ -417,3 +420,22 @@ onClick_ msg =
         "click"
         { preventDefault = True, stopPropagation = True }
         (Decode.succeed msg)
+
+
+nextPageBtn : Int -> Int -> Html Msg
+nextPageBtn displayed total =
+    if displayed < total then
+        button
+            [ class "btn btn-default"
+            , style [ ( "width", "100%" ) ]
+            , onClick LoadNextPage
+            ]
+            [ text <|
+                "Load "
+                    ++ (toString pageSize)
+                    ++ " more ("
+                    ++ (toString <| total - displayed)
+                    ++ " left)"
+            ]
+    else
+        div [] []

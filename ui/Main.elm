@@ -1,5 +1,6 @@
 module Main exposing (..)
 
+import Kinto
 import Model exposing (..)
 import Navigation exposing (..)
 import Types exposing (..)
@@ -21,14 +22,38 @@ main =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ filterValues } as model) =
     case msg of
-        BuildRecordsFetched (Ok buildRecordList) ->
-            updateModelWithFilters ({ model | builds = buildRecordList, loading = False })
+        BuildRecordsFetched (Ok buildsPager) ->
+            { model
+                | buildsPager = buildsPager
+                , loading = False
+            }
                 ! []
 
         BuildRecordsFetched (Err err) ->
             let
                 _ =
                     Debug.log "An error occured while fetching the build records" err
+            in
+                model ! []
+
+        LoadNextPage ->
+            model ! [ getNextBuilds model.buildsPager ]
+
+        BuildRecordsNextPageFetched (Ok buildsPager) ->
+            let
+                newPager =
+                    Kinto.updatePager buildsPager model.buildsPager
+            in
+                { model
+                    | buildsPager = newPager
+                    , loading = False
+                }
+                    ! []
+
+        BuildRecordsNextPageFetched (Err err) ->
+            let
+                _ =
+                    Debug.log "An error occured while fetching the next page of build records" err
             in
                 model ! []
 
@@ -67,8 +92,14 @@ update msg ({ filterValues } as model) =
                 updatedModelWithRoute =
                     { model | route = routeFromFilters updatedModelWithFilters }
             in
-                updateModelWithFilters updatedModelWithRoute
-                    ! [ newUrl <| urlFromRoute updatedModelWithRoute.route ]
+                updatedModelWithRoute
+                    ! [ newUrl <| urlFromRoute updatedModelWithRoute.route
+                      , getBuildRecordList updatedModelWithRoute
+                      ]
 
         UrlChange location ->
-            updateModelWithFilters (routeFromUrl model location) ! []
+            let
+                updatedModel =
+                    routeFromUrl model location
+            in
+                updatedModel ! [ getBuildRecordList updatedModel ]

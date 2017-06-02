@@ -1,4 +1,9 @@
-module Model exposing (init, updateModelWithFilters)
+module Model
+    exposing
+        ( init
+        , getBuildRecordList
+        , getNextBuilds
+        )
 
 import Decoder exposing (..)
 import Filters exposing (..)
@@ -12,8 +17,7 @@ init : Location -> ( Model, Cmd Msg )
 init location =
     let
         defaultModel =
-            { builds = []
-            , filteredBuilds = []
+            { buildsPager = Kinto.emptyPager client recordResource
             , filterValues = FilterValues productList channelList platformList versionList localeList
             , productFilter = "all"
             , versionFilter = "all"
@@ -24,16 +28,62 @@ init location =
             , loading = True
             , route = MainView
             }
+
+        updatedModel =
+            routeFromUrl defaultModel location
     in
-        updateModelWithFilters (routeFromUrl defaultModel location) ! [ getBuildRecordList ]
+        updatedModel ! [ getBuildRecordList updatedModel ]
 
 
-getBuildRecordList : Cmd Msg
-getBuildRecordList =
-    client
-        |> Kinto.getList recordResource
-        |> Kinto.sortBy [ "-build.date" ]
-        |> Kinto.send BuildRecordsFetched
+getBuildRecordList : Model -> Cmd Msg
+getBuildRecordList { productFilter, channelFilter, platformFilter, versionFilter, localeFilter } =
+    let
+        request =
+            client
+                |> Kinto.getList recordResource
+                |> Kinto.limit pageSize
+                |> Kinto.sortBy [ "-build.date" ]
+
+        filteredRequest =
+            request
+                |> (if productFilter /= "all" then
+                        Kinto.withFilter (Kinto.Equal "source.product" productFilter)
+                    else
+                        identity
+                   )
+                |> (if channelFilter /= "all" then
+                        Kinto.withFilter (Kinto.Equal "target.channel" channelFilter)
+                    else
+                        identity
+                   )
+                |> (if platformFilter /= "all" then
+                        Kinto.withFilter (Kinto.Equal "target.platform" platformFilter)
+                    else
+                        identity
+                   )
+                |> (if versionFilter /= "all" then
+                        Kinto.withFilter (Kinto.Equal "target.version" versionFilter)
+                    else
+                        identity
+                   )
+                |> (if localeFilter /= "all" then
+                        Kinto.withFilter (Kinto.Equal "target.locale" localeFilter)
+                    else
+                        identity
+                   )
+    in
+        filteredRequest
+            |> Kinto.send BuildRecordsFetched
+
+
+getNextBuilds : Kinto.Pager BuildRecord -> Cmd Msg
+getNextBuilds pager =
+    case Kinto.loadNextPage pager of
+        Just request ->
+            request |> Kinto.send BuildRecordsNextPageFetched
+
+        Nothing ->
+            Cmd.none
 
 
 client : Kinto.Client
@@ -46,44 +96,3 @@ client =
 recordResource : Kinto.Resource BuildRecord
 recordResource =
     Kinto.recordResource "build-hub" "fixtures" buildRecordDecoder
-
-
-recordStringEquals : (BuildRecord -> String) -> String -> BuildRecord -> Bool
-recordStringEquals path filterValue buildRecord =
-    (filterValue == "all")
-        || (buildRecord
-                |> path
-                |> (==) filterValue
-           )
-
-
-recordStringStartsWith : (BuildRecord -> String) -> String -> BuildRecord -> Bool
-recordStringStartsWith path filterValue buildRecord =
-    buildRecord
-        |> path
-        |> String.startsWith filterValue
-
-
-applyFilters : Model -> List BuildRecord
-applyFilters model =
-    model.builds
-        |> List.filter
-            (\buildRecord ->
-                (recordStringEquals (.source >> .product) model.productFilter) buildRecord
-                    && (recordStringEquals (.target >> .version) model.versionFilter) buildRecord
-                    && (recordStringEquals (.target >> .platform) model.platformFilter) buildRecord
-                    && (recordStringEquals (.target >> .channel) model.channelFilter) buildRecord
-                    && (recordStringEquals (.target >> .locale) model.localeFilter) buildRecord
-                    && (recordStringStartsWith (.build >> Maybe.withDefault (Build "" "" "") >> .id) model.buildIdFilter) buildRecord
-            )
-
-
-updateModelWithFilters : Model -> Model
-updateModelWithFilters model =
-    let
-        filteredBuilds =
-            applyFilters model
-    in
-        { model
-            | filteredBuilds = filteredBuilds
-        }
