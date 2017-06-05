@@ -158,3 +158,4 @@ type Msg
     | UpdateFilter NewFilter
     | UrlChange Location
     | SubmitFilters
+    | DismissError
