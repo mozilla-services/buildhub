@@ -46,7 +46,7 @@ getFilters : String -> Cmd Msg
 getFilters filterName =
     client
         |> Kinto.getList (filterRecordResource filterName)
-        |> Kinto.sortBy [ "name" ]
+        |> Kinto.sortBy [ "id" ]
         |> Kinto.send (FiltersReceived filterName)
 
 
