@@ -3,6 +3,7 @@ module View exposing (view)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Kinto
 import Snippet exposing (snippets)
 import Types exposing (..)
 import Filesize
@@ -28,7 +29,8 @@ mainView model =
             (if model.loading then
                 [ spinner ]
              else
-                [ numBuilds model
+                [ errorView model.error
+                , numBuilds model
                 , div [] <| List.map recordView model.buildsPager.objects
                 , nextPageBtn (List.length model.buildsPager.objects) model.buildsPager.total
                 ]
@@ -126,6 +128,23 @@ headerView model =
                 ]
             ]
         ]
+
+
+errorView : Maybe Kinto.Error -> Html Msg
+errorView err =
+    case err of
+        Just err ->
+            div [ class "panel panel-warning" ]
+                [ div [ class "panel-heading" ]
+                    [ h3 [ class "panel-title" ]
+                        [ text "An error occured while fetching builds" ]
+                    ]
+                , div [ class "panel-body" ]
+                    [ text <| toString err ]
+                ]
+
+        _ ->
+            div [] []
 
 
 numBuilds : Model -> Html Msg
