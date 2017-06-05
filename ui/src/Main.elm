@@ -26,15 +26,12 @@ update msg ({ filterValues } as model) =
             { model
                 | buildsPager = buildsPager
                 , loading = False
+                , error = Nothing
             }
                 ! []
 
         BuildRecordsFetched (Err err) ->
-            let
-                _ =
-                    Debug.log "An error occured while fetching the build records" err
-            in
-                model ! []
+            { model | error = Just err, loading = False } ! []
 
         LoadNextPage ->
             model ! [ getNextBuilds model.buildsPager ]
@@ -47,15 +44,12 @@ update msg ({ filterValues } as model) =
                 { model
                     | buildsPager = newPager
                     , loading = False
+                    , error = Nothing
                 }
                     ! []
 
         BuildRecordsNextPageFetched (Err err) ->
-            let
-                _ =
-                    Debug.log "An error occured while fetching the next page of build records" err
-            in
-                model ! []
+            { model | error = Just err, loading = False } ! []
 
         UpdateFilter newFilter ->
             let
@@ -98,7 +92,7 @@ update msg ({ filterValues } as model) =
                 updatedModelWithRoute =
                     { model | route = routeFromFilters updatedModelWithFilters }
             in
-                { updatedModelWithRoute | loading = True }
+                { updatedModelWithRoute | loading = True, error = Nothing }
                     ! [ newUrl <| urlFromRoute updatedModelWithRoute.route ]
 
         UrlChange location ->
@@ -106,4 +100,4 @@ update msg ({ filterValues } as model) =
                 updatedModel =
                     routeFromUrl model location
             in
-                { updatedModel | loading = True } ! [ getBuildRecordList updatedModel ]
+                { updatedModel | loading = True, error = Nothing } ! [ getBuildRecordList updatedModel ]

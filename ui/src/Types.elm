@@ -19,6 +19,7 @@ import Kinto
 import Navigation exposing (..)
 
 
+pageSize : Int
 pageSize =
     10
 
@@ -34,6 +35,7 @@ type alias Model =
     , buildIdFilter : String
     , loading : Bool
     , route : Route
+    , error : Maybe Kinto.Error
     }
 
 
