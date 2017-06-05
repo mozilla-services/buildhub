@@ -216,7 +216,7 @@ recordView record =
         [ class "panel panel-default", Html.Attributes.id record.id ]
         [ div [ class "panel-heading" ]
             [ div [ class "row" ]
-                [ strong [ class "col-sm-6" ]
+                [ strong [ class "col-sm-4" ]
                     [ a [ href <| "./#" ++ record.id ]
                         [ text <|
                             record.source.product
@@ -224,13 +224,21 @@ recordView record =
                                 ++ record.target.version
                         ]
                     ]
-                , em [ class "col-sm-6 text-right" ]
+                , small [ class "col-sm-4 text-center" ]
                     [ case record.build of
-                        Just build ->
-                            text build.date
+                        Just { date } ->
+                            text date
 
                         Nothing ->
-                            text "Unknown"
+                            text ""
+                    ]
+                , em [ class "col-sm-4 text-right" ]
+                    [ case record.build of
+                        Just { id } ->
+                            text id
+
+                        Nothing ->
+                            text ""
                     ]
                 ]
             ]
@@ -308,13 +316,10 @@ viewSourceDetails source =
                 Just revision ->
                     case source.repository of
                         Just url ->
-                            div []
-                                [ h4 [] [ text "Source" ]
-                                , a [ href <| url ++ revision ] [ text revision ]
-                                ]
+                            a [ href <| url ++ revision ] [ text revision ]
 
                         Nothing ->
-                            text "If you see this file a bug. revision not linked to a repository."
+                            text "If you see this, please file a bug. Revision not linked to a repository."
 
                 Nothing ->
                     text ""
