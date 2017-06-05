@@ -36,7 +36,7 @@ init location =
 
 
 getBuildRecordList : Model -> Cmd Msg
-getBuildRecordList { productFilter, channelFilter, platformFilter, versionFilter, localeFilter } =
+getBuildRecordList { buildIdFilter, productFilter, channelFilter, platformFilter, versionFilter, localeFilter } =
     let
         request =
             client
@@ -45,33 +45,38 @@ getBuildRecordList { productFilter, channelFilter, platformFilter, versionFilter
                 |> Kinto.sortBy [ "-build.date" ]
 
         filteredRequest =
-            request
-                |> (if productFilter /= "all" then
-                        Kinto.withFilter (Kinto.Equal "source.product" productFilter)
-                    else
-                        identity
-                   )
-                |> (if channelFilter /= "all" then
-                        Kinto.withFilter (Kinto.Equal "target.channel" channelFilter)
-                    else
-                        identity
-                   )
-                |> (if platformFilter /= "all" then
-                        Kinto.withFilter (Kinto.Equal "target.platform" platformFilter)
-                    else
-                        identity
-                   )
-                |> (if versionFilter /= "all" then
-                        -- Temporary workaround for https://github.com/Kinto/kinto/issues/1217 : surround version with quotes
-                        Kinto.withFilter (Kinto.Equal "target.version" ("\"" ++ versionFilter ++ "\""))
-                    else
-                        identity
-                   )
-                |> (if localeFilter /= "all" then
-                        Kinto.withFilter (Kinto.Equal "target.locale" localeFilter)
-                    else
-                        identity
-                   )
+            if buildIdFilter /= "" then
+                request
+                    -- Temporary workaround for https://github.com/Kinto/kinto/issues/1217 : surround version with quotes
+                    |> Kinto.withFilter (Kinto.LIKE "build.id" <| ("\"" ++ buildIdFilter ++ "\""))
+            else
+                request
+                    |> (if productFilter /= "all" then
+                            Kinto.withFilter (Kinto.Equal "source.product" productFilter)
+                        else
+                            identity
+                       )
+                    |> (if channelFilter /= "all" then
+                            Kinto.withFilter (Kinto.Equal "target.channel" channelFilter)
+                        else
+                            identity
+                       )
+                    |> (if platformFilter /= "all" then
+                            Kinto.withFilter (Kinto.Equal "target.platform" platformFilter)
+                        else
+                            identity
+                       )
+                    |> (if versionFilter /= "all" then
+                            -- Temporary workaround for https://github.com/Kinto/kinto/issues/1217 : surround version with quotes
+                            Kinto.withFilter (Kinto.Equal "target.version" ("\"" ++ versionFilter ++ "\""))
+                        else
+                            identity
+                       )
+                    |> (if localeFilter /= "all" then
+                            Kinto.withFilter (Kinto.Equal "target.locale" localeFilter)
+                        else
+                            identity
+                       )
     in
         filteredRequest
             |> Kinto.send BuildRecordsFetched
