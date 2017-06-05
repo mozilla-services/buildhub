@@ -4,7 +4,7 @@
     "repository": "https://github.com/mozilla-services/buildhub.git",
     "license": "Apache-2",
     "source-directories": [
-        "."
+        "src"
     ],
     "exposed-modules": [],
     "dependencies": {
