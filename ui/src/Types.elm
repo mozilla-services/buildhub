@@ -35,6 +35,7 @@ type alias Model =
     , buildIdFilter : String
     , loading : Bool
     , route : Route
+    , error : Maybe Kinto.Error
     }
 
 

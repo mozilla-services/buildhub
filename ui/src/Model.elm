@@ -27,6 +27,7 @@ init location =
             , buildIdFilter = ""
             , loading = True
             , route = MainView
+            , error = Nothing
             }
 
         updatedModel =
