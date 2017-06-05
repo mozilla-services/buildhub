@@ -26,18 +26,14 @@ mainView : Model -> Html Msg
 mainView model =
     div [ class "row" ]
         [ div [ class "col-sm-9" ]
-            (case model.error of
-                Just err ->
-                    [ errorView err ]
-
-                _ ->
-                    if model.loading then
-                        [ spinner ]
-                    else
-                        [ numBuilds model
-                        , div [] <| List.map recordView model.buildsPager.objects
-                        , nextPageBtn (List.length model.buildsPager.objects) model.buildsPager.total
-                        ]
+            (if model.loading then
+                [ spinner ]
+             else
+                [ errorView model.error
+                , numBuilds model
+                , div [] <| List.map recordView model.buildsPager.objects
+                , nextPageBtn (List.length model.buildsPager.objects) model.buildsPager.total
+                ]
             )
         , div [ class "col-sm-3" ]
             [ div [ class "panel panel-default" ]
@@ -134,16 +130,21 @@ headerView model =
         ]
 
 
-errorView : Kinto.Error -> Html Msg
+errorView : Maybe Kinto.Error -> Html Msg
 errorView err =
-    div [ class "panel panel-warning" ]
-        [ div [ class "panel-heading" ]
-            [ h3 [ class "panel-title" ]
-                [ text "An error occured while fetching builds" ]
-            ]
-        , div [ class "panel-body" ]
-            [ text <| toString err ]
-        ]
+    case err of
+        Just err ->
+            div [ class "panel panel-warning" ]
+                [ div [ class "panel-heading" ]
+                    [ h3 [ class "panel-title" ]
+                        [ text "An error occured while fetching builds" ]
+                    ]
+                , div [ class "panel-body" ]
+                    [ text <| toString err ]
+                ]
+
+        _ ->
+            div [] []
 
 
 numBuilds : Model -> Html Msg
