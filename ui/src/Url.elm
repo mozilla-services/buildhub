@@ -215,23 +215,19 @@ urlFromRoute route =
             "#/builds/"
 
 
-routeFromFilters : Model -> Route
-routeFromFilters { filters } =
-    let
-        { buildId, locale, version, platform, channel, product } =
-            filters
-    in
-        if buildId /= "" then
-            BuildIdView product channel platform version locale buildId
-        else if locale /= "all" then
-            LocaleView product channel platform version locale
-        else if version /= "all" then
-            VersionView product channel platform version
-        else if platform /= "all" then
-            PlatformView product channel platform
-        else if channel /= "all" then
-            ChannelView product channel
-        else if product /= "all" then
-            ProductView product
-        else
-            MainView
+routeFromFilters : Filters -> Route
+routeFromFilters { buildId, locale, version, platform, channel, product } =
+    if buildId /= "" then
+        BuildIdView product channel platform version locale buildId
+    else if locale /= "all" then
+        LocaleView product channel platform version locale
+    else if version /= "all" then
+        VersionView product channel platform version
+    else if platform /= "all" then
+        PlatformView product channel platform
+    else if channel /= "all" then
+        ChannelView product channel
+    else if product /= "all" then
+        ProductView product
+    else
+        MainView

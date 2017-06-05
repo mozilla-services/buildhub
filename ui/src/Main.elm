@@ -105,7 +105,7 @@ update msg ({ filters, filterValues } as model) =
         SubmitFilters ->
             let
                 route =
-                    routeFromFilters model
+                    routeFromFilters filters
             in
                 { model | route = route, loading = True, error = Nothing }
                     ! [ newUrl <| urlFromRoute route ]
