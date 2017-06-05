@@ -106,3 +106,6 @@ update msg ({ filterValues } as model) =
             in
                 { updatedModel | loading = True, error = Nothing }
                     ! [ getBuildRecordList updatedModel ]
+
+        DismissError ->
+            { model | error = Nothing } ! []

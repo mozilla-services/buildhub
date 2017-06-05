@@ -143,7 +143,11 @@ errorView err =
             div [ class "panel panel-warning" ]
                 [ div [ class "panel-heading" ]
                     [ h3 [ class "panel-title" ]
-                        [ text "An error occured while fetching builds" ]
+                        [ text "An error occured while fetching builds"
+                        , button [ type_ "button", class "close", onClick DismissError ]
+                            [ span [ class "glyphicon glyphicon-remove" ] []
+                            ]
+                        ]
                     ]
                 , div [ class "panel-body" ]
                     [ text <| toString err ]
