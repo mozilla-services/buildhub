@@ -28,6 +28,7 @@ ENTRY_POINTS = {
     'console_scripts': [
         'scrape_archives = buildhub.scrape_archives:run',
         'sysaddons_updates = buildhub.sysaddons_updates:run',
+        'index_filters = buildhub.index_filters:run',
     ],
 }
 
