@@ -38,7 +38,6 @@ mainView model =
                 [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
                 , Html.form [ class "panel-body", onSubmit <| SubmitFilters ]
                     [ buildIdSearchForm model
-                    , div [ style [ ( "text-align", "center" ) ] ] [ text " -- or -- " ]
                     , filterSelector model.filterValues.productList "Products" model.productFilter (UpdateFilter << NewProductFilter)
                     , filterSelector model.filterValues.versionList "Versions" model.versionFilter (UpdateFilter << NewVersionFilter)
                     , filterSelector model.filterValues.platformList "Platforms" model.platformFilter (UpdateFilter << NewPlatformFilter)

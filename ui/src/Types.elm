@@ -141,12 +141,12 @@ type alias Locale =
 
 type Route
     = MainView
-    | BuildIdView BuildId
     | ProductView Product
     | ChannelView Product Channel
     | PlatformView Product Channel Platform
     | VersionView Product Channel Platform Version
     | LocaleView Product Channel Platform Version Locale
+    | BuildIdView Product Channel Platform Version Locale BuildId
     | DocsView
 
 
