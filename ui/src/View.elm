@@ -23,28 +23,28 @@ view model =
 
 
 mainView : Model -> Html Msg
-mainView model =
+mainView { loading, error, buildsPager, filters, filterValues } =
     div [ class "row" ]
         [ div [ class "col-sm-9" ]
-            (if model.loading then
+            (if loading then
                 [ spinner ]
              else
-                [ errorView model.error
-                , numBuilds model
-                , div [] <| List.map recordView model.buildsPager.objects
-                , nextPageBtn (List.length model.buildsPager.objects) model.buildsPager.total
+                [ errorView error
+                , numBuilds buildsPager
+                , div [] <| List.map recordView buildsPager.objects
+                , nextPageBtn (List.length buildsPager.objects) buildsPager.total
                 ]
             )
         , div [ class "col-sm-3" ]
             [ div [ class "panel panel-default" ]
                 [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
                 , Html.form [ class "panel-body", onSubmit <| SubmitFilters ]
-                    [ buildIdSearchForm model
-                    , filterSelector model.filterValues.productList "Products" model.productFilter (UpdateFilter << NewProductFilter)
-                    , filterSelector model.filterValues.versionList "Versions" model.versionFilter (UpdateFilter << NewVersionFilter)
-                    , filterSelector model.filterValues.platformList "Platforms" model.platformFilter (UpdateFilter << NewPlatformFilter)
-                    , filterSelector model.filterValues.channelList "Channels" model.channelFilter (UpdateFilter << NewChannelFilter)
-                    , filterSelector model.filterValues.localeList "Locales" model.localeFilter (UpdateFilter << NewLocaleFilter)
+                    [ buildIdSearchForm filters.buildId
+                    , filterSelector filterValues.productList "Products" filters.product (UpdateFilter << NewProductFilter)
+                    , filterSelector filterValues.versionList "Versions" filters.version (UpdateFilter << NewVersionFilter)
+                    , filterSelector filterValues.platformList "Platforms" filters.platform (UpdateFilter << NewPlatformFilter)
+                    , filterSelector filterValues.channelList "Channels" filters.channel (UpdateFilter << NewChannelFilter)
+                    , filterSelector filterValues.localeList "Locales" filters.locale (UpdateFilter << NewLocaleFilter)
                     , div [ class "btn-group btn-group-justified" ]
                         [ div [ class "btn-group" ]
                             [ button
@@ -157,11 +157,11 @@ errorView err =
             div [] []
 
 
-numBuilds : Model -> Html Msg
-numBuilds model =
+numBuilds : Kinto.Pager BuildRecord -> Html Msg
+numBuilds pager =
     let
         nbBuilds =
-            List.length model.buildsPager.objects
+            List.length pager.objects
     in
         p [ class "well" ] <|
             [ text <|
@@ -173,20 +173,20 @@ numBuilds model =
                             "s"
                        )
                     ++ " displayed ("
-                    ++ toString model.buildsPager.total
+                    ++ toString pager.total
                     ++ " total)."
             ]
 
 
-buildIdSearchForm : Model -> Html Msg
-buildIdSearchForm model =
+buildIdSearchForm : String -> Html Msg
+buildIdSearchForm buildId =
     div [ class "form-group" ]
         [ label [] [ text "Build id" ]
         , input
             [ type_ "text"
             , class "form-control"
             , placeholder "Eg. 201705011233"
-            , value model.buildIdFilter
+            , value buildId
             , onInput <| UpdateFilter << NewBuildIdSearch
             ]
             []

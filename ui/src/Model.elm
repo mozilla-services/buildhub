@@ -1,6 +1,7 @@
 module Model
     exposing
         ( init
+        , initFilters
         , getBuildRecordList
         , getNextBuilds
         )
@@ -18,12 +19,7 @@ init location =
         defaultModel =
             { buildsPager = Kinto.emptyPager client buildRecordResource
             , filterValues = FilterValues [] [] [] [] []
-            , productFilter = "all"
-            , versionFilter = "all"
-            , platformFilter = "all"
-            , channelFilter = "all"
-            , localeFilter = "all"
-            , buildIdFilter = ""
+            , filters = initFilters
             , loading = True
             , route = MainView
             , error = Nothing
@@ -42,6 +38,17 @@ init location =
               ]
 
 
+initFilters : Filters
+initFilters =
+    { product = "all"
+    , version = "all"
+    , platform = "all"
+    , channel = "all"
+    , locale = "all"
+    , buildId = ""
+    }
+
+
 getFilters : String -> Cmd Msg
 getFilters filterName =
     client
@@ -51,7 +58,7 @@ getFilters filterName =
 
 
 getBuildRecordList : Model -> Cmd Msg
-getBuildRecordList { buildIdFilter, productFilter, channelFilter, platformFilter, versionFilter, localeFilter } =
+getBuildRecordList { filters } =
     {- FIXME: https://github.com/Kinto/kinto/issues/1217: here we surround all qs param values with quotes
        in case they're treated as numbers by Kinto, which makes it crash.
     -}
@@ -63,8 +70,8 @@ getBuildRecordList { buildIdFilter, productFilter, channelFilter, platformFilter
                 request
 
         applyBuildIdFilter request =
-            if buildIdFilter /= "" then
-                Kinto.withFilter (Kinto.LIKE "build.id" <| ("\"" ++ buildIdFilter ++ "\"")) request
+            if filters.buildId /= "" then
+                Kinto.withFilter (Kinto.LIKE "build.id" <| ("\"" ++ filters.buildId ++ "\"")) request
             else
                 request
     in
@@ -72,11 +79,11 @@ getBuildRecordList { buildIdFilter, productFilter, channelFilter, platformFilter
             |> Kinto.getList buildRecordResource
             |> Kinto.limit pageSize
             |> Kinto.sortBy [ "-build.date" ]
-            |> applyListFilter (Kinto.Equal "source.product") productFilter
-            |> applyListFilter (Kinto.Equal "target.channel") channelFilter
-            |> applyListFilter (Kinto.Equal "target.platform") platformFilter
-            |> applyListFilter (Kinto.Equal "target.version") versionFilter
-            |> applyListFilter (Kinto.Equal "target.locale") localeFilter
+            |> applyListFilter (Kinto.Equal "source.product") filters.product
+            |> applyListFilter (Kinto.Equal "target.channel") filters.channel
+            |> applyListFilter (Kinto.Equal "target.platform") filters.platform
+            |> applyListFilter (Kinto.Equal "target.version") filters.version
+            |> applyListFilter (Kinto.Equal "target.locale") filters.locale
             |> applyBuildIdFilter
             |> Kinto.send BuildRecordsFetched
 

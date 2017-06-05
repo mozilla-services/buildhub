@@ -19,8 +19,33 @@ main =
         }
 
 
+updateFilters : NewFilter -> Filters -> Filters
+updateFilters newFilter filters =
+    case newFilter of
+        ClearAll ->
+            initFilters
+
+        NewProductFilter value ->
+            { filters | product = value }
+
+        NewVersionFilter value ->
+            { filters | version = value }
+
+        NewPlatformFilter value ->
+            { filters | platform = value }
+
+        NewChannelFilter value ->
+            { filters | channel = value }
+
+        NewLocaleFilter value ->
+            { filters | locale = value }
+
+        NewBuildIdSearch value ->
+            { filters | buildId = value }
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ({ filterValues } as model) =
+update msg ({ filters, filterValues } as model) =
     case msg of
         BuildRecordsFetched (Ok buildsPager) ->
             { model
@@ -37,16 +62,12 @@ update msg ({ filterValues } as model) =
             model ! [ getNextBuilds model.buildsPager ]
 
         BuildRecordsNextPageFetched (Ok buildsPager) ->
-            let
-                newPager =
-                    Kinto.updatePager buildsPager model.buildsPager
-            in
-                { model
-                    | buildsPager = newPager
-                    , loading = False
-                    , error = Nothing
-                }
-                    ! []
+            { model
+                | buildsPager = Kinto.updatePager buildsPager model.buildsPager
+                , loading = False
+                , error = Nothing
+            }
+                ! []
 
         BuildRecordsNextPageFetched (Err err) ->
             { model | error = Just err, loading = False } ! []
@@ -79,44 +100,7 @@ update msg ({ filterValues } as model) =
             { model | error = Just err, loading = False } ! []
 
         UpdateFilter newFilter ->
-            let
-                noFilters =
-                    { model
-                        | productFilter = "all"
-                        , versionFilter = "all"
-                        , platformFilter = "all"
-                        , channelFilter = "all"
-                        , localeFilter = "all"
-                        , buildIdFilter = ""
-                    }
-
-                noBuildId =
-                    { model | buildIdFilter = "" }
-
-                updatedModelWithFilters =
-                    case newFilter of
-                        ClearAll ->
-                            noFilters
-
-                        NewProductFilter value ->
-                            { noBuildId | productFilter = value }
-
-                        NewVersionFilter value ->
-                            { noBuildId | versionFilter = value }
-
-                        NewPlatformFilter value ->
-                            { noBuildId | platformFilter = value }
-
-                        NewChannelFilter value ->
-                            { noBuildId | channelFilter = value }
-
-                        NewLocaleFilter value ->
-                            { noBuildId | localeFilter = value }
-
-                        NewBuildIdSearch value ->
-                            { noFilters | buildIdFilter = value }
-            in
-                updatedModelWithFilters ! []
+            { model | filters = updateFilters newFilter filters } ! []
 
         SubmitFilters ->
             let
