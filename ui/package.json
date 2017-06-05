@@ -3,16 +3,16 @@
   "version": "0.0.1",
   "description": "Firefox System Build info manager.",
   "scripts": {
-    "build": "elm-make Main.elm --output=build/app.js && npm run copy-assets",
-    "copy-assets": "copyfiles index.html style.css build/",
-    "debug": "elm-live Main.elm --output=app.js --debug",
+    "build": "npm run copy-assets && elm-make src/Main.elm --output=build/app.js",
+    "copy-assets": "rimraf build && mkdir build && cp -r public/* build",
+    "debug": "elm-live src/Main.elm --warn --dir=public/ --output=public/app.js --debug",
     "deploy": "npm run build && gh-pages --dist build/",
-    "start": "elm-live Main.elm --output=app.js",
+    "start": "elm-live src/Main.elm --warn --dir=public/ --output=public/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/leplatrem/systemaddons-versions.git"
+    "url": "git+https://github.com/mozilla-services/buildhub.git"
   },
   "keywords": [
     "firefox"
@@ -27,6 +27,7 @@
     "copyfiles": "^1.2.0",
     "elm": "^0.18.0",
     "elm-live": "^2.7.4",
-    "gh-pages": "^0.12.0"
+    "gh-pages": "^0.12.0",
+    "rimraf": "^2.6.1"
   }
 }
