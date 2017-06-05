@@ -13,10 +13,6 @@ routeFromUrl model location =
                 (oneOf
                     [ map DocsView (s "docs" </> top)
                     , map MainView (s "builds" </> top)
-                    , map BuildIdView
-                        (s "builds"
-                            </> (s "buildId" </> string)
-                        )
                     , map ProductView
                         (s "builds"
                             </> (s "product" </> string)
@@ -47,6 +43,15 @@ routeFromUrl model location =
                             </> (s "version" </> string)
                             </> (s "locale" </> string)
                         )
+                    , map BuildIdView
+                        (s "builds"
+                            </> (s "product" </> string)
+                            </> (s "channel" </> string)
+                            </> (s "platform" </> string)
+                            </> (s "version" </> string)
+                            </> (s "locale" </> string)
+                            </> (s "buildId" </> string)
+                        )
                     ]
                 )
                 location
@@ -55,15 +60,15 @@ routeFromUrl model location =
             Just DocsView ->
                 { model | route = DocsView }
 
-            Just (BuildIdView buildId) ->
+            Just (BuildIdView product channel platform version locale buildId) ->
                 { model
-                    | route = BuildIdView buildId
+                    | route = BuildIdView product channel platform version locale buildId
                     , buildIdFilter = buildId
-                    , productFilter = "all"
-                    , channelFilter = "all"
-                    , platformFilter = "all"
-                    , versionFilter = "all"
-                    , localeFilter = "all"
+                    , productFilter = product
+                    , channelFilter = channel
+                    , platformFilter = platform
+                    , versionFilter = version
+                    , localeFilter = locale
                 }
 
             Just (ProductView product) ->
@@ -139,9 +144,6 @@ urlFromRoute route =
         DocsView ->
             "#/docs/"
 
-        BuildIdView buildId ->
-            "#/builds/buildId/" ++ buildId
-
         ProductView product ->
             "#/builds/product/" ++ product
 
@@ -181,6 +183,20 @@ urlFromRoute route =
                 ++ "/locale/"
                 ++ locale
 
+        BuildIdView product channel platform version locale buildId ->
+            "#/builds/product/"
+                ++ product
+                ++ "/channel/"
+                ++ channel
+                ++ "/platform/"
+                ++ platform
+                ++ "/version/"
+                ++ version
+                ++ "/locale/"
+                ++ locale
+                ++ "/buildId/"
+                ++ buildId
+
         _ ->
             "#/builds/"
 
@@ -188,7 +204,7 @@ urlFromRoute route =
 routeFromFilters : Model -> Route
 routeFromFilters { buildIdFilter, localeFilter, versionFilter, platformFilter, channelFilter, productFilter } =
     if buildIdFilter /= "" then
-        BuildIdView buildIdFilter
+        BuildIdView productFilter channelFilter platformFilter versionFilter localeFilter buildIdFilter
     else if localeFilter /= "all" then
         LocaleView productFilter channelFilter platformFilter versionFilter localeFilter
     else if versionFilter /= "all" then

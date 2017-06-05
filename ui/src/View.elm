@@ -38,18 +38,24 @@ mainView model =
         , div [ class "col-sm-3" ]
             [ div [ class "panel panel-default" ]
                 [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
-                , div [ class "panel-body" ]
+                , Html.form [ class "panel-body", onSubmit <| SubmitFilters ]
                     [ buildIdSearchForm model
-                    , div [ style [ ( "text-align", "center" ) ] ] [ text " -- or -- " ]
                     , filterSelector model.filterValues.productList "Products" model.productFilter (UpdateFilter << NewProductFilter)
                     , filterSelector model.filterValues.versionList "Versions" model.versionFilter (UpdateFilter << NewVersionFilter)
                     , filterSelector model.filterValues.platformList "Platforms" model.platformFilter (UpdateFilter << NewPlatformFilter)
                     , filterSelector model.filterValues.channelList "Channels" model.channelFilter (UpdateFilter << NewChannelFilter)
                     , filterSelector model.filterValues.localeList "Locales" model.localeFilter (UpdateFilter << NewLocaleFilter)
-                    , p [ class "text-right" ]
-                        [ button
-                            [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
-                            [ text "Clear all filters" ]
+                    , div [ class "btn-group btn-group-justified" ]
+                        [ div [ class "btn-group" ]
+                            [ button
+                                [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
+                                [ text "Reset" ]
+                            ]
+                        , div [ class "btn-group" ]
+                            [ button
+                                [ class "btn btn-default btn-primary", type_ "submit" ]
+                                [ text "Search" ]
+                            ]
                         ]
                     ]
                 ]
