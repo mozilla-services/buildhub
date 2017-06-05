@@ -3,6 +3,7 @@ module Types
         ( pageSize
         , Build
         , BuildRecord
+        , FilterRecord
         , Route(..)
         , Download
         , FilterValues
@@ -46,6 +47,10 @@ type alias FilterValues =
     , versionList : List String
     , localeList : List String
     }
+
+
+type alias FilterRecord =
+    { id : String, name : String }
 
 
 type alias BuildRecord =
@@ -153,6 +158,7 @@ type Route
 
 type Msg
     = BuildRecordsFetched (Result Kinto.Error (Kinto.Pager BuildRecord))
+    | FiltersReceived String (Result Kinto.Error (Kinto.Pager FilterRecord))
     | LoadNextPage
     | BuildRecordsNextPageFetched (Result Kinto.Error (Kinto.Pager BuildRecord))
     | UpdateFilter NewFilter
