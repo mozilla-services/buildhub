@@ -94,12 +94,15 @@ update msg ({ filterValues } as model) =
 
                         NewBuildIdSearch value ->
                             { noFilters | buildIdFilter = value }
-
-                updatedModelWithRoute =
-                    { model | route = routeFromFilters updatedModelWithFilters }
             in
-                { updatedModelWithRoute | loading = True }
-                    ! [ newUrl <| urlFromRoute updatedModelWithRoute.route ]
+                updatedModelWithFilters ! []
+
+        SubmitFilters ->
+            let
+                route =
+                    routeFromFilters model
+            in
+                { model | route = route } ! [ newUrl <| urlFromRoute route ]
 
         UrlChange location ->
             let

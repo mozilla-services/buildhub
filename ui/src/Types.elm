@@ -19,6 +19,7 @@ import Kinto
 import Navigation exposing (..)
 
 
+pageSize : Int
 pageSize =
     10
 
@@ -155,3 +156,4 @@ type Msg
     | BuildRecordsNextPageFetched (Result Kinto.Error (Kinto.Pager BuildRecord))
     | UpdateFilter NewFilter
     | UrlChange Location
+    | SubmitFilters
