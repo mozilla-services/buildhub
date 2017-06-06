@@ -6,6 +6,7 @@ module Types
         , FilterRecord
         , Route(..)
         , Download
+        , Filters
         , FilterValues
         , Model
         , Msg(..)
@@ -27,16 +28,21 @@ pageSize =
 
 type alias Model =
     { buildsPager : Kinto.Pager BuildRecord
+    , filters : Filters
     , filterValues : FilterValues
-    , productFilter : String
-    , versionFilter : String
-    , platformFilter : String
-    , channelFilter : String
-    , localeFilter : String
-    , buildIdFilter : String
     , loading : Bool
     , route : Route
     , error : Maybe Kinto.Error
+    }
+
+
+type alias Filters =
+    { product : String
+    , version : String
+    , platform : String
+    , channel : String
+    , locale : String
+    , buildId : String
     }
 
 

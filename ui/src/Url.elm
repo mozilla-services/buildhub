@@ -63,78 +63,92 @@ routeFromUrl model location =
             Just (BuildIdView product channel platform version locale buildId) ->
                 { model
                     | route = BuildIdView product channel platform version locale buildId
-                    , buildIdFilter = buildId
-                    , productFilter = product
-                    , channelFilter = channel
-                    , platformFilter = platform
-                    , versionFilter = version
-                    , localeFilter = locale
+                    , filters =
+                        { buildId = buildId
+                        , product = product
+                        , channel = channel
+                        , platform = platform
+                        , version = version
+                        , locale = locale
+                        }
                 }
 
             Just (ProductView product) ->
                 { model
                     | route = ProductView product
-                    , buildIdFilter = ""
-                    , productFilter = product
-                    , channelFilter = "all"
-                    , platformFilter = "all"
-                    , versionFilter = "all"
-                    , localeFilter = "all"
+                    , filters =
+                        { buildId = ""
+                        , product = product
+                        , channel = "all"
+                        , platform = "all"
+                        , version = "all"
+                        , locale = "all"
+                        }
                 }
 
             Just (ChannelView product channel) ->
                 { model
                     | route = ChannelView product channel
-                    , buildIdFilter = ""
-                    , productFilter = product
-                    , channelFilter = channel
-                    , platformFilter = "all"
-                    , versionFilter = "all"
-                    , localeFilter = "all"
+                    , filters =
+                        { buildId = ""
+                        , product = product
+                        , channel = channel
+                        , platform = "all"
+                        , version = "all"
+                        , locale = "all"
+                        }
                 }
 
             Just (PlatformView product channel platform) ->
                 { model
                     | route = PlatformView product channel platform
-                    , buildIdFilter = ""
-                    , productFilter = product
-                    , channelFilter = channel
-                    , platformFilter = platform
-                    , versionFilter = "all"
-                    , localeFilter = "all"
+                    , filters =
+                        { buildId = ""
+                        , product = product
+                        , channel = channel
+                        , platform = platform
+                        , version = "all"
+                        , locale = "all"
+                        }
                 }
 
             Just (VersionView product channel platform version) ->
                 { model
                     | route = VersionView product channel platform version
-                    , buildIdFilter = ""
-                    , productFilter = product
-                    , channelFilter = channel
-                    , platformFilter = platform
-                    , versionFilter = version
-                    , localeFilter = "all"
+                    , filters =
+                        { buildId = ""
+                        , product = product
+                        , channel = channel
+                        , platform = platform
+                        , version = version
+                        , locale = "all"
+                        }
                 }
 
             Just (LocaleView product channel platform version locale) ->
                 { model
                     | route = VersionView product channel platform version
-                    , buildIdFilter = ""
-                    , productFilter = product
-                    , channelFilter = channel
-                    , platformFilter = platform
-                    , versionFilter = version
-                    , localeFilter = locale
+                    , filters =
+                        { buildId = ""
+                        , product = product
+                        , channel = channel
+                        , platform = platform
+                        , version = version
+                        , locale = locale
+                        }
                 }
 
             _ ->
                 { model
                     | route = MainView
-                    , buildIdFilter = ""
-                    , productFilter = "all"
-                    , channelFilter = "all"
-                    , platformFilter = "all"
-                    , versionFilter = "all"
-                    , localeFilter = "all"
+                    , filters =
+                        { buildId = ""
+                        , product = "all"
+                        , channel = "all"
+                        , platform = "all"
+                        , version = "all"
+                        , locale = "all"
+                        }
                 }
 
 
@@ -201,19 +215,19 @@ urlFromRoute route =
             "#/builds/"
 
 
-routeFromFilters : Model -> Route
-routeFromFilters { buildIdFilter, localeFilter, versionFilter, platformFilter, channelFilter, productFilter } =
-    if buildIdFilter /= "" then
-        BuildIdView productFilter channelFilter platformFilter versionFilter localeFilter buildIdFilter
-    else if localeFilter /= "all" then
-        LocaleView productFilter channelFilter platformFilter versionFilter localeFilter
-    else if versionFilter /= "all" then
-        VersionView productFilter channelFilter platformFilter versionFilter
-    else if platformFilter /= "all" then
-        PlatformView productFilter channelFilter platformFilter
-    else if channelFilter /= "all" then
-        ChannelView productFilter channelFilter
-    else if productFilter /= "all" then
-        ProductView productFilter
+routeFromFilters : Filters -> Route
+routeFromFilters { buildId, locale, version, platform, channel, product } =
+    if buildId /= "" then
+        BuildIdView product channel platform version locale buildId
+    else if locale /= "all" then
+        LocaleView product channel platform version locale
+    else if version /= "all" then
+        VersionView product channel platform version
+    else if platform /= "all" then
+        PlatformView product channel platform
+    else if channel /= "all" then
+        ChannelView product channel
+    else if product /= "all" then
+        ProductView product
     else
         MainView
