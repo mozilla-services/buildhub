@@ -5,7 +5,8 @@ env:
   - TOX_ENV=py35
   - TOX_ENV=flake8
 install:
-  - pip install tox
+  - pip install 'setuptools < 36'
+  - pip install tox tox-virtualenv-no-download
 script:
   - cd jobs; tox -e $TOX_ENV
 after_success:
