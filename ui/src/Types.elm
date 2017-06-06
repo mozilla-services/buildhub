@@ -80,6 +80,7 @@ type alias Download =
     { mimetype : String
     , size : Int
     , url : String
+    , date : String
     }
 
 
