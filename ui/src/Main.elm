@@ -72,33 +72,6 @@ update msg ({ filters, filterValues } as model) =
         BuildRecordsNextPageFetched (Err err) ->
             { model | error = Just err, loading = False } ! []
 
-        FiltersReceived filterName (Ok { objects }) ->
-            let
-                values =
-                    List.map .name objects
-            in
-                case filterName of
-                    "product" ->
-                        { model | filterValues = { filterValues | productList = values } } ! []
-
-                    "channel" ->
-                        { model | filterValues = { filterValues | channelList = values } } ! []
-
-                    "platform" ->
-                        { model | filterValues = { filterValues | platformList = values } } ! []
-
-                    "version" ->
-                        { model | filterValues = { filterValues | versionList = values } } ! []
-
-                    "locale" ->
-                        { model | filterValues = { filterValues | localeList = values } } ! []
-
-                    _ ->
-                        model ! []
-
-        FiltersReceived filterName (Err err) ->
-            { model | error = Just err, loading = False } ! []
-
         FacetsReceived (Ok facets) ->
             { model | facets = Just facets } ! []
 

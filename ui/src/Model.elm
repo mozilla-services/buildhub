@@ -39,12 +39,7 @@ init location =
             routeFromUrl defaultModel location
     in
         updatedModel
-            ! [ getFilters "product"
-              , getFilters "channel"
-              , getFilters "platform"
-              , getFilters "version"
-              , getFilters "locale"
-              , getFilterFacets initFilters
+            ! [ getFilterFacets initFilters
               , getBuildRecordList updatedModel
               ]
 
@@ -58,14 +53,6 @@ initFilters =
     , locale = "all"
     , buildId = ""
     }
-
-
-getFilters : String -> Cmd Msg
-getFilters filterName =
-    client
-        |> Kinto.getList (filterRecordResource filterName)
-        |> Kinto.sortBy [ "id" ]
-        |> Kinto.send (FiltersReceived filterName)
 
 
 getFilterFacets : Filters -> Cmd Msg
@@ -127,8 +114,3 @@ client =
 buildRecordResource : Kinto.Resource BuildRecord
 buildRecordResource =
     Kinto.recordResource "build-hub" "releases" buildRecordDecoder
-
-
-filterRecordResource : String -> Kinto.Resource FilterRecord
-filterRecordResource filterName =
-    Kinto.recordResource "build-hub" (filterName ++ "_filters") filterRecordDecoder

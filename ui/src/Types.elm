@@ -54,10 +54,6 @@ type alias FilterValues =
     }
 
 
-type alias FilterRecord =
-    { id : String, name : String }
-
-
 type alias BuildRecord =
     { id : String
     , last_modified : Int
@@ -159,7 +155,6 @@ type Route
 
 type Msg
     = BuildRecordsFetched (Result Kinto.Error (Kinto.Pager BuildRecord))
-    | FiltersReceived String (Result Kinto.Error (Kinto.Pager FilterRecord))
     | FacetsReceived (Result Http.Error Facets)
     | LoadNextPage
     | BuildRecordsNextPageFetched (Result Kinto.Error (Kinto.Pager BuildRecord))
