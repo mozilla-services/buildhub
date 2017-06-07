@@ -122,7 +122,7 @@ update msg ({ filters, filterValues } as model) =
                     routeFromFilters filters
             in
                 { model | route = route, loading = True, error = Nothing }
-                    ! [ newUrl <| urlFromRoute route ]
+                    ! [ getFilterFacets model.filters, newUrl <| urlFromRoute route ]
 
         UrlChange location ->
             let
