@@ -35,31 +35,7 @@ mainView { loading, error, buildsPager, filters, filterValues } =
                 , nextPageBtn (List.length buildsPager.objects) buildsPager.total
                 ]
             )
-        , div [ class "col-sm-3" ]
-            [ div [ class "panel panel-default" ]
-                [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
-                , Html.form [ class "panel-body", onSubmit <| SubmitFilters ]
-                    [ buildIdSearchForm filters.buildId
-                    , filterSelector filterValues.productList "Products" filters.product (UpdateFilter << NewProductFilter)
-                    , filterSelector filterValues.versionList "Versions" filters.version (UpdateFilter << NewVersionFilter)
-                    , filterSelector filterValues.platformList "Platforms" filters.platform (UpdateFilter << NewPlatformFilter)
-                    , filterSelector filterValues.channelList "Channels" filters.channel (UpdateFilter << NewChannelFilter)
-                    , filterSelector filterValues.localeList "Locales" filters.locale (UpdateFilter << NewLocaleFilter)
-                    , div [ class "btn-group btn-group-justified" ]
-                        [ div [ class "btn-group" ]
-                            [ button
-                                [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
-                                [ text "Reset" ]
-                            ]
-                        , div [ class "btn-group" ]
-                            [ button
-                                [ class "btn btn-default btn-primary", type_ "submit" ]
-                                [ text "Search" ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+        , filtersView filters filterValues
         ]
 
 
@@ -424,3 +400,32 @@ nextPageBtn displayed total =
             ]
     else
         div [] []
+
+
+filtersView : Filters -> FilterValues -> Html Msg
+filtersView filters filterValues =
+    div [ class "col-sm-3" ]
+        [ div [ class "panel panel-default" ]
+            [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
+            , Html.form [ class "panel-body", onSubmit <| SubmitFilters ]
+                [ buildIdSearchForm filters.buildId
+                , filterSelector filterValues.productList "Products" filters.product (UpdateFilter << NewProductFilter)
+                , filterSelector filterValues.versionList "Versions" filters.version (UpdateFilter << NewVersionFilter)
+                , filterSelector filterValues.platformList "Platforms" filters.platform (UpdateFilter << NewPlatformFilter)
+                , filterSelector filterValues.channelList "Channels" filters.channel (UpdateFilter << NewChannelFilter)
+                , filterSelector filterValues.localeList "Locales" filters.locale (UpdateFilter << NewLocaleFilter)
+                , div [ class "btn-group btn-group-justified" ]
+                    [ div [ class "btn-group" ]
+                        [ button
+                            [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
+                            [ text "Reset" ]
+                        ]
+                    , div [ class "btn-group" ]
+                        [ button
+                            [ class "btn btn-default btn-primary", type_ "submit" ]
+                            [ text "Search" ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
