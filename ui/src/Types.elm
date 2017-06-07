@@ -23,7 +23,7 @@ import Navigation exposing (..)
 
 pageSize : Int
 pageSize =
-    10
+    100
 
 
 type alias Model =
