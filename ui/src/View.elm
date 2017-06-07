@@ -220,13 +220,16 @@ recordView record =
                 [ strong [ class "col-sm-4" ]
                     [ a
                         [ let
+                            buildInfo =
+                                Maybe.withDefault (Build "" "") record.build
+
                             url =
                                 { product = record.source.product
                                 , version = record.target.version
                                 , platform = record.target.platform
                                 , channel = "all"
                                 , locale = record.target.locale
-                                , buildId = ""
+                                , buildId = buildInfo.id
                                 }
                                     |> routeFromFilters
                                     |> urlFromRoute
