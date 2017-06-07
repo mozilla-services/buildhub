@@ -5,11 +5,6 @@ import Kinto
 import Navigation exposing (..)
 
 
-pageSize : Int
-pageSize =
-    10
-
-
 type alias Model =
     { buildsPager : Kinto.Pager BuildRecord
     , filters : Filters
@@ -18,6 +13,7 @@ type alias Model =
     , loading : Bool
     , route : Route
     , error : Maybe Kinto.Error
+    , settings : Settings
     }
 
 
@@ -32,6 +28,10 @@ type alias Facets =
     , platform_filters : List Facet
     , locale_filters : List Facet
     }
+
+
+type alias Settings =
+    { pageSize : Int }
 
 
 type alias Filters =
@@ -78,6 +78,7 @@ type alias Download =
     { mimetype : String
     , size : Int
     , url : String
+    , date : String
     }
 
 
@@ -165,3 +166,4 @@ type Msg
     | UrlChange Location
     | SubmitFilters
     | DismissError
+    | NewPageSize String

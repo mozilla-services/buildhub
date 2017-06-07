@@ -1,12 +1,13 @@
 module View exposing (view)
 
+import Filesize
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Kinto
 import Snippet exposing (snippets)
 import Types exposing (..)
-import Filesize
+import Url exposing (..)
 
 
 view : Model -> Html Msg
@@ -23,7 +24,7 @@ view model =
 
 
 mainView : Model -> Html Msg
-mainView { loading, error, buildsPager, facets, filters, filterValues } =
+mainView { loading, settings, error, buildsPager, facets, filters, filterValues } =
     div [ class "row" ]
         [ div [ class "col-sm-9" ]
             (if loading then
@@ -32,29 +33,12 @@ mainView { loading, error, buildsPager, facets, filters, filterValues } =
                 [ errorView error
                 , numBuilds buildsPager
                 , div [] <| List.map recordView buildsPager.objects
-                , nextPageBtn (List.length buildsPager.objects) buildsPager.total
+                , nextPageBtn settings.pageSize (List.length buildsPager.objects) buildsPager.total
                 ]
             )
         , div [ class "col-sm-3" ]
-            [ div [ class "panel panel-default" ]
-                [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
-                , Html.form [ class "panel-body", onSubmit <| SubmitFilters ]
-                    [ buildIdSearchForm filters.buildId
-                    , facetSelectors filters facets
-                    , div [ class "btn-group btn-group-justified" ]
-                        [ div [ class "btn-group" ]
-                            [ button
-                                [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
-                                [ text "Reset" ]
-                            ]
-                        , div [ class "btn-group" ]
-                            [ button
-                                [ class "btn btn-default btn-primary", type_ "submit" ]
-                                [ text "Search" ]
-                            ]
-                        ]
-                    ]
-                ]
+            [ filtersView facets filters filterValues
+            , settingsView settings
             ]
         ]
 
@@ -214,22 +198,6 @@ facetSelector title selectedValue handler facet =
             ]
 
 
-facetSelectors : Filters -> Maybe Facets -> Html Msg
-facetSelectors filters facets =
-    case facets of
-        Just facets ->
-            div []
-                [ facetSelector "Products" filters.product (UpdateFilter << NewProductFilter) facets.product_filters
-                , facetSelector "Versions" filters.version (UpdateFilter << NewVersionFilter) facets.version_filters
-                , facetSelector "Platforms" filters.platform (UpdateFilter << NewPlatformFilter) facets.platform_filters
-                , facetSelector "Channels" filters.channel (UpdateFilter << NewChannelFilter) facets.channel_filters
-                , facetSelector "Locales" filters.locale (UpdateFilter << NewLocaleFilter) facets.locale_filters
-                ]
-
-        Nothing ->
-            text ""
-
-
 recordView : BuildRecord -> Html Msg
 recordView record =
     div
@@ -237,7 +205,24 @@ recordView record =
         [ div [ class "panel-heading" ]
             [ div [ class "row" ]
                 [ strong [ class "col-sm-4" ]
-                    [ a [ href <| "./#" ++ record.id ]
+                    [ a
+                        [ let
+                            buildInfo =
+                                Maybe.withDefault (Build "" "") record.build
+
+                            url =
+                                { product = record.source.product
+                                , version = record.target.version
+                                , platform = record.target.platform
+                                , channel = "all"
+                                , locale = record.target.locale
+                                , buildId = buildInfo.id
+                                }
+                                    |> routeFromFilters
+                                    |> urlFromRoute
+                          in
+                            href url
+                        ]
                         [ text <|
                             record.source.product
                                 ++ " "
@@ -315,6 +300,7 @@ viewDownloadDetails download =
                         [ th [] [ text "URL" ]
                         , th [] [ text "Mimetype" ]
                         , th [] [ text "Size" ]
+                        , th [] [ text "Published on" ]
                         ]
                     ]
                 , tbody []
@@ -322,6 +308,7 @@ viewDownloadDetails download =
                         [ td [] [ a [ href download.url ] [ text filename ] ]
                         , td [] [ text <| download.mimetype ]
                         , td [] [ text <| Filesize.formatBase2 download.size ]
+                        , td [] [ text <| download.date ]
                         ]
                     ]
                 ]
@@ -425,8 +412,8 @@ spinner =
     div [ class "loader" ] []
 
 
-nextPageBtn : Int -> Int -> Html Msg
-nextPageBtn displayed total =
+nextPageBtn : Int -> Int -> Int -> Html Msg
+nextPageBtn pageSize displayed total =
     if displayed < total then
         button
             [ class "btn btn-default"
@@ -442,3 +429,59 @@ nextPageBtn displayed total =
             ]
     else
         div [] []
+
+
+filtersView : Maybe Facets -> Filters -> FilterValues -> Html Msg
+filtersView facets filters filterValues =
+    div [ class "panel panel-default" ]
+        [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
+        , Html.form [ class "panel-body", onSubmit <| SubmitFilters ]
+            [ buildIdSearchForm filters.buildId
+            , case facets of
+                Just facets ->
+                    div []
+                        [ facetSelector "Products" filters.product (UpdateFilter << NewProductFilter) facets.product_filters
+                        , facetSelector "Versions" filters.version (UpdateFilter << NewVersionFilter) facets.version_filters
+                        , facetSelector "Platforms" filters.platform (UpdateFilter << NewPlatformFilter) facets.platform_filters
+                        , facetSelector "Channels" filters.channel (UpdateFilter << NewChannelFilter) facets.channel_filters
+                        , facetSelector "Locales" filters.locale (UpdateFilter << NewLocaleFilter) facets.locale_filters
+                        ]
+
+                Nothing ->
+                    text ""
+            , div [ class "btn-group btn-group-justified" ]
+                [ div [ class "btn-group" ]
+                    [ button
+                        [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
+                        [ text "Reset" ]
+                    ]
+                , div [ class "btn-group" ]
+                    [ button
+                        [ class "btn btn-default btn-primary", type_ "submit" ]
+                        [ text "Search" ]
+                    ]
+                ]
+            ]
+        ]
+
+
+settingsView : Settings -> Html Msg
+settingsView { pageSize } =
+    div [ class "panel panel-default" ]
+        [ div [ class "panel-heading" ] [ strong [] [ text "Settings" ] ]
+        , Html.form [ class "panel-body" ]
+            [ let
+                optionView value_ =
+                    option [ value value_, selected (value_ == toString pageSize) ] [ text value_ ]
+              in
+                div [ class "form-group", style [ ( "display", "block" ) ] ]
+                    [ label [] [ text "number of records per page" ]
+                    , select
+                        [ class "form-control"
+                        , onInput NewPageSize
+                        , value <| toString pageSize
+                        ]
+                        (List.map optionView [ "100", "200", "500", "1000" ])
+                    ]
+            ]
+        ]
