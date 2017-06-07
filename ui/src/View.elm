@@ -23,7 +23,7 @@ view model =
 
 
 mainView : Model -> Html Msg
-mainView { loading, error, buildsPager, filters, filterValues } =
+mainView { loading, error, buildsPager, facets, filters, filterValues } =
     div [ class "row" ]
         [ div [ class "col-sm-9" ]
             (if loading then
@@ -40,11 +40,7 @@ mainView { loading, error, buildsPager, filters, filterValues } =
                 [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
                 , Html.form [ class "panel-body", onSubmit <| SubmitFilters ]
                     [ buildIdSearchForm filters.buildId
-                    , filterSelector filterValues.productList "Products" filters.product (UpdateFilter << NewProductFilter)
-                    , filterSelector filterValues.versionList "Versions" filters.version (UpdateFilter << NewVersionFilter)
-                    , filterSelector filterValues.platformList "Platforms" filters.platform (UpdateFilter << NewPlatformFilter)
-                    , filterSelector filterValues.channelList "Channels" filters.channel (UpdateFilter << NewChannelFilter)
-                    , filterSelector filterValues.localeList "Locales" filters.locale (UpdateFilter << NewLocaleFilter)
+                    , facetSelectors filters facets
                     , div [ class "btn-group btn-group-justified" ]
                         [ div [ class "btn-group" ]
                             [ button
@@ -193,21 +189,45 @@ buildIdSearchForm buildId =
         ]
 
 
-filterSelector : List String -> String -> String -> (String -> Msg) -> Html Msg
-filterSelector filters filterTitle selectedFilter updateHandler =
+facetSelector : String -> String -> (String -> Msg) -> List Facet -> Html Msg
+facetSelector title selectedValue handler facet =
     let
-        optionView value_ =
-            option [ value value_, selected (value_ == selectedFilter) ] [ text value_ ]
+        optionView entry =
+            option [ value entry.value, selected (entry.value == selectedValue) ]
+                [ text <|
+                    entry.value
+                        ++ (if entry.count == -1 then
+                                ""
+                            else
+                                " (" ++ (toString entry.count) ++ ")"
+                           )
+                ]
     in
         div [ class "form-group", style [ ( "display", "block" ) ] ]
-            [ label [] [ text filterTitle ]
+            [ label [] [ text title ]
             , select
                 [ class "form-control"
-                , onInput updateHandler
-                , value selectedFilter
+                , onInput handler
+                , value selectedValue
                 ]
-                (List.map optionView ("all" :: filters))
+                (List.map optionView ((Facet -1 "all") :: facet))
             ]
+
+
+facetSelectors : Filters -> Maybe Facets -> Html Msg
+facetSelectors filters facets =
+    case facets of
+        Just facets ->
+            div []
+                [ facetSelector "Products" filters.product (UpdateFilter << NewProductFilter) facets.product_filters
+                , facetSelector "Versions" filters.version (UpdateFilter << NewVersionFilter) facets.version_filters
+                , facetSelector "Platforms" filters.platform (UpdateFilter << NewPlatformFilter) facets.platform_filters
+                , facetSelector "Channels" filters.channel (UpdateFilter << NewChannelFilter) facets.channel_filters
+                , facetSelector "Locales" filters.locale (UpdateFilter << NewLocaleFilter) facets.locale_filters
+                ]
+
+        Nothing ->
+            text ""
 
 
 recordView : BuildRecord -> Html Msg

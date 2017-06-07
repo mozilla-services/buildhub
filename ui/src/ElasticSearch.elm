@@ -54,7 +54,10 @@ encodeQuery filters =
             ( name
             , Encode.object
                 [ ( "terms"
-                  , Encode.object [ ( "field", Encode.string property ) ]
+                  , Encode.object
+                        [ ( "field", Encode.string property )
+                        , ( "size", Encode.int 1000 )
+                        ]
                   )
                 ]
             )
