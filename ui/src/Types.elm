@@ -12,7 +12,7 @@ type alias Model =
     , facets : Maybe Facets
     , loading : Bool
     , route : Route
-    , error : Maybe Kinto.Error
+    , error : Maybe String
     , settings : Settings
     }
 

@@ -116,7 +116,7 @@ headerView model =
         ]
 
 
-errorView : Maybe Kinto.Error -> Html Msg
+errorView : Maybe String -> Html Msg
 errorView err =
     case err of
         Just err ->
@@ -130,7 +130,7 @@ errorView err =
                         ]
                     ]
                 , div [ class "panel-body" ]
-                    [ text <| toString err ]
+                    [ text err ]
                 ]
 
         _ ->

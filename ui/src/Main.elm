@@ -56,7 +56,7 @@ update msg ({ filters, filterValues } as model) =
                 ! [ getFilterFacets model.filters ]
 
         BuildRecordsFetched (Err err) ->
-            { model | error = Just err, loading = False } ! []
+            { model | error = Just (toString err), loading = False } ! []
 
         LoadNextPage ->
             model ! [ getNextBuilds model.buildsPager ]
@@ -70,17 +70,13 @@ update msg ({ filters, filterValues } as model) =
                 ! [ getFilterFacets model.filters ]
 
         BuildRecordsNextPageFetched (Err err) ->
-            { model | error = Just err, loading = False } ! []
+            { model | error = Just (toString err), loading = False } ! []
 
         FacetsReceived (Ok facets) ->
             { model | facets = Just facets } ! []
 
         FacetsReceived (Err error) ->
-            let
-                _ =
-                    Debug.crash (toString error)
-            in
-                model ! []
+            { model | error = Just (toString error) } ! []
 
         UpdateFilter newFilter ->
             let
