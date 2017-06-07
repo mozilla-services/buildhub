@@ -1,7 +1,6 @@
 module Types
     exposing
-        ( pageSize
-        , Build
+        ( Build
         , BuildRecord
         , FilterRecord
         , Route(..)
@@ -11,6 +10,7 @@ module Types
         , Model
         , Msg(..)
         , NewFilter(..)
+        , Settings
         , Snippet
         , Source
         , SystemAddon
@@ -21,11 +21,6 @@ import Kinto
 import Navigation exposing (..)
 
 
-pageSize : Int
-pageSize =
-    100
-
-
 type alias Model =
     { buildsPager : Kinto.Pager BuildRecord
     , filters : Filters
@@ -33,7 +28,12 @@ type alias Model =
     , loading : Bool
     , route : Route
     , error : Maybe Kinto.Error
+    , settings : Settings
     }
+
+
+type alias Settings =
+    { pageSize : Int }
 
 
 type alias Filters =

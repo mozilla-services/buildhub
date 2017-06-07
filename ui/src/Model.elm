@@ -23,6 +23,7 @@ init location =
             , loading = True
             , route = MainView
             , error = Nothing
+            , settings = { pageSize = 100 }
             }
 
         updatedModel =
@@ -58,7 +59,7 @@ getFilters filterName =
 
 
 getBuildRecordList : Model -> Cmd Msg
-getBuildRecordList { filters } =
+getBuildRecordList { filters, settings } =
     {- FIXME: https://github.com/Kinto/kinto/issues/1217: here we surround all qs param values with quotes
        in case they're treated as numbers by Kinto, which makes it crash.
     -}
@@ -77,7 +78,7 @@ getBuildRecordList { filters } =
     in
         client
             |> Kinto.getList buildRecordResource
-            |> Kinto.limit pageSize
+            |> Kinto.limit settings.pageSize
             |> Kinto.sortBy [ "-build.date" ]
             |> applyListFilter (Kinto.Equal "source.product") filters.product
             |> applyListFilter (Kinto.Equal "target.channel") filters.channel

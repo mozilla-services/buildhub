@@ -23,7 +23,7 @@ view model =
 
 
 mainView : Model -> Html Msg
-mainView { loading, error, buildsPager, filters, filterValues } =
+mainView { loading, error, buildsPager, filters, filterValues, settings } =
     div [ class "row" ]
         [ div [ class "col-sm-9" ]
             (if loading then
@@ -32,7 +32,7 @@ mainView { loading, error, buildsPager, filters, filterValues } =
                 [ errorView error
                 , numBuilds buildsPager
                 , div [] <| List.map recordView buildsPager.objects
-                , nextPageBtn (List.length buildsPager.objects) buildsPager.total
+                , nextPageBtn settings.pageSize (List.length buildsPager.objects) buildsPager.total
                 ]
             )
         , filtersView filters filterValues
@@ -383,8 +383,8 @@ spinner =
     div [ class "loader" ] []
 
 
-nextPageBtn : Int -> Int -> Html Msg
-nextPageBtn displayed total =
+nextPageBtn : Int -> Int -> Int -> Html Msg
+nextPageBtn pageSize displayed total =
     if displayed < total then
         button
             [ class "btn btn-default"
