@@ -106,7 +106,8 @@ decodeResponse =
             Decode.list decodeFacet
                 |> Decode.at [ "aggregations", name, "buckets" ]
     in
-        Decode.map5 Facets
+        Decode.map6 Facets
+            (Decode.at [ "hits", "total" ] Decode.int)
             (decodeFilter "product_filters")
             (decodeFilter "version_filters")
             (decodeFilter "channel_filters")

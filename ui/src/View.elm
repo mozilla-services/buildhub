@@ -173,18 +173,16 @@ buildIdSearchForm buildId =
         ]
 
 
-facetSelector : String -> String -> (String -> Msg) -> List Facet -> Html Msg
-facetSelector title selectedValue handler facet =
+facetSelector : String -> Int -> String -> (String -> Msg) -> List Facet -> Html Msg
+facetSelector title total selectedValue handler facet =
     let
         optionView entry =
             option [ value entry.value, selected (entry.value == selectedValue) ]
                 [ text <|
                     entry.value
-                        ++ (if entry.count == -1 then
-                                ""
-                            else
-                                " (" ++ (toString entry.count) ++ ")"
-                           )
+                        ++ " ("
+                        ++ (toString entry.count)
+                        ++ ")"
                 ]
     in
         div [ class "form-group", style [ ( "display", "block" ) ] ]
@@ -194,7 +192,7 @@ facetSelector title selectedValue handler facet =
                 , onInput handler
                 , value selectedValue
                 ]
-                (List.map optionView ((Facet -1 "all") :: facet))
+                (List.map optionView ((Facet total "all") :: facet))
             ]
 
 
@@ -440,11 +438,11 @@ filtersView facets filters filterValues =
             , case facets of
                 Just facets ->
                     div []
-                        [ facetSelector "Products" filters.product (UpdateFilter << NewProductFilter) facets.product_filters
-                        , facetSelector "Versions" filters.version (UpdateFilter << NewVersionFilter) facets.version_filters
-                        , facetSelector "Platforms" filters.platform (UpdateFilter << NewPlatformFilter) facets.platform_filters
-                        , facetSelector "Channels" filters.channel (UpdateFilter << NewChannelFilter) facets.channel_filters
-                        , facetSelector "Locales" filters.locale (UpdateFilter << NewLocaleFilter) facets.locale_filters
+                        [ facetSelector "Products" facets.total filters.product (UpdateFilter << NewProductFilter) facets.product_filters
+                        , facetSelector "Versions" facets.total filters.version (UpdateFilter << NewVersionFilter) facets.version_filters
+                        , facetSelector "Platforms" facets.total filters.platform (UpdateFilter << NewPlatformFilter) facets.platform_filters
+                        , facetSelector "Channels" facets.total filters.channel (UpdateFilter << NewChannelFilter) facets.channel_filters
+                        , facetSelector "Locales" facets.total filters.locale (UpdateFilter << NewLocaleFilter) facets.locale_filters
                         ]
 
                 Nothing ->
