@@ -1,22 +1,6 @@
-module Types
-    exposing
-        ( pageSize
-        , Build
-        , BuildRecord
-        , FilterRecord
-        , Route(..)
-        , Download
-        , Filters
-        , FilterValues
-        , Model
-        , Msg(..)
-        , NewFilter(..)
-        , Snippet
-        , Source
-        , SystemAddon
-        , Target
-        )
+module Types exposing (..)
 
+import Http
 import Kinto
 import Navigation exposing (..)
 
@@ -30,9 +14,23 @@ type alias Model =
     { buildsPager : Kinto.Pager BuildRecord
     , filters : Filters
     , filterValues : FilterValues
+    , facets : Maybe Facets
     , loading : Bool
     , route : Route
     , error : Maybe Kinto.Error
+    }
+
+
+type alias Facet =
+    { count : Int, value : String }
+
+
+type alias Facets =
+    { product_filters : List Facet
+    , version_filters : List Facet
+    , channel_filters : List Facet
+    , platform_filters : List Facet
+    , locale_filters : List Facet
     }
 
 
@@ -160,6 +158,7 @@ type Route
 type Msg
     = BuildRecordsFetched (Result Kinto.Error (Kinto.Pager BuildRecord))
     | FiltersReceived String (Result Kinto.Error (Kinto.Pager FilterRecord))
+    | FacetsReceived (Result Http.Error Facets)
     | LoadNextPage
     | BuildRecordsNextPageFetched (Result Kinto.Error (Kinto.Pager BuildRecord))
     | UpdateFilter NewFilter

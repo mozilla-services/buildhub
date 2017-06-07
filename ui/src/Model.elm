@@ -4,13 +4,21 @@ module Model
         , initFilters
         , getBuildRecordList
         , getNextBuilds
+        , getFilterFacets
         )
 
 import Decoder exposing (..)
+import ElasticSearch
+import Http
 import Kinto
 import Navigation exposing (..)
 import Types exposing (..)
 import Url exposing (..)
+
+
+kintoServer : String
+kintoServer =
+    "https://kinto-ota.dev.mozaws.net/v1/"
 
 
 init : Location -> ( Model, Cmd Msg )
@@ -20,6 +28,7 @@ init location =
             { buildsPager = Kinto.emptyPager client buildRecordResource
             , filterValues = FilterValues [] [] [] [] []
             , filters = initFilters
+            , facets = Nothing
             , loading = True
             , route = MainView
             , error = Nothing
@@ -34,6 +43,7 @@ init location =
               , getFilters "platform"
               , getFilters "version"
               , getFilters "locale"
+              , getFilterFacets initFilters
               , getBuildRecordList updatedModel
               ]
 
@@ -55,6 +65,16 @@ getFilters filterName =
         |> Kinto.getList (filterRecordResource filterName)
         |> Kinto.sortBy [ "id" ]
         |> Kinto.send (FiltersReceived filterName)
+
+
+getFilterFacets : Filters -> Cmd Msg
+getFilterFacets filters =
+    let
+        searchEndpoint =
+            kintoServer ++ "buckets/build-hub/collections/releases/search"
+    in
+        ElasticSearch.getFilters searchEndpoint filters
+            |> Http.send FacetsReceived
 
 
 getBuildRecordList : Model -> Cmd Msg
@@ -100,9 +120,7 @@ getNextBuilds pager =
 
 client : Kinto.Client
 client =
-    Kinto.client
-        "https://kinto-ota.dev.mozaws.net/v1/"
-        (Kinto.Basic "user" "pass")
+    Kinto.client kintoServer (Kinto.Basic "user" "pass")
 
 
 buildRecordResource : Kinto.Resource BuildRecord
