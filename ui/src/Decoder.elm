@@ -37,6 +37,7 @@ downloadDecoder =
         |> required "mimetype" string
         |> required "size" int
         |> required "url" string
+        |> required "date" string
 
 
 targetDecoder : Decoder Target
