@@ -167,3 +167,4 @@ type Msg
     | UrlChange Location
     | SubmitFilters
     | DismissError
+    | NewPageSize String
