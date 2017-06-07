@@ -120,3 +120,16 @@ update msg ({ filters, filterValues } as model) =
 
         DismissError ->
             { model | error = Nothing } ! []
+
+        NewPageSize sizeStr ->
+            let
+                modelSettings =
+                    model.settings
+
+                updatedSettings =
+                    { modelSettings | pageSize = Result.withDefault 100 <| String.toInt sizeStr }
+
+                updatedModel =
+                    { model | settings = updatedSettings, loading = True }
+            in
+                updatedModel ! [ getBuildRecordList updatedModel ]

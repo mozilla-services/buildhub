@@ -23,7 +23,7 @@ view model =
 
 
 mainView : Model -> Html Msg
-mainView { loading, error, buildsPager, filters, filterValues } =
+mainView { loading, error, buildsPager, filters, filterValues, settings } =
     div [ class "row" ]
         [ div [ class "col-sm-9" ]
             (if loading then
@@ -32,33 +32,12 @@ mainView { loading, error, buildsPager, filters, filterValues } =
                 [ errorView error
                 , numBuilds buildsPager
                 , div [] <| List.map recordView buildsPager.objects
-                , nextPageBtn (List.length buildsPager.objects) buildsPager.total
+                , nextPageBtn settings.pageSize (List.length buildsPager.objects) buildsPager.total
                 ]
             )
         , div [ class "col-sm-3" ]
-            [ div [ class "panel panel-default" ]
-                [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
-                , Html.form [ class "panel-body", onSubmit <| SubmitFilters ]
-                    [ buildIdSearchForm filters.buildId
-                    , filterSelector filterValues.productList "Products" filters.product (UpdateFilter << NewProductFilter)
-                    , filterSelector filterValues.versionList "Versions" filters.version (UpdateFilter << NewVersionFilter)
-                    , filterSelector filterValues.platformList "Platforms" filters.platform (UpdateFilter << NewPlatformFilter)
-                    , filterSelector filterValues.channelList "Channels" filters.channel (UpdateFilter << NewChannelFilter)
-                    , filterSelector filterValues.localeList "Locales" filters.locale (UpdateFilter << NewLocaleFilter)
-                    , div [ class "btn-group btn-group-justified" ]
-                        [ div [ class "btn-group" ]
-                            [ button
-                                [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
-                                [ text "Reset" ]
-                            ]
-                        , div [ class "btn-group" ]
-                            [ button
-                                [ class "btn btn-default btn-primary", type_ "submit" ]
-                                [ text "Search" ]
-                            ]
-                        ]
-                    ]
-                ]
+            [ filtersView filters filterValues
+            , settingsView settings
             ]
         ]
 
@@ -407,8 +386,8 @@ spinner =
     div [ class "loader" ] []
 
 
-nextPageBtn : Int -> Int -> Html Msg
-nextPageBtn displayed total =
+nextPageBtn : Int -> Int -> Int -> Html Msg
+nextPageBtn pageSize displayed total =
     if displayed < total then
         button
             [ class "btn btn-default"
@@ -424,3 +403,52 @@ nextPageBtn displayed total =
             ]
     else
         div [] []
+
+
+filtersView : Filters -> FilterValues -> Html Msg
+filtersView filters filterValues =
+    div [ class "panel panel-default" ]
+        [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
+        , Html.form [ class "panel-body", onSubmit <| SubmitFilters ]
+            [ buildIdSearchForm filters.buildId
+            , filterSelector filterValues.productList "Products" filters.product (UpdateFilter << NewProductFilter)
+            , filterSelector filterValues.versionList "Versions" filters.version (UpdateFilter << NewVersionFilter)
+            , filterSelector filterValues.platformList "Platforms" filters.platform (UpdateFilter << NewPlatformFilter)
+            , filterSelector filterValues.channelList "Channels" filters.channel (UpdateFilter << NewChannelFilter)
+            , filterSelector filterValues.localeList "Locales" filters.locale (UpdateFilter << NewLocaleFilter)
+            , div [ class "btn-group btn-group-justified" ]
+                [ div [ class "btn-group" ]
+                    [ button
+                        [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
+                        [ text "Reset" ]
+                    ]
+                , div [ class "btn-group" ]
+                    [ button
+                        [ class "btn btn-default btn-primary", type_ "submit" ]
+                        [ text "Search" ]
+                    ]
+                ]
+            ]
+        ]
+
+
+settingsView : Settings -> Html Msg
+settingsView { pageSize } =
+    div [ class "panel panel-default" ]
+        [ div [ class "panel-heading" ] [ strong [] [ text "Settings" ] ]
+        , Html.form [ class "panel-body" ]
+            [ let
+                optionView value_ =
+                    option [ value value_, selected (value_ == toString pageSize) ] [ text value_ ]
+              in
+                div [ class "form-group", style [ ( "display", "block" ) ] ]
+                    [ label [] [ text "number of records per page" ]
+                    , select
+                        [ class "form-control"
+                        , onInput NewPageSize
+                        , value <| toString pageSize
+                        ]
+                        (List.map optionView [ "100", "200", "500", "1000" ])
+                    ]
+            ]
+        ]
