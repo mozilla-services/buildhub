@@ -6,42 +6,58 @@ import Json.Encode as Encode
 import Types exposing (..)
 
 
-filterToJsonProperty : String -> String
+filterToJsonProperty : String -> Maybe String
 filterToJsonProperty filter =
     if filter == "product" then
-        "source.product"
+        Just "source.product"
     else if filter == "channel" then
-        "target.channel"
+        Just "target.channel"
     else if filter == "locale" then
-        "target.locale"
+        Just "target.locale"
     else if filter == "version" then
-        "target.version"
+        Just "target.version"
+    else if filter == "platform" then
+        Just "target.platform"
     else
-        "target.platform"
+        Nothing
 
 
-mustClause : Filters -> List ( String, String )
-mustClause { product, channel, locale, version, platform } =
-    [ ( "product", product )
-    , ( "channel", channel )
-    , ( "locale", locale )
-    , ( "version", version )
-    , ( "platform", platform )
-    ]
-        |> List.filter (\( k, v ) -> v /= "all")
-        |> List.map (\( k, v ) -> ( filterToJsonProperty k, v ))
+encodeMustClause : Filters -> Encode.Value
+encodeMustClause { product, channel, locale, version, platform } =
+    let
+        encodeFilter ( name, value ) =
+            Encode.object
+                [ ( "match"
+                  , Encode.object
+                        [ ( name, Encode.string value ) ]
+                  )
+                ]
+
+        refineFilters ( k, v ) acc =
+            case filterToJsonProperty k of
+                Just property ->
+                    if v /= "all" then
+                        ( property, v ) :: acc
+                    else
+                        acc
+
+                Nothing ->
+                    acc
+    in
+        [ ( "product", product )
+        , ( "channel", channel )
+        , ( "locale", locale )
+        , ( "version", version )
+        , ( "platform", platform )
+        ]
+            |> List.foldr refineFilters []
+            |> List.map encodeFilter
+            |> Encode.list
 
 
 encodeQuery : Filters -> Encode.Value
 encodeQuery filters =
     let
-        encodeFilter ( name, value ) =
-            Encode.object
-                [ ( "match"
-                  , Encode.object [ ( name, Encode.string value ) ]
-                  )
-                ]
-
         encodeFacet name property =
             ( name
             , Encode.object
@@ -60,12 +76,7 @@ encodeQuery filters =
               , Encode.object
                     [ ( "bool"
                       , Encode.object
-                            [ ( "must"
-                              , mustClause filters
-                                    |> List.map encodeFilter
-                                    |> Encode.list
-                              )
-                            ]
+                            [ ( "must", encodeMustClause filters ) ]
                       )
                     ]
               )
