@@ -6,49 +6,41 @@ import Json.Encode as Encode
 import Types exposing (..)
 
 
-filterToJsonProperty : String -> Maybe String
+filterToJsonProperty : String -> String
 filterToJsonProperty filter =
-    case filter of
-        "product" ->
-            Just "source.product"
-
-        "channel" ->
-            Just "target.channel"
-
-        "locale" ->
-            Just "target.locale"
-
-        "version" ->
-            Just "target.version"
-
-        "platform" ->
-            Just "target.platform"
-
-        _ ->
-            Nothing
+    if filter == "product" then
+        "source.product"
+    else if filter == "channel" then
+        "target.channel"
+    else if filter == "locale" then
+        "target.locale"
+    else if filter == "version" then
+        "target.version"
+    else
+        "target.platform"
 
 
-getFilterNames : Filters -> List String
-getFilterNames { product, channel, locale, version, platform } =
-    [ product, channel, locale, version, platform ]
-        |> List.filter (\v -> v /= "all")
+mustClause : Filters -> List ( String, String )
+mustClause { product, channel, locale, version, platform } =
+    [ ( "product", product )
+    , ( "channel", channel )
+    , ( "locale", locale )
+    , ( "version", version )
+    , ( "platform", platform )
+    ]
+        |> List.filter (\( k, v ) -> v /= "all")
+        |> List.map (\( k, v ) -> ( filterToJsonProperty k, v ))
 
 
 encodeQuery : Filters -> Encode.Value
 encodeQuery filters =
     let
-        encodeFilter filter =
-            case filterToJsonProperty filter of
-                Just property ->
-                    [ Encode.object
-                        [ ( "match"
-                          , Encode.object [ ( property, Encode.string filter ) ]
-                          )
-                        ]
-                    ]
-
-                Nothing ->
-                    []
+        encodeFilter ( name, value ) =
+            Encode.object
+                [ ( "match"
+                  , Encode.object [ ( name, Encode.string value ) ]
+                  )
+                ]
 
         encodeFacet name property =
             ( name
@@ -69,9 +61,8 @@ encodeQuery filters =
                     [ ( "bool"
                       , Encode.object
                             [ ( "must"
-                              , getFilterNames filters
+                              , mustClause filters
                                     |> List.map encodeFilter
-                                    |> List.concat
                                     |> Encode.list
                               )
                             ]
