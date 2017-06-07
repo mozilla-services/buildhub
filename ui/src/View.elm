@@ -1,12 +1,13 @@
 module View exposing (view)
 
+import Filesize
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Kinto
 import Snippet exposing (snippets)
 import Types exposing (..)
-import Filesize
+import Url exposing (..)
 
 
 view : Model -> Html Msg
@@ -196,7 +197,24 @@ recordView record =
         [ div [ class "panel-heading" ]
             [ div [ class "row" ]
                 [ strong [ class "col-sm-4" ]
-                    [ a [ href <| "./#" ++ record.id ]
+                    [ a
+                        [ let
+                            buildInfo =
+                                Maybe.withDefault (Build "" "") record.build
+
+                            url =
+                                { product = record.source.product
+                                , version = record.target.version
+                                , platform = record.target.platform
+                                , channel = "all"
+                                , locale = record.target.locale
+                                , buildId = buildInfo.id
+                                }
+                                    |> routeFromFilters
+                                    |> urlFromRoute
+                          in
+                            href url
+                        ]
                         [ text <|
                             record.source.product
                                 ++ " "
