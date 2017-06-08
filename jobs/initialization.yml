@@ -9,6 +9,7 @@ build-hub:
           properties:
             id:
               type: "keyword"
+              index: "not_analyzed"
             last_modified:
               type: "long"
             build:
@@ -22,32 +23,41 @@ build-hub:
               properties:
                 product:
                   type: "keyword"
+                  index: "not_analyzed"
                 repository:
                   type: "keyword"
+                  index: "not_analyzed"
                 tree:
                   type: "keyword"
+                  index: "not_analyzed"
                 revision:
                   type: "keyword"
             target:
               properties:
                 platform:
                   type: "keyword"
+                  index: "not_analyzed"
                 locale:
                   type: "keyword"
+                  index: "not_analyzed"
                 version:
                   type: "keyword"
+                  index: "not_analyzed"
                 channel:
                   type: "keyword"
+                  index: "not_analyzed"
             download:
               properties:
                 url:
                   type: "keyword"
                 mimetype:
                   type: "keyword"
+                  index: "not_analyzed"
                 size:
                   type: "long"
                 date:
                   type: "date"
+                  format: "date"
         displayFields:
           - id
           - source.product
