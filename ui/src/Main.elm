@@ -1,6 +1,5 @@
 module Main exposing (..)
 
-import Kinto
 import Model exposing (..)
 import Navigation exposing (..)
 import Types exposing (..)
@@ -47,16 +46,11 @@ updateFilters newFilter filters =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ filters, filterValues, settings } as model) =
     case msg of
-        BuildRecordsFetched (Ok buildsPager) ->
-            { model
-                | buildsPager = buildsPager
-                , loading = False
-                , error = Nothing
-            }
-                ! [ getFilterFacets filters settings.pageSize 1 ]
+        FacetsReceived (Ok facets) ->
+            { model | facets = Just facets } ! []
 
-        BuildRecordsFetched (Err err) ->
-            { model | error = Just (toString err), loading = False } ! []
+        FacetsReceived (Err error) ->
+            { model | error = Just (toString error) } ! []
 
         LoadNextPage ->
             { model | page = model.page + 1 }
@@ -66,37 +60,13 @@ update msg ({ filters, filterValues, settings } as model) =
             { model | page = model.page - 1 }
                 ! [ getFilterFacets filters settings.pageSize (model.page - 1) ]
 
-        BuildRecordsNextPageFetched (Ok buildsPager) ->
-            { model
-                | buildsPager = Kinto.updatePager buildsPager model.buildsPager
-                , loading = False
-                , error = Nothing
-            }
-                ! [ getFilterFacets filters settings.pageSize 1 ]
-
-        BuildRecordsNextPageFetched (Err err) ->
-            { model | error = Just (toString err), loading = False } ! []
-
-        FacetsReceived (Ok facets) ->
-            { model | facets = Just facets } ! []
-
-        FacetsReceived (Err error) ->
-            { model | error = Just (toString error) } ! []
-
         UpdateFilter newFilter ->
             let
                 updatedFilters =
                     updateFilters newFilter filters
             in
-                { model | filters = updatedFilters } ! [ getFilterFacets updatedFilters settings.pageSize 1 ]
-
-        SubmitFilters ->
-            let
-                route =
-                    routeFromFilters filters
-            in
-                { model | route = route, loading = True, error = Nothing }
-                    ! [ getFilterFacets filters settings.pageSize 1, newUrl <| urlFromRoute route ]
+                { model | filters = updatedFilters, page = 1 }
+                    ! [ getFilterFacets updatedFilters settings.pageSize 1 ]
 
         UrlChange location ->
             let
@@ -104,7 +74,8 @@ update msg ({ filters, filterValues, settings } as model) =
                     routeFromUrl model location
             in
                 { updatedModel | loading = True, error = Nothing }
-                    ! [ getBuildRecordList updatedModel ]
+                    -- FIXME: load facets here
+                    ! []
 
         DismissError ->
             { model | error = Nothing } ! []
@@ -120,4 +91,5 @@ update msg ({ filters, filterValues, settings } as model) =
                 updatedModel =
                     { model | settings = updatedSettings, loading = True }
             in
-                updatedModel ! [ getBuildRecordList updatedModel ]
+                -- FIXME: relad facets with new pageSize
+                updatedModel ! []

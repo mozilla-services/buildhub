@@ -23,7 +23,7 @@ view model =
 
 
 mainView : Model -> Html Msg
-mainView { loading, settings, error, buildsPager, facets, page, filters, filterValues } =
+mainView { loading, settings, error, facets, page, filters, filterValues } =
     div [ class "row" ]
         [ div [ class "col-sm-9" ]
             [ errorView error
@@ -144,6 +144,12 @@ paginationView { total, hits } pageSize page =
     let
         nbBuilds =
             List.length hits
+
+        index =
+            (page - 1) * pageSize
+
+        ( chunkStart, chunkStop ) =
+            ( index + 1, index + nbBuilds )
     in
         div [ class "well" ]
             [ div [ class "row" ]
@@ -152,16 +158,19 @@ paginationView { total, hits } pageSize page =
                         "Page "
                             ++ (toString page)
                             ++ ": "
-                            ++ (toString nbBuilds)
-                            ++ " build"
+                            ++ "result"
                             ++ (if nbBuilds == 1 then
                                     ""
                                 else
                                     "s"
                                )
-                            ++ " displayed ("
+                            ++ " "
+                            ++ (toString chunkStart)
+                            ++ ".."
+                            ++ (toString chunkStop)
+                            ++ " of "
                             ++ toString total
-                            ++ " total)."
+                            ++ "."
                     ]
                 , div [ class "col-sm-3 text-right" ]
                     [ div [ class "btn-group" ]
@@ -174,6 +183,7 @@ paginationView { total, hits } pageSize page =
                         , button
                             [ class "btn btn-default"
                             , onClick LoadNextPage
+                            , disabled <| chunkStop + pageSize >= total
                             ]
                             [ text "Next" ]
                         ]
@@ -448,6 +458,13 @@ filtersView facets filters filterValues =
                         , facetSelector "Platforms" facets.total filters.platform (UpdateFilter << NewPlatformFilter) facets.platform_filters
                         , facetSelector "Channels" facets.total filters.channel (UpdateFilter << NewChannelFilter) facets.channel_filters
                         , facetSelector "Locales" facets.total filters.locale (UpdateFilter << NewLocaleFilter) facets.locale_filters
+                        , div [ class "btn-group btn-group-justified" ]
+                            [ div [ class "btn-group" ]
+                                [ button
+                                    [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
+                                    [ text "Reset" ]
+                                ]
+                            ]
                         ]
 
                 Nothing ->

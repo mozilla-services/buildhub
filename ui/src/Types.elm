@@ -1,13 +1,11 @@
 module Types exposing (..)
 
 import Http
-import Kinto
 import Navigation exposing (..)
 
 
 type alias Model =
-    { buildsPager : Kinto.Pager BuildRecord
-    , filters : Filters
+    { filters : Filters
     , filterValues : FilterValues
     , facets : Maybe Facets
     , page : Int
@@ -156,13 +154,10 @@ type Route
 
 
 type Msg
-    = BuildRecordsFetched (Result Kinto.Error (Kinto.Pager BuildRecord))
-    | FacetsReceived (Result Http.Error Facets)
+    = FacetsReceived (Result Http.Error Facets)
     | LoadNextPage
     | LoadPreviousPage
-    | BuildRecordsNextPageFetched (Result Kinto.Error (Kinto.Pager BuildRecord))
     | UpdateFilter NewFilter
     | UrlChange Location
-    | SubmitFilters
     | DismissError
     | NewPageSize String
