@@ -38,10 +38,7 @@ init location =
         updatedModel =
             routeFromUrl defaultModel location
     in
-        updatedModel
-            ! [ getFilterFacets initFilters
-              , getBuildRecordList updatedModel
-              ]
+        updatedModel ! [ getFilterFacets initFilters ]
 
 
 initFilters : Filters
@@ -61,7 +58,7 @@ getFilterFacets filters =
         searchEndpoint =
             kintoServer ++ "buckets/build-hub/collections/releases/search"
     in
-        ElasticSearch.getFilters searchEndpoint filters
+        ElasticSearch.getFacets searchEndpoint filters
             |> Http.send FacetsReceived
 
 

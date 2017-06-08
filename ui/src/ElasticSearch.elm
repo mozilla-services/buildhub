@@ -1,6 +1,7 @@
 module ElasticSearch exposing (..)
 
 import Http
+import Decoder exposing (buildRecordDecoder)
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Types exposing (..)
@@ -77,7 +78,7 @@ encodeQuery filters =
             )
     in
         Encode.object
-            [ ( "size", Encode.int 0 )
+            [ ( "size", Encode.int 10 )
             , ( "query"
               , Encode.object
                     [ ( "bool"
@@ -105,6 +106,11 @@ decodeFacet =
         (Decode.field "key" Decode.string)
 
 
+decodeBuildRecordHit : Decode.Decoder BuildRecord
+decodeBuildRecordHit =
+    Decode.at [ "_source" ] buildRecordDecoder
+
+
 decodeResponse : Decode.Decoder Facets
 decodeResponse =
     let
@@ -112,7 +118,8 @@ decodeResponse =
             Decode.list decodeFacet
                 |> Decode.at [ "aggregations", name, "buckets" ]
     in
-        Decode.map6 Facets
+        Decode.map7 Facets
+            (Decode.at [ "hits", "hits" ] (Decode.list decodeBuildRecordHit))
             (Decode.at [ "hits", "total" ] Decode.int)
             (decodeFilter "product_filters")
             (decodeFilter "version_filters")
@@ -121,6 +128,6 @@ decodeResponse =
             (decodeFilter "locale_filters")
 
 
-getFilters : String -> Filters -> Http.Request Facets
-getFilters endpoint filters =
+getFacets : String -> Filters -> Http.Request Facets
+getFacets endpoint filters =
     Http.post endpoint (Http.jsonBody (encodeQuery filters)) decodeResponse

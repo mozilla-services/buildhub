@@ -27,15 +27,16 @@ mainView : Model -> Html Msg
 mainView { loading, settings, error, buildsPager, facets, filters, filterValues } =
     div [ class "row" ]
         [ div [ class "col-sm-9" ]
-            (if loading then
-                [ spinner ]
-             else
-                [ errorView error
-                , numBuilds buildsPager
-                , div [] <| List.map recordView buildsPager.objects
-                , nextPageBtn settings.pageSize (List.length buildsPager.objects) buildsPager.total
-                ]
-            )
+            [ errorView error
+            , numBuilds buildsPager
+            , case facets of
+                Just facets ->
+                    div [] <| List.map recordView facets.hits
+
+                Nothing ->
+                    spinner
+            , nextPageBtn settings.pageSize (List.length buildsPager.objects) buildsPager.total
+            ]
         , div [ class "col-sm-3" ]
             [ filtersView facets filters filterValues
             , settingsView settings

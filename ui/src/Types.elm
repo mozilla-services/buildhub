@@ -22,7 +22,8 @@ type alias Facet =
 
 
 type alias Facets =
-    { total : Int
+    { hits : List BuildRecord
+    , total : Int
     , product_filters : List Facet
     , version_filters : List Facet
     , channel_filters : List Facet
