@@ -23,28 +23,34 @@ filterToJsonProperty filter =
 
 
 encodeMustClause : Filters -> Encode.Value
-encodeMustClause { product, channel, locale, version, platform } =
+encodeMustClause { product, channel, locale, version, platform, buildId } =
     let
         encodeFilter ( name, value ) =
             Encode.object
-                [ ( "match"
-                  , Encode.object
-                        [ ( name, Encode.string value ) ]
+                [ ( if name == "build.id" then
+                        "prefix"
+                    else
+                        "match"
+                  , Encode.object [ ( name, Encode.string value ) ]
                   )
                 ]
 
         refineFilters ( k, v ) acc =
-            case filterToJsonProperty k of
-                Just property ->
-                    if v /= "all" then
-                        ( property, v ) :: acc
-                    else
-                        acc
+            if k == "buildId" && v /= "" then
+                ( "build.id", v ) :: acc
+            else
+                case filterToJsonProperty k of
+                    Just property ->
+                        if v /= "all" then
+                            ( property, v ) :: acc
+                        else
+                            acc
 
-                Nothing ->
-                    acc
+                    Nothing ->
+                        acc
     in
-        [ ( "product", product )
+        [ ( "buildId", buildId )
+        , ( "product", product )
         , ( "channel", channel )
         , ( "locale", locale )
         , ( "version", version )
