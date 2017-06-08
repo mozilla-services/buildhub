@@ -19,7 +19,6 @@ build-hub:
                 date:
                   type: "date"
                   format: "date"
-                  index: "not_analyzed"
             source:
               properties:
                 product:
@@ -33,7 +32,6 @@ build-hub:
                   index: "not_analyzed"
                 revision:
                   type: "keyword"
-                  index: "not_analyzed"
             target:
               properties:
                 platform:
@@ -52,7 +50,6 @@ build-hub:
               properties:
                 url:
                   type: "keyword"
-                  index: "not_analyzed"
                 mimetype:
                   type: "keyword"
                   index: "not_analyzed"
@@ -60,7 +57,7 @@ build-hub:
                   type: "long"
                 date:
                   type: "date"
-                  index: "not_analyzed"
+                  format: "date"
         displayFields:
           - id
           - source.product
