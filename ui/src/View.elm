@@ -4,7 +4,6 @@ import Filesize
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Kinto
 import Snippet exposing (snippets)
 import Types exposing (..)
 import Url exposing (..)
@@ -24,18 +23,20 @@ view model =
 
 
 mainView : Model -> Html Msg
-mainView { loading, settings, error, buildsPager, facets, filters, filterValues } =
+mainView { loading, settings, error, buildsPager, facets, page, filters, filterValues } =
     div [ class "row" ]
         [ div [ class "col-sm-9" ]
             [ errorView error
-            , numBuilds buildsPager
             , case facets of
                 Just facets ->
-                    div [] <| List.map recordView facets.hits
+                    div []
+                        [ paginationView facets settings.pageSize page
+                        , div [] <| List.map recordView facets.hits
+                        , paginationView facets settings.pageSize page
+                        ]
 
                 Nothing ->
                     spinner
-            , nextPageBtn settings.pageSize (List.length buildsPager.objects) buildsPager.total
             ]
         , div [ class "col-sm-3" ]
             [ filtersView facets filters filterValues
@@ -138,24 +139,46 @@ errorView err =
             div [] []
 
 
-numBuilds : Kinto.Pager BuildRecord -> Html Msg
-numBuilds pager =
+paginationView : Facets -> Int -> Int -> Html Msg
+paginationView { total, hits } pageSize page =
     let
         nbBuilds =
-            List.length pager.objects
+            List.length hits
     in
-        p [ class "well" ] <|
-            [ text <|
-                (toString nbBuilds)
-                    ++ " build"
-                    ++ (if nbBuilds == 1 then
-                            ""
-                        else
-                            "s"
-                       )
-                    ++ " displayed ("
-                    ++ toString pager.total
-                    ++ " total)."
+        div [ class "well" ]
+            [ div [ class "row" ]
+                [ p [ class "col-sm-9" ] <|
+                    [ text <|
+                        "Page "
+                            ++ (toString page)
+                            ++ ": "
+                            ++ (toString nbBuilds)
+                            ++ " build"
+                            ++ (if nbBuilds == 1 then
+                                    ""
+                                else
+                                    "s"
+                               )
+                            ++ " displayed ("
+                            ++ toString total
+                            ++ " total)."
+                    ]
+                , div [ class "col-sm-3 text-right" ]
+                    [ div [ class "btn-group" ]
+                        [ button
+                            [ class "btn btn-default"
+                            , onClick LoadPreviousPage
+                            , disabled (page == 1)
+                            ]
+                            [ text "Previous" ]
+                        , button
+                            [ class "btn btn-default"
+                            , onClick LoadNextPage
+                            ]
+                            [ text "Next" ]
+                        ]
+                    ]
+                ]
             ]
 
 
@@ -411,35 +434,16 @@ spinner =
     div [ class "loader" ] []
 
 
-nextPageBtn : Int -> Int -> Int -> Html Msg
-nextPageBtn pageSize displayed total =
-    if displayed < total then
-        button
-            [ class "btn btn-default"
-            , style [ ( "width", "100%" ) ]
-            , onClick LoadNextPage
-            ]
-            [ text <|
-                "Load "
-                    ++ (toString pageSize)
-                    ++ " more ("
-                    ++ (toString <| total - displayed)
-                    ++ " left)"
-            ]
-    else
-        div [] []
-
-
 filtersView : Maybe Facets -> Filters -> FilterValues -> Html Msg
 filtersView facets filters filterValues =
     div [ class "panel panel-default" ]
         [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
-        , Html.form [ class "panel-body", onSubmit <| SubmitFilters ]
-            [ buildIdSearchForm filters.buildId
-            , case facets of
+        , div [ class "panel-body" ]
+            [ case facets of
                 Just facets ->
                     div []
-                        [ facetSelector "Products" facets.total filters.product (UpdateFilter << NewProductFilter) facets.product_filters
+                        [ buildIdSearchForm filters.buildId
+                        , facetSelector "Products" facets.total filters.product (UpdateFilter << NewProductFilter) facets.product_filters
                         , facetSelector "Versions" facets.total filters.version (UpdateFilter << NewVersionFilter) facets.version_filters
                         , facetSelector "Platforms" facets.total filters.platform (UpdateFilter << NewPlatformFilter) facets.platform_filters
                         , facetSelector "Channels" facets.total filters.channel (UpdateFilter << NewChannelFilter) facets.channel_filters
@@ -448,18 +452,6 @@ filtersView facets filters filterValues =
 
                 Nothing ->
                     text ""
-            , div [ class "btn-group btn-group-justified" ]
-                [ div [ class "btn-group" ]
-                    [ button
-                        [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
-                        [ text "Reset" ]
-                    ]
-                , div [ class "btn-group" ]
-                    [ button
-                        [ class "btn btn-default btn-primary", type_ "submit" ]
-                        [ text "Search" ]
-                    ]
-                ]
             ]
         ]
 

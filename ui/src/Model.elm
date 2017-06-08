@@ -24,21 +24,25 @@ kintoServer =
 init : Location -> ( Model, Cmd Msg )
 init location =
     let
+        defaultSettings =
+            { pageSize = 100 }
+
         defaultModel =
             { buildsPager = Kinto.emptyPager client buildRecordResource
             , filterValues = FilterValues [] [] [] [] []
             , filters = initFilters
             , facets = Nothing
+            , page = 1
             , loading = True
             , route = MainView
             , error = Nothing
-            , settings = { pageSize = 100 }
+            , settings = defaultSettings
             }
 
         updatedModel =
             routeFromUrl defaultModel location
     in
-        updatedModel ! [ getFilterFacets initFilters ]
+        updatedModel ! [ getFilterFacets initFilters defaultSettings.pageSize 1 ]
 
 
 initFilters : Filters
@@ -52,13 +56,13 @@ initFilters =
     }
 
 
-getFilterFacets : Filters -> Cmd Msg
-getFilterFacets filters =
+getFilterFacets : Filters -> Int -> Int -> Cmd Msg
+getFilterFacets filters pageSize page =
     let
         searchEndpoint =
             kintoServer ++ "buckets/build-hub/collections/releases/search"
     in
-        ElasticSearch.getFacets searchEndpoint filters
+        ElasticSearch.getFacets searchEndpoint filters pageSize page
             |> Http.send FacetsReceived
 
 

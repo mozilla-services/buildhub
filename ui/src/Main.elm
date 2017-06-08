@@ -45,7 +45,7 @@ updateFilters newFilter filters =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ({ filters, filterValues } as model) =
+update msg ({ filters, filterValues, settings } as model) =
     case msg of
         BuildRecordsFetched (Ok buildsPager) ->
             { model
@@ -53,13 +53,18 @@ update msg ({ filters, filterValues } as model) =
                 , loading = False
                 , error = Nothing
             }
-                ! [ getFilterFacets model.filters ]
+                ! [ getFilterFacets filters settings.pageSize 1 ]
 
         BuildRecordsFetched (Err err) ->
             { model | error = Just (toString err), loading = False } ! []
 
         LoadNextPage ->
-            model ! [ getNextBuilds model.buildsPager ]
+            { model | page = model.page + 1 }
+                ! [ getFilterFacets filters settings.pageSize (model.page + 1) ]
+
+        LoadPreviousPage ->
+            { model | page = model.page - 1 }
+                ! [ getFilterFacets filters settings.pageSize (model.page - 1) ]
 
         BuildRecordsNextPageFetched (Ok buildsPager) ->
             { model
@@ -67,7 +72,7 @@ update msg ({ filters, filterValues } as model) =
                 , loading = False
                 , error = Nothing
             }
-                ! [ getFilterFacets model.filters ]
+                ! [ getFilterFacets filters settings.pageSize 1 ]
 
         BuildRecordsNextPageFetched (Err err) ->
             { model | error = Just (toString err), loading = False } ! []
@@ -83,7 +88,7 @@ update msg ({ filters, filterValues } as model) =
                 updatedFilters =
                     updateFilters newFilter filters
             in
-                { model | filters = updatedFilters } ! [ getFilterFacets updatedFilters ]
+                { model | filters = updatedFilters } ! [ getFilterFacets updatedFilters settings.pageSize 1 ]
 
         SubmitFilters ->
             let
@@ -91,7 +96,7 @@ update msg ({ filters, filterValues } as model) =
                     routeFromFilters filters
             in
                 { model | route = route, loading = True, error = Nothing }
-                    ! [ getFilterFacets model.filters, newUrl <| urlFromRoute route ]
+                    ! [ getFilterFacets filters settings.pageSize 1, newUrl <| urlFromRoute route ]
 
         UrlChange location ->
             let

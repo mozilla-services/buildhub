@@ -62,8 +62,8 @@ encodeMustClause { product, channel, locale, version, platform, buildId } =
             |> Encode.list
 
 
-encodeQuery : Filters -> Encode.Value
-encodeQuery filters =
+encodeQuery : Filters -> Int -> Int -> Encode.Value
+encodeQuery filters size page =
     let
         encodeFacet name property =
             ( name
@@ -78,7 +78,8 @@ encodeQuery filters =
             )
     in
         Encode.object
-            [ ( "size", Encode.int 10 )
+            [ ( "size", Encode.int size )
+            , ( "from", Encode.int <| (page - 1) * size )
             , ( "query"
               , Encode.object
                     [ ( "bool"
@@ -128,6 +129,6 @@ decodeResponse =
             (decodeFilter "locale_filters")
 
 
-getFacets : String -> Filters -> Http.Request Facets
-getFacets endpoint filters =
-    Http.post endpoint (Http.jsonBody (encodeQuery filters)) decodeResponse
+getFacets : String -> Filters -> Int -> Int -> Http.Request Facets
+getFacets endpoint filters size page =
+    Http.post endpoint (Http.jsonBody (encodeQuery filters size page)) decodeResponse

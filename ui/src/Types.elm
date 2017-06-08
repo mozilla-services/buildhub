@@ -10,6 +10,7 @@ type alias Model =
     , filters : Filters
     , filterValues : FilterValues
     , facets : Maybe Facets
+    , page : Int
     , loading : Bool
     , route : Route
     , error : Maybe String
@@ -158,6 +159,7 @@ type Msg
     = BuildRecordsFetched (Result Kinto.Error (Kinto.Pager BuildRecord))
     | FacetsReceived (Result Http.Error Facets)
     | LoadNextPage
+    | LoadPreviousPage
     | BuildRecordsNextPageFetched (Result Kinto.Error (Kinto.Pager BuildRecord))
     | UpdateFilter NewFilter
     | UrlChange Location
