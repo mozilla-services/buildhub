@@ -63,7 +63,7 @@ encodeMustClause { product, channel, locale, version, platform, buildId } =
 
 
 encodeQuery : Filters -> Int -> Int -> Encode.Value
-encodeQuery filters size page =
+encodeQuery filters pageSize page =
     let
         encodeFacet name property =
             ( name
@@ -78,8 +78,8 @@ encodeQuery filters size page =
             )
     in
         Encode.object
-            [ ( "size", Encode.int size )
-            , ( "from", Encode.int <| (page - 1) * size )
+            [ ( "size", Encode.int pageSize )
+            , ( "from", Encode.int <| (page - 1) * pageSize )
             , ( "query"
               , Encode.object
                     [ ( "bool"

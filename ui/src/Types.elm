@@ -9,7 +9,6 @@ type alias Model =
     , filterValues : FilterValues
     , facets : Maybe Facets
     , page : Int
-    , loading : Bool
     , route : Route
     , error : Maybe String
     , settings : Settings

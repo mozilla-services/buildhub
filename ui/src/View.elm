@@ -23,7 +23,7 @@ view model =
 
 
 mainView : Model -> Html Msg
-mainView { loading, settings, error, facets, page, filters, filterValues } =
+mainView { settings, error, facets, page, filters, filterValues } =
     div [ class "row" ]
         [ div [ class "col-sm-9" ]
             [ errorView error
@@ -39,7 +39,12 @@ mainView { loading, settings, error, facets, page, filters, filterValues } =
                     spinner
             ]
         , div [ class "col-sm-3" ]
-            [ filtersView facets filters filterValues
+            [ case facets of
+                Just facets ->
+                    filtersView facets filters filterValues
+
+                Nothing ->
+                    text ""
             , settingsView settings
             ]
         ]
@@ -183,7 +188,7 @@ paginationView { total, hits } pageSize page =
                         , button
                             [ class "btn btn-default"
                             , onClick LoadNextPage
-                            , disabled <| chunkStop + pageSize >= total
+                            , disabled <| page == ceiling ((toFloat total) / (toFloat pageSize))
                             ]
                             [ text "Next" ]
                         ]
@@ -444,31 +449,26 @@ spinner =
     div [ class "loader" ] []
 
 
-filtersView : Maybe Facets -> Filters -> FilterValues -> Html Msg
+filtersView : Facets -> Filters -> FilterValues -> Html Msg
 filtersView facets filters filterValues =
     div [ class "panel panel-default" ]
         [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
         , div [ class "panel-body" ]
-            [ case facets of
-                Just facets ->
-                    div []
-                        [ buildIdSearchForm filters.buildId
-                        , facetSelector "Products" facets.total filters.product (UpdateFilter << NewProductFilter) facets.product_filters
-                        , facetSelector "Versions" facets.total filters.version (UpdateFilter << NewVersionFilter) facets.version_filters
-                        , facetSelector "Platforms" facets.total filters.platform (UpdateFilter << NewPlatformFilter) facets.platform_filters
-                        , facetSelector "Channels" facets.total filters.channel (UpdateFilter << NewChannelFilter) facets.channel_filters
-                        , facetSelector "Locales" facets.total filters.locale (UpdateFilter << NewLocaleFilter) facets.locale_filters
-                        , div [ class "btn-group btn-group-justified" ]
-                            [ div [ class "btn-group" ]
-                                [ button
-                                    [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
-                                    [ text "Reset" ]
-                                ]
-                            ]
+            [ div []
+                [ buildIdSearchForm filters.buildId
+                , facetSelector "Products" facets.total filters.product (UpdateFilter << NewProductFilter) facets.product_filters
+                , facetSelector "Versions" facets.total filters.version (UpdateFilter << NewVersionFilter) facets.version_filters
+                , facetSelector "Platforms" facets.total filters.platform (UpdateFilter << NewPlatformFilter) facets.platform_filters
+                , facetSelector "Channels" facets.total filters.channel (UpdateFilter << NewChannelFilter) facets.channel_filters
+                , facetSelector "Locales" facets.total filters.locale (UpdateFilter << NewLocaleFilter) facets.locale_filters
+                , div [ class "btn-group btn-group-justified" ]
+                    [ div [ class "btn-group" ]
+                        [ button
+                            [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
+                            [ text "Reset" ]
                         ]
-
-                Nothing ->
-                    text ""
+                    ]
+                ]
             ]
         ]
 

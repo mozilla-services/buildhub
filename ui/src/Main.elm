@@ -73,7 +73,7 @@ update msg ({ filters, filterValues, settings } as model) =
                 updatedModel =
                     routeFromUrl model location
             in
-                { updatedModel | loading = True, error = Nothing }
+                { updatedModel | error = Nothing }
                     -- FIXME: load facets here
                     ! []
 
@@ -89,7 +89,7 @@ update msg ({ filters, filterValues, settings } as model) =
                     { modelSettings | pageSize = Result.withDefault 100 <| String.toInt sizeStr }
 
                 updatedModel =
-                    { model | settings = updatedSettings, loading = True }
+                    { model | settings = updatedSettings }
             in
                 -- FIXME: relad facets with new pageSize
                 updatedModel ! []

@@ -28,7 +28,6 @@ init location =
             , filters = initFilters
             , facets = Nothing
             , page = 1
-            , loading = True
             , route = MainView
             , error = Nothing
             , settings = defaultSettings
