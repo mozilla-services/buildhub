@@ -90,11 +90,11 @@ encodeQuery filters pageSize page =
               )
             , ( "aggregations"
               , Encode.object
-                    [ encodeFacet "product_filters" "source.product"
-                    , encodeFacet "channel_filters" "target.channel"
-                    , encodeFacet "platform_filters" "target.platform"
-                    , encodeFacet "version_filters" "target.version"
-                    , encodeFacet "locale_filters" "target.locale"
+                    [ encodeFacet "products" "source.product"
+                    , encodeFacet "channels" "target.channel"
+                    , encodeFacet "platforms" "target.platform"
+                    , encodeFacet "versions" "target.version"
+                    , encodeFacet "locales" "target.locale"
                     ]
               )
             ]
@@ -122,11 +122,11 @@ decodeResponse =
         Decode.map7 Facets
             (Decode.at [ "hits", "hits" ] (Decode.list decodeBuildRecordHit))
             (Decode.at [ "hits", "total" ] Decode.int)
-            (decodeFilter "product_filters")
-            (decodeFilter "version_filters")
-            (decodeFilter "channel_filters")
-            (decodeFilter "platform_filters")
-            (decodeFilter "locale_filters")
+            (decodeFilter "products")
+            (decodeFilter "versions")
+            (decodeFilter "channels")
+            (decodeFilter "platforms")
+            (decodeFilter "locales")
 
 
 getFacets : String -> Filters -> Int -> Int -> Http.Request Facets

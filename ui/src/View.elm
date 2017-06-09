@@ -217,12 +217,7 @@ facetSelector title total selectedValue handler facet =
     let
         optionView entry =
             option [ value entry.value, selected (entry.value == selectedValue) ]
-                [ text <|
-                    entry.value
-                        ++ " ("
-                        ++ (toString entry.count)
-                        ++ ")"
-                ]
+                [ text <| entry.value ++ " (" ++ (toString entry.count) ++ ")" ]
     in
         div [ class "form-group", style [ ( "display", "block" ) ] ]
             [ label [] [ text title ]
@@ -451,26 +446,33 @@ spinner =
 
 filtersView : Facets -> Filters -> Html Msg
 filtersView facets filters =
-    div [ class "panel panel-default" ]
-        [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
-        , div [ class "panel-body" ]
-            [ div []
-                [ buildIdSearchForm filters.buildId
-                , facetSelector "Products" facets.total filters.product (UpdateFilter << NewProductFilter) facets.product_filters
-                , facetSelector "Versions" facets.total filters.version (UpdateFilter << NewVersionFilter) facets.version_filters
-                , facetSelector "Platforms" facets.total filters.platform (UpdateFilter << NewPlatformFilter) facets.platform_filters
-                , facetSelector "Channels" facets.total filters.channel (UpdateFilter << NewChannelFilter) facets.channel_filters
-                , facetSelector "Locales" facets.total filters.locale (UpdateFilter << NewLocaleFilter) facets.locale_filters
-                , div [ class "btn-group btn-group-justified" ]
-                    [ div [ class "btn-group" ]
-                        [ button
-                            [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
-                            [ text "Reset" ]
+    let
+        { total, products, versions, platforms, channels, locales } =
+            facets
+
+        { buildId, product, version, platform, channel, locale } =
+            filters
+    in
+        div [ class "panel panel-default" ]
+            [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
+            , div [ class "panel-body" ]
+                [ div []
+                    [ buildIdSearchForm buildId
+                    , facetSelector "Products" total product (UpdateFilter << NewProductFilter) products
+                    , facetSelector "Versions" total version (UpdateFilter << NewVersionFilter) versions
+                    , facetSelector "Platforms" total platform (UpdateFilter << NewPlatformFilter) platforms
+                    , facetSelector "Channels" total channel (UpdateFilter << NewChannelFilter) channels
+                    , facetSelector "Locales" total locale (UpdateFilter << NewLocaleFilter) locales
+                    , div [ class "btn-group btn-group-justified" ]
+                        [ div [ class "btn-group" ]
+                            [ button
+                                [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
+                                [ text "Reset" ]
+                            ]
                         ]
                     ]
                 ]
             ]
-        ]
 
 
 settingsView : Settings -> Html Msg
