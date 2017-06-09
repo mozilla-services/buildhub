@@ -132,3 +132,28 @@ decodeResponse =
 getFacets : String -> Filters -> Int -> Int -> Http.Request Facets
 getFacets endpoint filters size page =
     Http.post endpoint (Http.jsonBody (encodeQuery filters size page)) decodeResponse
+
+
+processFacets : Facets -> Facets
+processFacets ({ versions } as facets) =
+    let
+        toVersionParts { value, count } =
+            value
+                |> String.split "."
+                |> (\parts ->
+                        case parts of
+                            major :: _ ->
+                                ( Result.withDefault 0 <| String.toInt major, Facet count value )
+
+                            _ ->
+                                ( 0, Facet count value )
+                   )
+
+        orderedVersions =
+            versions
+                |> List.map toVersionParts
+                |> List.sortBy (\( major, _ ) -> major)
+                |> List.map (\( _, facet ) -> facet)
+                |> List.reverse
+    in
+        { facets | versions = orderedVersions }

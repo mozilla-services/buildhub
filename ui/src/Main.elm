@@ -1,5 +1,6 @@
 module Main exposing (..)
 
+import ElasticSearch
 import Model exposing (..)
 import Navigation exposing (..)
 import Types exposing (..)
@@ -47,7 +48,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ filters, settings } as model) =
     case msg of
         FacetsReceived (Ok facets) ->
-            { model | facets = Just facets } ! []
+            { model | facets = Just <| ElasticSearch.processFacets facets } ! []
 
         FacetsReceived (Err error) ->
             { model | error = Just (toString error) } ! []
