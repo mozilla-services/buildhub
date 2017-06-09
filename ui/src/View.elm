@@ -23,7 +23,7 @@ view model =
 
 
 mainView : Model -> Html Msg
-mainView { settings, error, facets, page, filters, filterValues } =
+mainView { settings, error, facets, page, filters } =
     div [ class "row" ]
         [ div [ class "col-sm-9" ]
             [ errorView error
@@ -41,7 +41,7 @@ mainView { settings, error, facets, page, filters, filterValues } =
         , div [ class "col-sm-3" ]
             [ case facets of
                 Just facets ->
-                    filtersView facets filters filterValues
+                    filtersView facets filters
 
                 Nothing ->
                     text ""
@@ -449,8 +449,8 @@ spinner =
     div [ class "loader" ] []
 
 
-filtersView : Facets -> Filters -> FilterValues -> Html Msg
-filtersView facets filters filterValues =
+filtersView : Facets -> Filters -> Html Msg
+filtersView facets filters =
     div [ class "panel panel-default" ]
         [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
         , div [ class "panel-body" ]

@@ -44,7 +44,7 @@ updateFilters newFilter filters =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ({ filters, filterValues, settings } as model) =
+update msg ({ filters, settings } as model) =
     case msg of
         FacetsReceived (Ok facets) ->
             { model | facets = Just facets } ! []

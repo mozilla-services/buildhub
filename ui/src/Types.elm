@@ -6,7 +6,6 @@ import Navigation exposing (..)
 
 type alias Model =
     { filters : Filters
-    , filterValues : FilterValues
     , facets : Maybe Facets
     , page : Int
     , route : Route
@@ -41,15 +40,6 @@ type alias Filters =
     , channel : String
     , locale : String
     , buildId : String
-    }
-
-
-type alias FilterValues =
-    { productList : List String
-    , channelList : List String
-    , platformList : List String
-    , versionList : List String
-    , localeList : List String
     }
 
 

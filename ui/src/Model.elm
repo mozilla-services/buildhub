@@ -24,8 +24,7 @@ init location =
             { pageSize = 100 }
 
         defaultModel =
-            { filterValues = FilterValues [] [] [] [] []
-            , filters = initFilters
+            { filters = initFilters
             , facets = Nothing
             , page = 1
             , route = MainView
