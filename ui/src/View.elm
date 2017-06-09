@@ -467,7 +467,7 @@ filtersView facets filters =
                         [ div [ class "btn-group" ]
                             [ button
                                 [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
-                                [ text "Reset" ]
+                                [ text "Reset all filters" ]
                             ]
                         ]
                     ]
