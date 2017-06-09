@@ -1,34 +1,31 @@
-module Types
-    exposing
-        ( Build
-        , BuildRecord
-        , FilterRecord
-        , Route(..)
-        , Download
-        , Filters
-        , FilterValues
-        , Model
-        , Msg(..)
-        , NewFilter(..)
-        , Settings
-        , Snippet
-        , Source
-        , SystemAddon
-        , Target
-        )
+module Types exposing (..)
 
-import Kinto
+import Http
 import Navigation exposing (..)
 
 
 type alias Model =
-    { buildsPager : Kinto.Pager BuildRecord
-    , filters : Filters
-    , filterValues : FilterValues
-    , loading : Bool
+    { filters : Filters
+    , facets : Maybe Facets
+    , page : Int
     , route : Route
-    , error : Maybe Kinto.Error
+    , error : Maybe String
     , settings : Settings
+    }
+
+
+type alias Facet =
+    { count : Int, value : String }
+
+
+type alias Facets =
+    { hits : List BuildRecord
+    , total : Int
+    , products : List Facet
+    , versions : List Facet
+    , channels : List Facet
+    , platforms : List Facet
+    , locales : List Facet
     }
 
 
@@ -44,19 +41,6 @@ type alias Filters =
     , locale : String
     , buildId : String
     }
-
-
-type alias FilterValues =
-    { productList : List String
-    , channelList : List String
-    , platformList : List String
-    , versionList : List String
-    , localeList : List String
-    }
-
-
-type alias FilterRecord =
-    { id : String, name : String }
 
 
 type alias BuildRecord =
@@ -152,19 +136,21 @@ type alias Locale =
     String
 
 
+type alias Page =
+    Int
+
+
 type Route
     = MainView
-    | FilteredView Product Channel Platform Version Locale BuildId
+    | FilteredView Product Channel Platform Version Locale BuildId Page
     | DocsView
 
 
 type Msg
-    = BuildRecordsFetched (Result Kinto.Error (Kinto.Pager BuildRecord))
-    | FiltersReceived String (Result Kinto.Error (Kinto.Pager FilterRecord))
+    = FacetsReceived (Result Http.Error Facets)
     | LoadNextPage
-    | BuildRecordsNextPageFetched (Result Kinto.Error (Kinto.Pager BuildRecord))
+    | LoadPreviousPage
     | UpdateFilter NewFilter
     | UrlChange Location
-    | SubmitFilters
     | DismissError
     | NewPageSize String

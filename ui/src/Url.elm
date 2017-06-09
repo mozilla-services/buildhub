@@ -21,6 +21,7 @@ routeFromUrl model location =
                             </> (s "version" </> string)
                             </> (s "locale" </> string)
                             </> (s "buildId" </> string)
+                            </> (s "page" </> int)
                         )
                     ]
                 )
@@ -30,9 +31,10 @@ routeFromUrl model location =
             Just DocsView ->
                 { model | route = DocsView }
 
-            Just (FilteredView product channel platform version locale buildId) ->
+            Just (FilteredView product channel platform version locale buildId page) ->
                 { model
-                    | route = FilteredView product channel platform version locale buildId
+                    | route = FilteredView product channel platform version locale buildId page
+                    , page = page
                     , filters =
                         { buildId = buildId
                         , product = product
@@ -63,7 +65,7 @@ urlFromRoute route =
         DocsView ->
             "#/docs/"
 
-        FilteredView product channel platform version locale buildId ->
+        FilteredView product channel platform version locale buildId page ->
             "#/builds/product/"
                 ++ product
                 ++ "/channel/"
@@ -76,21 +78,13 @@ urlFromRoute route =
                 ++ locale
                 ++ "/buildId/"
                 ++ buildId
+                ++ "/page/"
+                ++ (toString page)
 
         _ ->
             "#/builds/"
 
 
-routeFromFilters : Filters -> Route
-routeFromFilters { buildId, locale, version, platform, channel, product } =
-    if
-        (buildId /= "")
-            || (locale /= "all")
-            || (version /= "all")
-            || (platform /= "all")
-            || (channel /= "all")
-            || (product /= "all")
-    then
-        FilteredView product channel platform version locale buildId
-    else
-        MainView
+routeFromFilters : Page -> Filters -> Route
+routeFromFilters page { buildId, locale, version, platform, channel, product } =
+    FilteredView product channel platform version locale buildId page

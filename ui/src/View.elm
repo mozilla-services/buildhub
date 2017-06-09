@@ -4,7 +4,6 @@ import Filesize
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Kinto
 import Snippet exposing (snippets)
 import Types exposing (..)
 import Url exposing (..)
@@ -24,20 +23,28 @@ view model =
 
 
 mainView : Model -> Html Msg
-mainView { loading, error, buildsPager, filters, filterValues, settings } =
+mainView { settings, error, facets, page, filters } =
     div [ class "row" ]
         [ div [ class "col-sm-9" ]
-            (if loading then
-                [ spinner ]
-             else
-                [ errorView error
-                , numBuilds buildsPager
-                , div [] <| List.map recordView buildsPager.objects
-                , nextPageBtn settings.pageSize (List.length buildsPager.objects) buildsPager.total
-                ]
-            )
+            [ errorView error
+            , case facets of
+                Just facets ->
+                    div []
+                        [ paginationView facets settings.pageSize page
+                        , div [] <| List.map recordView facets.hits
+                        , paginationView facets settings.pageSize page
+                        ]
+
+                Nothing ->
+                    spinner
+            ]
         , div [ class "col-sm-3" ]
-            [ filtersView filters filterValues
+            [ case facets of
+                Just facets ->
+                    filtersView facets filters
+
+                Nothing ->
+                    text ""
             , settingsView settings
             ]
         ]
@@ -116,7 +123,7 @@ headerView model =
         ]
 
 
-errorView : Maybe Kinto.Error -> Html Msg
+errorView : Maybe String -> Html Msg
 errorView err =
     case err of
         Just err ->
@@ -130,31 +137,62 @@ errorView err =
                         ]
                     ]
                 , div [ class "panel-body" ]
-                    [ text <| toString err ]
+                    [ text err ]
                 ]
 
         _ ->
-            div [] []
+            text ""
 
 
-numBuilds : Kinto.Pager BuildRecord -> Html Msg
-numBuilds pager =
+paginationView : Facets -> Int -> Int -> Html Msg
+paginationView { total, hits } pageSize page =
     let
         nbBuilds =
-            List.length pager.objects
+            List.length hits
+
+        index =
+            (page - 1) * pageSize
+
+        ( chunkStart, chunkStop ) =
+            ( index + 1, index + nbBuilds )
     in
-        p [ class "well" ] <|
-            [ text <|
-                (toString nbBuilds)
-                    ++ " build"
-                    ++ (if nbBuilds == 1 then
-                            ""
-                        else
-                            "s"
-                       )
-                    ++ " displayed ("
-                    ++ toString pager.total
-                    ++ " total)."
+        div [ class "well" ]
+            [ div [ class "row" ]
+                [ p [ class "col-sm-6" ] <|
+                    [ text <|
+                        "Build result"
+                            ++ (if nbBuilds == 1 then
+                                    ""
+                                else
+                                    "s"
+                               )
+                            ++ " "
+                            ++ (toString chunkStart)
+                            ++ ".."
+                            ++ (toString chunkStop)
+                            ++ " of "
+                            ++ toString total
+                            ++ "."
+                    ]
+                , div [ class "col-sm-6 text-right" ]
+                    [ div [ class "btn-group" ]
+                        [ if page /= 1 then
+                            button
+                                [ class "btn btn-default", onClick LoadPreviousPage ]
+                                [ text <| "« Page " ++ (toString (page - 1)) ]
+                          else
+                            text ""
+                        , button [ class "btn btn-default active", disabled True ]
+                            [ text <| "Page " ++ (toString page) ]
+                        , if page /= ceiling ((toFloat total) / (toFloat pageSize)) then
+                            button
+                                [ class "btn btn-default", onClick LoadNextPage ]
+                                [ text <| "Page " ++ (toString (page + 1)) ++ " »" ]
+                          else
+                            text ""
+                        ]
+                    ]
+                ]
             ]
 
 
@@ -173,20 +211,21 @@ buildIdSearchForm buildId =
         ]
 
 
-filterSelector : List String -> String -> String -> (String -> Msg) -> Html Msg
-filterSelector filters filterTitle selectedFilter updateHandler =
+facetSelector : String -> Int -> String -> (String -> Msg) -> List Facet -> Html Msg
+facetSelector title total selectedValue handler facet =
     let
-        optionView value_ =
-            option [ value value_, selected (value_ == selectedFilter) ] [ text value_ ]
+        optionView entry =
+            option [ value entry.value, selected (entry.value == selectedValue) ]
+                [ text <| entry.value ++ " (" ++ (toString entry.count) ++ ")" ]
     in
         div [ class "form-group", style [ ( "display", "block" ) ] ]
-            [ label [] [ text filterTitle ]
+            [ label [] [ text title ]
             , select
                 [ class "form-control"
-                , onInput updateHandler
-                , value selectedFilter
+                , onInput handler
+                , value selectedValue
                 ]
-                (List.map optionView ("all" :: filters))
+                (List.map optionView ((Facet total "all") :: facet))
             ]
 
 
@@ -210,7 +249,7 @@ recordView record =
                                 , locale = record.target.locale
                                 , buildId = buildInfo.id
                                 }
-                                    |> routeFromFilters
+                                    |> routeFromFilters 1
                                     |> urlFromRoute
                           in
                             href url
@@ -404,50 +443,35 @@ spinner =
     div [ class "loader" ] []
 
 
-nextPageBtn : Int -> Int -> Int -> Html Msg
-nextPageBtn pageSize displayed total =
-    if displayed < total then
-        button
-            [ class "btn btn-default"
-            , style [ ( "width", "100%" ) ]
-            , onClick LoadNextPage
-            ]
-            [ text <|
-                "Load "
-                    ++ (toString pageSize)
-                    ++ " more ("
-                    ++ (toString <| total - displayed)
-                    ++ " left)"
-            ]
-    else
-        div [] []
+filtersView : Facets -> Filters -> Html Msg
+filtersView facets filters =
+    let
+        { total, products, versions, platforms, channels, locales } =
+            facets
 
-
-filtersView : Filters -> FilterValues -> Html Msg
-filtersView filters filterValues =
-    div [ class "panel panel-default" ]
-        [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
-        , Html.form [ class "panel-body", onSubmit <| SubmitFilters ]
-            [ buildIdSearchForm filters.buildId
-            , filterSelector filterValues.productList "Products" filters.product (UpdateFilter << NewProductFilter)
-            , filterSelector filterValues.versionList "Versions" filters.version (UpdateFilter << NewVersionFilter)
-            , filterSelector filterValues.platformList "Platforms" filters.platform (UpdateFilter << NewPlatformFilter)
-            , filterSelector filterValues.channelList "Channels" filters.channel (UpdateFilter << NewChannelFilter)
-            , filterSelector filterValues.localeList "Locales" filters.locale (UpdateFilter << NewLocaleFilter)
-            , div [ class "btn-group btn-group-justified" ]
-                [ div [ class "btn-group" ]
-                    [ button
-                        [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
-                        [ text "Reset" ]
-                    ]
-                , div [ class "btn-group" ]
-                    [ button
-                        [ class "btn btn-default btn-primary", type_ "submit" ]
-                        [ text "Search" ]
+        { buildId, product, version, platform, channel, locale } =
+            filters
+    in
+        div [ class "panel panel-default" ]
+            [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
+            , div [ class "panel-body" ]
+                [ div []
+                    [ buildIdSearchForm buildId
+                    , facetSelector "Products" total product (UpdateFilter << NewProductFilter) products
+                    , facetSelector "Versions" total version (UpdateFilter << NewVersionFilter) versions
+                    , facetSelector "Platforms" total platform (UpdateFilter << NewPlatformFilter) platforms
+                    , facetSelector "Channels" total channel (UpdateFilter << NewChannelFilter) channels
+                    , facetSelector "Locales" total locale (UpdateFilter << NewLocaleFilter) locales
+                    , div [ class "btn-group btn-group-justified" ]
+                        [ div [ class "btn-group" ]
+                            [ button
+                                [ class "btn btn-default", type_ "button", onClick (UpdateFilter ClearAll) ]
+                                [ text "Reset all filters" ]
+                            ]
+                        ]
                     ]
                 ]
             ]
-        ]
 
 
 settingsView : Settings -> Html Msg

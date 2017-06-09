@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import Kinto
+import ElasticSearch
 import Model exposing (..)
 import Navigation exposing (..)
 import Types exposing (..)
@@ -45,91 +45,62 @@ updateFilters newFilter filters =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ({ filters, filterValues } as model) =
+update msg ({ filters, settings } as model) =
     case msg of
-        BuildRecordsFetched (Ok buildsPager) ->
-            { model
-                | buildsPager = buildsPager
-                , loading = False
-                , error = Nothing
-            }
-                ! []
+        FacetsReceived (Ok facets) ->
+            { model | facets = Just <| ElasticSearch.processFacets facets } ! []
 
-        BuildRecordsFetched (Err err) ->
-            { model | error = Just err, loading = False } ! []
+        FacetsReceived (Err error) ->
+            { model | error = Just (toString error) } ! []
 
         LoadNextPage ->
-            model ! [ getNextBuilds model.buildsPager ]
-
-        BuildRecordsNextPageFetched (Ok buildsPager) ->
-            { model
-                | buildsPager = Kinto.updatePager buildsPager model.buildsPager
-                , loading = False
-                , error = Nothing
-            }
-                ! []
-
-        BuildRecordsNextPageFetched (Err err) ->
-            { model | error = Just err, loading = False } ! []
-
-        FiltersReceived filterName (Ok { objects }) ->
             let
-                values =
-                    List.map .name objects
+                nextPage =
+                    model.page + 1
+
+                updatedRoute =
+                    routeFromFilters nextPage model.filters
             in
-                case filterName of
-                    "product" ->
-                        { model | filterValues = { filterValues | productList = values } } ! []
+                { model | route = updatedRoute, page = nextPage }
+                    ! [ newUrl <| urlFromRoute updatedRoute ]
 
-                    "channel" ->
-                        { model | filterValues = { filterValues | channelList = values } } ! []
+        LoadPreviousPage ->
+            let
+                previousPage =
+                    model.page - 1
 
-                    "platform" ->
-                        { model | filterValues = { filterValues | platformList = values } } ! []
-
-                    "version" ->
-                        { model | filterValues = { filterValues | versionList = values } } ! []
-
-                    "locale" ->
-                        { model | filterValues = { filterValues | localeList = values } } ! []
-
-                    _ ->
-                        model ! []
-
-        FiltersReceived filterName (Err err) ->
-            { model | error = Just err, loading = False } ! []
+                updatedRoute =
+                    routeFromFilters previousPage model.filters
+            in
+                { model | route = updatedRoute, page = previousPage }
+                    ! [ newUrl <| urlFromRoute updatedRoute ]
 
         UpdateFilter newFilter ->
-            { model | filters = updateFilters newFilter filters } ! []
-
-        SubmitFilters ->
             let
-                route =
-                    routeFromFilters filters
+                updatedFilters =
+                    updateFilters newFilter filters
+
+                updatedRoute =
+                    routeFromFilters 1 updatedFilters
             in
-                { model | route = route, loading = True, error = Nothing }
-                    ! [ newUrl <| urlFromRoute route ]
+                { model | filters = updatedFilters, page = 1 }
+                    ! [ newUrl <| urlFromRoute updatedRoute ]
 
         UrlChange location ->
             let
                 updatedModel =
                     routeFromUrl model location
             in
-                { updatedModel | loading = True, error = Nothing }
-                    ! [ getBuildRecordList updatedModel ]
+                { updatedModel | error = Nothing, page = updatedModel.page }
+                    ! [ getFilterFacets updatedModel.filters settings.pageSize updatedModel.page ]
 
         DismissError ->
             { model | error = Nothing } ! []
 
         NewPageSize sizeStr ->
             let
-                modelSettings =
-                    model.settings
-
-                updatedSettings =
-                    { modelSettings | pageSize = Result.withDefault 100 <| String.toInt sizeStr }
-
-                updatedModel =
-                    { model | settings = updatedSettings, loading = True }
+                newPageSize =
+                    Result.withDefault 100 <| String.toInt sizeStr
             in
-                updatedModel ! [ getBuildRecordList updatedModel ]
+                { model | settings = { settings | pageSize = newPageSize }, page = 1 }
+                    ! [ getFilterFacets model.filters newPageSize 1 ]

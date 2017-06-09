@@ -17,13 +17,6 @@ buildRecordDecoder =
         |> required "target" targetDecoder
 
 
-filterRecordDecoder : Decoder FilterRecord
-filterRecordDecoder =
-    decode FilterRecord
-        |> required "id" string
-        |> required "name" string
-
-
 buildDecoder : Decoder Build
 buildDecoder =
     decode Build
