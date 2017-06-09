@@ -7,22 +7,6 @@ import Json.Encode as Encode
 import Types exposing (..)
 
 
-filterToJsonProperty : String -> Maybe String
-filterToJsonProperty filter =
-    if filter == "product" then
-        Just "source.product"
-    else if filter == "channel" then
-        Just "target.channel"
-    else if filter == "locale" then
-        Just "target.locale"
-    else if filter == "version" then
-        Just "target.version"
-    else if filter == "platform" then
-        Just "target.platform"
-    else
-        Nothing
-
-
 encodeMustClause : Filters -> Encode.Value
 encodeMustClause { product, channel, locale, version, platform, buildId } =
     let
@@ -37,25 +21,22 @@ encodeMustClause { product, channel, locale, version, platform, buildId } =
                 ]
 
         refineFilters ( k, v ) acc =
-            if k == "buildId" && v /= "" then
-                ( "build.id", v ) :: acc
+            if k == "build.id" then
+                if v /= "" then
+                    ( "build.id", v ) :: acc
+                else
+                    acc
+            else if v /= "all" then
+                ( k, v ) :: acc
             else
-                case filterToJsonProperty k of
-                    Just property ->
-                        if v /= "all" then
-                            ( property, v ) :: acc
-                        else
-                            acc
-
-                    Nothing ->
-                        acc
+                acc
     in
-        [ ( "buildId", buildId )
-        , ( "product", product )
-        , ( "channel", channel )
-        , ( "locale", locale )
-        , ( "version", version )
-        , ( "platform", platform )
+        [ ( "build.id", buildId )
+        , ( "source.product", product )
+        , ( "target.channel", channel )
+        , ( "target.locale", locale )
+        , ( "target.version", version )
+        , ( "target.platform", platform )
         ]
             |> List.foldr refineFilters []
             |> List.map encodeFilter
