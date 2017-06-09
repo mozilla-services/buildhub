@@ -110,9 +110,13 @@ decodeResponse =
             (decodeFilter "locales")
 
 
-getFacets : String -> Filters -> Int -> Int -> Http.Request Facets
-getFacets endpoint filters size page =
-    Http.post endpoint (Http.jsonBody (encodeQuery filters size page)) decodeResponse
+getFacets : Filters -> Int -> Int -> Http.Request Facets
+getFacets filters size page =
+    let
+        endpoint =
+            "https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releases/search"
+    in
+        Http.post endpoint (Http.jsonBody (encodeQuery filters size page)) decodeResponse
 
 
 processFacets : Facets -> Facets
