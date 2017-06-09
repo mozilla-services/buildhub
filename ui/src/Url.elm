@@ -85,16 +85,6 @@ urlFromRoute route =
             "#/builds/"
 
 
-routeFromFilters : Filters -> Route
-routeFromFilters { buildId, locale, version, platform, channel, product } =
-    if
-        (buildId /= "")
-            || (locale /= "all")
-            || (version /= "all")
-            || (platform /= "all")
-            || (channel /= "all")
-            || (product /= "all")
-    then
-        FilteredView product channel platform version locale buildId 1
-    else
-        MainView
+routeFromFilters : Page -> Filters -> Route
+routeFromFilters page { buildId, locale, version, platform, channel, product } =
+    FilteredView product channel platform version locale buildId page

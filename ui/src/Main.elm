@@ -54,12 +54,26 @@ update msg ({ filters, settings } as model) =
             { model | error = Just (toString error) } ! []
 
         LoadNextPage ->
-            { model | page = model.page + 1 }
-                ! [ getFilterFacets filters settings.pageSize (model.page + 1) ]
+            let
+                nextPage =
+                    model.page + 1
+
+                updatedRoute =
+                    routeFromFilters nextPage model.filters
+            in
+                { model | route = updatedRoute, page = nextPage }
+                    ! [ newUrl <| urlFromRoute updatedRoute ]
 
         LoadPreviousPage ->
-            { model | page = model.page - 1 }
-                ! [ getFilterFacets filters settings.pageSize (model.page - 1) ]
+            let
+                previousPage =
+                    model.page - 1
+
+                updatedRoute =
+                    routeFromFilters previousPage model.filters
+            in
+                { model | route = updatedRoute, page = previousPage }
+                    ! [ newUrl <| urlFromRoute updatedRoute ]
 
         UpdateFilter newFilter ->
             let
@@ -67,7 +81,7 @@ update msg ({ filters, settings } as model) =
                     updateFilters newFilter filters
 
                 updatedRoute =
-                    routeFromFilters updatedFilters
+                    routeFromFilters 1 updatedFilters
             in
                 { model | filters = updatedFilters, page = 1 }
                     ! [ newUrl <| urlFromRoute updatedRoute ]

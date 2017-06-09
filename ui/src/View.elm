@@ -158,12 +158,9 @@ paginationView { total, hits } pageSize page =
     in
         div [ class "well" ]
             [ div [ class "row" ]
-                [ p [ class "col-sm-8" ] <|
+                [ p [ class "col-sm-6" ] <|
                     [ text <|
-                        "Page "
-                            ++ (toString page)
-                            ++ ": "
-                            ++ "result"
+                        "Build result"
                             ++ (if nbBuilds == 1 then
                                     ""
                                 else
@@ -177,7 +174,7 @@ paginationView { total, hits } pageSize page =
                             ++ toString total
                             ++ "."
                     ]
-                , div [ class "col-sm-4 text-right" ]
+                , div [ class "col-sm-6 text-right" ]
                     [ div [ class "btn-group" ]
                         [ if page /= 1 then
                             button
@@ -185,6 +182,8 @@ paginationView { total, hits } pageSize page =
                                 [ text <| "« Page " ++ (toString (page - 1)) ]
                           else
                             text ""
+                        , button [ class "btn btn-default active", disabled True ]
+                            [ text <| "Page " ++ (toString page) ]
                         , if page /= ceiling ((toFloat total) / (toFloat pageSize)) then
                             button
                                 [ class "btn btn-default", onClick LoadNextPage ]
@@ -250,7 +249,7 @@ recordView record =
                                 , locale = record.target.locale
                                 , buildId = buildInfo.id
                                 }
-                                    |> routeFromFilters
+                                    |> routeFromFilters 1
                                     |> urlFromRoute
                           in
                             href url
