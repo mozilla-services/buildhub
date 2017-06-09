@@ -82,14 +82,8 @@ update msg ({ filters, settings } as model) =
 
         NewPageSize sizeStr ->
             let
-                modelSettings =
-                    model.settings
-
-                updatedSettings =
-                    { modelSettings | pageSize = Result.withDefault 100 <| String.toInt sizeStr }
-
-                updatedModel =
-                    { model | settings = updatedSettings }
+                newPageSize =
+                    Result.withDefault 100 <| String.toInt sizeStr
             in
-                -- FIXME: relad facets with new pageSize
-                updatedModel ! []
+                { model | settings = { settings | pageSize = newPageSize }, page = 1 }
+                    ! [ getFilterFacets model.filters newPageSize 1 ]

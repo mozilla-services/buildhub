@@ -141,7 +141,7 @@ errorView err =
                 ]
 
         _ ->
-            div [] []
+            text ""
 
 
 paginationView : Facets -> Int -> Int -> Html Msg
@@ -158,7 +158,7 @@ paginationView { total, hits } pageSize page =
     in
         div [ class "well" ]
             [ div [ class "row" ]
-                [ p [ class "col-sm-9" ] <|
+                [ p [ class "col-sm-8" ] <|
                     [ text <|
                         "Page "
                             ++ (toString page)
@@ -177,20 +177,20 @@ paginationView { total, hits } pageSize page =
                             ++ toString total
                             ++ "."
                     ]
-                , div [ class "col-sm-3 text-right" ]
+                , div [ class "col-sm-4 text-right" ]
                     [ div [ class "btn-group" ]
-                        [ button
-                            [ class "btn btn-default"
-                            , onClick LoadPreviousPage
-                            , disabled (page == 1)
-                            ]
-                            [ text "Previous" ]
-                        , button
-                            [ class "btn btn-default"
-                            , onClick LoadNextPage
-                            , disabled <| page == ceiling ((toFloat total) / (toFloat pageSize))
-                            ]
-                            [ text "Next" ]
+                        [ if page /= 1 then
+                            button
+                                [ class "btn btn-default", onClick LoadPreviousPage ]
+                                [ text <| "« Page " ++ (toString (page - 1)) ]
+                          else
+                            text ""
+                        , if page /= ceiling ((toFloat total) / (toFloat pageSize)) then
+                            button
+                                [ class "btn btn-default", onClick LoadNextPage ]
+                                [ text <| "Page " ++ (toString (page + 1)) ++ " »" ]
+                          else
+                            text ""
                         ]
                     ]
                 ]
