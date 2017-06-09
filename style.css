@@ -3,6 +3,14 @@ body {
 }
 
 /* Buildhub custom styles */
+.well {
+  padding: 15px;
+}
+
+.well p {
+  margin-top: 10px;
+}
+
 .loader {
     border: 16px solid #999;
     border-top: 16px solid #666;
