@@ -35,7 +35,8 @@ init location =
         updatedModel =
             routeFromUrl defaultModel location
     in
-        updatedModel ! [ getFilterFacets initFilters defaultSettings.pageSize 1 ]
+        updatedModel
+            ! [ getFilterFacets updatedModel.filters defaultSettings.pageSize updatedModel.page ]
 
 
 initFilters : Filters

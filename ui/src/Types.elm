@@ -136,9 +136,13 @@ type alias Locale =
     String
 
 
+type alias Page =
+    Int
+
+
 type Route
     = MainView
-    | FilteredView Product Channel Platform Version Locale BuildId
+    | FilteredView Product Channel Platform Version Locale BuildId Page
     | DocsView
 
 

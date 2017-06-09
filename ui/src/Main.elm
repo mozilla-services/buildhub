@@ -65,18 +65,20 @@ update msg ({ filters, settings } as model) =
             let
                 updatedFilters =
                     updateFilters newFilter filters
+
+                updatedRoute =
+                    routeFromFilters updatedFilters
             in
                 { model | filters = updatedFilters, page = 1 }
-                    ! [ getFilterFacets updatedFilters settings.pageSize 1 ]
+                    ! [ newUrl <| urlFromRoute updatedRoute ]
 
         UrlChange location ->
             let
                 updatedModel =
                     routeFromUrl model location
             in
-                { updatedModel | error = Nothing }
-                    -- FIXME: load facets here
-                    ! []
+                { updatedModel | error = Nothing, page = updatedModel.page }
+                    ! [ getFilterFacets updatedModel.filters settings.pageSize updatedModel.page ]
 
         DismissError ->
             { model | error = Nothing } ! []
