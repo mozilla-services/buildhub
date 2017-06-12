@@ -3,16 +3,13 @@ import './App.css';
 
 import {
     SearchBox,
-    RefinementListFilter,
     NoHits,
     Hits,
     HitsStats,
-    SearchkitComponent,
     ItemHistogramList,
     SortingSelector,
     SelectedFilters,
     MenuFilter,
-    HierarchicalMenuFilter,
     Pagination,
     ResetFilters,
     Select,
