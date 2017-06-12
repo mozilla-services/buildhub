@@ -18,7 +18,7 @@ build-hub:
                   type: "keyword"
                 date:
                   type: "date"
-                  format: "date"
+                  format: "date_time_no_millis"
             source:
               properties:
                 product:
@@ -57,7 +57,7 @@ build-hub:
                   type: "long"
                 date:
                   type: "date"
-                  format: "date"
+                  format: "date_time_no_millis"
         displayFields:
           - id
           - source.product
