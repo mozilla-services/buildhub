@@ -24,6 +24,9 @@ DEFAULT_COLLECTION = "releases"
 NB_THREADS = 3
 NB_RETRY_REQUEST = 3
 TIMEOUT_SECONDS = 5 * 60
+
+DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+
 today = datetime.date.today()
 
 logger = logging.getLogger(__name__)
@@ -69,7 +72,7 @@ def latest_known_nightly_datetime(client, product):
     latest = None
     if existing:
         latest_nightly = existing[0]["download"]["date"]
-        latest = datetime.datetime.strptime(latest_nightly, "%Y-%m-%dT%H:%M:%SZ")
+        latest = datetime.datetime.strptime(latest_nightly, DATETIME_FORMAT)
     return latest
 
 
@@ -122,7 +125,8 @@ def archive(product, version, platform, locale, url, size, date, metadata=None):
         record['source']['tree'] = repository.split("hg.mozilla.org/", 1)[-1]
 
         buildid = metadata["buildid"]
-        builddate = datetime.datetime.strptime(buildid[:12], "%Y%m%d%H%M").isoformat()
+        builddate = datetime.datetime.strptime(buildid[:14], "%Y%m%d%H%M%S")
+        builddate = builddate.strftime(DATETIME_FORMAT)
         record['build'] = {
             "id": buildid,
             "date": builddate,

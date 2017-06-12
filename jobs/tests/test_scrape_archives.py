@@ -24,7 +24,7 @@ ARCHIVE_INFOS = [
               "2017-05-03-03-02-12-mozilla-central/firefox-55.0a1.en-US.win64.zip"
           },
           "build": {
-              "date": "2017-05-03T03:02:00",
+              "date": "2017-05-03T03:02:12Z",
               "id": "20170503030212"
           },
           "id": "firefox_nightly_2017-05-03-03-02-12_55-0a1_win64_en-us",
@@ -75,7 +75,7 @@ ARCHIVE_INFOS = [
               "52.0.1-candidates/build3/linux-x86_64/en-US/thunderbird-52.0.1.tar.bz2"
           },
           "build": {
-              "date": "2017-04-13T21:49:00",
+              "date": "2017-04-13T21:49:57Z",
               "id": "20170413214957"
           },
           "id": "thunderbird_52-0-1_linux-x86_64_en-us",
