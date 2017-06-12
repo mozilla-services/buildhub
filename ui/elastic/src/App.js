@@ -69,8 +69,8 @@ const HitsTable = ({hits}) => {
                 <td>{hit._source.download.mimetype}</td>
                 <td>{hit._source.download.size}</td>
                 <td>{hit._source.download.date}</td>
-                <td>{hit._source.build.id}</td>
-                <td>{hit._source.build.date}</td>
+                <td>{hit._source.build && hit._source.build.id}</td>
+                <td>{hit._source.build && hit._source.build.date}</td>
               </tr>
           )})}
         </tbody>
@@ -103,18 +103,24 @@ class App extends Component {
                             size={1000}
                             showMore={false}
                             translations={{"All":"All versions"}}/>
-                <MenuFilter field="target.locale"
-                            title="Locale"
-                            id="locale"
-                            listComponent={ItemHistogramList}
-                            size={10}
-                            translations={{"All":"All locales"}}/>
                 <MenuFilter field="target.platform"
                             title="Platform"
                             id="platform"
                             size={10}
                             listComponent={ItemHistogramList}
                             translations={{"All":"All platforms"}}/>
+                <MenuFilter field="target.channel"
+                            title="Channel"
+                            id="channel"
+                            size={10}
+                            listComponent={ItemHistogramList}
+                            translations={{"All":"All channels"}}/>
+                <MenuFilter field="target.locale"
+                            title="Locale"
+                            id="locale"
+                            listComponent={ItemHistogramList}
+                            size={10}
+                            translations={{"All":"All locales"}}/>
               </SideBar>
 
               <LayoutResults>
