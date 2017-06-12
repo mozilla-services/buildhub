@@ -129,8 +129,8 @@ class App extends Component {
                   <ActionBarRow>
                     <HitsStats/>
                     <SortingSelector options={[
-                      {label: "Relevance", field: "_score", order: "desc", defaultOption: true},
-                      {label: "Latest Releases", field:"download.date", order: "desc"},
+                      {label: "Latest Releases", field:"download.date", order: "desc", defaultOption: true},
+                      {label: "Relevance", field: "_score", order: "desc"},
                     ]}/>
                   </ActionBarRow>
 
