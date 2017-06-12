@@ -39,19 +39,25 @@ const HitsTable = ({hits}) => {
             <th>Version</th>
             <th>Locale</th>
             <th>Platform</th>
+            <th>Revision</th>
             <th>Date</th>
           </tr>
         </thead>
         <tbody>
-          {hits.map(hit => (
-            <tr key={hit._id}>
-              <td>{hit._source.source.product}</td>
-              <td>{hit._source.target.version}</td>
-              <td>{hit._source.target.locale}</td>
-              <td>{hit._source.target.platform}</td>
-              <td>{hit._source.download.date}</td>
-            </tr>
-          ))}
+          {hits.map(hit => {
+            const url = (hit._source.source.revision)
+              ? (<a href={(hit._source.source.repository + '/rev/' + hit._source.source.revision)}>{hit._source.source.revision}</a>)
+              : "";
+            return (
+              <tr key={hit._id}>
+                <td>{hit._source.source.product}</td>
+                <td>{hit._source.target.version}</td>
+                <td>{hit._source.target.locale}</td>
+                <td>{hit._source.target.platform}</td>
+                <td>{url}</td>
+                <td>{hit._source.download.date}</td>
+              </tr>
+          )})}
         </tbody>
       </table>
     </div>
