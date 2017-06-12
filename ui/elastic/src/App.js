@@ -36,26 +36,41 @@ const HitsTable = ({hits}) => {
         <thead>
           <tr>
             <th>Product</th>
-            <th>Version</th>
-            <th>Locale</th>
-            <th>Platform</th>
+            <th>Tree</th>
             <th>Revision</th>
+            <th>Version</th>
+            <th>Platform</th>
+            <th>Channel</th>
+            <th>Locale</th>
+            <th>URL</th>
+            <th>Mimetype</th>
+            <th>Size</th>
+            <th>Published on</th>
+            <th>Build ID</th>
             <th>Date</th>
           </tr>
         </thead>
         <tbody>
           {hits.map(hit => {
-            const url = (hit._source.source.revision)
+            const revisionUrl = (hit._source.source.revision)
               ? (<a href={(hit._source.source.repository + '/rev/' + hit._source.source.revision)}>{hit._source.source.revision}</a>)
               : "";
+            const filename = hit._source.download.url.split("/").reverse()[0];
             return (
               <tr key={hit._id}>
                 <td>{hit._source.source.product}</td>
+                <td>{hit._source.source.tree}</td>
+                <td>{revisionUrl}</td>
                 <td>{hit._source.target.version}</td>
-                <td>{hit._source.target.locale}</td>
                 <td>{hit._source.target.platform}</td>
-                <td>{url}</td>
+                <td>{hit._source.target.channel}</td>
+                <td>{hit._source.target.locale}</td>
+                <td><a href={hit._source.download.url}>{filename}</a></td>
+                <td>{hit._source.download.mimetype}</td>
+                <td>{hit._source.download.size}</td>
                 <td>{hit._source.download.date}</td>
+                <td>{hit._source.build.id}</td>
+                <td>{hit._source.build.date}</td>
               </tr>
           )})}
         </tbody>
@@ -73,7 +88,10 @@ class App extends Component {
           <Layout>
 
             <TopBar>
-              <SearchBox/>
+              <SearchBox
+              autofocus={true}
+              searchOnChange={true}
+              queryFields={["build.id"]}/>
             </TopBar>
 
             <LayoutBody>
