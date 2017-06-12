@@ -15,6 +15,7 @@ initFilters =
     , channel = "all"
     , locale = "all"
     , buildId = ""
+    , page = 1
     }
 
 
@@ -27,7 +28,6 @@ init location =
         defaultModel =
             { filters = initFilters
             , facets = Nothing
-            , page = 1
             , route = MainView
             , error = Nothing
             , settings = defaultSettings
@@ -37,6 +37,6 @@ init location =
             routeFromUrl defaultModel location
     in
         updatedModel
-            ! [ ElasticSearch.getFacets updatedModel.filters defaultSettings.pageSize updatedModel.page
+            ! [ ElasticSearch.getFacets updatedModel.filters defaultSettings.pageSize
                     |> Http.send FacetsReceived
               ]

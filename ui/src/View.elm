@@ -23,16 +23,16 @@ view model =
 
 
 mainView : Model -> Html Msg
-mainView { settings, error, facets, page, filters } =
+mainView { settings, error, facets, filters } =
     div [ class "row" ]
         [ div [ class "col-sm-9" ]
             [ errorView error
             , case facets of
                 Just facets ->
                     div []
-                        [ paginationView facets settings.pageSize page
+                        [ paginationView facets settings.pageSize filters.page
                         , div [] <| List.map recordView facets.hits
-                        , paginationView facets settings.pageSize page
+                        , paginationView facets settings.pageSize filters.page
                         ]
 
                 Nothing ->
@@ -248,8 +248,9 @@ recordView record =
                                 , channel = "all"
                                 , locale = record.target.locale
                                 , buildId = buildInfo.id
+                                , page = 1
                                 }
-                                    |> routeFromFilters 1
+                                    |> routeFromFilters
                                     |> urlFromRoute
                           in
                             href url

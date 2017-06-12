@@ -34,7 +34,6 @@ routeFromUrl model location =
             Just (FilteredView product channel platform version locale buildId page) ->
                 { model
                     | route = FilteredView product channel platform version locale buildId page
-                    , page = page
                     , filters =
                         { buildId = buildId
                         , product = product
@@ -42,6 +41,7 @@ routeFromUrl model location =
                         , platform = platform
                         , version = version
                         , locale = locale
+                        , page = page
                         }
                 }
 
@@ -55,6 +55,7 @@ routeFromUrl model location =
                         , platform = "all"
                         , version = "all"
                         , locale = "all"
+                        , page = 1
                         }
                 }
 
@@ -85,6 +86,6 @@ urlFromRoute route =
             "#/builds/"
 
 
-routeFromFilters : Page -> Filters -> Route
-routeFromFilters page { buildId, locale, version, platform, channel, product } =
+routeFromFilters : Filters -> Route
+routeFromFilters { buildId, locale, version, platform, channel, product, page } =
     FilteredView product channel platform version locale buildId page

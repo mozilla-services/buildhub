@@ -43,8 +43,8 @@ encodeMustClause { product, channel, locale, version, platform, buildId } =
             |> Encode.list
 
 
-encodeQuery : Filters -> Int -> Int -> Encode.Value
-encodeQuery filters pageSize page =
+encodeQuery : Filters -> Int -> Encode.Value
+encodeQuery filters pageSize =
     let
         encodeFacet name property =
             ( name
@@ -60,7 +60,7 @@ encodeQuery filters pageSize page =
     in
         Encode.object
             [ ( "size", Encode.int pageSize )
-            , ( "from", Encode.int <| (page - 1) * pageSize )
+            , ( "from", Encode.int <| (filters.page - 1) * pageSize )
             , ( "query"
               , Encode.object
                     [ ( "bool"
@@ -110,13 +110,13 @@ decodeResponse =
             (decodeFilter "locales")
 
 
-getFacets : Filters -> Int -> Int -> Http.Request Facets
-getFacets filters size page =
+getFacets : Filters -> Int -> Http.Request Facets
+getFacets filters size =
     let
         endpoint =
             "https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releases/search"
     in
-        Http.post endpoint (Http.jsonBody (encodeQuery filters size page)) decodeResponse
+        Http.post endpoint (Http.jsonBody (encodeQuery filters size)) decodeResponse
 
 
 processFacets : Facets -> Facets

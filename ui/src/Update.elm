@@ -8,6 +8,19 @@ import Types exposing (..)
 import Url exposing (..)
 
 
+navigateToPage : Model -> Page -> ( Model, Cmd Msg )
+navigateToPage ({ filters } as model) newPage =
+    let
+        updatedFilters =
+            { filters | page = newPage }
+
+        updatedRoute =
+            routeFromFilters updatedFilters
+    in
+        { model | route = updatedRoute, filters = updatedFilters }
+            ! [ newUrl <| urlFromRoute updatedRoute ]
+
+
 updateFilters : NewFilter -> Filters -> Filters
 updateFilters newFilter filters =
     case newFilter of
@@ -15,22 +28,22 @@ updateFilters newFilter filters =
             Init.initFilters
 
         NewProductFilter value ->
-            { filters | product = value }
+            { filters | product = value, page = 1 }
 
         NewVersionFilter value ->
-            { filters | version = value }
+            { filters | version = value, page = 1 }
 
         NewPlatformFilter value ->
-            { filters | platform = value }
+            { filters | platform = value, page = 1 }
 
         NewChannelFilter value ->
-            { filters | channel = value }
+            { filters | channel = value, page = 1 }
 
         NewLocaleFilter value ->
-            { filters | locale = value }
+            { filters | locale = value, page = 1 }
 
         NewBuildIdSearch value ->
-            { filters | buildId = value }
+            { filters | buildId = value, page = 1 }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -43,26 +56,10 @@ update msg ({ filters, settings } as model) =
             { model | error = Just (toString error) } ! []
 
         LoadNextPage ->
-            let
-                nextPage =
-                    model.page + 1
-
-                updatedRoute =
-                    routeFromFilters nextPage model.filters
-            in
-                { model | route = updatedRoute, page = nextPage }
-                    ! [ newUrl <| urlFromRoute updatedRoute ]
+            navigateToPage model <| filters.page + 1
 
         LoadPreviousPage ->
-            let
-                previousPage =
-                    model.page - 1
-
-                updatedRoute =
-                    routeFromFilters previousPage model.filters
-            in
-                { model | route = updatedRoute, page = previousPage }
-                    ! [ newUrl <| urlFromRoute updatedRoute ]
+            navigateToPage model <| filters.page - 1
 
         UpdateFilter newFilter ->
             let
@@ -70,9 +67,9 @@ update msg ({ filters, settings } as model) =
                     updateFilters newFilter filters
 
                 updatedRoute =
-                    routeFromFilters 1 updatedFilters
+                    routeFromFilters updatedFilters
             in
-                { model | filters = updatedFilters, page = 1 }
+                { model | filters = updatedFilters }
                     ! [ newUrl <| urlFromRoute updatedRoute ]
 
         UrlChange location ->
@@ -80,8 +77,8 @@ update msg ({ filters, settings } as model) =
                 updatedModel =
                     routeFromUrl model location
             in
-                { updatedModel | error = Nothing, page = updatedModel.page }
-                    ! [ ElasticSearch.getFacets updatedModel.filters settings.pageSize updatedModel.page
+                { updatedModel | error = Nothing }
+                    ! [ ElasticSearch.getFacets updatedModel.filters settings.pageSize
                             |> Http.send FacetsReceived
                       ]
 
@@ -92,8 +89,14 @@ update msg ({ filters, settings } as model) =
             let
                 newPageSize =
                     Result.withDefault 100 <| String.toInt sizeStr
+
+                updatedFilters =
+                    { filters | page = 1 }
             in
-                { model | settings = { settings | pageSize = newPageSize }, page = 1 }
-                    ! [ ElasticSearch.getFacets model.filters newPageSize 1
+                { model
+                    | filters = updatedFilters
+                    , settings = { settings | pageSize = newPageSize }
+                }
+                    ! [ ElasticSearch.getFacets updatedFilters newPageSize
                             |> Http.send FacetsReceived
                       ]
