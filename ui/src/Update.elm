@@ -8,6 +8,19 @@ import Types exposing (..)
 import Url exposing (..)
 
 
+navigateToPage : Model -> Page -> ( Model, Cmd Msg )
+navigateToPage ({ filters } as model) newPage =
+    let
+        updatedFilters =
+            { filters | page = newPage }
+
+        updatedRoute =
+            routeFromFilters updatedFilters
+    in
+        { model | route = updatedRoute, filters = updatedFilters }
+            ! [ newUrl <| urlFromRoute updatedRoute ]
+
+
 updateFilters : NewFilter -> Filters -> Filters
 updateFilters newFilter filters =
     case newFilter of
@@ -43,26 +56,10 @@ update msg ({ filters, settings } as model) =
             { model | error = Just (toString error) } ! []
 
         LoadNextPage ->
-            let
-                updatedFilters =
-                    { filters | page = filters.page + 1 }
-
-                updatedRoute =
-                    routeFromFilters updatedFilters
-            in
-                { model | route = updatedRoute, filters = updatedFilters }
-                    ! [ newUrl <| urlFromRoute updatedRoute ]
+            navigateToPage model <| filters.page + 1
 
         LoadPreviousPage ->
-            let
-                updatedFilters =
-                    { filters | page = filters.page - 1 }
-
-                updatedRoute =
-                    routeFromFilters updatedFilters
-            in
-                { model | route = updatedRoute, filters = updatedFilters }
-                    ! [ newUrl <| urlFromRoute updatedRoute ]
+            navigateToPage model <| filters.page - 1
 
         UpdateFilter newFilter ->
             let
