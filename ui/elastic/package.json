@@ -5,12 +5,16 @@
   "dependencies": {
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
+    "rimraf": "^2.6.1",
     "searchkit": "^2.1.0"
   },
   "devDependencies": {
+    "gh-pages": "^1.0.0",
     "react-scripts": "1.0.7"
   },
+  "homepage": "https://mozilla-services.github.io/buildhub/searchkit",
   "scripts": {
+    "deploy": "npm run build && mkdir tmp && cp -R build tmp/searchkit && gh-pages -d tmp --add && rimraf tmp",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
