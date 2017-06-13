@@ -215,17 +215,24 @@ facetSelector : String -> Int -> String -> (String -> Msg) -> List Facet -> Html
 facetSelector title total selectedValue handler facet =
     let
         optionView entry =
-            option [ value entry.value, selected (entry.value == selectedValue) ]
-                [ text <| entry.value ++ " (" ++ (toString entry.count) ++ ")" ]
+            let
+                countInfo =
+                    if entry.value == "all" && selectedValue /= "all" then
+                        ""
+                    else
+                        " (" ++ (toString entry.count) ++ ")"
+            in
+                option [ value entry.value, selected (entry.value == selectedValue) ]
+                    [ text <| entry.value ++ countInfo ]
     in
-        div [ class "form-group", style [ ( "display", "block" ) ] ]
+        div [ class "form-group" ]
             [ label [] [ text title ]
-            , select
-                [ class "form-control"
-                , onInput handler
-                , value selectedValue
-                ]
-                (List.map optionView ((Facet total "all") :: facet))
+            , List.map optionView ((Facet total "all") :: facet)
+                |> select
+                    [ class "form-control"
+                    , onInput handler
+                    , value selectedValue
+                    ]
             ]
 
 
