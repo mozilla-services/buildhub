@@ -26,58 +26,85 @@ import {
 const searchkit = new SearchkitManager("https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releases/", {searchUrlPath: "search"})
 
 
-const HitsTable = ({hits}) => {
-  return (
-    <div style={{width: '100%', boxSizing: 'border-box', padding: 8}}>
-      <table className="sk-table sk-table-striped" style={{width: '100%', boxSizing: 'border-box'}}>
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th>Tree</th>
-            <th>Revision</th>
-            <th>Version</th>
-            <th>Platform</th>
-            <th>Channel</th>
-            <th>Locale</th>
-            <th>URL</th>
-            <th>Mimetype</th>
-            <th>Size</th>
-            <th>Published on</th>
-            <th>Build ID</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {hits.map(hit => {
-            const revisionUrl = (hit._source.source.revision)
-              ? (<a href={(hit._source.source.repository + '/rev/' + hit._source.source.revision)}>{hit._source.source.revision}</a>)
-              : "";
-            const filename = hit._source.download.url.split("/").reverse()[0];
-            return (
-              <tr key={hit._id}>
-                <td>{hit._source.source.product}</td>
-                <td>{hit._source.source.tree}</td>
-                <td>{revisionUrl}</td>
-                <td>{hit._source.target.version}</td>
-                <td>{hit._source.target.platform}</td>
-                <td>{hit._source.target.channel}</td>
-                <td>{hit._source.target.locale}</td>
-                <td><a href={hit._source.download.url}>{filename}</a></td>
-                <td>{hit._source.download.mimetype}</td>
-                <td>{hit._source.download.size}</td>
-                <td>{hit._source.download.date}</td>
-                <td>{hit._source.build && hit._source.build.id}</td>
-                <td>{hit._source.build && hit._source.build.date}</td>
-              </tr>
-          )})}
-        </tbody>
-      </table>
-    </div>
-  );
+const HitsTable = (toggleExpand, expandedEntry) => {
+  return ({hits}) => {
+    return (
+      <div style={{width: '100%', boxSizing: 'border-box', padding: 8}}>
+        <table className="sk-table sk-table-striped" style={{width: '100%', boxSizing: 'border-box'}}>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Version</th>
+              <th>Platform</th>
+              <th>Channel</th>
+              <th>Locale</th>
+              <th>Published on</th>
+            </tr>
+          </thead>
+          <tbody>
+            {hits.map(hit => {
+              const revisionUrl = (hit._source.source.revision)
+                ? (<a href={(hit._source.source.repository + '/rev/' + hit._source.source.revision)}>{hit._source.source.revision}</a>)
+                : "";
+              const filename = hit._source.download.url.split("/").reverse()[0];
+              const clickHandler = (event, data) => toggleExpand(event, data, hit._id);
+              if (expandedEntry === hit._id) {
+                return (
+                  <tr key={hit._id} onClick={clickHandler}>
+                    <td colSpan="6">
+                      <p>Product: {hit._source.source.product}</p>
+                      <p>Version: {hit._source.target.version}</p>
+                      <p>Platform: {hit._source.target.platform}</p>
+                      <p>Channel: {hit._source.target.channel}</p>
+                      <p>Locale: {hit._source.target.locale}</p>
+                      <p>Published on: {hit._source.build && hit._source.build.date}</p>
+                      <p>Tree: {hit._source.source.tree}</p>
+                      <p>Revision: {revisionUrl}</p>
+                      <p>URL: <a href={hit._source.download.url}>{filename}</a></p>
+                      <p>Mimetype: {hit._source.download.mimetype}</p>
+                      <p>Size: {hit._source.download.size}</p>
+                      <p>Date: {hit._source.download.date}</p>
+                      <p>Id: {hit._source.build && hit._source.build.id}</p>
+                    </td>
+                  </tr>
+                )
+              } else {
+                return (
+                  <tr key={hit._id} onClick={clickHandler}>
+                    <td>{hit._source.source.product}</td>
+                    <td>{hit._source.target.version}</td>
+                    <td>{hit._source.target.platform}</td>
+                    <td>{hit._source.target.channel}</td>
+                    <td>{hit._source.target.locale}</td>
+                    <td>{hit._source.build && hit._source.build.date}</td>
+                  </tr>
+                )
+              }
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
 };
 
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      expandedEntry: null
+    };
+  }
+
+  toggleExpand(event, data, id) {
+    if (this.state.expandedEntry === id) {
+      this.setState({expandedEntry: null});
+    } else {
+      this.setState({expandedEntry: id});
+    }
+  }
+
   render() {
     return (
       <div className="App">
@@ -146,7 +173,7 @@ class App extends Component {
                               translations={{"All":"All products"}}/>
                 </ActionBar>
 
-                <Hits hitsPerPage={30} listComponent={HitsTable}/>
+                <Hits hitsPerPage={30} listComponent={HitsTable(this.toggleExpand.bind(this), this.state.expandedEntry)}/>
                 <NoHits translations={{
                   "NoHits.NoResultsFound":"No release found were found for {query}",
                   "NoHits.DidYouMean":"Search for {suggestion}",
