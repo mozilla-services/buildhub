@@ -6,13 +6,13 @@ import {
     NoHits,
     Hits,
     HitsStats,
-    ItemHistogramList,
+    ItemCheckboxList,
     SortingSelector,
     SelectedFilters,
     MenuFilter,
     Pagination,
+    RefinementListFilter,
     ResetFilters,
-    Select,
     SearchkitManager,
     SearchkitProvider,
     Tabs,
@@ -93,30 +93,33 @@ class App extends Component {
 
             <LayoutBody>
               <SideBar>
-                <MenuFilter field="target.version"
+                <RefinementListFilter field="target.version"
                             title="Version"
                             id="versions"
-                            listComponent={Select}
-                            size={1000}
-                            showMore={false}
+                            listComponent={ItemCheckboxList}
+                            size={10}
+                            operator="OR"
                             translations={{"All":"All versions"}}/>
-                <MenuFilter field="target.platform"
+                <RefinementListFilter field="target.platform"
                             title="Platform"
                             id="platform"
                             size={10}
-                            listComponent={ItemHistogramList}
+                            operator="OR"
+                            listComponent={ItemCheckboxList}
                             translations={{"All":"All platforms"}}/>
-                <MenuFilter field="target.channel"
+                <RefinementListFilter field="target.channel"
                             title="Channel"
                             id="channel"
                             size={10}
-                            listComponent={ItemHistogramList}
+                            operator="OR"
+                            listComponent={ItemCheckboxList}
                             translations={{"All":"All channels"}}/>
-                <MenuFilter field="target.locale"
+                <RefinementListFilter field="target.locale"
                             title="Locale"
                             id="locale"
-                            listComponent={ItemHistogramList}
+                            listComponent={ItemCheckboxList}
                             size={10}
+                            operator="OR"
                             translations={{"All":"All locales"}}/>
               </SideBar>
 
