@@ -119,8 +119,8 @@ getFacets filters size =
         Http.post endpoint (Http.jsonBody (encodeQuery filters size)) decodeResponse
 
 
-processFacets : Facets -> Facets
-processFacets ({ versions } as facets) =
+orderVersions : List Facet -> List Facet
+orderVersions versions =
     let
         toVersionParts { value, count } =
             value
@@ -133,12 +133,17 @@ processFacets ({ versions } as facets) =
                             _ ->
                                 ( 0, Facet count value )
                    )
-
-        orderedVersions =
-            versions
-                |> List.map toVersionParts
-                |> List.sortBy (\( major, _ ) -> major)
-                |> List.map (\( _, facet ) -> facet)
-                |> List.reverse
     in
-        { facets | versions = orderedVersions }
+        versions
+            |> List.map toVersionParts
+            |> List.sortBy (\( major, _ ) -> major)
+            |> List.map (\( _, facet ) -> facet)
+            |> List.reverse
+
+
+processFacets : Facets -> Facets
+processFacets ({ versions, locales } as facets) =
+    { facets
+        | versions = orderVersions versions
+        , locales = locales |> List.sortBy .value
+    }
