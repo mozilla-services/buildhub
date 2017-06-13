@@ -355,7 +355,7 @@ viewSourceDetails source =
                 Just revision ->
                     case source.repository of
                         Just url ->
-                            a [ href <| url ++ revision ] [ text revision ]
+                            a [ href <| url ++ "/rev/" ++ revision ] [ text revision ]
 
                         Nothing ->
                             text "If you see this, please file a bug. Revision not linked to a repository."
