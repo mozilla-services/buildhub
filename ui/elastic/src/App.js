@@ -123,15 +123,17 @@ class App extends Component {
                 <RefinementListFilter field="target.version"
                             title="Version"
                             id="versions"
-                            listComponent={ItemCheckboxList}
                             size={10}
                             operator="OR"
+                            orderKey="_term"
+                            listComponent={ItemCheckboxList}
                             translations={{"All":"All versions"}}/>
                 <RefinementListFilter field="target.platform"
                             title="Platform"
                             id="platform"
                             size={10}
                             operator="OR"
+                            orderKey="_term"
                             listComponent={ItemCheckboxList}
                             translations={{"All":"All platforms"}}/>
                 <RefinementListFilter field="target.channel"
@@ -139,14 +141,16 @@ class App extends Component {
                             id="channel"
                             size={10}
                             operator="OR"
+                            orderKey="_term"
                             listComponent={ItemCheckboxList}
                             translations={{"All":"All channels"}}/>
                 <RefinementListFilter field="target.locale"
                             title="Locale"
                             id="locale"
-                            listComponent={ItemCheckboxList}
                             size={10}
                             operator="OR"
+                            orderKey="_term"
+                            listComponent={ItemCheckboxList}
                             translations={{"All":"All locales"}}/>
               </SideBar>
 
