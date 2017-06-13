@@ -187,6 +187,7 @@ async def fetch_listing(session, url):
 
 _nightly_metadata = {}
 
+
 async def fetch_nightly_metadata(session, product, nightly_url):
     """A JSON file containing build info is published along the nightly archive.
     """

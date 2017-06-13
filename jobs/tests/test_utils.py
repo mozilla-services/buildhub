@@ -236,6 +236,7 @@ RECORDS = [
             "mozilla-central-android-x86-old-id/fennec-55.0a1.multi.android-i386.apk",
         }
     },
+
 ]
 
 
