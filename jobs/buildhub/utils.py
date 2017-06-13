@@ -11,6 +11,19 @@ KNOWN_MIMETYPES = {
     }
 
 
+def localize_nightly_url(nightly_url):
+    nightly_url = nightly_url.replace('-l10n', '')
+    parts = nightly_url.split('.')
+    locale = 'en-US'
+    index = -3
+    if 'tar' in nightly_url:
+        index = -4
+    if 'mobile' in nightly_url:
+        locale = 'multi'
+    parts[index] = locale
+    return '.'.join(parts)
+
+
 def guess_channel(url, version):
     channel = 'release'
     if 'nightly' in url:

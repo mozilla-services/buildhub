@@ -3,6 +3,7 @@ import async_timeout
 import concurrent.futures
 import datetime
 import logging
+import os.path
 import re
 import sys
 from packaging.version import parse as version_parse
@@ -11,7 +12,7 @@ import aiohttp
 import backoff
 from buildhub.utils import (
     FILE_EXTENSIONS, build_record_id, parse_nightly_filename, is_release_metadata,
-    is_release_filename, guess_mimetype, guess_channel
+    is_release_filename, guess_mimetype, guess_channel, localize_nightly_url
 )
 from kinto_http import cli_utils
 
@@ -184,16 +185,25 @@ async def fetch_listing(session, url):
         raise ValueError("Could not fetch {}: {}".format(url, e))
 
 
-async def fetch_nightly_metadata(session, nightly_url):
+_nightly_metadata = {}
+
+
+async def fetch_nightly_metadata(session, product, nightly_url):
     """A JSON file containing build info is published along the nightly archive.
     """
-    # XXX: It is only available for en-US though. Should we use the same for every locale?
-    if "en-US" not in nightly_url:
+    if not is_release_filename(product, os.path.basename(nightly_url)):
         return None
+
+    # Make sure the nightly_url is turned into a en-US one.
+    nightly_url = localize_nightly_url(nightly_url)
+
+    if nightly_url in _nightly_metadata:
+        return _nightly_metadata[nightly_url]
 
     try:
         metadata_url = re.sub("\.({})$".format(FILE_EXTENSIONS), ".json", nightly_url)
         metadata = await fetch_json(session, metadata_url)
+        _nightly_metadata[nightly_url] = metadata
         return metadata
     except aiohttp.ClientError:
         return None
@@ -209,7 +219,7 @@ async def fetch_release_metadata(session, product, version, platform, locale):
 
     # XXX: It is only available for en-US though. Should we use the same for every locale?
     if locale != "en-US":
-        return None
+        locale = 'en-US'
 
     # Keep the list of latest available candidates per product, for more efficiency.
     if _candidates.get(product) is None:
@@ -284,7 +294,7 @@ async def fetch_nightlies(session, queue, product, client):
             files_subset = files[(i * batch_size):((i + 1) * batch_size)]
 
             # Fetch metadata in batch.
-            futures = [fetch_nightly_metadata(session, day_url + file_["name"])
+            futures = [fetch_nightly_metadata(session, product, day_url + file_["name"])
                        for file_ in files_subset]
             metadatas = await asyncio.gather(*futures)
 

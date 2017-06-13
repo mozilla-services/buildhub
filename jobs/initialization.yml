@@ -71,7 +71,6 @@ build-hub:
           type: object
           additionalProperties: false
           required:
-            - id
             - source
             - download
             - target

@@ -1,7 +1,7 @@
 import pytest
 from buildhub.utils import (
     build_record_id, parse_nightly_filename, is_release_metadata, is_release_filename,
-    guess_mimetype, guess_channel, chunked
+    guess_mimetype, guess_channel, chunked, localize_nightly_url
 )
 
 
@@ -236,6 +236,7 @@ RECORDS = [
             "mozilla-central-android-x86-old-id/fennec-55.0a1.multi.android-i386.apk",
         }
     },
+
 ]
 
 
@@ -361,3 +362,54 @@ CHUNKS = [
 @pytest.mark.parametrize("iterable,size,chunks", CHUNKS)
 def test_chunked(iterable, size, chunks):
     assert list(chunked(iterable, size)) == chunks
+
+
+NIGHTLY_URLS = [
+    # Mobile ARM not localized
+    ("https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-05-30-10-01-27-"
+     "mozilla-central-android-x86-old-id/fennec-55.0a1.multi.android-i386.apk",
+     "https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-05-30-10-01-27-"
+     "mozilla-central-android-x86-old-id/fennec-55.0a1.multi.android-i386.apk"),
+
+    # Mobile ARM localized
+    ("https://archive.mozilla.org/pub/mobile/nightly/2017/06/2017-06-01-10-02-05-"
+     "mozilla-central-android-api-15-l10n/fennec-55.0a1.ar.android-arm.apk",
+     "https://archive.mozilla.org/pub/mobile/nightly/2017/06/2017-06-01-10-02-05-"
+     "mozilla-central-android-api-15/fennec-55.0a1.multi.android-arm.apk"),
+
+    # Mobile i386 not localized
+    ("https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-05-30-10-01-27-"
+     "mozilla-central-android-x86/fennec-55.0a1.multi.android-i386.apk",
+     "https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-05-30-10-01-27-"
+     "mozilla-central-android-x86/fennec-55.0a1.multi.android-i386.apk"),
+
+    # firefox Mac not localized
+    ("https://archive.mozilla.org/pub/firefox/nightly/2017/05/2017-05-01-03-02-04-"
+     "mozilla-central/firefox-55.0a1.en-US.mac.dmg",
+     "https://archive.mozilla.org/pub/firefox/nightly/2017/05/2017-05-01-03-02-04-"
+     "mozilla-central/firefox-55.0a1.en-US.mac.dmg"),
+
+    # Firefox Mac localized
+    ("https://archive.mozilla.org/pub/firefox/nightly/2017/05/2017-05-01-03-02-04-"
+     "mozilla-central-l10n/firefox-55.0a1.ach.mac.dmg",
+     "https://archive.mozilla.org/pub/firefox/nightly/2017/05/2017-05-01-03-02-04-"
+     "mozilla-central/firefox-55.0a1.en-US.mac.dmg"),
+
+    # Firefox linux not localized
+    ("https://archive.mozilla.org/pub/firefox/nightly/2017/05/"
+     "2017-05-15-10-02-38-mozilla-central/firefox-55.0a1.en-US.linux-x86_64.tar.bz2",
+     "https://archive.mozilla.org/pub/firefox/nightly/2017/05/"
+     "2017-05-15-10-02-38-mozilla-central/firefox-55.0a1.en-US.linux-x86_64.tar.bz2"),
+
+    # Firefox linux localized
+    ("https://archive.mozilla.org/pub/firefox/nightly/2017/05/2017-05-15-10-02-38-"
+     "mozilla-central-l10n/firefox-55.0a1.ach.linux-x86_64.tar.bz2",
+     "https://archive.mozilla.org/pub/firefox/nightly/2017/05/"
+     "2017-05-15-10-02-38-mozilla-central/firefox-55.0a1.en-US.linux-x86_64.tar.bz2"
+     )
+]
+
+
+@pytest.mark.parametrize("localized_url,american_url", NIGHTLY_URLS)
+def test_localize_nightly_url(localized_url, american_url):
+    assert localize_nightly_url(localized_url) == american_url
