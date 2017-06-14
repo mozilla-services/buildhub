@@ -103,7 +103,7 @@ def is_release_filename(product, filename):
     """
     match_filename = filename.replace(' ', '-').lower()
     re_filename = re.compile("{}-(.+)({})$".format(product, FILE_EXTENSIONS))
-    re_exclude = re.compile(".+(sdk|tests|crashreporter)")
+    re_exclude = re.compile(".+(sdk|tests|crashreporter|stub)")
     return re_filename.match(match_filename) and not re_exclude.match(match_filename)
 
 
