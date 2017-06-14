@@ -23,7 +23,7 @@ import {
   ActionBar, ActionBarRow, SideBar
 } from "searchkit"
 
-const searchkit = new SearchkitManager("https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releases/", {searchUrlPath: "search"})
+const searchkit = new SearchkitManager("https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releasesv2/", {searchUrlPath: "search"})
 
 
 const HitsTable = (toggleExpand, expandedEntry) => {
