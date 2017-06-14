@@ -324,6 +324,7 @@ NIGHTLY_FILENAMES = [
     ("fennec-55.0a1.multi.android-i386.apk", "55.0a1", "multi", "android-i386"),
     ("fennec-55.0a1.multi.android-arm.apk", "55.0a1", "multi", "android-arm"),
     ("firefox-56.0a1.en-US.mac.dmg", "56.0a1", "en-US", "macosx"),
+    ("firefox-55.0a1.ar.win32.installer.exe", "55.0a1", "ar", "win32"),
 ]
 
 
@@ -337,6 +338,7 @@ NIGHTLY_WRONG_FILENAMES = [
     "firefox-tests.bz2",
     "firefox-crashreporter.gz",
     "foobar.bz2",
+    "firefox-55.0a1.ar.win32.installer-stub.exe",
 ]
 
 
