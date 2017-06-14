@@ -27,10 +27,11 @@ const searchkit = new SearchkitManager("https://kinto-ota.dev.mozaws.net/v1/buck
 
 
 const HitsTable = (toggleExpand, expandedEntry) => {
+  const tableStyle = {width: "100%", boxSizing: 'border-box'};
   return ({hits}) => {
     return (
       <div style={{width: '100%', boxSizing: 'border-box', padding: 8}}>
-        <table className="sk-table sk-table-striped" style={{width: '100%', boxSizing: 'border-box'}}>
+        <table className="sk-table sk-table-striped" style={tableStyle}>
           <thead>
             <tr>
               <th>Product</th>
@@ -52,19 +53,79 @@ const HitsTable = (toggleExpand, expandedEntry) => {
                 return (
                   <tr key={hit._id} onClick={clickHandler}>
                     <td colSpan="6">
-                      <p>Product: {hit._source.source.product}</p>
-                      <p>Version: {hit._source.target.version}</p>
-                      <p>Platform: {hit._source.target.platform}</p>
-                      <p>Channel: {hit._source.target.channel}</p>
-                      <p>Locale: {hit._source.target.locale}</p>
-                      <p>Published on: {hit._source.download.date}</p>
-                      <p>Tree: {hit._source.source.tree}</p>
-                      <p>Revision: {revisionUrl}</p>
-                      <p>URL: <a href={hit._source.download.url}>{filename}</a></p>
-                      <p>Mimetype: {hit._source.download.mimetype}</p>
-                      <p>Size: {hit._source.download.size}</p>
-                      <p>Build date: {hit._source.build && hit._source.build.date}</p>
-                      <p>Id: {hit._source.build && hit._source.build.id}</p>
+                      <table className="sk-table sk-table-striped" style={tableStyle}>
+                        <thead>
+                          <tr>
+                            <th>Product</th>
+                            <th>Tree</th>
+                            <th>Revision</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>{hit._source.source.product}</td>
+                            <td>{hit._source.source.tree}</td>
+                            <td>{revisionUrl}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+
+                      <h4>Target</h4>
+                      <table className="sk-table sk-table-striped" style={tableStyle}>
+                        <thead>
+                          <tr>
+                            <th>Version</th>
+                            <th>Platform</th>
+                            <th>Channel</th>
+                            <th>Locale</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>{hit._source.target.version}</td>
+                            <td>{hit._source.target.platform}</td>
+                            <td>{hit._source.target.channel}</td>
+                            <td>{hit._source.target.locale}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+
+                      <h4>Download</h4>
+                      <table className="sk-table sk-table-striped" style={tableStyle}>
+                        <thead>
+                          <tr>
+                            <th>URL</th>
+                            <th>Mimetype</th>
+                            <th>Size</th>
+                            <th>Published on</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td><a href={hit._source.download.url}>{filename}</a></td>
+                            <td>{hit._source.download.mimetype}</td>
+                            <td>{hit._source.download.size}</td>
+                            <td>{hit._source.download.date}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+
+                      <h4>Build</h4>
+                      <table className="sk-table sk-table-striped" style={tableStyle}>
+                        <thead>
+                          <tr>
+                            <th>id</th>
+                            <th>Date</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>{hit._source.build && hit._source.build.id}</td>
+                            <td>{hit._source.build && hit._source.build.date}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+
                     </td>
                   </tr>
                 )
