@@ -251,6 +251,7 @@ NIGHTLY_FILENAMES = [
     ("firefox-55.0a1.en-US.linux-x86_64.tar.bz2", "55.0a1", "en-US", "linux-x86_64"),
     ("fennec-55.0a1.multi.android-i386.apk", "55.0a1", "multi", "android-i386"),
     ("fennec-55.0a1.multi.android-arm.apk", "55.0a1", "multi", "android-arm"),
+    ("firefox-56.0a1.en-US.mac.dmg", "56.0a1", "en-US", "macosx"),
 ]
 
 
