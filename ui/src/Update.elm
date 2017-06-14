@@ -23,27 +23,34 @@ navigateToPage ({ filters } as model) newPage =
 
 updateFilters : NewFilter -> Filters -> Filters
 updateFilters newFilter filters =
-    case newFilter of
-        ClearAll ->
-            Init.initFilters
+    let
+        toggleFilter value active values =
+            if active then
+                value :: values
+            else
+                List.filter (\v -> v /= value) values
+    in
+        case newFilter of
+            ClearAll ->
+                Init.initFilters
 
-        NewProductFilter value ->
-            { filters | product = value, page = 1 }
+            NewProductFilter value active ->
+                { filters | product = filters.product |> toggleFilter value active, page = 1 }
 
-        NewVersionFilter value ->
-            { filters | version = value, page = 1 }
+            NewVersionFilter value active ->
+                { filters | version = filters.version |> toggleFilter value active, page = 1 }
 
-        NewPlatformFilter value ->
-            { filters | platform = value, page = 1 }
+            NewPlatformFilter value active ->
+                { filters | platform = filters.platform |> toggleFilter value active, page = 1 }
 
-        NewChannelFilter value ->
-            { filters | channel = value, page = 1 }
+            NewChannelFilter value active ->
+                { filters | channel = filters.channel |> toggleFilter value active, page = 1 }
 
-        NewLocaleFilter value ->
-            { filters | locale = value, page = 1 }
+            NewLocaleFilter value active ->
+                { filters | locale = filters.locale |> toggleFilter value active, page = 1 }
 
-        NewBuildIdSearch value ->
-            { filters | buildId = value, page = 1 }
+            NewBuildIdSearch value ->
+                { filters | buildId = value, page = 1 }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

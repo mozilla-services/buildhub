@@ -9,11 +9,11 @@ import Url exposing (..)
 
 initFilters : Filters
 initFilters =
-    { product = "all"
-    , version = "all"
-    , platform = "all"
-    , channel = "all"
-    , locale = "all"
+    { product = [ "all" ]
+    , version = [ "all" ]
+    , platform = [ "all" ]
+    , channel = [ "all" ]
+    , locale = [ "all" ]
     , buildId = ""
     , page = 1
     }

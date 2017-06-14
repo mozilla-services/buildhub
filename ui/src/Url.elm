@@ -36,11 +36,11 @@ routeFromUrl model location =
                     | route = FilteredView product channel platform version locale buildId page
                     , filters =
                         { buildId = buildId
-                        , product = product
-                        , channel = channel
-                        , platform = platform
-                        , version = version
-                        , locale = locale
+                        , product = product |> String.split "|"
+                        , channel = channel |> String.split "|"
+                        , platform = platform |> String.split "|"
+                        , version = version |> String.split "|"
+                        , locale = locale |> String.split "|"
                         , page = page
                         }
                 }
@@ -50,11 +50,11 @@ routeFromUrl model location =
                     | route = MainView
                     , filters =
                         { buildId = ""
-                        , product = "all"
-                        , channel = "all"
-                        , platform = "all"
-                        , version = "all"
-                        , locale = "all"
+                        , product = [ "all" ]
+                        , channel = [ "all" ]
+                        , platform = [ "all" ]
+                        , version = [ "all" ]
+                        , locale = [ "all" ]
                         , page = 1
                         }
                 }
@@ -88,4 +88,11 @@ urlFromRoute route =
 
 routeFromFilters : Filters -> Route
 routeFromFilters { buildId, locale, version, platform, channel, product, page } =
-    FilteredView product channel platform version locale buildId page
+    FilteredView
+        (product |> String.join "|")
+        (channel |> String.join "|")
+        (platform |> String.join "|")
+        (version |> String.join "|")
+        (locale |> String.join "|")
+        buildId
+        page

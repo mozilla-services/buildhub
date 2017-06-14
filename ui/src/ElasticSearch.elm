@@ -7,8 +7,8 @@ import Json.Encode as Encode
 import Types exposing (..)
 
 
-encodeMustClause : Filters -> Encode.Value
-encodeMustClause { product, channel, locale, version, platform, buildId } =
+encodeClause : Filters -> Encode.Value
+encodeClause { product, channel, locale, version, platform, buildId } =
     let
         encodeFilter ( name, value ) =
             Encode.object
@@ -31,13 +31,14 @@ encodeMustClause { product, channel, locale, version, platform, buildId } =
             else
                 acc
     in
-        [ ( "build.id", buildId )
-        , ( "source.product", product )
-        , ( "target.channel", channel )
-        , ( "target.locale", locale )
-        , ( "target.version", version )
-        , ( "target.platform", platform )
+        [ [ ( "build.id", buildId ) ]
+        , product |> List.map (\v -> ( "source.product", v ))
+        , channel |> List.map (\v -> ( "target.channel", v ))
+        , version |> List.map (\v -> ( "target.version", v ))
+        , locale |> List.map (\v -> ( "target.locale", v ))
+        , platform |> List.map (\v -> ( "target.platform", v ))
         ]
+            |> List.concat
             |> List.foldr refineFilters []
             |> List.map encodeFilter
             |> Encode.list
@@ -65,7 +66,7 @@ encodeQuery filters pageSize =
               , Encode.object
                     [ ( "bool"
                       , Encode.object
-                            [ ( "must", encodeMustClause filters ) ]
+                            [ ( "should", encodeClause filters ) ]
                       )
                     ]
               )
@@ -114,7 +115,7 @@ getFacets : Filters -> Int -> Http.Request Facets
 getFacets filters size =
     let
         endpoint =
-            "https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releases/search"
+            "https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releasesv2/search"
     in
         Http.post endpoint (Http.jsonBody (encodeQuery filters size)) decodeResponse
 

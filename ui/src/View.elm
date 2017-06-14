@@ -211,49 +211,24 @@ buildIdSearchForm buildId =
         ]
 
 
-facetSelector : String -> Int -> String -> (String -> Msg) -> List Facet -> Html Msg
-facetSelector title total selectedValue handler facet =
-    let
-        optionView entry =
-            let
-                countInfo =
-                    if entry.value == "all" && selectedValue /= "all" then
-                        ""
-                    else
-                        " (" ++ (toString entry.count) ++ ")"
-            in
-                option [ value entry.value, selected (entry.value == selectedValue) ]
-                    [ text <| entry.value ++ countInfo ]
-    in
-        div [ class "form-group" ]
-            [ label [] [ text title ]
-            , List.map optionView ((Facet total "all") :: facet)
-                |> select
-                    [ class "form-control"
-                    , onInput handler
-                    , value selectedValue
-                    ]
-            ]
-
-
 recordView : BuildRecord -> Html Msg
-recordView record =
+recordView { id, build, download, source, target, systemAddons } =
     div
-        [ class "panel panel-default", Html.Attributes.id record.id ]
+        [ class "panel panel-default", Html.Attributes.id id ]
         [ div [ class "panel-heading" ]
             [ div [ class "row" ]
                 [ strong [ class "col-sm-4" ]
                     [ a
                         [ let
                             buildInfo =
-                                Maybe.withDefault (Build "" "") record.build
+                                Maybe.withDefault (Build "" "") build
 
                             url =
-                                { product = record.source.product
-                                , version = record.target.version
-                                , platform = record.target.platform
-                                , channel = "all"
-                                , locale = record.target.locale
+                                { product = [ source.product ]
+                                , version = [ target.version ]
+                                , platform = [ target.platform ]
+                                , channel = [ "all" ]
+                                , locale = [ target.locale ]
                                 , buildId = buildInfo.id
                                 , page = 1
                                 }
@@ -263,13 +238,13 @@ recordView record =
                             href url
                         ]
                         [ text <|
-                            record.source.product
+                            source.product
                                 ++ " "
-                                ++ record.target.version
+                                ++ target.version
                         ]
                     ]
                 , small [ class "col-sm-4 text-center" ]
-                    [ case record.build of
+                    [ case build of
                         Just { date } ->
                             text date
 
@@ -277,7 +252,7 @@ recordView record =
                             text ""
                     ]
                 , em [ class "col-sm-4 text-right" ]
-                    [ case record.build of
+                    [ case build of
                         Just { id } ->
                             text id
 
@@ -287,11 +262,11 @@ recordView record =
                 ]
             ]
         , div [ class "panel-body" ]
-            [ viewSourceDetails record.source
-            , viewTargetDetails record.target
-            , viewDownloadDetails record.download
-            , viewBuildDetails record.build
-            , viewSystemAddonsDetails record.systemAddons
+            [ viewSourceDetails source
+            , viewTargetDetails target
+            , viewDownloadDetails download
+            , viewBuildDetails build
+            , viewSystemAddonsDetails systemAddons
             ]
         ]
 
@@ -451,6 +426,33 @@ spinner =
     div [ class "loader" ] []
 
 
+facetSelector : String -> Int -> List String -> (String -> Bool -> NewFilter) -> List Facet -> Html Msg
+facetSelector title total selectedValues filterMsg facets =
+    let
+        choice entry =
+            let
+                countInfo =
+                    " (" ++ (toString entry.count) ++ ")"
+            in
+                div [ class "checkbox" ]
+                    [ label []
+                        [ input
+                            [ type_ "checkbox"
+                            , value entry.value
+                            , checked <| List.member entry.value selectedValues
+                            , onCheck <| UpdateFilter << (filterMsg entry.value)
+                            ]
+                            []
+                        , text <| entry.value ++ countInfo
+                        ]
+                    ]
+    in
+        div [ class "form-group" ]
+            [ p [] [ text title ]
+            , div [ class "scrollable-choices" ] <| List.map choice facets
+            ]
+
+
 filtersView : Facets -> Filters -> Html Msg
 filtersView facets filters =
     let
@@ -465,11 +467,11 @@ filtersView facets filters =
             , div [ class "panel-body" ]
                 [ div []
                     [ buildIdSearchForm buildId
-                    , facetSelector "Products" total product (UpdateFilter << NewProductFilter) products
-                    , facetSelector "Versions" total version (UpdateFilter << NewVersionFilter) versions
-                    , facetSelector "Platforms" total platform (UpdateFilter << NewPlatformFilter) platforms
-                    , facetSelector "Channels" total channel (UpdateFilter << NewChannelFilter) channels
-                    , facetSelector "Locales" total locale (UpdateFilter << NewLocaleFilter) locales
+                    , facetSelector "Products" total product NewProductFilter products
+                    , facetSelector "Versions" total version NewVersionFilter versions
+                    , facetSelector "Platforms" total platform NewPlatformFilter platforms
+                    , facetSelector "Channels" total channel NewChannelFilter channels
+                    , facetSelector "Locales" total locale NewLocaleFilter locales
                     , div [ class "btn-group btn-group-justified" ]
                         [ div [ class "btn-group" ]
                             [ button

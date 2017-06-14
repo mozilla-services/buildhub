@@ -33,11 +33,11 @@ type alias Settings =
 
 
 type alias Filters =
-    { product : String
-    , version : String
-    , platform : String
-    , channel : String
-    , locale : String
+    { product : List String
+    , version : List String
+    , platform : List String
+    , channel : List String
+    , locale : List String
     , buildId : String
     , page : Int
     }
@@ -104,11 +104,11 @@ type alias Target =
 
 type NewFilter
     = ClearAll
-    | NewProductFilter String
-    | NewVersionFilter String
-    | NewPlatformFilter String
-    | NewChannelFilter String
-    | NewLocaleFilter String
+    | NewProductFilter String Bool
+    | NewVersionFilter String Bool
+    | NewPlatformFilter String Bool
+    | NewChannelFilter String Bool
+    | NewLocaleFilter String Bool
     | NewBuildIdSearch String
 
 
