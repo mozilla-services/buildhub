@@ -57,13 +57,13 @@ const HitsTable = (toggleExpand, expandedEntry) => {
                       <p>Platform: {hit._source.target.platform}</p>
                       <p>Channel: {hit._source.target.channel}</p>
                       <p>Locale: {hit._source.target.locale}</p>
-                      <p>Published on: {hit._source.build && hit._source.build.date}</p>
+                      <p>Published on: {hit._source.download.date}</p>
                       <p>Tree: {hit._source.source.tree}</p>
                       <p>Revision: {revisionUrl}</p>
                       <p>URL: <a href={hit._source.download.url}>{filename}</a></p>
                       <p>Mimetype: {hit._source.download.mimetype}</p>
                       <p>Size: {hit._source.download.size}</p>
-                      <p>Date: {hit._source.download.date}</p>
+                      <p>Build date: {hit._source.build && hit._source.build.date}</p>
                       <p>Id: {hit._source.build && hit._source.build.id}</p>
                     </td>
                   </tr>
@@ -76,7 +76,7 @@ const HitsTable = (toggleExpand, expandedEntry) => {
                     <td>{hit._source.target.platform}</td>
                     <td>{hit._source.target.channel}</td>
                     <td>{hit._source.target.locale}</td>
-                    <td>{hit._source.build && hit._source.build.date}</td>
+                    <td>{hit._source.download.date}</td>
                   </tr>
                 )
               }
@@ -162,8 +162,8 @@ class App extends Component {
                   <ActionBarRow>
                     <HitsStats/>
                     <SortingSelector options={[
-                      {label: "Latest Releases", field:"download.date", order: "desc", defaultOption: true},
-                      {label: "Relevance", field: "_score", order: "desc"},
+                      {label: "Published on", field:"download.date", order: "desc", defaultOption: true},
+                      {label: "Build date", field:"build.date", order: "desc"}
                     ]}/>
                   </ActionBarRow>
 
