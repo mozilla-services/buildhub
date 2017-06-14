@@ -26,13 +26,13 @@ RECORDS = [
 
     # Firefox Aurora
     {
-        "id": "firefox_aurora_54-0a2_mac_en-us",
+        "id": "firefox_aurora_54-0a2_macosx_en-us",
         "source": {
             "product": "firefox",
         },
         "target": {
             "version": "54.0a2",
-            "platform": "mac",
+            "platform": "macosx",
             "locale": "en-US",
             "channel": "aurora"
         },
