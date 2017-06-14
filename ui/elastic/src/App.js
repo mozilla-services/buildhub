@@ -126,6 +126,7 @@ class App extends Component {
                             size={10}
                             operator="OR"
                             orderKey="_term"
+                            orderDirection="desc"
                             listComponent={ItemCheckboxList}
                             translations={{"All":"All versions"}}/>
                 <RefinementListFilter field="target.platform"
