@@ -13,13 +13,15 @@ from kinto_http import cli_utils
 from kinto_http.exceptions import KintoException
 from .utils import is_release_filename
 from .index_filters import build_version_id
-
+from.scrape_archives import (
+    archive, fetch_release_metadata, fetch_nightly_metadata, parse_nightly_filename
+)
 
 ARCHIVE_URL = "https://archive.mozilla.org/pub/"
 PRODUCTS = ("fennec", "firefox", "thunderbird")
 DEFAULT_SERVER = "https://kinto-ota.dev.mozaws.net/v1"
 DEFAULT_BUCKET = "build-hub"
-DEFAULT_COLLECTION = "releases"
+DEFAULT_COLLECTION = "archives"
 NB_THREADS = 3
 NB_RETRY_REQUEST = 3
 TIMEOUT_SECONDS = 5 * 60
@@ -111,38 +113,42 @@ def archive_url(product, version=None, platform=None, locale=None, nightly=None,
 @backoff.on_exception(backoff.expo,
                       asyncio.TimeoutError,
                       max_tries=NB_RETRY_REQUEST)
-async def fetch_json(session, url):
+async def fetch_json(loop, session, url):
     headers = {
         "Accept": "application/json",
         "User-Agent": "BuildHub;storage-team@mozilla.com"
     }
-    with async_timeout.timeout(TIMEOUT_SECONDS):
-        async with session.get(url, headers=headers, timeout=None) as response:
-            return await response.json()
-
-
-async def fetch_listing(session, url):
     try:
-        data = await fetch_json(session, url)
+        with async_timeout.timeout(TIMEOUT_SECONDS):
+            async with session.get(url, headers=headers, timeout=None) as response:
+                return await response.json()
+    except (asyncio.TimeoutError, aiohttp.ClientConnectionError):
+        # Retry with a fresh session
+        async with aiohttp.ClientSession(loop=loop) as session:
+            return await fetch_json(loop, session, url)
+
+async def fetch_listing(loop, session, url):
+    try:
+        data = await fetch_json(loop, session, url)
         return data["prefixes"], data["files"]
     except (aiohttp.ClientError, KeyError, ValueError) as e:
         raise ValueError("Could not fetch {}: {}".format(url, e))
 
 
-async def fetch_nightlies(session, queue, product, client):
+async def fetch_nightlies(loop, session, queue, product, client):
     # Check latest known version on server.
     latest_nightly_folder = ""
 
     current_month = "{}/{:02d}".format(today.year, today.month)
     month_url = archive_url(product, nightly=current_month)
-    days_folders, _ = await fetch_listing(session, month_url)
+    days_folders, _ = await fetch_listing(loop, session, month_url)
 
     # Skip aurora nightlies and known nightlies...
     days_urls = [archive_url(product, nightly=current_month + "/" + f[:-1])
                  for f in days_folders if f > latest_nightly_folder]
     days_urls = [url for url in days_urls if "mozilla-central" in url]
 
-    futures = [fetch_listing(session, day_url) for day_url in days_urls]
+    futures = [fetch_listing(loop, session, day_url) for day_url in days_urls]
     listings = await asyncio.gather(*futures)
 
     batch_size = 10  # Add URL in the consumer queue 10 by 10
@@ -152,20 +158,33 @@ async def fetch_nightlies(session, queue, product, client):
         for i in range(nb_batches):
             files_subset = files[(i * batch_size):((i + 1) * batch_size)]
 
+            # Fetch metadata in batch.
+            futures = [fetch_nightly_metadata(session, day_url + file_["name"])
+                       for file_ in files_subset]
+            metadatas = await asyncio.gather(*futures)
+
             futures = []
-            for file_ in files_subset:
+            for file_, metadata in zip(files_subset, metadatas):
                 url = day_url + file_['name']
+                filename = file_["name"]
+                size = file_["size"]
+                date = file_["last_modified"]
+                try:
+                    version, locale, platform = parse_nightly_filename(filename)
+                except ValueError:
+                    continue
                 if not is_release_filename(product, file_['name']):
                     print('Skipping', url)
                     continue
-
-                futures.append(queue.put(url))
+                record = archive(product, version, platform, locale, url,
+                                 size, date, metadata)
+                futures.append(queue.put(record))
             await asyncio.gather(*futures)
 
 
-async def fetch_versions(session, queue, product, client):
+async def fetch_versions(loop, session, queue, product, client):
     product_url = archive_url(product)
-    versions_folders, _ = await fetch_listing(session, product_url)
+    versions_folders, _ = await fetch_listing(loop, session, product_url)
 
     versions = [v[:-1] for v in versions_folders if re.match(r'^[0-9]', v)]
     versions = [v for v in versions if "funnelcake" not in v]
@@ -173,38 +192,38 @@ async def fetch_versions(session, queue, product, client):
     versions = sorted(versions, key=lambda v: build_version_id(v.replace('-real', '')),
                       reverse=True)
 
-    futures = [fetch_platforms(session, queue, product, version)
+    futures = [fetch_platforms(loop, session, queue, product, version)
                for version in versions]
     return await asyncio.gather(*futures)
 
 
-async def fetch_platforms(session, queue, product, version):
+async def fetch_platforms(loop, session, queue, product, version):
     version_url = archive_url(product, version)
-    platform_folders, _ = await fetch_listing(session, version_url)
+    platform_folders, _ = await fetch_listing(loop, session, version_url)
 
     platforms = [p[:-1] for p in platform_folders]  # strip trailing /
     platforms = [p for p in platforms if p not in ("source", "update", "contrib")]
 
-    futures = [fetch_locales(session, queue, product, version, platform)
+    futures = [fetch_locales(loop, session, queue, product, version, platform)
                for platform in platforms]
     return await asyncio.gather(*futures)
 
 
-async def fetch_locales(session, queue, product, version, platform):
+async def fetch_locales(loop, session, queue, product, version, platform):
     platform_url = archive_url(product, version, platform)
-    locale_folders, _ = await fetch_listing(session, platform_url)
+    locale_folders, _ = await fetch_listing(loop, session, platform_url)
 
     locales = [l[:-1] for l in locale_folders]
     locales = [l for l in locales if l != "xpi"]
 
-    futures = [fetch_files(session, queue, product, version, platform, locale)
+    futures = [fetch_files(loop, session, queue, product, version, platform, locale)
                for locale in locales]
     return await asyncio.gather(*futures)
 
 
-async def fetch_files(session, queue, product, version, platform, locale):
+async def fetch_files(loop, session, queue, product, version, platform, locale):
     locale_url = archive_url(product, version, platform, locale)
-    _, files = await fetch_listing(session, locale_url)
+    _, files = await fetch_listing(loop, session, locale_url)
 
     futures = []
     for file_ in files:
@@ -214,24 +233,32 @@ async def fetch_files(session, queue, product, version, platform, locale):
         if not is_release_filename(product, filename):
             print('Skipping', url)
             continue
-        futures.append(queue.put(url))
+
+        size = file_["size"]
+        date = file_["last_modified"]
+
+        metadata = await fetch_release_metadata(session, product, version, platform, locale)
+        record = archive(product, version, platform, locale, url, size, date, metadata)
+        logger.debug("Release found {}".format(url))
+
+        futures.append(queue.put(record))
 
     return await asyncio.gather(*futures)
 
 
-async def fetch_products(session, queue, products, client):
+async def fetch_products(loop, session, queue, products, client):
     # Nightlies
-    # futures = [fetch_nightlies(session, queue, product, client) for product in products]
+    # futures = [fetch_nightlies(loop, session, queue, product, client) for product in products]
     # await asyncio.gather(*futures)
     # Releases
-    futures = [fetch_versions(session, queue, product, client) for product in products]
+    futures = [fetch_versions(loop, session, queue, product, client) for product in products]
     await asyncio.gather(*futures)
 
 
 async def produce(loop, queue, client):
     """Grab releases from the archives website."""
     async with aiohttp.ClientSession(loop=loop) as session:
-        await fetch_products(session, queue, PRODUCTS, client)
+        await fetch_products(loop, session, queue, PRODUCTS, client)
     logger.info("Scraping releases done.")
 
 
@@ -242,7 +269,8 @@ async def consume(loop, queue, executor, client):
     print("Start consumer.")
 
     while True:
-        release_url = await queue.get()
+        record = await queue.get()
+        release_url = record['download']['url']
         release_id = build_record_id(release_url)
         if release_id is None:
             print('Skipping', release_url)
@@ -253,6 +281,7 @@ async def consume(loop, queue, executor, client):
         except KintoException as e:
             if e.response.status_code == 404:
                 status = 'MISSING'
+                client.create_record(data=record)
             else:
                 import pdb
                 pdb.set_trace()
