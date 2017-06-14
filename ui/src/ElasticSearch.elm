@@ -62,7 +62,7 @@ encodeQuery filters pageSize =
         Encode.object
             [ ( "size", Encode.int pageSize )
             , ( "from", Encode.int <| (filters.page - 1) * pageSize )
-            , ( "query"
+            , ( "post_filter"
               , Encode.object
                     [ ( "bool"
                       , Encode.object
