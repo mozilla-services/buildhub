@@ -80,11 +80,11 @@ def parse_nightly_filename(filename):
                             r"\.(.+)"  # platform
                             r"\.({})$".format(FILE_EXTENSIONS))
     match = re_nightly.search(filename)
-    if not match or "tests" in filename or "crashreporter" in filename:
+    if not match or "tests" in filename or "crashreporter" in filename or "stub" in filename:
         raise ValueError()
     version = match.group(1)
     locale = match.group(2)
-    platform = match.group(4)
+    platform = match.group(4).replace('.installer', '')
     if platform == 'mac':
         platform = 'macosx'
     return version, locale, platform
