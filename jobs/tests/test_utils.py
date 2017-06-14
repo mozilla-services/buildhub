@@ -114,6 +114,24 @@ RECORDS = [
         }
     },
 
+    # Thunderbird Old Release
+    {
+        "id": "thunderbird_10-0-12esr_macosx_pt-br",
+        "source": {
+            "product": "thunderbird",
+        },
+        "target": {
+            "version": "10.0.12esr",
+            "platform": "macosx",
+            "locale": "pt-BR",
+            "channel": "release"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/thunderbird/releases/10.0.12esr/mac/pt-BR/"
+            "Thunderbird 10.0.12esr.dmg",
+        }
+    },
+
     # Thunderbird Release
     {
         "id": "thunderbird_17-0-8esr_linux-x86_64_gd",
@@ -306,6 +324,7 @@ RELEASE_FILENAMES = [
     ("thunderbird", "thunderbird-17.0.8esr.tar.bz2"),
     ("fennec", "fennec-39.0b5.sl.android-arm.apk"),
     ("fennec", "fennec-42.0b2.fr.android-arm.apk"),
+    ("thunderbird", "Thunderbird 10.0.12esr.dmg"),
 ]
 
 

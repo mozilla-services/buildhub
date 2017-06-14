@@ -97,10 +97,12 @@ def is_release_filename(product, filename):
 
     - firefox-1.5.0.5.tar.gz.asc
     - firefox-52.0.win32.sdk.zip
+    - Thunderbird 10.0.12esr.dmg
     """
+    match_filename = filename.replace(' ', '-').lower()
     re_filename = re.compile("{}-(.+)({})$".format(product, FILE_EXTENSIONS))
     re_exclude = re.compile(".+(sdk|tests|crashreporter)")
-    return re_filename.match(filename) and not re_exclude.match(filename)
+    return re_filename.match(match_filename) and not re_exclude.match(match_filename)
 
 
 def is_release_metadata(product, version, filename):
