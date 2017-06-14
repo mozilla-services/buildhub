@@ -127,6 +127,7 @@ async def fetch_json(loop, session, url):
         async with aiohttp.ClientSession(loop=loop) as session:
             return await fetch_json(loop, session, url)
 
+
 async def fetch_listing(loop, session, url):
     try:
         data = await fetch_json(loop, session, url)
