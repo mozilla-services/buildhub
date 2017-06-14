@@ -26,4 +26,13 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-    Contact GitHub API Training Shop Blog About
+/* Filter widgets */
+
+.scrollable-choices {
+  max-height: 120px;
+  overflow: auto;
+}
+
+.scrollable-choices .checkbox {
+  margin: 0 5px 0;
+}
