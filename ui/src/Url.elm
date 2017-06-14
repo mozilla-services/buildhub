@@ -88,11 +88,20 @@ urlFromRoute route =
 
 routeFromFilters : Filters -> Route
 routeFromFilters { buildId, locale, version, platform, channel, product, page } =
-    FilteredView
-        (product |> String.join "|")
-        (channel |> String.join "|")
-        (platform |> String.join "|")
-        (version |> String.join "|")
-        (locale |> String.join "|")
-        buildId
-        page
+    let
+        buildUrlParam values =
+            if List.length values == 0 then
+                "all"
+            else if List.length values > 1 && List.member "all" values then
+                values |> List.filter (\v -> v /= "all") |> String.join "|"
+            else
+                values |> String.join "|"
+    in
+        FilteredView
+            (product |> buildUrlParam)
+            (channel |> buildUrlParam)
+            (platform |> buildUrlParam)
+            (version |> buildUrlParam)
+            (locale |> buildUrlParam)
+            buildId
+            page
