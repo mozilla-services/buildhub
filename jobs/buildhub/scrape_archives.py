@@ -95,6 +95,9 @@ def latest_known_version(client, product):
 
 
 def archive(product, version, platform, locale, url, size, date, metadata=None):
+    if platform == 'mac':
+        platform = 'macosx'
+
     record = {
         "source": {
             "product": product,

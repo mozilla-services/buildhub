@@ -84,6 +84,8 @@ def parse_nightly_filename(filename):
     version = match.group(1)
     locale = match.group(2)
     platform = match.group(4)
+    if platform == 'mac':
+        platform = 'macosx'
     return version, locale, platform
 
 
