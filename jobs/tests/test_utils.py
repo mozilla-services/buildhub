@@ -114,7 +114,61 @@ RECORDS = [
         }
     },
 
-    # Thunderbird Old Release
+    # Firefox Win release
+    {
+        "id": "firefox_beta_16-0b6_win32_bs",
+        "source": {
+            "product": "firefox",
+        },
+        "target": {
+            "version": "16.0b6",
+            "platform": "win32",
+            "locale": "bs",
+            "channel": "beta"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/firefox/releases/16.0b6/win32/bs/"
+            "Firefox Setup 16.0b6.exe",
+        }
+    },
+
+    # Firefox MacOSX release
+    {
+        "id": "firefox_50-0-1_macosx_ko",
+        "source": {
+            "product": "firefox",
+        },
+        "target": {
+            "version": "50.0.1",
+            "platform": "macosx",
+            "locale": "ko",
+            "channel": "release"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/firefox/releases/50.0.1/mac/ko/"
+            "Firefox 50.0.1.dmg",
+        }
+    },
+
+    # Thunderbird Windows Release
+    {
+        "id": "thunderbird_beta_11-0b2_win32_eu",
+        "source": {
+            "product": "thunderbird",
+        },
+        "target": {
+            "version": "11.0b2",
+            "platform": "win32",
+            "locale": "eu",
+            "channel": "beta"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/thunderbird/releases/11.0b2/win32/eu/"
+            "Thunderbird Setup 11.0b2.exe",
+        }
+    },
+
+    # Thunderbird Mac OS X Release
     {
         "id": "thunderbird_10-0-12esr_macosx_pt-br",
         "source": {
@@ -325,6 +379,9 @@ RELEASE_FILENAMES = [
     ("fennec", "fennec-39.0b5.sl.android-arm.apk"),
     ("fennec", "fennec-42.0b2.fr.android-arm.apk"),
     ("thunderbird", "Thunderbird 10.0.12esr.dmg"),
+    ("thunderbird", "Thunderbird Setup 11.0b2.exe"),
+    ("firefox", "Firefox Setup 17.0b3.exe"),
+    ("firefox", "Firefox 50.0.1.dmg"),
 ]
 
 

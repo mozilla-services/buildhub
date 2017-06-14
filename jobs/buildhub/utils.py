@@ -1,13 +1,14 @@
 import os.path
 import re
 
-FILE_EXTENSIONS = "zip|tar.gz|tar.bz2|dmg|apk"
+FILE_EXTENSIONS = "zip|tar.gz|tar.bz2|dmg|apk|exe"
 KNOWN_MIMETYPES = {
     'apk': 'application/vnd.android.package-archive',
     'bz2': 'application/x-bzip2',
     'zip': 'application/zip',
     'dmg': 'application/x-apple-diskimage',
     'gz': 'application/x-gzip',
+    'exe': 'application/msdos-windows',
     }
 
 
@@ -98,6 +99,7 @@ def is_release_filename(product, filename):
     - firefox-1.5.0.5.tar.gz.asc
     - firefox-52.0.win32.sdk.zip
     - Thunderbird 10.0.12esr.dmg
+    - Firefox Setup 17.0b3.exe
     """
     match_filename = filename.replace(' ', '-').lower()
     re_filename = re.compile("{}-(.+)({})$".format(product, FILE_EXTENSIONS))
