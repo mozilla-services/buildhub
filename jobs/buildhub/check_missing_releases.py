@@ -32,11 +32,11 @@ logger = logging.getLogger(__name__)
 
 def build_record_id(url):
     # Generate an ID that looks like that: firefox_53.0b9_linux-i686_en-US
-    parts = basename(url).split('.')
+    parts = basename(url.replace(' ', '-').lower()).split('.')
     url_parts = url.split('/')
 
     try:
-        product_name, major_version = parts[0].split('-')
+        product_name, major_version = parts[0].replace('-setup', '').split('-')
     except Exception:
         return None
     channel = 'release'
@@ -79,6 +79,9 @@ def build_record_id(url):
         channel += "-old-id"
 
     channel = channel + "_" if channel != "release" else ""
+
+    if arch == 'mac':
+        arch = 'macosx'
 
     return '{}_{}{}_{}_{}'.format(
         product_name, channel, version, arch, locale).replace('.', '-').lower()
