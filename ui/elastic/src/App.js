@@ -115,6 +115,7 @@ class App extends Component {
               <SearchBox
               autofocus={true}
               searchOnChange={true}
+              placeholder="Search a build ID, eg: 201706*"
               queryFields={["build.id"]}/>
             </TopBar>
 
