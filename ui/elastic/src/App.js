@@ -45,7 +45,7 @@ const HitsTable = (toggleExpand, expandedEntry) => {
           <tbody>
             {hits.map(({_source: {build, download, source, target}, _id}) => {
               const revisionUrl = (source.revision)
-                ? (<a href={(source.repository + '/rev/' + source.revision)}>{source.revision}</a>)
+                ? (<a href={`${source.repository}/rev/${source.revision}`}>{source.revision}</a>)
                 : "";
               const filename = download.url.split("/").reverse()[0];
               const clickHandler = (event, data) => toggleExpand(event, data, _id);
