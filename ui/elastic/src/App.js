@@ -33,7 +33,7 @@ const searchkit = new SearchkitManager(
   { searchUrlPath: "search" }
 );
 
-const HitItem = (toggleExpand, expandedEntry) => {
+function HitItem(toggleExpand, expandedEntry) {
   return ({result: { _source: { build, download, source, target }, _id }}) => {
     const revisionUrl = source.revision
       ? <a href={`${source.repository}/rev/${source.revision}`}>
@@ -55,7 +55,7 @@ const HitItem = (toggleExpand, expandedEntry) => {
           className="panel-body"
           style={(expandedEntry === _id) ? {display: "block"} : {display: "none"}}>
 
-          <table>
+          <table className="table table-condensed">
             <thead>
               <tr>
                 <th>Product</th>
@@ -67,28 +67,49 @@ const HitItem = (toggleExpand, expandedEntry) => {
             <tbody>
               <tr>
                 <td>
-                  Product: {source.product}<br/>
-                  Tree: {source.tree}<br/>
-                  Revision: {revisionUrl}
+                  <dl>
+                    <dt>Name</dt>
+                    <dd>{source.product}</dd>
+                    <dt>Tree</dt>
+                    <dd>{source.tree}</dd>
+                    <dt>Revision</dt>
+                    <dd>{revisionUrl}</dd>
+                  </dl>
                 </td>
 
                 <td>
-                  Version: {target.version}<br/>
-                  Platform: {target.platform}<br/>
-                  Channel: {target.channel}<br/>
-                  Locale: {target.locale}
+                  <dl>
+                    <dt>Version</dt>
+                    <dd>{target.version}</dd>
+                    <dt>Platform</dt>
+                    <dd>{target.platform}</dd>
+                    <dt>Channel</dt>
+                    <dd>{target.channel}</dd>
+                    <dt>Locale</dt>
+                    <dd>{target.locale}</dd>
+                  </dl>
                 </td>
 
                 <td>
-                  URL: <a href={download.url}>{filename}</a><br/>
-                  Mimetype: {download.mimetype}<br/>
-                  Size: {download.size}<br/>
-                  Published on: {download.date}
+                  <dl>
+                    <dt>URL</dt>
+                    <dd><a href={download.url}>{filename}</a></dd>
+                    <dt>Mimetype</dt>
+                    <dd>{download.mimetype}</dd>
+                    <dt>Size</dt>
+                    <dd>{download.size}</dd>
+                    <dt>Published on</dt>
+                    <dd>{download.date}</dd>
+                  </dl>
                 </td>
 
                 <td>
-                  ID: {build && build.id}<br/>
-                  Date: {build && build.date}
+                  <dl>
+                    <dt>ID</dt>
+                    <dd>{build && build.id}</dd>
+                    <dt>Date</dt>
+                    <dd>{build && build.date}</dd>
+                  </dl>
                 </td>
               </tr>
             </tbody>
