@@ -7,41 +7,79 @@ import Json.Encode as Encode
 import Types exposing (..)
 
 
-encodeClause : Filters -> Encode.Value
-encodeClause { product, channel, locale, version, platform, buildId } =
-    let
-        encodeFilter ( name, value ) =
-            Encode.object
-                [ ( if name == "build.id" then
-                        "prefix"
-                    else
-                        "match"
-                  , Encode.object [ ( name, Encode.string value ) ]
-                  )
-                ]
+type alias Clauses =
+    ( List MustClause, List ShouldClause )
 
-        refineFilters ( k, v ) acc =
-            if k == "build.id" then
-                if v /= "" then
-                    ( "build.id", v ) :: acc
-                else
-                    acc
-            else if v /= "all" then
-                ( k, v ) :: acc
-            else
-                acc
-    in
-        [ [ ( "build.id", buildId ) ]
-        , product |> List.map (\v -> ( "source.product", v ))
-        , channel |> List.map (\v -> ( "target.channel", v ))
-        , version |> List.map (\v -> ( "target.version", v ))
-        , locale |> List.map (\v -> ( "target.locale", v ))
-        , platform |> List.map (\v -> ( "target.platform", v ))
+
+type ClauseKind
+    = Match
+    | Prefix
+
+
+type alias MustClause =
+    Encode.Value
+
+
+type alias ShouldClause =
+    Encode.Value
+
+
+clauseName : ClauseKind -> String
+clauseName kind =
+    case kind of
+        Prefix ->
+            "prefix"
+
+        _ ->
+            "match"
+
+
+encodeClause : ClauseKind -> String -> String -> Encode.Value
+encodeClause kind name value =
+    Encode.object
+        [ ( clauseName kind
+          , Encode.object [ ( name, Encode.string value ) ]
+          )
         ]
-            |> List.concat
-            |> List.foldr refineFilters []
-            |> List.map encodeFilter
-            |> Encode.list
+
+
+extractClauses : ClauseKind -> String -> List String -> Clauses
+extractClauses kind field values =
+    case values of
+        [] ->
+            ( [], [] )
+
+        [ "" ] ->
+            ( [], [] )
+
+        [ value ] ->
+            ( [ encodeClause kind field value ], [] )
+
+        values ->
+            ( [], List.map (encodeClause kind field) values )
+
+
+encodeFilters : Filters -> Encode.Value
+encodeFilters { product, channel, locale, version, platform, buildId } =
+    let
+        ( must, should ) =
+            [ extractClauses Match "source.product" product
+            , extractClauses Match "target.channel" channel
+            , extractClauses Match "target.version" version
+            , extractClauses Match "target.locale" locale
+            , extractClauses Match "target.platform" platform
+            , extractClauses Prefix "build.id" [ buildId ]
+            ]
+                |> List.foldl
+                    (\( m, s ) ( macc, sacc ) ->
+                        ( List.concat [ m, macc ], List.concat [ s, sacc ] )
+                    )
+                    ( [], [] )
+    in
+        Encode.object
+            [ ( "must", Encode.list must )
+            , ( "should", Encode.list should )
+            ]
 
 
 encodeQuery : Filters -> Int -> Encode.Value
@@ -62,14 +100,7 @@ encodeQuery filters pageSize =
         Encode.object
             [ ( "size", Encode.int pageSize )
             , ( "from", Encode.int <| (filters.page - 1) * pageSize )
-            , ( "post_filter"
-              , Encode.object
-                    [ ( "bool"
-                      , Encode.object
-                            [ ( "should", encodeClause filters ) ]
-                      )
-                    ]
-              )
+            , ( "post_filter", Encode.object [ ( "bool", encodeFilters filters ) ] )
             , ( "aggregations"
               , Encode.object
                     [ encodeFacet "products" "source.product"

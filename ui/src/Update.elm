@@ -21,33 +21,40 @@ navigateToPage ({ filters } as model) newPage =
             ! [ newUrl <| urlFromRoute updatedRoute ]
 
 
-updateFilters : NewFilter -> Filters -> Filters
-updateFilters newFilter filters =
+updateFilters : Facets -> NewFilter -> Filters -> Filters
+updateFilters facets newFilter filters =
     let
-        toggleFilter value active values =
-            if active then
-                value :: values
-            else
-                List.filter (\v -> v /= value) values
+        toggleFilter facets value active values =
+            let
+                newValues =
+                    if active then
+                        value :: (List.filter (\v -> v /= "all") values)
+                    else
+                        List.filter (\v -> v /= value) values
+            in
+                if List.length newValues == List.length facets then
+                    []
+                else
+                    newValues
     in
         case newFilter of
             ClearAll ->
                 Init.initFilters
 
             NewProductFilter value active ->
-                { filters | product = filters.product |> toggleFilter value active, page = 1 }
+                { filters | product = filters.product |> toggleFilter facets.products value active, page = 1 }
 
             NewVersionFilter value active ->
-                { filters | version = filters.version |> toggleFilter value active, page = 1 }
+                { filters | version = filters.version |> toggleFilter facets.versions value active, page = 1 }
 
             NewPlatformFilter value active ->
-                { filters | platform = filters.platform |> toggleFilter value active, page = 1 }
+                { filters | platform = filters.platform |> toggleFilter facets.platforms value active, page = 1 }
 
             NewChannelFilter value active ->
-                { filters | channel = filters.channel |> toggleFilter value active, page = 1 }
+                { filters | channel = filters.channel |> toggleFilter facets.channels value active, page = 1 }
 
             NewLocaleFilter value active ->
-                { filters | locale = filters.locale |> toggleFilter value active, page = 1 }
+                { filters | locale = filters.locale |> toggleFilter facets.locales value active, page = 1 }
 
             NewBuildIdSearch value ->
                 { filters | buildId = value, page = 1 }
@@ -69,15 +76,20 @@ update msg ({ filters, settings } as model) =
             navigateToPage model <| filters.page - 1
 
         UpdateFilter newFilter ->
-            let
-                updatedFilters =
-                    updateFilters newFilter filters
+            case model.facets of
+                Nothing ->
+                    model ! []
 
-                updatedRoute =
-                    routeFromFilters updatedFilters
-            in
-                { model | filters = updatedFilters }
-                    ! [ newUrl <| urlFromRoute updatedRoute ]
+                Just facets ->
+                    let
+                        updatedFilters =
+                            updateFilters facets newFilter filters
+
+                        updatedRoute =
+                            routeFromFilters updatedFilters
+                    in
+                        { model | filters = updatedFilters }
+                            ! [ newUrl <| urlFromRoute updatedRoute ]
 
         UrlChange location ->
             let

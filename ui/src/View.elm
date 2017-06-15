@@ -227,7 +227,7 @@ recordView { id, build, download, source, target, systemAddons } =
                                 { product = [ source.product ]
                                 , version = [ target.version ]
                                 , platform = [ target.platform ]
-                                , channel = [ "all" ]
+                                , channel = [ target.channel ]
                                 , locale = [ target.locale ]
                                 , buildId = buildInfo.id
                                 , page = 1
@@ -439,7 +439,7 @@ facetSelector title total selectedValues filterMsg facets =
                         [ input
                             [ type_ "checkbox"
                             , value entry.value
-                            , checked <| List.member entry.value selectedValues
+                            , checked <| selectedValues /= [] && List.member entry.value selectedValues
                             , onCheck <| UpdateFilter << (filterMsg entry.value)
                             ]
                             []

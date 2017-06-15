@@ -36,11 +36,11 @@ routeFromUrl model location =
                     | route = FilteredView product channel platform version locale buildId page
                     , filters =
                         { buildId = buildId
-                        , product = product |> String.split "|"
-                        , channel = channel |> String.split "|"
-                        , platform = platform |> String.split "|"
-                        , version = version |> String.split "|"
-                        , locale = locale |> String.split "|"
+                        , product = product |> String.split "|" |> List.filter (\v -> v /= "all")
+                        , channel = channel |> String.split "|" |> List.filter (\v -> v /= "all")
+                        , platform = platform |> String.split "|" |> List.filter (\v -> v /= "all")
+                        , version = version |> String.split "|" |> List.filter (\v -> v /= "all")
+                        , locale = locale |> String.split "|" |> List.filter (\v -> v /= "all")
                         , page = page
                         }
                 }
@@ -50,11 +50,11 @@ routeFromUrl model location =
                     | route = MainView
                     , filters =
                         { buildId = ""
-                        , product = [ "all" ]
-                        , channel = [ "all" ]
-                        , platform = [ "all" ]
-                        , version = [ "all" ]
-                        , locale = [ "all" ]
+                        , product = []
+                        , channel = []
+                        , platform = []
+                        , version = []
+                        , locale = []
                         , page = 1
                         }
                 }
@@ -92,16 +92,14 @@ routeFromFilters { buildId, locale, version, platform, channel, product, page } 
         buildUrlParam values =
             if List.length values == 0 then
                 "all"
-            else if List.length values > 1 && List.member "all" values then
-                values |> List.filter (\v -> v /= "all") |> String.join "|"
             else
-                values |> String.join "|"
+                String.join "|" values
     in
         FilteredView
-            (product |> buildUrlParam)
-            (channel |> buildUrlParam)
-            (platform |> buildUrlParam)
-            (version |> buildUrlParam)
-            (locale |> buildUrlParam)
+            (buildUrlParam product)
+            (buildUrlParam channel)
+            (buildUrlParam platform)
+            (buildUrlParam version)
+            (buildUrlParam locale)
             buildId
             page
