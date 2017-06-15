@@ -185,7 +185,7 @@ class App extends Component {
                 <RefinementListFilter field="target.version"
                             title="Version"
                             id="versions"
-                            size={10}
+                            size={1000}
                             operator="OR"
                             orderKey="_term"
                             orderDirection="desc"
@@ -194,7 +194,7 @@ class App extends Component {
                 <RefinementListFilter field="target.platform"
                             title="Platform"
                             id="platform"
-                            size={10}
+                            size={1000}
                             operator="OR"
                             orderKey="_term"
                             listComponent={ItemCheckboxList}
@@ -202,7 +202,7 @@ class App extends Component {
                 <RefinementListFilter field="target.channel"
                             title="Channel"
                             id="channel"
-                            size={10}
+                            size={1000}
                             operator="OR"
                             orderKey="_term"
                             listComponent={ItemCheckboxList}
@@ -210,7 +210,7 @@ class App extends Component {
                 <RefinementListFilter field="target.locale"
                             title="Locale"
                             id="locale"
-                            size={10}
+                            size={1000}
                             operator="OR"
                             orderKey="_term"
                             listComponent={ItemCheckboxList}
