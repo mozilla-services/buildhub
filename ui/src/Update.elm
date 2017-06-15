@@ -24,13 +24,13 @@ navigateToPage ({ filters } as model) newPage =
 updateFilters : Facets -> NewFilter -> Filters -> Filters
 updateFilters facets newFilter filters =
     let
-        toggleFilter facets value active values =
+        toggleFilter facets value values =
             let
                 newValues =
-                    if active then
-                        value :: (List.filter (\v -> v /= "all") values)
-                    else
+                    if List.member value values then
                         List.filter (\v -> v /= value) values
+                    else
+                        value :: values
             in
                 if List.length newValues == List.length facets then
                     []
@@ -41,20 +41,20 @@ updateFilters facets newFilter filters =
             ClearAll ->
                 Init.initFilters
 
-            NewProductFilter value active ->
-                { filters | product = filters.product |> toggleFilter facets.products value active, page = 1 }
+            NewProductFilter value ->
+                { filters | product = filters.product |> toggleFilter facets.products value, page = 1 }
 
-            NewVersionFilter value active ->
-                { filters | version = filters.version |> toggleFilter facets.versions value active, page = 1 }
+            NewVersionFilter value ->
+                { filters | version = filters.version |> toggleFilter facets.versions value, page = 1 }
 
-            NewPlatformFilter value active ->
-                { filters | platform = filters.platform |> toggleFilter facets.platforms value active, page = 1 }
+            NewPlatformFilter value ->
+                { filters | platform = filters.platform |> toggleFilter facets.platforms value, page = 1 }
 
-            NewChannelFilter value active ->
-                { filters | channel = filters.channel |> toggleFilter facets.channels value active, page = 1 }
+            NewChannelFilter value ->
+                { filters | channel = filters.channel |> toggleFilter facets.channels value, page = 1 }
 
-            NewLocaleFilter value active ->
-                { filters | locale = filters.locale |> toggleFilter facets.locales value active, page = 1 }
+            NewLocaleFilter value ->
+                { filters | locale = filters.locale |> toggleFilter facets.locales value, page = 1 }
 
             NewBuildIdSearch value ->
                 { filters | buildId = value, page = 1 }

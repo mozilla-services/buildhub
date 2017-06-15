@@ -1,6 +1,7 @@
 module View exposing (view)
 
 import Filesize
+import Json.Decode exposing (succeed)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -426,21 +427,30 @@ spinner =
     div [ class "loader" ] []
 
 
-facetSelector : String -> Int -> List String -> (String -> Bool -> NewFilter) -> List Facet -> Html Msg
+facetSelector : String -> Int -> List String -> (String -> NewFilter) -> List Facet -> Html Msg
 facetSelector title total selectedValues filterMsg facets =
     let
         choice entry =
             let
+                active =
+                    List.member entry.value selectedValues
+
                 countInfo =
                     " (" ++ (toString entry.count) ++ ")"
+
+                msg =
+                    UpdateFilter (filterMsg entry.value)
             in
                 div [ class "checkbox" ]
                     [ label []
                         [ input
                             [ type_ "checkbox"
                             , value entry.value
-                            , checked <| selectedValues /= [] && List.member entry.value selectedValues
-                            , onCheck <| UpdateFilter << (filterMsg entry.value)
+                            , checked active
+                            , onWithOptions
+                                "click"
+                                { preventDefault = True, stopPropagation = False }
+                                (succeed msg)
                             ]
                             []
                         , text <| entry.value ++ countInfo
