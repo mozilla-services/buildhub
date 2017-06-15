@@ -43,15 +43,15 @@ const HitsTable = (toggleExpand, expandedEntry) => {
             </tr>
           </thead>
           <tbody>
-            {hits.map(hit => {
-              const revisionUrl = (hit._source.source.revision)
-                ? (<a href={(hit._source.source.repository + '/rev/' + hit._source.source.revision)}>{hit._source.source.revision}</a>)
+            {hits.map(({_source: {build, download, source, target}, _id}) => {
+              const revisionUrl = (source.revision)
+                ? (<a href={(source.repository + '/rev/' + source.revision)}>{source.revision}</a>)
                 : "";
-              const filename = hit._source.download.url.split("/").reverse()[0];
-              const clickHandler = (event, data) => toggleExpand(event, data, hit._id);
-              if (expandedEntry === hit._id) {
+              const filename = download.url.split("/").reverse()[0];
+              const clickHandler = (event, data) => toggleExpand(event, data, _id);
+              if (expandedEntry === _id) {
                 return (
-                  <tr key={hit._id} onClick={clickHandler}>
+                  <tr key={_id} onClick={clickHandler}>
                     <td colSpan="6">
                       <table className="sk-table sk-table-striped" style={tableStyle}>
                         <thead>
@@ -63,8 +63,8 @@ const HitsTable = (toggleExpand, expandedEntry) => {
                         </thead>
                         <tbody>
                           <tr>
-                            <td>{hit._source.source.product}</td>
-                            <td>{hit._source.source.tree}</td>
+                            <td>{source.product}</td>
+                            <td>{source.tree}</td>
                             <td>{revisionUrl}</td>
                           </tr>
                         </tbody>
@@ -82,10 +82,10 @@ const HitsTable = (toggleExpand, expandedEntry) => {
                         </thead>
                         <tbody>
                           <tr>
-                            <td>{hit._source.target.version}</td>
-                            <td>{hit._source.target.platform}</td>
-                            <td>{hit._source.target.channel}</td>
-                            <td>{hit._source.target.locale}</td>
+                            <td>{target.version}</td>
+                            <td>{target.platform}</td>
+                            <td>{target.channel}</td>
+                            <td>{target.locale}</td>
                           </tr>
                         </tbody>
                       </table>
@@ -102,10 +102,10 @@ const HitsTable = (toggleExpand, expandedEntry) => {
                         </thead>
                         <tbody>
                           <tr>
-                            <td><a href={hit._source.download.url}>{filename}</a></td>
-                            <td>{hit._source.download.mimetype}</td>
-                            <td>{hit._source.download.size}</td>
-                            <td>{hit._source.download.date}</td>
+                            <td><a href={download.url}>{filename}</a></td>
+                            <td>{download.mimetype}</td>
+                            <td>{download.size}</td>
+                            <td>{download.date}</td>
                           </tr>
                         </tbody>
                       </table>
@@ -120,8 +120,8 @@ const HitsTable = (toggleExpand, expandedEntry) => {
                         </thead>
                         <tbody>
                           <tr>
-                            <td>{hit._source.build && hit._source.build.id}</td>
-                            <td>{hit._source.build && hit._source.build.date}</td>
+                            <td>{build && build.id}</td>
+                            <td>{build && build.date}</td>
                           </tr>
                         </tbody>
                       </table>
@@ -131,13 +131,13 @@ const HitsTable = (toggleExpand, expandedEntry) => {
                 )
               } else {
                 return (
-                  <tr key={hit._id} onClick={clickHandler}>
-                    <td>{hit._source.source.product}</td>
-                    <td>{hit._source.target.version}</td>
-                    <td>{hit._source.target.platform}</td>
-                    <td>{hit._source.target.channel}</td>
-                    <td>{hit._source.target.locale}</td>
-                    <td>{hit._source.download.date}</td>
+                  <tr key={_id} onClick={clickHandler}>
+                    <td>{source.product}</td>
+                    <td>{target.version}</td>
+                    <td>{target.platform}</td>
+                    <td>{target.channel}</td>
+                    <td>{target.locale}</td>
+                    <td>{download.date}</td>
                   </tr>
                 )
               }
