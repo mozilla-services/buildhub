@@ -177,13 +177,13 @@ class App extends Component {
     };
   }
 
-  toggleExpand(event, data, id) {
+  toggleExpand = (event, data, id) => {
     if (this.state.expandedEntry === id) {
       this.setState({ expandedEntry: null });
     } else {
       this.setState({ expandedEntry: id });
     }
-  }
+  };
 
   render() {
     return (
@@ -284,7 +284,7 @@ class App extends Component {
                 <Hits
                   hitsPerPage={30}
                   listComponent={HitsTable(
-                    this.toggleExpand.bind(this),
+                    this.toggleExpand,
                     this.state.expandedEntry
                   )}
                 />
