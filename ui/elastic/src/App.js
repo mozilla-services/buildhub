@@ -33,139 +33,103 @@ const searchkit = new SearchkitManager(
   { searchUrlPath: "search" }
 );
 
-const HitsTable = (toggleExpand, expandedEntry) => {
-  const tableStyle = { width: "100%", boxSizing: "border-box" };
-  return ({ hits }) => {
+const HitItem = (toggleExpand, expandedEntry) => {
+  return ({result: { _source: { build, download, source, target }, _id }}) => {
+    const revisionUrl = source.revision
+      ? <a href={`${source.repository}/rev/${source.revision}`}>
+          {source.revision}
+        </a>
+      : "";
+    const filename = download.url.split("/").reverse()[0];
+    const clickHandler = (event, data) =>
+      toggleExpand(event, data, _id);
+
     return (
-      <div style={{ width: "100%", boxSizing: "border-box", padding: 8 }}>
-        <table className="sk-table sk-table-striped" style={tableStyle}>
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Version</th>
-              <th>Platform</th>
-              <th>Channel</th>
-              <th>Locale</th>
-              <th>Published on</th>
-            </tr>
-          </thead>
-          <tbody>
-            {hits.map(
-              ({ _source: { build, download, source, target }, _id }) => {
-                const revisionUrl = source.revision
-                  ? <a href={`${source.repository}/rev/${source.revision}`}>
-                      {source.revision}
-                    </a>
-                  : "";
-                const filename = download.url.split("/").reverse()[0];
-                const clickHandler = (event, data) =>
-                  toggleExpand(event, data, _id);
-                if (expandedEntry === _id) {
-                  return (
-                    <tr key={_id} onClick={clickHandler}>
-                      <td colSpan="6">
-                        <table
-                          className="sk-table sk-table-striped"
-                          style={tableStyle}>
-                          <thead>
-                            <tr>
-                              <th>Product</th>
-                              <th>Tree</th>
-                              <th>Revision</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td>{source.product}</td>
-                              <td>{source.tree}</td>
-                              <td>{revisionUrl}</td>
-                            </tr>
-                          </tbody>
-                        </table>
+      <div key={_id} id={_id} className="panel">
+        <div className="panel-heading" onClick={clickHandler}>
+          <strong><a href={`#${_id}`}>{source.product} {target.version}</a></strong>
+          <span>{download.date}</span>
+          <em>{build && build.id}</em>
+        </div>
+        <div
+          className="panel-body"
+          style={(expandedEntry === _id) ? {display: "block"} : {display: "none"}}>
 
-                        <h4>Target</h4>
-                        <table
-                          className="sk-table sk-table-striped"
-                          style={tableStyle}>
-                          <thead>
-                            <tr>
-                              <th>Version</th>
-                              <th>Platform</th>
-                              <th>Channel</th>
-                              <th>Locale</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td>{target.version}</td>
-                              <td>{target.platform}</td>
-                              <td>{target.channel}</td>
-                              <td>{target.locale}</td>
-                            </tr>
-                          </tbody>
-                        </table>
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Tree</th>
+                <th>Revision</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{source.product}</td>
+                <td>{source.tree}</td>
+                <td>{revisionUrl}</td>
+              </tr>
+            </tbody>
+          </table>
 
-                        <h4>Download</h4>
-                        <table
-                          className="sk-table sk-table-striped"
-                          style={tableStyle}>
-                          <thead>
-                            <tr>
-                              <th>URL</th>
-                              <th>Mimetype</th>
-                              <th>Size</th>
-                              <th>Published on</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td><a href={download.url}>{filename}</a></td>
-                              <td>{download.mimetype}</td>
-                              <td>{download.size}</td>
-                              <td>{download.date}</td>
-                            </tr>
-                          </tbody>
-                        </table>
+          <h4>Target</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>Version</th>
+                <th>Platform</th>
+                <th>Channel</th>
+                <th>Locale</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{target.version}</td>
+                <td>{target.platform}</td>
+                <td>{target.channel}</td>
+                <td>{target.locale}</td>
+              </tr>
+            </tbody>
+          </table>
 
-                        <h4>Build</h4>
-                        <table
-                          className="sk-table sk-table-striped"
-                          style={tableStyle}>
-                          <thead>
-                            <tr>
-                              <th>id</th>
-                              <th>Date</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td>{build && build.id}</td>
-                              <td>{build && build.date}</td>
-                            </tr>
-                          </tbody>
-                        </table>
+          <h4>Download</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>URL</th>
+                <th>Mimetype</th>
+                <th>Size</th>
+                <th>Published on</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a href={download.url}>{filename}</a></td>
+                <td>{download.mimetype}</td>
+                <td>{download.size}</td>
+                <td>{download.date}</td>
+              </tr>
+            </tbody>
+          </table>
 
-                      </td>
-                    </tr>
-                  );
-                } else {
-                  return (
-                    <tr key={_id} onClick={clickHandler}>
-                      <td>{source.product}</td>
-                      <td>{target.version}</td>
-                      <td>{target.platform}</td>
-                      <td>{target.channel}</td>
-                      <td>{target.locale}</td>
-                      <td>{download.date}</td>
-                    </tr>
-                  );
-                }
-              }
-            )}
-          </tbody>
-        </table>
+          <h4>Build</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>id</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{build && build.id}</td>
+                <td>{build && build.date}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    );
+    )
   };
 };
 
@@ -283,7 +247,7 @@ class App extends Component {
 
                 <Hits
                   hitsPerPage={30}
-                  listComponent={HitsTable(
+                  itemComponent={HitItem(
                     this.toggleExpand,
                     this.state.expandedEntry
                   )}
