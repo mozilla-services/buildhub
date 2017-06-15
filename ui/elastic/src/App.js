@@ -59,71 +59,37 @@ const HitItem = (toggleExpand, expandedEntry) => {
             <thead>
               <tr>
                 <th>Product</th>
-                <th>Tree</th>
-                <th>Revision</th>
+                <th>Target</th>
+                <th>Download</th>
+                <th>Build</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>{source.product}</td>
-                <td>{source.tree}</td>
-                <td>{revisionUrl}</td>
-              </tr>
-            </tbody>
-          </table>
+                <td>
+                  Product: {source.product}<br/>
+                  Tree: {source.tree}<br/>
+                  Revision: {revisionUrl}
+                </td>
 
-          <h4>Target</h4>
-          <table>
-            <thead>
-              <tr>
-                <th>Version</th>
-                <th>Platform</th>
-                <th>Channel</th>
-                <th>Locale</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>{target.version}</td>
-                <td>{target.platform}</td>
-                <td>{target.channel}</td>
-                <td>{target.locale}</td>
-              </tr>
-            </tbody>
-          </table>
+                <td>
+                  Version: {target.version}<br/>
+                  Platform: {target.platform}<br/>
+                  Channel: {target.channel}<br/>
+                  Locale: {target.locale}
+                </td>
 
-          <h4>Download</h4>
-          <table>
-            <thead>
-              <tr>
-                <th>URL</th>
-                <th>Mimetype</th>
-                <th>Size</th>
-                <th>Published on</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><a href={download.url}>{filename}</a></td>
-                <td>{download.mimetype}</td>
-                <td>{download.size}</td>
-                <td>{download.date}</td>
-              </tr>
-            </tbody>
-          </table>
+                <td>
+                  URL: <a href={download.url}>{filename}</a><br/>
+                  Mimetype: {download.mimetype}<br/>
+                  Size: {download.size}<br/>
+                  Published on: {download.date}
+                </td>
 
-          <h4>Build</h4>
-          <table>
-            <thead>
-              <tr>
-                <th>id</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>{build && build.id}</td>
-                <td>{build && build.date}</td>
+                <td>
+                  ID: {build && build.id}<br/>
+                  Date: {build && build.date}
+                </td>
               </tr>
             </tbody>
           </table>
