@@ -13,3 +13,7 @@ body {
 table a {
   text-decoration: none;
 }
+
+.sk-table td, .sk-table th {
+  padding: .5em .5em;
+}

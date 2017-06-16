@@ -41,8 +41,11 @@ const HitsTable = (toggleExpand, expandedEntry) => {
           <thead>
             <tr>
               <th></th>
-              <th>Product (platform | channel | locale)</th>
-              <th>Channel</th>
+              <th>Product</th>
+              <th>platform</th>
+              <th>channel</th>
+              <th>locale</th>
+              <th>Tree</th>
               <th>Size</th>
               <th>Published on</th>
               <th>Build ID</th>
@@ -59,31 +62,16 @@ const HitsTable = (toggleExpand, expandedEntry) => {
                   : "";
                 return (
                   <tr key={_id} id={_id}>
-                    <td>
-                      <a href={`#${_id}`}>
-                        #
-                      </a>
-                    </td>
-                    <td>
-                      <a href={download.url}>
-                        {source.product} {target.version} ({target.platform} | {target.channel} | {target.locale})
-                      </a>
-                    </td>
-                    <td>
-                      {source.tree}
-                    </td>
-                    <td>
-                      {download.size}
-                    </td>
-                    <td>
-                      {download.date}
-                    </td>
-                    <td>
-                      {build && build.id}
-                    </td>
-                    <td>
-                      {revisionUrl}
-                    </td>
+                    <td><a href={`#${_id}`}>#</a></td>
+                    <td><a href={download.url}>{source.product} {target.version}</a></td>
+                    <td>{target.platform}</td>
+                    <td>{target.channel}</td>
+                    <td>{target.locale}</td>
+                    <td>{source.tree}</td>
+                    <td>{filesize(download.size)}</td>
+                    <td>{download.date}</td>
+                    <td>{build && build.id}</td>
+                    <td>{revisionUrl}</td>
                   </tr>
                 );
               }
