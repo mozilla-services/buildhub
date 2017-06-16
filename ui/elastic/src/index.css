@@ -16,4 +16,6 @@ table a {
 
 .sk-table td, .sk-table th {
   padding: .5em .5em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
