@@ -34,19 +34,19 @@ const searchkit = new SearchkitManager(
 );
 
 const HitsTable = (toggleExpand, expandedEntry) => {
-  const tableStyle = { width: "100%", boxSizing: "border-box" };
   return ({ hits }) => {
     return (
       <div style={{ width: "100%", boxSizing: "border-box", padding: 8 }}>
-        <table className="sk-table sk-table-striped" style={tableStyle}>
+        <table className="sk-table sk-table-striped" style={{ width: "100%", boxSizing: "border-box" }}>
           <thead>
             <tr>
-              <th>Product</th>
-              <th>Version</th>
-              <th>Platform</th>
+              <th></th>
+              <th>Product (platform | channel | locale)</th>
               <th>Channel</th>
-              <th>Locale</th>
+              <th>Size</th>
               <th>Published on</th>
+              <th>Build ID</th>
+              <th>Revision</th>
             </tr>
           </thead>
           <tbody>
@@ -54,114 +54,41 @@ const HitsTable = (toggleExpand, expandedEntry) => {
               ({ _source: { build, download, source, target }, _id }) => {
                 const revisionUrl = source.revision
                   ? <a href={`${source.repository}/rev/${source.revision}`}>
-                      {source.revision}
+                      {source.revision.substring(0, 6)}
                     </a>
                   : "";
-                const filename = download.url.split("/").reverse()[0];
-                const clickHandler = (event, data) =>
-                  toggleExpand(event, data, _id);
-                if (expandedEntry === _id) {
-                  return (
-                    <tr key={_id} onClick={clickHandler}>
-                      <td colSpan="6">
-                        <table
-                          className="sk-table sk-table-striped"
-                          style={tableStyle}>
-                          <thead>
-                            <tr>
-                              <th>Product</th>
-                              <th>Tree</th>
-                              <th>Revision</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td>{source.product}</td>
-                              <td>{source.tree}</td>
-                              <td>{revisionUrl}</td>
-                            </tr>
-                          </tbody>
-                        </table>
-
-                        <h4>Target</h4>
-                        <table
-                          className="sk-table sk-table-striped"
-                          style={tableStyle}>
-                          <thead>
-                            <tr>
-                              <th>Version</th>
-                              <th>Platform</th>
-                              <th>Channel</th>
-                              <th>Locale</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td>{target.version}</td>
-                              <td>{target.platform}</td>
-                              <td>{target.channel}</td>
-                              <td>{target.locale}</td>
-                            </tr>
-                          </tbody>
-                        </table>
-
-                        <h4>Download</h4>
-                        <table
-                          className="sk-table sk-table-striped"
-                          style={tableStyle}>
-                          <thead>
-                            <tr>
-                              <th>URL</th>
-                              <th>Mimetype</th>
-                              <th>Size</th>
-                              <th>Published on</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td><a href={download.url}>{filename}</a></td>
-                              <td>{download.mimetype}</td>
-                              <td>{download.size}</td>
-                              <td>{download.date}</td>
-                            </tr>
-                          </tbody>
-                        </table>
-
-                        <h4>Build</h4>
-                        <table
-                          className="sk-table sk-table-striped"
-                          style={tableStyle}>
-                          <thead>
-                            <tr>
-                              <th>id</th>
-                              <th>Date</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td>{build && build.id}</td>
-                              <td>{build && build.date}</td>
-                            </tr>
-                          </tbody>
-                        </table>
-
-                      </td>
-                    </tr>
-                  );
-                } else {
-                  return (
-                    <tr key={_id} onClick={clickHandler}>
-                      <td>{source.product}</td>
-                      <td>{target.version}</td>
-                      <td>{target.platform}</td>
-                      <td>{target.channel}</td>
-                      <td>{target.locale}</td>
-                      <td>{download.date}</td>
-                    </tr>
-                  );
-                }
+                return (
+                  <tr key={_id} id={_id}>
+                    <td>
+                      <a href={`#${_id}`}>
+                        #
+                      </a>
+                    </td>
+                    <td>
+                      <a href={download.url}>
+                        {source.product} {target.version} ({target.platform} | {target.channel} | {target.locale})
+                      </a>
+                    </td>
+                    <td>
+                      {source.tree}
+                    </td>
+                    <td>
+                      {download.size}
+                    </td>
+                    <td>
+                      {download.date}
+                    </td>
+                    <td>
+                      {build && build.id}
+                    </td>
+                    <td>
+                      {revisionUrl}
+                    </td>
+                  </tr>
+                );
               }
-            )}
+            )
+            }
           </tbody>
         </table>
       </div>
