@@ -13,6 +13,22 @@ type ClauseKind
     | Term
 
 
+type alias EncodedAggregate =
+    Encode.Value
+
+
+type alias EncodedClause =
+    Encode.Value
+
+
+type alias EncodedFilter =
+    Encode.Value
+
+
+type alias EncodedQuery =
+    Encode.Value
+
+
 clauseName : ClauseKind -> String
 clauseName kind =
     case kind of
@@ -26,7 +42,7 @@ clauseName kind =
             "term"
 
 
-encodeClause : ClauseKind -> String -> String -> Encode.Value
+encodeClause : ClauseKind -> String -> String -> EncodedClause
 encodeClause kind name value =
     Encode.object
         [ ( clauseName kind
@@ -35,13 +51,10 @@ encodeClause kind name value =
         ]
 
 
-extractClauses : ClauseKind -> String -> List String -> Maybe Encode.Value
+extractClauses : ClauseKind -> String -> List String -> Maybe EncodedClause
 extractClauses kind field values =
-    case values of
+    case (List.filter (not << String.isEmpty) values) of
         [] ->
-            Nothing
-
-        [ "" ] ->
             Nothing
 
         [ value ] ->
@@ -70,7 +83,7 @@ extractClauses kind field values =
                     ]
 
 
-encodeAggregate : String -> List (Maybe Encode.Value) -> ( String, Encode.Value )
+encodeAggregate : String -> List (Maybe EncodedClause) -> ( String, EncodedAggregate )
 encodeAggregate field clauses =
     ( field
     , Encode.object
@@ -93,7 +106,7 @@ encodeAggregate field clauses =
     )
 
 
-encodeFilter : List (Maybe Encode.Value) -> Encode.Value
+encodeFilter : List (Maybe EncodedClause) -> EncodedFilter
 encodeFilter clauses =
     Encode.object
         [ ( "bool"
@@ -108,7 +121,7 @@ encodeFilter clauses =
         ]
 
 
-encodeQuery : Filters -> Int -> Encode.Value
+encodeQuery : Filters -> Int -> EncodedQuery
 encodeQuery { page, product, channel, locale, version, platform, buildId } pageSize =
     let
         productClauses =
