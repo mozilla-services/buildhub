@@ -458,7 +458,7 @@ facetSelector title total selectedValues filterMsg facets =
                     ]
     in
         div [ class "form-group" ]
-            [ p [] [ text title ]
+            [ p [] [ strong [] [ text title ] ]
             , div [ class "scrollable-choices" ] <| List.map choice facets
             ]
 

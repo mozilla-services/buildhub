@@ -102,8 +102,9 @@ encodeQuery filters pageSize =
         Encode.object
             [ ( "size", Encode.int pageSize )
             , ( "from", Encode.int <| (filters.page - 1) * pageSize )
+            , ( "sort", Encode.list [ Encode.object [ ( "download.date", Encode.string "desc" ) ] ] )
             , ( "post_filter", Encode.object [ ( "bool", encodeFilters filters ) ] )
-            , ( "aggregations"
+            , ( "aggs"
               , Encode.object
                     [ encodeFacet "products" "source.product"
                     , encodeFacet "channels" "target.channel"
