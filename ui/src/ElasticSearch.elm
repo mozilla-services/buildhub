@@ -7,21 +7,10 @@ import Json.Encode as Encode
 import Types exposing (..)
 
 
-type alias Clauses =
-    ( List MustClause, List ShouldClause )
-
-
 type ClauseKind
     = Match
     | Prefix
-
-
-type alias MustClause =
-    Encode.Value
-
-
-type alias ShouldClause =
-    Encode.Value
+    | Term
 
 
 clauseName : ClauseKind -> String
@@ -30,8 +19,11 @@ clauseName kind =
         Prefix ->
             "prefix"
 
-        _ ->
+        Match ->
             "match"
+
+        _ ->
+            "term"
 
 
 encodeClause : ClauseKind -> String -> String -> Encode.Value
@@ -52,7 +44,18 @@ extractClauses kind field values =
         [ "" ] ->
             Nothing
 
+        [ value ] ->
+            -- Only this value
+            Just <|
+                Encode.object
+                    [ ( "bool"
+                      , Encode.object
+                            [ ( "must", encodeClause kind field value ) ]
+                      )
+                    ]
+
         values ->
+            -- Any of those values
             Just <|
                 Encode.object
                     [ ( "bool"
@@ -67,50 +70,116 @@ extractClauses kind field values =
                     ]
 
 
-encodeFilters : Filters -> Encode.Value
-encodeFilters { product, channel, locale, version, platform, buildId } =
+encodeAggregate : String -> List (Maybe Encode.Value) -> ( String, Encode.Value )
+encodeAggregate field clauses =
+    ( field
+    , Encode.object
+        [ ( "filter", encodeFilter clauses )
+        , ( "aggs"
+          , Encode.object
+                [ ( field ++ "_agg"
+                  , Encode.object
+                        [ ( "terms"
+                          , Encode.object
+                                [ ( "field", Encode.string field )
+                                , ( "size", Encode.int 1000 )
+                                ]
+                          )
+                        ]
+                  )
+                ]
+          )
+        ]
+    )
+
+
+encodeFilter : List (Maybe Encode.Value) -> Encode.Value
+encodeFilter clauses =
     Encode.object
-        [ ( "must"
-          , [ extractClauses Match "source.product" product
-            , extractClauses Match "target.channel" channel
-            , extractClauses Match "target.version" version
-            , extractClauses Match "target.locale" locale
-            , extractClauses Match "target.platform" platform
-            , extractClauses Prefix "build.id" [ buildId ]
-            ]
-                |> List.filterMap identity
-                |> Encode.list
+        [ ( "bool"
+          , Encode.object
+                [ ( "must"
+                  , clauses
+                        |> List.filterMap identity
+                        |> Encode.list
+                  )
+                ]
           )
         ]
 
 
 encodeQuery : Filters -> Int -> Encode.Value
-encodeQuery filters pageSize =
+encodeQuery { page, product, channel, locale, version, platform, buildId } pageSize =
     let
-        encodeFacet name property =
-            ( name
-            , Encode.object
-                [ ( "terms"
-                  , Encode.object
-                        [ ( "field", Encode.string property )
-                        , ( "size", Encode.int 1000 )
-                        ]
-                  )
-                ]
-            )
+        productClauses =
+            extractClauses Term "source.product" product
+
+        channelClauses =
+            extractClauses Term "target.channel" channel
+
+        versionClauses =
+            extractClauses Term "target.version" version
+
+        localeClauses =
+            extractClauses Term "target.locale" locale
+
+        platformClauses =
+            extractClauses Term "target.platform" platform
+
+        buildIdClauses =
+            extractClauses Prefix "build.id" [ buildId ]
     in
         Encode.object
             [ ( "size", Encode.int pageSize )
-            , ( "from", Encode.int <| (filters.page - 1) * pageSize )
+            , ( "from", Encode.int <| (page - 1) * pageSize )
             , ( "sort", Encode.list [ Encode.object [ ( "download.date", Encode.string "desc" ) ] ] )
-            , ( "post_filter", Encode.object [ ( "bool", encodeFilters filters ) ] )
+            , ( "post_filter"
+              , encodeFilter
+                    [ productClauses
+                    , channelClauses
+                    , versionClauses
+                    , localeClauses
+                    , platformClauses
+                    , buildIdClauses
+                    ]
+              )
             , ( "aggs"
               , Encode.object
-                    [ encodeFacet "products" "source.product"
-                    , encodeFacet "channels" "target.channel"
-                    , encodeFacet "platforms" "target.platform"
-                    , encodeFacet "versions" "target.version"
-                    , encodeFacet "locales" "target.locale"
+                    [ encodeAggregate "source.product"
+                        [ channelClauses
+                        , versionClauses
+                        , localeClauses
+                        , platformClauses
+                        , buildIdClauses
+                        ]
+                    , encodeAggregate "target.channel"
+                        [ productClauses
+                        , versionClauses
+                        , localeClauses
+                        , platformClauses
+                        , buildIdClauses
+                        ]
+                    , encodeAggregate "target.platform"
+                        [ productClauses
+                        , channelClauses
+                        , versionClauses
+                        , localeClauses
+                        , buildIdClauses
+                        ]
+                    , encodeAggregate "target.version"
+                        [ productClauses
+                        , channelClauses
+                        , localeClauses
+                        , platformClauses
+                        , buildIdClauses
+                        ]
+                    , encodeAggregate "target.locale"
+                        [ productClauses
+                        , channelClauses
+                        , versionClauses
+                        , platformClauses
+                        , buildIdClauses
+                        ]
                     ]
               )
             ]
@@ -133,16 +202,16 @@ decodeResponse =
     let
         decodeFilter name =
             Decode.list decodeFacet
-                |> Decode.at [ "aggregations", name, "buckets" ]
+                |> Decode.at [ "aggregations", name, name ++ "_agg", "buckets" ]
     in
         Decode.map7 Facets
             (Decode.at [ "hits", "hits" ] (Decode.list decodeBuildRecordHit))
             (Decode.at [ "hits", "total" ] Decode.int)
-            (decodeFilter "products")
-            (decodeFilter "versions")
-            (decodeFilter "channels")
-            (decodeFilter "platforms")
-            (decodeFilter "locales")
+            (decodeFilter "source.product")
+            (decodeFilter "target.version")
+            (decodeFilter "target.channel")
+            (decodeFilter "target.platform")
+            (decodeFilter "target.locale")
 
 
 getFacets : Filters -> Int -> Http.Request Facets
