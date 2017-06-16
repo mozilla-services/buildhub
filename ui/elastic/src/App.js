@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import "./App.css";
+import filesize from "filesize";
 
 import {
   SearchBox,
