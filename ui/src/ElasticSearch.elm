@@ -43,40 +43,43 @@ encodeClause kind name value =
         ]
 
 
-extractClauses : ClauseKind -> String -> List String -> Encode.Value
+extractClauses : ClauseKind -> String -> List String -> Maybe Encode.Value
 extractClauses kind field values =
-    let
-        should =
-            case values of
-                [] ->
-                    []
+    case values of
+        [] ->
+            Nothing
 
-                [ "" ] ->
-                    []
+        [ "" ] ->
+            Nothing
 
-                values ->
-                    List.map (encodeClause kind field) values
-    in
-        Encode.object
-            [ ( "bool"
-              , Encode.object
-                    [ ( "should", Encode.list should ) ]
-              )
-            ]
+        values ->
+            Just <|
+                Encode.object
+                    [ ( "bool"
+                      , Encode.object
+                            [ ( "should"
+                              , values
+                                    |> List.map (encodeClause kind field)
+                                    |> Encode.list
+                              )
+                            ]
+                      )
+                    ]
 
 
 encodeFilters : Filters -> Encode.Value
 encodeFilters { product, channel, locale, version, platform, buildId } =
     Encode.object
         [ ( "must"
-          , Encode.list
-                [ extractClauses Match "source.product" product
-                , extractClauses Match "target.channel" channel
-                , extractClauses Match "target.version" version
-                , extractClauses Match "target.locale" locale
-                , extractClauses Match "target.platform" platform
-                , extractClauses Prefix "build.id" [ buildId ]
-                ]
+          , [ extractClauses Match "source.product" product
+            , extractClauses Match "target.channel" channel
+            , extractClauses Match "target.version" version
+            , extractClauses Match "target.locale" locale
+            , extractClauses Match "target.platform" platform
+            , extractClauses Prefix "build.id" [ buildId ]
+            ]
+                |> List.filterMap identity
+                |> Encode.list
           )
         ]
 
