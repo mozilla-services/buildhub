@@ -43,43 +43,42 @@ encodeClause kind name value =
         ]
 
 
-extractClauses : ClauseKind -> String -> List String -> Clauses
+extractClauses : ClauseKind -> String -> List String -> Encode.Value
 extractClauses kind field values =
-    case values of
-        [] ->
-            ( [], [] )
+    let
+        should =
+            case values of
+                [] ->
+                    []
 
-        [ "" ] ->
-            ( [], [] )
+                [ "" ] ->
+                    []
 
-        [ value ] ->
-            ( [ encodeClause kind field value ], [] )
-
-        values ->
-            ( [], List.map (encodeClause kind field) values )
+                values ->
+                    List.map (encodeClause kind field) values
+    in
+        Encode.object
+            [ ( "bool"
+              , Encode.object
+                    [ ( "should", Encode.list should ) ]
+              )
+            ]
 
 
 encodeFilters : Filters -> Encode.Value
 encodeFilters { product, channel, locale, version, platform, buildId } =
-    let
-        ( must, should ) =
-            [ extractClauses Match "source.product" product
-            , extractClauses Match "target.channel" channel
-            , extractClauses Match "target.version" version
-            , extractClauses Match "target.locale" locale
-            , extractClauses Match "target.platform" platform
-            , extractClauses Prefix "build.id" [ buildId ]
-            ]
-                |> List.foldl
-                    (\( m, s ) ( macc, sacc ) ->
-                        ( List.concat [ m, macc ], List.concat [ s, sacc ] )
-                    )
-                    ( [], [] )
-    in
-        Encode.object
-            [ ( "must", Encode.list must )
-            , ( "should", Encode.list should )
-            ]
+    Encode.object
+        [ ( "must"
+          , Encode.list
+                [ extractClauses Match "source.product" product
+                , extractClauses Match "target.channel" channel
+                , extractClauses Match "target.version" version
+                , extractClauses Match "target.locale" locale
+                , extractClauses Match "target.platform" platform
+                , extractClauses Prefix "build.id" [ buildId ]
+                ]
+          )
+        ]
 
 
 encodeQuery : Filters -> Int -> Encode.Value
