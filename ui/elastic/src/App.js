@@ -37,7 +37,7 @@ function HitItem(toggleExpand, expandedEntry) {
   return ({result: { _source: { build, download, source, target }, _id }}) => {
     const revisionUrl = source.revision
       ? <a href={`${source.repository}/rev/${source.revision}`}>
-          {source.revision}
+          {source.revision.substring(0, 6)}
         </a>
       : "";
     const filename = download.url.split("/").reverse()[0];
@@ -47,70 +47,31 @@ function HitItem(toggleExpand, expandedEntry) {
     return (
       <div key={_id} id={_id} className="panel">
         <div className="panel-heading" onClick={clickHandler}>
-          <strong><a href={`#${_id}`}>{source.product} {target.version}</a></strong>
-          <span>{download.date}</span>
-          <em>{build && build.id}</em>
+          <strong>
+            <a href={`#${_id}`}>
+              {source.product} {target.version} ({target.platform} | {target.channel} | {target.locale})
+            </a>
+          </strong>
+          <span>{build && build.date}</span>
+          <em>{build && build.id} (<span className="revision-url">{revisionUrl}</span>)</em>
         </div>
         <div
           className="panel-body"
           style={(expandedEntry === _id) ? {display: "block"} : {display: "none"}}>
 
           <table className="table table-condensed">
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Target</th>
-                <th>Download</th>
-                <th>Build</th>
-              </tr>
-            </thead>
             <tbody>
               <tr>
-                <td>
-                  <dl>
-                    <dt>Name</dt>
-                    <dd>{source.product}</dd>
-                    <dt>Tree</dt>
-                    <dd>{source.tree}</dd>
-                    <dt>Revision</dt>
-                    <dd>{revisionUrl}</dd>
-                  </dl>
-                </td>
-
-                <td>
-                  <dl>
-                    <dt>Version</dt>
-                    <dd>{target.version}</dd>
-                    <dt>Platform</dt>
-                    <dd>{target.platform}</dd>
-                    <dt>Channel</dt>
-                    <dd>{target.channel}</dd>
-                    <dt>Locale</dt>
-                    <dd>{target.locale}</dd>
-                  </dl>
-                </td>
-
-                <td>
-                  <dl>
-                    <dt>URL</dt>
-                    <dd><a href={download.url}>{filename}</a></dd>
-                    <dt>Mimetype</dt>
-                    <dd>{download.mimetype}</dd>
-                    <dt>Size</dt>
-                    <dd>{download.size}</dd>
-                    <dt>Published on</dt>
-                    <dd>{download.date}</dd>
-                  </dl>
-                </td>
-
-                <td>
-                  <dl>
-                    <dt>ID</dt>
-                    <dd>{build && build.id}</dd>
-                    <dt>Date</dt>
-                    <dd>{build && build.date}</dd>
-                  </dl>
-                </td>
+                <th>Tree</th>
+                <td>{source.tree}</td>
+                <th>URL</th>
+                <td><a href={download.url}>{filename}</a></td>
+              </tr>
+              <tr>
+                <th>Size</th>
+                <td>{download.size}</td>
+                <th>Published on</th>
+                <td>{download.date}</td>
               </tr>
             </tbody>
           </table>

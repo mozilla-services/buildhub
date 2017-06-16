@@ -29,6 +29,7 @@ body {
   background-color: #f4f4f4;
   border-radius: 4px;
   color: #08c;
+  cursor: pointer;
   display: flex;
   padding: 15px;
 }
@@ -51,37 +52,12 @@ body {
 }
 
 .panel .panel-body table {
-  table-layout: fixed;
   border-collapse: collapse;
   border-spacing: 0;
-  margin-bottom: 20px;
   width: 100%;
 }
 
 .panel .panel-body table th {
-  border-bottom: 2px solid #ccc;
-  text-align: left;
-}
-
-.panel .panel-body table td {
-  padding-right: 1em;
-  width: 25%;
-  vertical-align: top;
-}
-
-.panel .panel-body table td dl {
-  line-height: 1.8em;
-}
-
-.panel .panel-body table td dt {
-  clear: left;
-  float: left;
-  width: 100px;
-  font-weight: bold;
-}
-
-.panel .panel-body table td dd {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  padding-right: 20px;
+  text-align: right;
 }
