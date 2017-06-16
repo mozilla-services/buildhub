@@ -26,13 +26,13 @@ RECORDS = [
 
     # Firefox Aurora
     {
-        "id": "firefox_aurora_54-0a2_mac_en-us",
+        "id": "firefox_aurora_54-0a2_macosx_en-us",
         "source": {
             "product": "firefox",
         },
         "target": {
             "version": "54.0a2",
-            "platform": "mac",
+            "platform": "macosx",
             "locale": "en-US",
             "channel": "aurora"
         },
@@ -111,6 +111,78 @@ RECORDS = [
         "download": {
             "url": "https://archive.mozilla.org/pub/firefox/releases/52.0esr/linux-x86_64/en-US/"
             "firefox-52.0esr.tar.bz2",
+        }
+    },
+
+    # Firefox Win release
+    {
+        "id": "firefox_beta_16-0b6_win32_bs",
+        "source": {
+            "product": "firefox",
+        },
+        "target": {
+            "version": "16.0b6",
+            "platform": "win32",
+            "locale": "bs",
+            "channel": "beta"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/firefox/releases/16.0b6/win32/bs/"
+            "Firefox Setup 16.0b6.exe",
+        }
+    },
+
+    # Firefox MacOSX release
+    {
+        "id": "firefox_50-0-1_macosx_ko",
+        "source": {
+            "product": "firefox",
+        },
+        "target": {
+            "version": "50.0.1",
+            "platform": "macosx",
+            "locale": "ko",
+            "channel": "release"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/firefox/releases/50.0.1/mac/ko/"
+            "Firefox 50.0.1.dmg",
+        }
+    },
+
+    # Thunderbird Windows Release
+    {
+        "id": "thunderbird_beta_11-0b2_win32_eu",
+        "source": {
+            "product": "thunderbird",
+        },
+        "target": {
+            "version": "11.0b2",
+            "platform": "win32",
+            "locale": "eu",
+            "channel": "beta"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/thunderbird/releases/11.0b2/win32/eu/"
+            "Thunderbird Setup 11.0b2.exe",
+        }
+    },
+
+    # Thunderbird Mac OS X Release
+    {
+        "id": "thunderbird_10-0-12esr_macosx_pt-br",
+        "source": {
+            "product": "thunderbird",
+        },
+        "target": {
+            "version": "10.0.12esr",
+            "platform": "macosx",
+            "locale": "pt-BR",
+            "channel": "release"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/thunderbird/releases/10.0.12esr/mac/pt-BR/"
+            "Thunderbird 10.0.12esr.dmg",
         }
     },
 
@@ -251,6 +323,8 @@ NIGHTLY_FILENAMES = [
     ("firefox-55.0a1.en-US.linux-x86_64.tar.bz2", "55.0a1", "en-US", "linux-x86_64"),
     ("fennec-55.0a1.multi.android-i386.apk", "55.0a1", "multi", "android-i386"),
     ("fennec-55.0a1.multi.android-arm.apk", "55.0a1", "multi", "android-arm"),
+    ("firefox-56.0a1.en-US.mac.dmg", "56.0a1", "en-US", "macosx"),
+    ("firefox-55.0a1.ar.win32.installer.exe", "55.0a1", "ar", "win32"),
 ]
 
 
@@ -264,6 +338,7 @@ NIGHTLY_WRONG_FILENAMES = [
     "firefox-tests.bz2",
     "firefox-crashreporter.gz",
     "foobar.bz2",
+    "firefox-55.0a1.ar.win32.installer-stub.exe",
 ]
 
 
@@ -306,6 +381,10 @@ RELEASE_FILENAMES = [
     ("thunderbird", "thunderbird-17.0.8esr.tar.bz2"),
     ("fennec", "fennec-39.0b5.sl.android-arm.apk"),
     ("fennec", "fennec-42.0b2.fr.android-arm.apk"),
+    ("thunderbird", "Thunderbird 10.0.12esr.dmg"),
+    ("thunderbird", "Thunderbird Setup 11.0b2.exe"),
+    ("firefox", "Firefox Setup 17.0b3.exe"),
+    ("firefox", "Firefox 50.0.1.dmg"),
 ]
 
 
@@ -319,6 +398,7 @@ WRONG_RELEASE_FILENAMES = [
     ("firefox", "firefox-52.0.win32.sdk.zip"),
     ("fennec", "fennec-21.0b1.multi.android-arm-armv6.tests.zip"),
     ("fennec", "fennec-24.0b1.en-US.android-arm.crashreporter-symbols.zip"),
+    ("firefox", "Firefox Setup Stub 49.0.exe"),
 ]
 
 
