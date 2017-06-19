@@ -43,6 +43,7 @@ const HitsTable = (toggleExpand, expandedEntry) => {
             <tr>
               <th></th>
               <th>Product</th>
+              <th>Version</th>
               <th>platform</th>
               <th>channel</th>
               <th>locale</th>
@@ -64,7 +65,8 @@ const HitsTable = (toggleExpand, expandedEntry) => {
                 return (
                   <tr key={_id} id={_id}>
                     <td><a href={`#${_id}`}>#</a></td>
-                    <td><a href={download.url}>{source.product} {target.version}</a></td>
+                    <td>{source.product}</td>
+                    <td><a href={download.url}>{target.version}</a></td>
                     <td>{target.platform}</td>
                     <td>{target.channel}</td>
                     <td>{target.locale}</td>
