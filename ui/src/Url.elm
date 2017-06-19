@@ -5,6 +5,14 @@ import Types exposing (..)
 import UrlParser exposing (..)
 
 
+parseFilter : String -> List String
+parseFilter textFilter =
+    if textFilter == "all" then
+        []
+    else
+        String.split "|" textFilter
+
+
 routeFromUrl : Model -> Location -> Model
 routeFromUrl model location =
     let
@@ -36,11 +44,11 @@ routeFromUrl model location =
                     | route = FilteredView product channel platform version locale buildId page
                     , filters =
                         { buildId = buildId
-                        , product = product |> String.split "|" |> List.filter (\v -> v /= "all")
-                        , channel = channel |> String.split "|" |> List.filter (\v -> v /= "all")
-                        , platform = platform |> String.split "|" |> List.filter (\v -> v /= "all")
-                        , version = version |> String.split "|" |> List.filter (\v -> v /= "all")
-                        , locale = locale |> String.split "|" |> List.filter (\v -> v /= "all")
+                        , product = parseFilter product
+                        , channel = parseFilter channel
+                        , platform = parseFilter platform
+                        , version = parseFilter version
+                        , locale = parseFilter locale
                         , page = page
                         }
                 }

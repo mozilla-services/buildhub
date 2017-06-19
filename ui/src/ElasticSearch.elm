@@ -38,7 +38,7 @@ clauseName kind =
         Match ->
             "match"
 
-        _ ->
+        Term ->
             "term"
 
 
@@ -51,7 +51,7 @@ encodeClause kind name value =
         ]
 
 
-extractClauses : ClauseKind -> String -> List String -> Maybe EncodedClause
+extractClauses : ClauseKind -> String -> List String -> Maybe EncodedFilter
 extractClauses kind field values =
     case (List.filter (not << String.isEmpty) values) of
         [] ->
