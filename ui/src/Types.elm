@@ -104,11 +104,11 @@ type alias Target =
 
 type NewFilter
     = ClearAll
-    | NewProductFilter String
-    | NewVersionFilter String
-    | NewPlatformFilter String
-    | NewChannelFilter String
-    | NewLocaleFilter String
+    | NewProductFilter String Bool
+    | NewVersionFilter String Bool
+    | NewPlatformFilter String Bool
+    | NewChannelFilter String Bool
+    | NewLocaleFilter String Bool
     | NewBuildIdSearch String
 
 

@@ -427,7 +427,7 @@ spinner =
     div [ class "loader" ] []
 
 
-facetSelector : String -> Int -> List String -> (String -> NewFilter) -> List Facet -> Html Msg
+facetSelector : String -> Int -> List String -> (String -> Bool -> NewFilter) -> List Facet -> Html Msg
 facetSelector title total selectedValues filterMsg facets =
     let
         choice entry =
@@ -437,9 +437,6 @@ facetSelector title total selectedValues filterMsg facets =
 
                 countInfo =
                     " (" ++ (toString entry.count) ++ ")"
-
-                msg =
-                    UpdateFilter (filterMsg entry.value)
             in
                 div [ class "checkbox" ]
                     [ label []
@@ -447,10 +444,7 @@ facetSelector title total selectedValues filterMsg facets =
                             [ type_ "checkbox"
                             , value entry.value
                             , checked active
-                            , onWithOptions
-                                "click"
-                                { preventDefault = True, stopPropagation = False }
-                                (succeed msg)
+                            , onCheck <| UpdateFilter << (filterMsg entry.value)
                             ]
                             []
                         , text <| entry.value ++ countInfo

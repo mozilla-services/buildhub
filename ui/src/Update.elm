@@ -25,35 +25,28 @@ updateFilters : Facets -> NewFilter -> Filters -> Filters
 updateFilters facets newFilter filters =
     let
         toggleFilter facets value values =
-            let
-                newValues =
-                    if List.member value values then
-                        List.filter (\v -> v /= value) values
-                    else
-                        value :: values
-            in
-                if List.length newValues == List.length facets then
-                    []
-                else
-                    newValues
+            if List.member value values then
+                List.filter (\v -> v /= value) values
+            else
+                value :: values
     in
         case newFilter of
             ClearAll ->
                 Init.initFilters
 
-            NewProductFilter value ->
+            NewProductFilter value active ->
                 { filters | product = filters.product |> toggleFilter facets.products value, page = 1 }
 
-            NewVersionFilter value ->
+            NewVersionFilter value active ->
                 { filters | version = filters.version |> toggleFilter facets.versions value, page = 1 }
 
-            NewPlatformFilter value ->
+            NewPlatformFilter value active ->
                 { filters | platform = filters.platform |> toggleFilter facets.platforms value, page = 1 }
 
-            NewChannelFilter value ->
+            NewChannelFilter value active ->
                 { filters | channel = filters.channel |> toggleFilter facets.channels value, page = 1 }
 
-            NewLocaleFilter value ->
+            NewLocaleFilter value active ->
                 { filters | locale = filters.locale |> toggleFilter facets.locales value, page = 1 }
 
             NewBuildIdSearch value ->
