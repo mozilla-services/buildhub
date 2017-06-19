@@ -70,7 +70,7 @@ const HitsTable = (toggleExpand, expandedEntry) => {
                     <td>{target.locale}</td>
                     <td>{source.tree}</td>
                     <td>{filesize(download.size)}</td>
-                    <td>{download.date}</td>
+                    <td title={download.date}><time datetime={download.date}>{new Date(download.date).toLocaleDateString()}</time></td>
                     <td>{build && build.id}</td>
                     <td>{revisionUrl}</td>
                   </tr>
