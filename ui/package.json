@@ -6,7 +6,7 @@
     "build": "npm run copy-assets && elm-make src/Main.elm --output=build/app.js",
     "copy-assets": "rimraf build && mkdir build && cp -r public/* build",
     "debug": "elm-live src/Main.elm --warn --dir=public/ --output=public/app.js --debug",
-    "deploy": "npm run build && npm run optimize && gh-pages --dist build/",
+    "deploy": "npm run build && npm run optimize && gh-pages --add --dist build/",
     "optimize": "uglifyjs build/app.js -c -m -o build/app.js",
     "start": "elm-live src/Main.elm --warn --dir=public/ --output=public/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
