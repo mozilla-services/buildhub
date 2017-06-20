@@ -1,7 +1,6 @@
 module View exposing (view)
 
 import Filesize
-import Json.Decode exposing (succeed)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -427,8 +426,15 @@ spinner =
     div [ class "loader" ] []
 
 
-facetSelector : String -> Int -> List String -> (String -> Bool -> NewFilter) -> List Facet -> Html Msg
-facetSelector title total selectedValues filterMsg facets =
+facetSelector :
+    String
+    -> Int
+    -> List String
+    -> (String -> Bool -> NewFilter)
+    -> NewFilter
+    -> List Facet
+    -> Html Msg
+facetSelector title total selectedValues filterMsg clearMsg facets =
     let
         choice entry =
             let
@@ -452,7 +458,14 @@ facetSelector title total selectedValues filterMsg facets =
                     ]
     in
         div [ class "form-group" ]
-            [ p [] [ strong [] [ text title ] ]
+            [ p []
+                [ strong [] [ text title ]
+                , if List.length selectedValues > 0 then
+                    button [ class "close", onClick <| UpdateFilter clearMsg ]
+                        [ text "×" ]
+                  else
+                    text ""
+                ]
             , div [ class "scrollable-choices" ] <| List.map choice facets
             ]
 
@@ -471,11 +484,11 @@ filtersView facets filters =
             , div [ class "panel-body" ]
                 [ div []
                     [ buildIdSearchForm buildId
-                    , facetSelector "Products" total product NewProductFilter products
-                    , facetSelector "Versions" total version NewVersionFilter versions
-                    , facetSelector "Platforms" total platform NewPlatformFilter platforms
-                    , facetSelector "Channels" total channel NewChannelFilter channels
-                    , facetSelector "Locales" total locale NewLocaleFilter locales
+                    , facetSelector "Products" total product NewProductFilter ClearProducts products
+                    , facetSelector "Versions" total version NewVersionFilter ClearVersions versions
+                    , facetSelector "Platforms" total platform NewPlatformFilter ClearPlatforms platforms
+                    , facetSelector "Channels" total channel NewChannelFilter ClearChannels channels
+                    , facetSelector "Locales" total locale NewLocaleFilter ClearLocales locales
                     , div [ class "btn-group btn-group-justified" ]
                         [ div [ class "btn-group" ]
                             [ button
