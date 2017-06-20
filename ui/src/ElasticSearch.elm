@@ -236,6 +236,7 @@ encodeQuery { page, product, channel, locale, version, platform, buildId, search
                         , localeClauses
                         , platformClauses
                         , buildIdClauses
+                        , searchClauses
                         ]
                     , encodeAggregate "target.locale"
                         [ productClauses
