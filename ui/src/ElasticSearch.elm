@@ -7,75 +7,192 @@ import Json.Encode as Encode
 import Types exposing (..)
 
 
-encodeMustClause : Filters -> Encode.Value
-encodeMustClause { product, channel, locale, version, platform, buildId } =
-    let
-        encodeFilter ( name, value ) =
-            Encode.object
-                [ ( if name == "build.id" then
-                        "prefix"
-                    else
-                        "match"
-                  , Encode.object [ ( name, Encode.string value ) ]
-                  )
-                ]
+type ClauseKind
+    = Match
+    | Prefix
+    | Term
 
-        refineFilters ( k, v ) acc =
-            if k == "build.id" then
-                if v /= "" then
-                    ( "build.id", v ) :: acc
-                else
-                    acc
-            else if v /= "all" then
-                ( k, v ) :: acc
-            else
-                acc
-    in
-        [ ( "build.id", buildId )
-        , ( "source.product", product )
-        , ( "target.channel", channel )
-        , ( "target.locale", locale )
-        , ( "target.version", version )
-        , ( "target.platform", platform )
+
+type alias EncodedAggregate =
+    Encode.Value
+
+
+type alias EncodedClause =
+    Encode.Value
+
+
+type alias EncodedFilter =
+    Encode.Value
+
+
+type alias EncodedQuery =
+    Encode.Value
+
+
+clauseName : ClauseKind -> String
+clauseName kind =
+    case kind of
+        Prefix ->
+            "prefix"
+
+        Match ->
+            "match"
+
+        Term ->
+            "term"
+
+
+encodeClause : ClauseKind -> String -> String -> EncodedClause
+encodeClause kind name value =
+    Encode.object
+        [ ( clauseName kind
+          , Encode.object [ ( name, Encode.string value ) ]
+          )
         ]
-            |> List.foldr refineFilters []
-            |> List.map encodeFilter
-            |> Encode.list
 
 
-encodeQuery : Filters -> Int -> Encode.Value
-encodeQuery filters pageSize =
-    let
-        encodeFacet name property =
-            ( name
-            , Encode.object
-                [ ( "terms"
+extractClauses : ClauseKind -> String -> List String -> Maybe EncodedFilter
+extractClauses kind field values =
+    case (List.filter (not << String.isEmpty) values) of
+        [] ->
+            Nothing
+
+        [ value ] ->
+            -- Only this value
+            Just <|
+                Encode.object
+                    [ ( "bool"
+                      , Encode.object
+                            [ ( "must", encodeClause kind field value ) ]
+                      )
+                    ]
+
+        values ->
+            -- Any of those values
+            Just <|
+                Encode.object
+                    [ ( "bool"
+                      , Encode.object
+                            [ ( "should"
+                              , values
+                                    |> List.map (encodeClause kind field)
+                                    |> Encode.list
+                              )
+                            ]
+                      )
+                    ]
+
+
+encodeAggregate : String -> List (Maybe EncodedClause) -> ( String, EncodedAggregate )
+encodeAggregate field clauses =
+    ( field
+    , Encode.object
+        [ ( "filter", encodeFilter clauses )
+        , ( "aggs"
+          , Encode.object
+                [ ( field ++ "_agg"
                   , Encode.object
-                        [ ( "field", Encode.string property )
-                        , ( "size", Encode.int 1000 )
+                        [ ( "terms"
+                          , Encode.object
+                                [ ( "field", Encode.string field )
+                                , ( "size", Encode.int 1000 )
+                                ]
+                          )
                         ]
                   )
                 ]
-            )
+          )
+        ]
+    )
+
+
+encodeFilter : List (Maybe EncodedClause) -> EncodedFilter
+encodeFilter clauses =
+    Encode.object
+        [ ( "bool"
+          , Encode.object
+                [ ( "must"
+                  , clauses
+                        |> List.filterMap identity
+                        |> Encode.list
+                  )
+                ]
+          )
+        ]
+
+
+encodeQuery : Filters -> Int -> EncodedQuery
+encodeQuery { page, product, channel, locale, version, platform, buildId } pageSize =
+    let
+        productClauses =
+            extractClauses Term "source.product" product
+
+        channelClauses =
+            extractClauses Term "target.channel" channel
+
+        versionClauses =
+            extractClauses Term "target.version" version
+
+        localeClauses =
+            extractClauses Term "target.locale" locale
+
+        platformClauses =
+            extractClauses Term "target.platform" platform
+
+        buildIdClauses =
+            extractClauses Prefix "build.id" [ buildId ]
     in
         Encode.object
             [ ( "size", Encode.int pageSize )
-            , ( "from", Encode.int <| (filters.page - 1) * pageSize )
-            , ( "query"
-              , Encode.object
-                    [ ( "bool"
-                      , Encode.object
-                            [ ( "must", encodeMustClause filters ) ]
-                      )
+            , ( "from", Encode.int <| (page - 1) * pageSize )
+            , ( "sort", Encode.list [ Encode.object [ ( "download.date", Encode.string "desc" ) ] ] )
+            , ( "post_filter"
+              , encodeFilter
+                    [ productClauses
+                    , channelClauses
+                    , versionClauses
+                    , localeClauses
+                    , platformClauses
+                    , buildIdClauses
                     ]
               )
-            , ( "aggregations"
+            , ( "aggs"
               , Encode.object
-                    [ encodeFacet "products" "source.product"
-                    , encodeFacet "channels" "target.channel"
-                    , encodeFacet "platforms" "target.platform"
-                    , encodeFacet "versions" "target.version"
-                    , encodeFacet "locales" "target.locale"
+                    [ encodeAggregate "source.product"
+                        [ channelClauses
+                        , versionClauses
+                        , localeClauses
+                        , platformClauses
+                        , buildIdClauses
+                        ]
+                    , encodeAggregate "target.channel"
+                        [ productClauses
+                        , versionClauses
+                        , localeClauses
+                        , platformClauses
+                        , buildIdClauses
+                        ]
+                    , encodeAggregate "target.platform"
+                        [ productClauses
+                        , channelClauses
+                        , versionClauses
+                        , localeClauses
+                        , buildIdClauses
+                        ]
+                    , encodeAggregate "target.version"
+                        [ productClauses
+                        , channelClauses
+                        , localeClauses
+                        , platformClauses
+                        , buildIdClauses
+                        ]
+                    , encodeAggregate "target.locale"
+                        [ productClauses
+                        , channelClauses
+                        , versionClauses
+                        , platformClauses
+                        , buildIdClauses
+                        ]
                     ]
               )
             ]
@@ -98,23 +215,23 @@ decodeResponse =
     let
         decodeFilter name =
             Decode.list decodeFacet
-                |> Decode.at [ "aggregations", name, "buckets" ]
+                |> Decode.at [ "aggregations", name, name ++ "_agg", "buckets" ]
     in
         Decode.map7 Facets
             (Decode.at [ "hits", "hits" ] (Decode.list decodeBuildRecordHit))
             (Decode.at [ "hits", "total" ] Decode.int)
-            (decodeFilter "products")
-            (decodeFilter "versions")
-            (decodeFilter "channels")
-            (decodeFilter "platforms")
-            (decodeFilter "locales")
+            (decodeFilter "source.product")
+            (decodeFilter "target.version")
+            (decodeFilter "target.channel")
+            (decodeFilter "target.platform")
+            (decodeFilter "target.locale")
 
 
 getFacets : Filters -> Int -> Http.Request Facets
 getFacets filters size =
     let
         endpoint =
-            "https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releases/search"
+            "https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releasesv2/search"
     in
         Http.post endpoint (Http.jsonBody (encodeQuery filters size)) decodeResponse
 

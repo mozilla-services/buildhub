@@ -21,29 +21,51 @@ navigateToPage ({ filters } as model) newPage =
             ! [ newUrl <| urlFromRoute updatedRoute ]
 
 
-updateFilters : NewFilter -> Filters -> Filters
-updateFilters newFilter filters =
-    case newFilter of
-        ClearAll ->
-            Init.initFilters
+updateFilters : Facets -> NewFilter -> Filters -> Filters
+updateFilters facets newFilter filters =
+    let
+        toggleFilter facets value values =
+            if List.member value values then
+                List.filter (\v -> v /= value) values
+            else
+                value :: values
+    in
+        case newFilter of
+            ClearAll ->
+                Init.initFilters
 
-        NewProductFilter value ->
-            { filters | product = value, page = 1 }
+            NewProductFilter value active ->
+                { filters | product = filters.product |> toggleFilter facets.products value, page = 1 }
 
-        NewVersionFilter value ->
-            { filters | version = value, page = 1 }
+            NewVersionFilter value active ->
+                { filters | version = filters.version |> toggleFilter facets.versions value, page = 1 }
 
-        NewPlatformFilter value ->
-            { filters | platform = value, page = 1 }
+            NewPlatformFilter value active ->
+                { filters | platform = filters.platform |> toggleFilter facets.platforms value, page = 1 }
 
-        NewChannelFilter value ->
-            { filters | channel = value, page = 1 }
+            NewChannelFilter value active ->
+                { filters | channel = filters.channel |> toggleFilter facets.channels value, page = 1 }
 
-        NewLocaleFilter value ->
-            { filters | locale = value, page = 1 }
+            NewLocaleFilter value active ->
+                { filters | locale = filters.locale |> toggleFilter facets.locales value, page = 1 }
 
-        NewBuildIdSearch value ->
-            { filters | buildId = value, page = 1 }
+            NewBuildIdSearch value ->
+                { filters | buildId = value, page = 1 }
+
+            ClearProducts ->
+                { filters | product = [], page = 1 }
+
+            ClearVersions ->
+                { filters | version = [], page = 1 }
+
+            ClearChannels ->
+                { filters | channel = [], page = 1 }
+
+            ClearPlatforms ->
+                { filters | platform = [], page = 1 }
+
+            ClearLocales ->
+                { filters | locale = [], page = 1 }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -62,15 +84,20 @@ update msg ({ filters, settings } as model) =
             navigateToPage model <| filters.page - 1
 
         UpdateFilter newFilter ->
-            let
-                updatedFilters =
-                    updateFilters newFilter filters
+            case model.facets of
+                Nothing ->
+                    model ! []
 
-                updatedRoute =
-                    routeFromFilters updatedFilters
-            in
-                { model | filters = updatedFilters }
-                    ! [ newUrl <| urlFromRoute updatedRoute ]
+                Just facets ->
+                    let
+                        updatedFilters =
+                            updateFilters facets newFilter filters
+
+                        updatedRoute =
+                            routeFromFilters updatedFilters
+                    in
+                        { model | filters = updatedFilters }
+                            ! [ newUrl <| urlFromRoute updatedRoute ]
 
         UrlChange location ->
             let

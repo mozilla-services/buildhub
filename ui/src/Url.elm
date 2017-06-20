@@ -5,6 +5,14 @@ import Types exposing (..)
 import UrlParser exposing (..)
 
 
+parseFilter : String -> List String
+parseFilter textFilter =
+    if textFilter == "all" then
+        []
+    else
+        String.split "|" textFilter
+
+
 routeFromUrl : Model -> Location -> Model
 routeFromUrl model location =
     let
@@ -36,11 +44,11 @@ routeFromUrl model location =
                     | route = FilteredView product channel platform version locale buildId page
                     , filters =
                         { buildId = buildId
-                        , product = product
-                        , channel = channel
-                        , platform = platform
-                        , version = version
-                        , locale = locale
+                        , product = parseFilter product
+                        , channel = parseFilter channel
+                        , platform = parseFilter platform
+                        , version = parseFilter version
+                        , locale = parseFilter locale
                         , page = page
                         }
                 }
@@ -50,11 +58,11 @@ routeFromUrl model location =
                     | route = MainView
                     , filters =
                         { buildId = ""
-                        , product = "all"
-                        , channel = "all"
-                        , platform = "all"
-                        , version = "all"
-                        , locale = "all"
+                        , product = []
+                        , channel = []
+                        , platform = []
+                        , version = []
+                        , locale = []
                         , page = 1
                         }
                 }
@@ -88,4 +96,18 @@ urlFromRoute route =
 
 routeFromFilters : Filters -> Route
 routeFromFilters { buildId, locale, version, platform, channel, product, page } =
-    FilteredView product channel platform version locale buildId page
+    let
+        buildUrlParam values =
+            if List.length values == 0 then
+                "all"
+            else
+                String.join "|" values
+    in
+        FilteredView
+            (buildUrlParam product)
+            (buildUrlParam channel)
+            (buildUrlParam platform)
+            (buildUrlParam version)
+            (buildUrlParam locale)
+            buildId
+            page

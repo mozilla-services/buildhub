@@ -25,3 +25,67 @@ body {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* Filter widgets */
+
+.scrollable-choices {
+  max-height: 120px;
+  overflow: auto;
+}
+
+.scrollable-choices .checkbox {
+  margin: 0 5px 0;
+}
+
+/* Scrollbars (Sadly non-available in Firefox) */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 8px
+}
+
+::-webkit-scrollbar-thumb {
+  background: #444;
+  border: 0px none #ffffff;
+  border-radius: 50px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #777;
+}
+
+::-webkit-scrollbar-track {
+  border: 0px none #ffffff;
+  border-radius: 0;
+  background: rgba(0,0,0,0.1);
+}
+
+::-webkit-scrollbar-track:hover {
+  background: #2a2e31;
+}
+
+::-webkit-scrollbar-track:active {
+  background: #2a2e31;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Close button icon */
+
+.close {
+  color: #bbb;
+  opacity: 1;
+  text-shadow: 0 1px 0 #333;
+}
+
+.close:hover, .close:focus, .close:active {
+  color: #eee;
+  opacity: 1;
+  outline: 0;
+}
