@@ -30,7 +30,7 @@ import {
 } from "searchkit";
 
 const searchkit = new SearchkitManager(
-  "https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releasesv2/",
+  "https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releases/",
   { searchUrlPath: "search" }
 );
 
