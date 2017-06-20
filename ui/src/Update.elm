@@ -74,7 +74,7 @@ updateFilters facets newFilter filters =
                 { filters | buildId = value, page = 1 }
 
             NewSearch search ->
-                { filters | search = search }
+                { filters | search = search, page = 1 }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
