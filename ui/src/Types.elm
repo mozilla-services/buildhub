@@ -110,6 +110,8 @@ type NewFilter
     | ClearPlatforms
     | ClearChannels
     | ClearLocales
+    | ClearBuildId
+    | ClearSearch
     | NewProductFilter String Bool
     | NewVersionFilter String Bool
     | NewPlatformFilter String Bool

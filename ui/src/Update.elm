@@ -49,6 +49,12 @@ updateFilters facets newFilter filters =
             ClearLocales ->
                 { filters | locale = [], page = 1 }
 
+            ClearBuildId ->
+                { filters | buildId = "", page = 1 }
+
+            ClearSearch ->
+                { filters | search = "", page = 1 }
+
             NewProductFilter value active ->
                 { filters | product = filters.product |> toggleFilter facets.products value, page = 1 }
 

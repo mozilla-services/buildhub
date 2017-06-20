@@ -22,19 +22,33 @@ view model =
         ]
 
 
+clearableTextInput : msg -> List (Attribute msg) -> String -> Html msg
+clearableTextInput onClearMsg attrs txt =
+    div [ class "btn-group clearable-text" ]
+        [ input attrs []
+        , if String.length txt > 0 then
+            span
+                [ class "text-clear-btn"
+                , onClick onClearMsg
+                ]
+                [ i [ class "glyphicon glyphicon-remove" ] [] ]
+          else
+            text ""
+        ]
+
+
 searchForm : Filters -> Html Msg
 searchForm filters =
     Html.form [ class "search-form well", onSubmit SubmitSearch ]
-        [ div [ class "form-group" ]
-            [ input
-                [ type_ "search"
-                , class "form-control"
-                , placeholder "firefox 54 linux"
-                , value filters.search
-                , onInput <| UpdateFilter << NewSearch
-                ]
-                []
+        [ clearableTextInput
+            (UpdateFilter ClearSearch)
+            [ type_ "search"
+            , class "form-control"
+            , placeholder "firefox 54 linux"
+            , value filters.search
+            , onInput <| UpdateFilter << NewSearch
             ]
+            filters.search
         ]
 
 
@@ -226,14 +240,15 @@ buildIdSearchForm : String -> Html Msg
 buildIdSearchForm buildId =
     div [ class "form-group" ]
         [ label [] [ text "Build id" ]
-        , input
-            [ type_ "text"
+        , clearableTextInput
+            (UpdateFilter ClearBuildId)
+            [ type_ "search"
             , class "form-control"
             , placeholder "Eg. 201705011233"
             , value buildId
             , onInput <| UpdateFilter << NewBuildIdSearch
             ]
-            []
+            buildId
         ]
 
 
