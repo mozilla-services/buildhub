@@ -231,7 +231,7 @@ getFacets : Filters -> Int -> Http.Request Facets
 getFacets filters size =
     let
         endpoint =
-            "https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releasesv2/search"
+            "https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releases/search"
     in
         Http.post endpoint (Http.jsonBody (encodeQuery filters size)) decodeResponse
 
