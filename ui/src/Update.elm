@@ -34,6 +34,21 @@ updateFilters facets newFilter filters =
             ClearAll ->
                 Init.initFilters
 
+            ClearProducts ->
+                { filters | product = [], page = 1 }
+
+            ClearVersions ->
+                { filters | version = [], page = 1 }
+
+            ClearChannels ->
+                { filters | channel = [], page = 1 }
+
+            ClearPlatforms ->
+                { filters | platform = [], page = 1 }
+
+            ClearLocales ->
+                { filters | locale = [], page = 1 }
+
             NewProductFilter value active ->
                 { filters | product = filters.product |> toggleFilter facets.products value, page = 1 }
 
@@ -52,20 +67,8 @@ updateFilters facets newFilter filters =
             NewBuildIdSearch value ->
                 { filters | buildId = value, page = 1 }
 
-            ClearProducts ->
-                { filters | product = [], page = 1 }
-
-            ClearVersions ->
-                { filters | version = [], page = 1 }
-
-            ClearChannels ->
-                { filters | channel = [], page = 1 }
-
-            ClearPlatforms ->
-                { filters | platform = [], page = 1 }
-
-            ClearLocales ->
-                { filters | locale = [], page = 1 }
+            NewSearch search ->
+                { filters | search = search }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -127,3 +130,6 @@ update msg ({ filters, settings } as model) =
                     ! [ ElasticSearch.getFacets updatedFilters newPageSize
                             |> Http.send FacetsReceived
                       ]
+
+        SubmitSearch ->
+            model ! []

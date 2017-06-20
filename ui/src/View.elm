@@ -27,6 +27,22 @@ mainView { settings, error, facets, filters } =
     div [ class "row" ]
         [ div [ class "col-sm-9" ]
             [ errorView error
+            , Html.form [ class "well", onSubmit SubmitSearch ]
+                [ div [ class "input-group" ]
+                    [ input
+                        [ type_ "search"
+                        , class "form-control"
+                        , placeholder "firefox 54 linux"
+                        , value filters.search
+                        , onInput <| UpdateFilter << NewSearch
+                        ]
+                        []
+                    , div [ class "input-group-btn" ]
+                        [ button [ class "btn btn-default" ]
+                            [ i [ class "glyphicon glyphicon-search" ] [] ]
+                        ]
+                    ]
+                ]
             , case facets of
                 Just facets ->
                     div []
@@ -230,6 +246,7 @@ recordView { id, build, download, source, target, systemAddons } =
                                 , channel = [ target.channel ]
                                 , locale = [ target.locale ]
                                 , buildId = buildInfo.id
+                                , search = ""
                                 , page = 1
                                 }
                                     |> routeFromFilters
@@ -451,6 +468,7 @@ facetSelector title total selectedValues filterMsg clearMsg facets =
                             , value entry.value
                             , checked active
                             , onCheck <| UpdateFilter << (filterMsg entry.value)
+                            , disabled <| List.length facets == 1
                             ]
                             []
                         , text <| entry.value ++ countInfo

@@ -29,6 +29,7 @@ routeFromUrl model location =
                             </> (s "version" </> string)
                             </> (s "locale" </> string)
                             </> (s "buildId" </> string)
+                            </> (s "search" </> string)
                             </> (s "page" </> int)
                         )
                     ]
@@ -39,9 +40,9 @@ routeFromUrl model location =
             Just DocsView ->
                 { model | route = DocsView }
 
-            Just (FilteredView product channel platform version locale buildId page) ->
+            Just (FilteredView product channel platform version locale buildId search page) ->
                 { model
-                    | route = FilteredView product channel platform version locale buildId page
+                    | route = FilteredView product channel platform version locale buildId search page
                     , filters =
                         { buildId = buildId
                         , product = parseFilter product
@@ -49,6 +50,7 @@ routeFromUrl model location =
                         , platform = parseFilter platform
                         , version = parseFilter version
                         , locale = parseFilter locale
+                        , search = search
                         , page = page
                         }
                 }
@@ -63,6 +65,7 @@ routeFromUrl model location =
                         , platform = []
                         , version = []
                         , locale = []
+                        , search = ""
                         , page = 1
                         }
                 }
@@ -74,7 +77,7 @@ urlFromRoute route =
         DocsView ->
             "#/docs/"
 
-        FilteredView product channel platform version locale buildId page ->
+        FilteredView product channel platform version locale buildId search page ->
             "#/builds/product/"
                 ++ product
                 ++ "/channel/"
@@ -87,6 +90,8 @@ urlFromRoute route =
                 ++ locale
                 ++ "/buildId/"
                 ++ buildId
+                ++ "/search/"
+                ++ search
                 ++ "/page/"
                 ++ (toString page)
 
@@ -95,7 +100,7 @@ urlFromRoute route =
 
 
 routeFromFilters : Filters -> Route
-routeFromFilters { buildId, locale, version, platform, channel, product, page } =
+routeFromFilters { buildId, locale, version, platform, channel, product, search, page } =
     let
         buildUrlParam values =
             if List.length values == 0 then
@@ -110,4 +115,5 @@ routeFromFilters { buildId, locale, version, platform, channel, product, page } 
             (buildUrlParam version)
             (buildUrlParam locale)
             buildId
+            search
             page

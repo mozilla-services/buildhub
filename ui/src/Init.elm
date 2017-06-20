@@ -15,6 +15,7 @@ initFilters =
     , channel = []
     , locale = []
     , buildId = ""
+    , search = ""
     , page = 1
     }
 

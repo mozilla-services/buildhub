@@ -83,6 +83,24 @@ extractClauses kind field values =
                     ]
 
 
+buildSearchClause : String -> Maybe EncodedFilter
+buildSearchClause search =
+    case search of
+        "" ->
+            Nothing
+
+        search ->
+            Just <|
+                Encode.object
+                    [ ( "query_string"
+                      , Encode.object
+                            [ ( "query", Encode.string search )
+                            , ( "default_operator", Encode.string "AND" )
+                            ]
+                      )
+                    ]
+
+
 encodeAggregate : String -> List (Maybe EncodedClause) -> ( String, EncodedAggregate )
 encodeAggregate field clauses =
     ( field
@@ -122,7 +140,7 @@ encodeFilter clauses =
 
 
 encodeQuery : Filters -> Int -> EncodedQuery
-encodeQuery { page, product, channel, locale, version, platform, buildId } pageSize =
+encodeQuery { page, product, channel, locale, version, platform, buildId, search } pageSize =
     let
         productClauses =
             extractClauses Term "source.product" product
@@ -141,6 +159,9 @@ encodeQuery { page, product, channel, locale, version, platform, buildId } pageS
 
         buildIdClauses =
             extractClauses Prefix "build.id" [ buildId ]
+
+        searchClauses =
+            buildSearchClause search
     in
         Encode.object
             [ ( "size", Encode.int pageSize )
@@ -154,6 +175,7 @@ encodeQuery { page, product, channel, locale, version, platform, buildId } pageS
                     , localeClauses
                     , platformClauses
                     , buildIdClauses
+                    , searchClauses
                     ]
               )
             , ( "aggs"
@@ -164,6 +186,7 @@ encodeQuery { page, product, channel, locale, version, platform, buildId } pageS
                         , localeClauses
                         , platformClauses
                         , buildIdClauses
+                        , searchClauses
                         ]
                     , encodeAggregate "target.channel"
                         [ productClauses
@@ -171,6 +194,7 @@ encodeQuery { page, product, channel, locale, version, platform, buildId } pageS
                         , localeClauses
                         , platformClauses
                         , buildIdClauses
+                        , searchClauses
                         ]
                     , encodeAggregate "target.platform"
                         [ productClauses
@@ -178,6 +202,7 @@ encodeQuery { page, product, channel, locale, version, platform, buildId } pageS
                         , versionClauses
                         , localeClauses
                         , buildIdClauses
+                        , searchClauses
                         ]
                     , encodeAggregate "target.version"
                         [ productClauses
@@ -192,6 +217,7 @@ encodeQuery { page, product, channel, locale, version, platform, buildId } pageS
                         , versionClauses
                         , platformClauses
                         , buildIdClauses
+                        , searchClauses
                         ]
                     ]
               )
