@@ -6,7 +6,7 @@ body {
 
 .sk-panel__content {
   max-height: 300px;
-  overflow-y: scroll;
+  overflow-y: auto;
   padding-right: 10px;
 }
 
