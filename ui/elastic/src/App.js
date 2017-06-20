@@ -72,7 +72,7 @@ const HitsTable = (toggleExpand, expandedEntry) => {
                     <td>{target.locale}</td>
                     <td>{source.tree}</td>
                     <td>{filesize(download.size)}</td>
-                    <td title={download.date}><time datetime={download.date}>{new Date(download.date).toLocaleDateString()}</time></td>
+                    <td title={download.date}><time dateTime={download.date}>{new Date(download.date).toLocaleDateString()}</time></td>
                     <td>{build && build.id}</td>
                     <td>{revisionUrl}</td>
                   </tr>
@@ -86,6 +86,15 @@ const HitsTable = (toggleExpand, expandedEntry) => {
     );
   };
 };
+
+
+const sortVersions = (filters) => {
+  return filters.sort((a, b) => {
+    const majorA = parseInt(a.key.split(".", 1)[0], 10)
+    const majorB = parseInt(b.key.split(".", 1)[0], 10)
+    return majorB - majorA
+  })
+}
 
 class App extends Component {
   constructor(props) {
@@ -129,6 +138,7 @@ class App extends Component {
                   orderKey="_term"
                   orderDirection="desc"
                   listComponent={ItemCheckboxList}
+                  bucketsTransform={sortVersions}
                   translations={{ All: "All versions" }}
                 />
                 <RefinementListFilter
