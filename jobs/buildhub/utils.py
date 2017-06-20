@@ -103,6 +103,8 @@ def is_release_filename(product, filename):
     - Thunderbird 10.0.12esr.dmg
     - Firefox Setup 17.0b3.exe
     """
+    if product == "devedition":
+        product = "firefox"
     match_filename = filename.replace(' ', '-').lower()
     re_filename = re.compile("{}-(.+)({})$".format(product, FILE_EXTENSIONS))
     re_exclude = re.compile(".+(sdk|tests|crashreporter|stub)")
@@ -116,6 +118,8 @@ def is_release_metadata(product, version, filename):
     - firefox-52.0b7.json
     - fennec-51.0b2.en-US.android-i386.json
     """
+    if product == "devedition":
+        product = "firefox"
     re_metadata = re.compile("{}-{}(.*).json".format(product, version))
     return re_metadata.match(filename)
 

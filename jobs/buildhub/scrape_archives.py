@@ -18,7 +18,7 @@ from kinto_http import cli_utils
 
 
 ARCHIVE_URL = "https://archive.mozilla.org/pub/"
-PRODUCTS = ("fennec", "firefox", "thunderbird")
+PRODUCTS = ("fennec", "firefox", "thunderbird", "devedition")
 DEFAULT_SERVER = "https://kinto-ota.dev.mozaws.net/v1"
 DEFAULT_BUCKET = "build-hub"
 DEFAULT_COLLECTION = "releases"
@@ -262,7 +262,8 @@ async def fetch_release_metadata(session, product, version, platform, locale):
 
 async def fetch_products(session, queue, products, client):
     # Nightlies
-    futures = [fetch_nightlies(session, queue, product, client) for product in products]
+    futures = [fetch_nightlies(session, queue, product, client) for product in products
+               if product != "devedition"]
     await asyncio.gather(*futures)
     # Releases
     futures = [fetch_versions(session, queue, product, client) for product in products]
