@@ -87,7 +87,7 @@ prepareSearchQuery : String -> String
 prepareSearchQuery search =
     search
         |> String.split " "
-        |> List.map (\w -> w ++ "*")
+        |> List.map (\w -> "*" ++ w ++ "*")
         |> String.join " "
 
 
@@ -103,7 +103,7 @@ buildSearchClause search =
                     [ ( "query_string"
                       , Encode.object
                             [ ( "query", Encode.string <| prepareSearchQuery search )
-                            , ( "analyzer", Encode.string "pattern" )
+                            , ( "analyzer", Encode.string "standard" )
                             , ( "default_operator", Encode.string "AND" )
                             , ( "phrase_slop", Encode.int 1 )
                             , ( "auto_generate_phrase_queries", Encode.bool True )
@@ -112,12 +112,10 @@ buildSearchClause search =
                             , ( "split_on_whitespace", Encode.bool True )
                             , ( "fields"
                               , [ "source.product"
-                                , "target.channel"
-                                , "target.version"
-                                , "target.locale"
-                                , "target.platform"
-                                , "build.id"
-                                , "id"
+                                , "target.channel^1.2"
+                                , "target.version^10"
+                                , "target.locale^3"
+                                , "target.platform^2"
                                 ]
                                     |> List.map Encode.string
                                     |> Encode.list
