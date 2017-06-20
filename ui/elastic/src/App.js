@@ -87,6 +87,15 @@ const HitsTable = (toggleExpand, expandedEntry) => {
   };
 };
 
+
+const sortVersions = (filters) => {
+  return filters.sort((a, b) => {
+    const majorA = parseInt(a.key.split(".", 1)[0], 10)
+    const majorB = parseInt(b.key.split(".", 1)[0], 10)
+    return majorB - majorA
+  })
+}
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -129,6 +138,7 @@ class App extends Component {
                   orderKey="_term"
                   orderDirection="desc"
                   listComponent={ItemCheckboxList}
+                  bucketsTransform={sortVersions}
                   translations={{ All: "All versions" }}
                 />
                 <RefinementListFilter
