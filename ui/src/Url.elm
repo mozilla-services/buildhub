@@ -1,5 +1,6 @@
 module Url exposing (routeFromFilters, routeFromUrl, urlFromRoute)
 
+import Http exposing (encodeUri, decodeUri)
 import Navigation exposing (..)
 import Types exposing (..)
 import UrlParser exposing (..)
@@ -50,7 +51,7 @@ routeFromUrl model location =
                         , platform = parseFilter platform
                         , version = parseFilter version
                         , locale = parseFilter locale
-                        , search = search
+                        , search = decodeUri search |> Maybe.withDefault ""
                         , page = page
                         }
                 }
@@ -91,7 +92,7 @@ urlFromRoute route =
                 ++ "/buildId/"
                 ++ buildId
                 ++ "/search/"
-                ++ search
+                ++ (encodeUri search)
                 ++ "/page/"
                 ++ (toString page)
 
