@@ -28,7 +28,7 @@ mainView { settings, error, facets, filters } =
         [ div [ class "col-sm-9" ]
             [ errorView error
             , Html.form [ class "well", onSubmit SubmitSearch ]
-                [ div [ class "input-group" ]
+                [ div [ class "form-group" ]
                     [ input
                         [ type_ "search"
                         , class "form-control"
@@ -37,10 +37,6 @@ mainView { settings, error, facets, filters } =
                         , onInput <| UpdateFilter << NewSearch
                         ]
                         []
-                    , div [ class "input-group-btn" ]
-                        [ button [ class "btn btn-default" ]
-                            [ i [ class "glyphicon glyphicon-search" ] [] ]
-                        ]
                     ]
                 ]
             , case facets of
