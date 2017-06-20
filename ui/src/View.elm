@@ -22,29 +22,37 @@ view model =
         ]
 
 
+searchForm : Filters -> Html Msg
+searchForm filters =
+    Html.form [ class "search-form well", onSubmit SubmitSearch ]
+        [ div [ class "form-group" ]
+            [ input
+                [ type_ "search"
+                , class "form-control"
+                , placeholder "firefox 54 linux"
+                , value filters.search
+                , onInput <| UpdateFilter << NewSearch
+                ]
+                []
+            ]
+        ]
+
+
 mainView : Model -> Html Msg
 mainView { settings, error, facets, filters } =
     div [ class "row" ]
         [ div [ class "col-sm-9" ]
             [ errorView error
-            , Html.form [ class "well", onSubmit SubmitSearch ]
-                [ div [ class "form-group" ]
-                    [ input
-                        [ type_ "search"
-                        , class "form-control"
-                        , placeholder "firefox 54 linux"
-                        , value filters.search
-                        , onInput <| UpdateFilter << NewSearch
-                        ]
-                        []
-                    ]
-                ]
+            , searchForm filters
             , case facets of
                 Just facets ->
                     div []
                         [ paginationView facets settings.pageSize filters.page
                         , div [] <| List.map recordView facets.hits
-                        , paginationView facets settings.pageSize filters.page
+                        , if List.length facets.hits > 0 then
+                            paginationView facets settings.pageSize filters.page
+                          else
+                            text ""
                         ]
 
                 Nothing ->
@@ -172,38 +180,44 @@ paginationView { total, hits } pageSize page =
             [ div [ class "row" ]
                 [ p [ class "col-sm-6" ] <|
                     [ text <|
-                        "Build result"
-                            ++ (if nbBuilds == 1 then
-                                    ""
-                                else
-                                    "s"
-                               )
-                            ++ " "
-                            ++ (toString chunkStart)
-                            ++ ".."
-                            ++ (toString chunkStop)
-                            ++ " of "
-                            ++ toString total
-                            ++ "."
+                        if nbBuilds == 0 then
+                            "No results were found matching your query."
+                        else
+                            "Build result"
+                                ++ (if nbBuilds == 1 then
+                                        ""
+                                    else
+                                        "s"
+                                   )
+                                ++ " "
+                                ++ (toString chunkStart)
+                                ++ ".."
+                                ++ (toString chunkStop)
+                                ++ " of "
+                                ++ toString total
+                                ++ "."
                     ]
-                , div [ class "col-sm-6 text-right" ]
-                    [ div [ class "btn-group" ]
-                        [ if page /= 1 then
-                            button
-                                [ class "btn btn-default", onClick LoadPreviousPage ]
-                                [ text <| "« Page " ++ (toString (page - 1)) ]
-                          else
-                            text ""
-                        , button [ class "btn btn-default active", disabled True ]
-                            [ text <| "Page " ++ (toString page) ]
-                        , if page /= ceiling ((toFloat total) / (toFloat pageSize)) then
-                            button
-                                [ class "btn btn-default", onClick LoadNextPage ]
-                                [ text <| "Page " ++ (toString (page + 1)) ++ " »" ]
-                          else
-                            text ""
+                , if nbBuilds > 0 then
+                    div [ class "col-sm-6 text-right" ]
+                        [ div [ class "btn-group" ]
+                            [ if page /= 1 then
+                                button
+                                    [ class "btn btn-default", onClick LoadPreviousPage ]
+                                    [ text <| "« Page " ++ (toString (page - 1)) ]
+                              else
+                                text ""
+                            , button [ class "btn btn-default active", disabled True ]
+                                [ text <| "Page " ++ (toString page) ]
+                            , if page /= ceiling ((toFloat total) / (toFloat pageSize)) then
+                                button
+                                    [ class "btn btn-default", onClick LoadNextPage ]
+                                    [ text <| "Page " ++ (toString (page + 1)) ++ " »" ]
+                              else
+                                text ""
+                            ]
                         ]
-                    ]
+                  else
+                    text ""
                 ]
             ]
 
@@ -531,7 +545,7 @@ settingsView { pageSize } =
                         , onInput NewPageSize
                         , value <| toString pageSize
                         ]
-                        (List.map optionView [ "100", "200", "500", "1000" ])
+                        (List.map optionView [ "5", "10", "20", "50", "100" ])
                     ]
             ]
         ]

@@ -83,6 +83,14 @@ extractClauses kind field values =
                     ]
 
 
+prepareSearchQuery : String -> String
+prepareSearchQuery search =
+    search
+        |> String.split " "
+        |> List.map (\w -> w ++ "*")
+        |> String.join " "
+
+
 buildSearchClause : String -> Maybe EncodedFilter
 buildSearchClause search =
     case search of
@@ -94,8 +102,26 @@ buildSearchClause search =
                 Encode.object
                     [ ( "query_string"
                       , Encode.object
-                            [ ( "query", Encode.string search )
+                            [ ( "query", Encode.string <| prepareSearchQuery search )
+                            , ( "analyzer", Encode.string "pattern" )
                             , ( "default_operator", Encode.string "AND" )
+                            , ( "phrase_slop", Encode.int 1 )
+                            , ( "auto_generate_phrase_queries", Encode.bool True )
+                            , ( "analyze_wildcard", Encode.bool True )
+                            , ( "lenient", Encode.bool True )
+                            , ( "split_on_whitespace", Encode.bool True )
+                            , ( "fields"
+                              , [ "source.product"
+                                , "target.channel"
+                                , "target.version"
+                                , "target.locale"
+                                , "target.platform"
+                                , "build.id"
+                                , "id"
+                                ]
+                                    |> List.map Encode.string
+                                    |> Encode.list
+                              )
                             ]
                       )
                     ]
