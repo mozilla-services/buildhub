@@ -12,6 +12,7 @@ import {
   SelectedFilters,
   MenuFilter,
   Pagination,
+  QueryString,
   RefinementListFilter,
   ResetFilters,
   SearchkitManager,
@@ -122,8 +123,23 @@ class App extends Component {
               <SearchBox
                 autofocus={true}
                 searchOnChange={true}
-                placeholder="Search a build ID, eg: 201706*"
-                queryFields={["build.id"]}
+                placeholder="firefox 54 linux"
+                queryBuilder={QueryString}
+                queryOptions={{
+                          analyzer: "standard",
+                          default_operator: "AND",
+                          phrase_slop: 1 ,
+                          auto_generate_phrase_queries: true,
+                          analyze_wildcard: true,
+                          lenient: true,
+                          split_on_whitespace: true
+                }}
+                queryFields={["source.product",
+                              "target.channel^1.2",
+                              "target.version^10",
+                              "target.locale^3",
+                              "target.platform^2",
+                              "build.id"]}
               />
             </TopBar>
 
