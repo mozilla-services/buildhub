@@ -57,24 +57,25 @@ const HitsTable = (toggleExpand, expandedEntry) => {
           </thead>
           <tbody>
             {hits.map(
-              ({ _source: { build, download, source, target }, _id }) => {
+              ({ _source: { build, download, source, target }, _id, highlight }) => {
                 const revisionUrl = source.revision
                   ? <a href={`${source.repository}/rev/${source.revision}`}>
                       {source.revision.substring(0, 6)}
                     </a>
                   : "";
+                const getHighlight = (title, value) => {return {__html: ((highlight && highlight[title]) || value)}}
                 return (
                   <tr key={_id} id={_id}>
                     <td><a href={`#${_id}`}>#</a></td>
-                    <td>{source.product}</td>
-                    <td><a href={download.url}>{target.version}</a></td>
-                    <td>{target.platform}</td>
-                    <td>{target.channel}</td>
-                    <td>{target.locale}</td>
+                    <td dangerouslySetInnerHTML={getHighlight("source.product", source.product)}/>
+                    <td><a href={download.url} dangerouslySetInnerHTML={getHighlight("target.version", target.version)}/></td>
+                    <td dangerouslySetInnerHTML={getHighlight("target.platform", target.platform)}/>
+                    <td dangerouslySetInnerHTML={getHighlight("target.channel", target.channel)}/>
+                    <td dangerouslySetInnerHTML={getHighlight("target.locale", target.locale)}/>
                     <td>{source.tree}</td>
                     <td>{filesize(download.size)}</td>
                     <td title={download.date}><time dateTime={download.date}>{new Date(download.date).toLocaleDateString()}</time></td>
-                    <td>{build && build.id}</td>
+                    <td dangerouslySetInnerHTML={getHighlight("build.id", build && build.id)}/>
                     <td>{revisionUrl}</td>
                   </tr>
                 );
@@ -231,6 +232,14 @@ class App extends Component {
                     this.toggleExpand,
                     this.state.expandedEntry
                   )}
+                  highlightFields={[
+                    "source.product",
+                    "target.channel",
+                    "target.version",
+                    "target.locale",
+                    "target.platform",
+                    "build.id"
+                  ]}
                 />
                 <NoHits
                   translations={{

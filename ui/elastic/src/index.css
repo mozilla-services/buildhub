@@ -14,6 +14,10 @@ table a {
   text-decoration: none;
 }
 
+table em {
+  background-color: yellow;
+}
+
 .sk-table td, .sk-table th {
   padding: .5em .5em;
   text-overflow: ellipsis;
