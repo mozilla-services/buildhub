@@ -213,7 +213,7 @@ async def fetch_nightly_metadata(session, product, nightly_url):
 
 
 _candidates = {}
-_lock = asyncio.Lock()
+_candidates_lock = asyncio.Lock()
 
 
 async def fetch_release_metadata(session, product, version, platform, locale):
@@ -227,9 +227,7 @@ async def fetch_release_metadata(session, product, version, platform, locale):
 
     # Make sure there is only one coroutine populating the _candidates list at a
     # time, using a mutex.
-    await _lock
-
-    try:
+    with await _candidates_lock:
         # Keep the list of latest available candidates per product, for more efficiency.
         if _candidates.get(product) is None:
             candidates_url = archive_url(product, candidate="/")
@@ -244,8 +242,6 @@ async def fetch_release_metadata(session, product, version, platform, locale):
                 build_folders, _ = await fetch_listing(session, builds_url)
                 latest_build_folder = sorted(build_folders)[-1]
                 _candidates[product][candidate_version] = latest_build_folder
-    finally:
-        _lock.release()
 
     # Candidates are only available for a subset of versions.
     if version not in _candidates[product]:
