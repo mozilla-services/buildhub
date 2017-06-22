@@ -4,4 +4,5 @@
 *.egg-info/
 __pycache__/
 jobs/.coverage
-
+docs/_build/
+.venv/
