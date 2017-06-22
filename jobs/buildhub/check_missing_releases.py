@@ -266,7 +266,7 @@ async def produce(loop, queue, client):
     logger.info("Scraping releases done.")
 
 
-async def consume(loop, queue, executor, client):
+async def consume(loop, queue, executor, client, records_ids):
     """Store grabbed releases from the archives website in Kinto."""
 
     # Check for 200 or 404 on the release name
@@ -279,16 +279,11 @@ async def consume(loop, queue, executor, client):
         if release_id is None:
             print('Skipping', release_url)
             continue
-        try:
-            client.get_record(id=release_id)
+        if release_id in records_ids:
             status = 'OK'
-        except KintoException as e:
-            if e.response.status_code == 404:
-                status = 'MISSING'
-                client.create_record(data=record)
-            else:
-                import pdb
-                pdb.set_trace()
+        else:
+            status = 'MISSING'
+            client.create_record(data=record)
         print(status, release_id, '\t', release_url)
 
         queue.task_done()
@@ -311,11 +306,16 @@ async def main(loop):
 
     client = cli_utils.create_client_from_args(args)
 
+    # Fetch the list of known records ids.
+    records = client.get_records(pages=float("inf"))
+    records_ids = set([r['id'] for r in records])
+    print("{} existing records found.".format(len(records_ids)))
+
     # Start a producer and a consumer with threaded kinto requests.
     queue = asyncio.Queue()
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=NB_THREADS)
     # Schedule the consumer
-    consumer_coro = consume(loop, queue, executor, client)
+    consumer_coro = consume(loop, queue, executor, client, records_ids)
     consumer = asyncio.ensure_future(consumer_coro)
     # Run the producer and wait for completion
     await produce(loop, queue, client)
