@@ -49,9 +49,6 @@ updateFilters facets newFilter filters =
             ClearLocales ->
                 { filters | locale = [], page = 1 }
 
-            ClearBuildId ->
-                { filters | buildId = "", page = 1 }
-
             ClearSearch ->
                 { filters | search = "", page = 1 }
 
@@ -69,9 +66,6 @@ updateFilters facets newFilter filters =
 
             NewLocaleFilter value active ->
                 { filters | locale = filters.locale |> toggleFilter facets.locales value, page = 1 }
-
-            NewBuildIdSearch value ->
-                { filters | buildId = value, page = 1 }
 
             NewSearch search ->
                 { filters | search = search, page = 1 }

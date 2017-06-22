@@ -11,6 +11,13 @@ body {
   margin-top: 10px;
 }
 
+.highlight {
+  background-color: lightblue;
+  color: #000;
+  padding: .2em .3em 0;
+  border-radius: 2px;
+}
+
 .loader {
     border: 16px solid #999;
     border-top: 16px solid #666;
@@ -56,11 +63,21 @@ body {
 
 .scrollable-choices {
   max-height: 120px;
-  overflow: auto;
+  overflow-y: scroll;
 }
 
 .scrollable-choices .checkbox {
-  margin: 0 5px 0;
+  margin: 0;
+}
+
+.scrollable-choices .checkbox label .filter-value {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.scrollable-choices .checkbox label .badge {
+  position: absolute;
+  right: 0;
 }
 
 /* Scrollbars (Sadly non-available in Firefox) */

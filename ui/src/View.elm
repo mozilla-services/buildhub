@@ -22,6 +22,21 @@ view model =
         ]
 
 
+highlighSearchTerm : String -> List String -> String -> Html Msg
+highlighSearchTerm search terms fieldValue =
+    let
+        fullTerms =
+            search
+                |> String.split " "
+                |> List.filter (not << String.isEmpty)
+                |> List.append terms
+    in
+        if List.member fieldValue fullTerms then
+            span [ class "highlight" ] [ text fieldValue ]
+        else
+            text fieldValue
+
+
 clearableTextInput : msg -> List (Attribute msg) -> String -> Html msg
 clearableTextInput onClearMsg attrs txt =
     div [ class "btn-group clearable-text" ]
@@ -44,7 +59,7 @@ searchForm filters =
             (UpdateFilter ClearSearch)
             [ type_ "search"
             , class "form-control"
-            , placeholder "firefox 54 linux"
+            , placeholder "Search builds, eg. \"firefox 54 linux\""
             , value filters.search
             , onInput <| UpdateFilter << NewSearch
             ]
@@ -62,7 +77,7 @@ mainView { settings, error, facets, filters } =
                 Just facets ->
                     div []
                         [ paginationView facets settings.pageSize filters.page
-                        , div [] <| List.map recordView facets.hits
+                        , div [] <| List.map (recordView filters) facets.hits
                         , if List.length facets.hits > 0 then
                             paginationView facets settings.pageSize filters.page
                           else
@@ -236,24 +251,8 @@ paginationView { total, hits } pageSize page =
             ]
 
 
-buildIdSearchForm : String -> Html Msg
-buildIdSearchForm buildId =
-    div [ class "form-group" ]
-        [ label [] [ text "Build id" ]
-        , clearableTextInput
-            (UpdateFilter ClearBuildId)
-            [ type_ "search"
-            , class "form-control"
-            , placeholder "Eg. 201705011233"
-            , value buildId
-            , onInput <| UpdateFilter << NewBuildIdSearch
-            ]
-            buildId
-        ]
-
-
-recordView : BuildRecord -> Html Msg
-recordView { id, build, download, source, target, systemAddons } =
+recordView : Filters -> BuildRecord -> Html Msg
+recordView filters { id, build, download, source, target, systemAddons } =
     div
         [ class "panel panel-default", Html.Attributes.id id ]
         [ div [ class "panel-heading" ]
@@ -279,10 +278,9 @@ recordView { id, build, download, source, target, systemAddons } =
                           in
                             href url
                         ]
-                        [ text <|
-                            source.product
-                                ++ " "
-                                ++ target.version
+                        [ highlighSearchTerm filters.search filters.product source.product
+                        , text " "
+                        , highlighSearchTerm filters.search filters.version target.version
                         ]
                     ]
                 , small [ class "col-sm-4 text-center" ]
@@ -296,7 +294,7 @@ recordView { id, build, download, source, target, systemAddons } =
                 , em [ class "col-sm-4 text-right" ]
                     [ case build of
                         Just { id } ->
-                            text id
+                            highlighSearchTerm filters.search [ filters.buildId ] id
 
                         Nothing ->
                             text ""
@@ -304,17 +302,17 @@ recordView { id, build, download, source, target, systemAddons } =
                 ]
             ]
         , div [ class "panel-body" ]
-            [ viewSourceDetails source
-            , viewTargetDetails target
+            [ viewSourceDetails filters source
+            , viewTargetDetails filters target
             , viewDownloadDetails download
-            , viewBuildDetails build
+            , viewBuildDetails filters build
             , viewSystemAddonsDetails systemAddons
             ]
         ]
 
 
-viewBuildDetails : Maybe Build -> Html Msg
-viewBuildDetails build =
+viewBuildDetails : Filters -> Maybe Build -> Html Msg
+viewBuildDetails filters build =
     case build of
         Just build ->
             div []
@@ -328,7 +326,7 @@ viewBuildDetails build =
                         ]
                     , tbody []
                         [ tr []
-                            [ td [] [ text build.id ]
+                            [ td [] [ highlighSearchTerm filters.search [ filters.buildId ] build.id ]
                             , td [] [ text build.date ]
                             ]
                         ]
@@ -371,8 +369,8 @@ viewDownloadDetails download =
             ]
 
 
-viewSourceDetails : Source -> Html Msg
-viewSourceDetails source =
+viewSourceDetails : Filters -> Source -> Html Msg
+viewSourceDetails { product, search } source =
     let
         revisionUrl =
             case source.revision of
@@ -385,7 +383,7 @@ viewSourceDetails source =
                             text "If you see this, please file a bug. Revision not linked to a repository."
 
                 Nothing ->
-                    text ""
+                    text "unknown"
     in
         table [ class "table table-stripped table-condensed" ]
             [ thead []
@@ -397,7 +395,7 @@ viewSourceDetails source =
                 ]
             , tbody []
                 [ tr []
-                    [ td [] [ text source.product ]
+                    [ td [] [ highlighSearchTerm search product source.product ]
                     , td [] [ text <| Maybe.withDefault "unknown" source.tree ]
                     , td [] [ revisionUrl ]
                     ]
@@ -437,8 +435,8 @@ viewSystemAddonsDetails systemAddons =
                 ]
 
 
-viewTargetDetails : Target -> Html Msg
-viewTargetDetails target =
+viewTargetDetails : Filters -> Target -> Html Msg
+viewTargetDetails filters target =
     div []
         [ h4 [] [ text "Target" ]
         , table
@@ -453,10 +451,10 @@ viewTargetDetails target =
                 ]
             , tbody []
                 [ tr []
-                    [ td [] [ text target.version ]
-                    , td [] [ text target.platform ]
-                    , td [] [ text target.channel ]
-                    , td [] [ text target.locale ]
+                    [ td [] [ highlighSearchTerm filters.search filters.version target.version ]
+                    , td [] [ highlighSearchTerm filters.search filters.platform target.platform ]
+                    , td [] [ highlighSearchTerm filters.search filters.channel target.channel ]
+                    , td [] [ highlighSearchTerm filters.search filters.locale target.locale ]
                     ]
                 ]
             ]
@@ -482,9 +480,6 @@ facetSelector title total selectedValues filterMsg clearMsg facets =
             let
                 active =
                     List.member entry.value selectedValues
-
-                countInfo =
-                    " (" ++ (toString entry.count) ++ ")"
             in
                 div [ class "checkbox" ]
                     [ label []
@@ -496,7 +491,10 @@ facetSelector title total selectedValues filterMsg clearMsg facets =
                             , disabled <| List.length facets == 1
                             ]
                             []
-                        , text <| entry.value ++ countInfo
+                        , span []
+                            [ span [ class "filter-value" ] [ text entry.value ]
+                            , span [ class "badge" ] [ text <| toString entry.count ]
+                            ]
                         ]
                     ]
     in
@@ -526,8 +524,7 @@ filtersView facets filters =
             [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
             , div [ class "panel-body" ]
                 [ div []
-                    [ buildIdSearchForm buildId
-                    , facetSelector "Products" total product NewProductFilter ClearProducts products
+                    [ facetSelector "Products" total product NewProductFilter ClearProducts products
                     , facetSelector "Versions" total version NewVersionFilter ClearVersions versions
                     , facetSelector "Platforms" total platform NewPlatformFilter ClearPlatforms platforms
                     , facetSelector "Channels" total channel NewChannelFilter ClearChannels channels
