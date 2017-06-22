@@ -85,10 +85,51 @@ extractClauses kind field values =
 
 prepareSearchQuery : String -> String
 prepareSearchQuery search =
-    search
-        |> String.split " "
-        |> List.map (\w -> "*" ++ w ++ "*")
-        |> String.join " "
+    let
+        processWord word =
+            case word of
+                "windows" ->
+                    "win*"
+
+                "android" ->
+                    "android*"
+
+                "apk" ->
+                    "android*"
+
+                "osx" ->
+                    "macosx"
+
+                "i386" ->
+                    "*i386"
+
+                "i686" ->
+                    "*i686"
+
+                "EME" ->
+                    "*EME*"
+
+                word ->
+                    case String.toInt word of
+                        Err _ ->
+                            if String.contains "*" word then
+                                word
+                            else
+                                -- default to prefixed search
+                                word ++ "*"
+
+                        Ok number ->
+                            if String.length word == 14 then
+                                -- buildid
+                                word
+                            else
+                                -- version
+                                word ++ ".*"
+    in
+        search
+            |> String.split " "
+            |> List.map processWord
+            |> String.join " "
 
 
 buildSearchClause : String -> Maybe EncodedFilter
@@ -116,6 +157,7 @@ buildSearchClause search =
                                 , "target.version^10"
                                 , "target.locale^3"
                                 , "target.platform^2"
+                                , "build.id"
                                 ]
                                     |> List.map Encode.string
                                     |> Encode.list
