@@ -35,58 +35,56 @@ const searchkit = new SearchkitManager(
   { searchUrlPath: "search" }
 );
 
-const HitsTable = (toggleExpand, expandedEntry) => {
-  return ({ hits }) => {
-    return (
-      <div style={{ width: "100%", boxSizing: "border-box", padding: 8 }}>
-        <table className="sk-table sk-table-striped" style={{ width: "100%", boxSizing: "border-box" }}>
-          <thead>
-            <tr>
-              <th></th>
-              <th>Product</th>
-              <th>Version</th>
-              <th>platform</th>
-              <th>channel</th>
-              <th>locale</th>
-              <th>Tree</th>
-              <th>Size</th>
-              <th>Published on</th>
-              <th>Build ID</th>
-              <th>Revision</th>
-            </tr>
-          </thead>
-          <tbody>
-            {hits.map(
-              ({ _source: { build, download, source, target }, _id, highlight }) => {
-                const revisionUrl = source.revision
-                  ? <a href={`${source.repository}/rev/${source.revision}`}>
-                      {source.revision.substring(0, 6)}
-                    </a>
-                  : "";
-                const getHighlight = (title, value) => {return {__html: ((highlight && highlight[title]) || value)}}
-                return (
-                  <tr key={_id} id={_id}>
-                    <td><a href={`#${_id}`}>#</a></td>
-                    <td dangerouslySetInnerHTML={getHighlight("source.product", source.product)}/>
-                    <td><a href={download.url} dangerouslySetInnerHTML={getHighlight("target.version", target.version)}/></td>
-                    <td dangerouslySetInnerHTML={getHighlight("target.platform", target.platform)}/>
-                    <td dangerouslySetInnerHTML={getHighlight("target.channel", target.channel)}/>
-                    <td dangerouslySetInnerHTML={getHighlight("target.locale", target.locale)}/>
-                    <td>{source.tree}</td>
-                    <td>{filesize(download.size)}</td>
-                    <td title={download.date}><time dateTime={download.date}>{new Date(download.date).toLocaleDateString()}</time></td>
-                    <td dangerouslySetInnerHTML={getHighlight("build.id", build && build.id)}/>
-                    <td>{revisionUrl}</td>
-                  </tr>
-                );
-              }
-            )
+const HitsTable = ({ hits }) => {
+  return (
+    <div style={{ width: "100%", boxSizing: "border-box", padding: 8 }}>
+      <table className="sk-table sk-table-striped" style={{ width: "100%", boxSizing: "border-box" }}>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Product</th>
+            <th>Version</th>
+            <th>platform</th>
+            <th>channel</th>
+            <th>locale</th>
+            <th>Tree</th>
+            <th>Size</th>
+            <th>Published on</th>
+            <th>Build ID</th>
+            <th>Revision</th>
+          </tr>
+        </thead>
+        <tbody>
+          {hits.map(
+            ({ _source: { build, download, source, target }, _id, highlight }) => {
+              const revisionUrl = source.revision
+                ? <a href={`${source.repository}/rev/${source.revision}`}>
+                    {source.revision.substring(0, 6)}
+                  </a>
+                : "";
+              const getHighlight = (title, value) => {return {__html: ((highlight && highlight[title]) || value)}}
+              return (
+                <tr key={_id} id={_id}>
+                  <td><a href={`#${_id}`}>#</a></td>
+                  <td dangerouslySetInnerHTML={getHighlight("source.product", source.product)}/>
+                  <td><a href={download.url} dangerouslySetInnerHTML={getHighlight("target.version", target.version)}/></td>
+                  <td dangerouslySetInnerHTML={getHighlight("target.platform", target.platform)}/>
+                  <td dangerouslySetInnerHTML={getHighlight("target.channel", target.channel)}/>
+                  <td dangerouslySetInnerHTML={getHighlight("target.locale", target.locale)}/>
+                  <td>{source.tree}</td>
+                  <td>{filesize(download.size)}</td>
+                  <td title={download.date}><time dateTime={download.date}>{new Date(download.date).toLocaleDateString()}</time></td>
+                  <td dangerouslySetInnerHTML={getHighlight("build.id", build && build.id)}/>
+                  <td>{revisionUrl}</td>
+                </tr>
+              );
             }
-          </tbody>
-        </table>
-      </div>
-    );
-  };
+          )
+          }
+        </tbody>
+      </table>
+    </div>
+  );
 };
 
 
@@ -99,21 +97,6 @@ const sortVersions = (filters) => {
 }
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      expandedEntry: null,
-    };
-  }
-
-  toggleExpand = (event, data, id) => {
-    if (this.state.expandedEntry === id) {
-      this.setState({ expandedEntry: null });
-    } else {
-      this.setState({ expandedEntry: id });
-    }
-  };
-
   render() {
     return (
       <div className="App">
@@ -228,10 +211,7 @@ class App extends Component {
 
                 <Hits
                   hitsPerPage={30}
-                  listComponent={HitsTable(
-                    this.toggleExpand,
-                    this.state.expandedEntry
-                  )}
+                  listComponent={HitsTable}
                   highlightFields={[
                     "source.product",
                     "target.channel",
