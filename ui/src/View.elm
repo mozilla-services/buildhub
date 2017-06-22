@@ -59,7 +59,7 @@ searchForm filters =
             (UpdateFilter ClearSearch)
             [ type_ "search"
             , class "form-control"
-            , placeholder "firefox 54 linux"
+            , placeholder "Search builds, eg. \"firefox 54 linux\""
             , value filters.search
             , onInput <| UpdateFilter << NewSearch
             ]
@@ -249,22 +249,6 @@ paginationView { total, hits } pageSize page =
                     text ""
                 ]
             ]
-
-
-buildIdSearchForm : String -> Html Msg
-buildIdSearchForm buildId =
-    div [ class "form-group" ]
-        [ label [] [ text "Build id" ]
-        , clearableTextInput
-            (UpdateFilter ClearBuildId)
-            [ type_ "search"
-            , class "form-control"
-            , placeholder "Eg. 201705011233"
-            , value buildId
-            , onInput <| UpdateFilter << NewBuildIdSearch
-            ]
-            buildId
-        ]
 
 
 recordView : Filters -> BuildRecord -> Html Msg
@@ -496,9 +480,6 @@ facetSelector title total selectedValues filterMsg clearMsg facets =
             let
                 active =
                     List.member entry.value selectedValues
-
-                countInfo =
-                    " (" ++ (toString entry.count) ++ ")"
             in
                 div [ class "checkbox" ]
                     [ label []
@@ -510,7 +491,10 @@ facetSelector title total selectedValues filterMsg clearMsg facets =
                             , disabled <| List.length facets == 1
                             ]
                             []
-                        , text <| entry.value ++ countInfo
+                        , span []
+                            [ span [ class "filter-value" ] [ text entry.value ]
+                            , span [ class "badge" ] [ text <| toString entry.count ]
+                            ]
                         ]
                     ]
     in
@@ -540,8 +524,7 @@ filtersView facets filters =
             [ div [ class "panel-heading" ] [ strong [] [ text "Filters" ] ]
             , div [ class "panel-body" ]
                 [ div []
-                    [ buildIdSearchForm buildId
-                    , facetSelector "Products" total product NewProductFilter ClearProducts products
+                    [ facetSelector "Products" total product NewProductFilter ClearProducts products
                     , facetSelector "Versions" total version NewVersionFilter ClearVersions versions
                     , facetSelector "Platforms" total platform NewPlatformFilter ClearPlatforms platforms
                     , facetSelector "Channels" total channel NewChannelFilter ClearChannels channels

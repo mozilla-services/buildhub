@@ -110,14 +110,12 @@ type NewFilter
     | ClearPlatforms
     | ClearChannels
     | ClearLocales
-    | ClearBuildId
     | ClearSearch
     | NewProductFilter String Bool
     | NewVersionFilter String Bool
     | NewPlatformFilter String Bool
     | NewChannelFilter String Bool
     | NewLocaleFilter String Bool
-    | NewBuildIdSearch String
     | NewSearch String
 
 
