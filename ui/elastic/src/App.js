@@ -12,7 +12,6 @@ import {
   SelectedFilters,
   MenuFilter,
   Pagination,
-  QueryString,
   RefinementListFilter,
   ResetFilters,
   SearchkitManager,
@@ -96,6 +95,16 @@ const sortVersions = (filters) => {
   })
 }
 
+const fullText = (query, options) => {
+  if(!query){
+    return
+  }
+  const fulltextQuery = query.split(" ").map((term) => {return `${term}*`}).join(" ");
+  return {
+    "query_string": Object.assign({query: fulltextQuery}, options)
+  }
+}
+
 class App extends Component {
   render() {
     return (
@@ -108,7 +117,7 @@ class App extends Component {
                 autofocus={true}
                 searchOnChange={true}
                 placeholder="firefox 54 linux"
-                queryBuilder={QueryString}
+                queryBuilder={fullText}
                 queryOptions={{
                           analyzer: "standard",
                           default_operator: "AND",
