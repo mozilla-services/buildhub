@@ -63,11 +63,21 @@ body {
 
 .scrollable-choices {
   max-height: 120px;
-  overflow: auto;
+  overflow-y: scroll;
 }
 
 .scrollable-choices .checkbox {
-  margin: 0 5px 0;
+  margin: 0;
+}
+
+.scrollable-choices .checkbox label .filter-value {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.scrollable-choices .checkbox label .badge {
+  position: absolute;
+  right: 0;
 }
 
 /* Scrollbars (Sadly non-available in Firefox) */
