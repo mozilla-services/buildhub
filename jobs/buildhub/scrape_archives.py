@@ -18,7 +18,7 @@ from kinto_http import cli_utils
 
 
 ARCHIVE_URL = "https://archive.mozilla.org/pub/"
-PRODUCTS = ("fennec", "firefox", "thunderbird")
+PRODUCTS = ("fennec", "firefox", "thunderbird", "devedition")
 DEFAULT_SERVER = "https://kinto-ota.dev.mozaws.net/v1"
 DEFAULT_BUCKET = "build-hub"
 DEFAULT_COLLECTION = "releases"
@@ -213,6 +213,7 @@ async def fetch_nightly_metadata(session, product, nightly_url):
 
 
 _candidates = {}
+_candidates_lock = asyncio.Lock()
 
 
 async def fetch_release_metadata(session, product, version, platform, locale):
@@ -224,20 +225,23 @@ async def fetch_release_metadata(session, product, version, platform, locale):
     if locale != "en-US":
         locale = 'en-US'
 
-    # Keep the list of latest available candidates per product, for more efficiency.
-    if _candidates.get(product) is None:
-        candidates_url = archive_url(product, candidate="/")
-        candidates_folders, _ = await fetch_listing(session, candidates_url)
-        # For each version take the latest build.
-        _candidates[product] = {}
-        for f in candidates_folders:
-            if f == "archived/":
-                continue
-            candidate_version = f.replace("-candidates/", "")
-            builds_url = archive_url(product, candidate_version, candidate="/")
-            build_folders, _ = await fetch_listing(session, builds_url)
-            latest_build_folder = sorted(build_folders)[-1]
-            _candidates[product][candidate_version] = latest_build_folder
+    # Make sure there is only one coroutine populating the _candidates list at a
+    # time, using a mutex.
+    with await _candidates_lock:
+        # Keep the list of latest available candidates per product, for more efficiency.
+        if _candidates.get(product) is None:
+            candidates_url = archive_url(product, candidate="/")
+            candidates_folders, _ = await fetch_listing(session, candidates_url)
+            # For each version take the latest build.
+            _candidates[product] = {}
+            for f in candidates_folders:
+                if f == "archived/":
+                    continue
+                candidate_version = f.replace("-candidates/", "")
+                builds_url = archive_url(product, candidate_version, candidate="/")
+                build_folders, _ = await fetch_listing(session, builds_url)
+                latest_build_folder = sorted(build_folders)[-1]
+                _candidates[product][candidate_version] = latest_build_folder
 
     # Candidates are only available for a subset of versions.
     if version not in _candidates[product]:
@@ -262,7 +266,8 @@ async def fetch_release_metadata(session, product, version, platform, locale):
 
 async def fetch_products(session, queue, products, client):
     # Nightlies
-    futures = [fetch_nightlies(session, queue, product, client) for product in products]
+    futures = [fetch_nightlies(session, queue, product, client) for product in products
+               if product != "devedition"]
     await asyncio.gather(*futures)
     # Releases
     futures = [fetch_versions(session, queue, product, client) for product in products]

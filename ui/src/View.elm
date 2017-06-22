@@ -22,17 +22,51 @@ view model =
         ]
 
 
+clearableTextInput : msg -> List (Attribute msg) -> String -> Html msg
+clearableTextInput onClearMsg attrs txt =
+    div [ class "btn-group clearable-text" ]
+        [ input attrs []
+        , if String.length txt > 0 then
+            span
+                [ class "text-clear-btn"
+                , onClick onClearMsg
+                ]
+                [ i [ class "glyphicon glyphicon-remove" ] [] ]
+          else
+            text ""
+        ]
+
+
+searchForm : Filters -> Html Msg
+searchForm filters =
+    Html.form [ class "search-form well", onSubmit SubmitSearch ]
+        [ clearableTextInput
+            (UpdateFilter ClearSearch)
+            [ type_ "search"
+            , class "form-control"
+            , placeholder "firefox 54 linux"
+            , value filters.search
+            , onInput <| UpdateFilter << NewSearch
+            ]
+            filters.search
+        ]
+
+
 mainView : Model -> Html Msg
 mainView { settings, error, facets, filters } =
     div [ class "row" ]
         [ div [ class "col-sm-9" ]
             [ errorView error
+            , searchForm filters
             , case facets of
                 Just facets ->
                     div []
                         [ paginationView facets settings.pageSize filters.page
                         , div [] <| List.map recordView facets.hits
-                        , paginationView facets settings.pageSize filters.page
+                        , if List.length facets.hits > 0 then
+                            paginationView facets settings.pageSize filters.page
+                          else
+                            text ""
                         ]
 
                 Nothing ->
@@ -160,38 +194,44 @@ paginationView { total, hits } pageSize page =
             [ div [ class "row" ]
                 [ p [ class "col-sm-6" ] <|
                     [ text <|
-                        "Build result"
-                            ++ (if nbBuilds == 1 then
-                                    ""
-                                else
-                                    "s"
-                               )
-                            ++ " "
-                            ++ (toString chunkStart)
-                            ++ ".."
-                            ++ (toString chunkStop)
-                            ++ " of "
-                            ++ toString total
-                            ++ "."
+                        if nbBuilds == 0 then
+                            "No results were found matching your query."
+                        else
+                            "Build result"
+                                ++ (if nbBuilds == 1 then
+                                        ""
+                                    else
+                                        "s"
+                                   )
+                                ++ " "
+                                ++ (toString chunkStart)
+                                ++ ".."
+                                ++ (toString chunkStop)
+                                ++ " of "
+                                ++ toString total
+                                ++ "."
                     ]
-                , div [ class "col-sm-6 text-right" ]
-                    [ div [ class "btn-group" ]
-                        [ if page /= 1 then
-                            button
-                                [ class "btn btn-default", onClick LoadPreviousPage ]
-                                [ text <| "« Page " ++ (toString (page - 1)) ]
-                          else
-                            text ""
-                        , button [ class "btn btn-default active", disabled True ]
-                            [ text <| "Page " ++ (toString page) ]
-                        , if page /= ceiling ((toFloat total) / (toFloat pageSize)) then
-                            button
-                                [ class "btn btn-default", onClick LoadNextPage ]
-                                [ text <| "Page " ++ (toString (page + 1)) ++ " »" ]
-                          else
-                            text ""
+                , if nbBuilds > 0 then
+                    div [ class "col-sm-6 text-right" ]
+                        [ div [ class "btn-group" ]
+                            [ if page /= 1 then
+                                button
+                                    [ class "btn btn-default", onClick LoadPreviousPage ]
+                                    [ text <| "« Page " ++ (toString (page - 1)) ]
+                              else
+                                text ""
+                            , button [ class "btn btn-default active", disabled True ]
+                                [ text <| "Page " ++ (toString page) ]
+                            , if page /= ceiling ((toFloat total) / (toFloat pageSize)) then
+                                button
+                                    [ class "btn btn-default", onClick LoadNextPage ]
+                                    [ text <| "Page " ++ (toString (page + 1)) ++ " »" ]
+                              else
+                                text ""
+                            ]
                         ]
-                    ]
+                  else
+                    text ""
                 ]
             ]
 
@@ -200,61 +240,38 @@ buildIdSearchForm : String -> Html Msg
 buildIdSearchForm buildId =
     div [ class "form-group" ]
         [ label [] [ text "Build id" ]
-        , input
-            [ type_ "text"
+        , clearableTextInput
+            (UpdateFilter ClearBuildId)
+            [ type_ "search"
             , class "form-control"
             , placeholder "Eg. 201705011233"
             , value buildId
             , onInput <| UpdateFilter << NewBuildIdSearch
             ]
-            []
+            buildId
         ]
 
 
-facetSelector : String -> Int -> String -> (String -> Msg) -> List Facet -> Html Msg
-facetSelector title total selectedValue handler facet =
-    let
-        optionView entry =
-            let
-                countInfo =
-                    if entry.value == "all" && selectedValue /= "all" then
-                        ""
-                    else
-                        " (" ++ (toString entry.count) ++ ")"
-            in
-                option [ value entry.value, selected (entry.value == selectedValue) ]
-                    [ text <| entry.value ++ countInfo ]
-    in
-        div [ class "form-group" ]
-            [ label [] [ text title ]
-            , List.map optionView ((Facet total "all") :: facet)
-                |> select
-                    [ class "form-control"
-                    , onInput handler
-                    , value selectedValue
-                    ]
-            ]
-
-
 recordView : BuildRecord -> Html Msg
-recordView record =
+recordView { id, build, download, source, target, systemAddons } =
     div
-        [ class "panel panel-default", Html.Attributes.id record.id ]
+        [ class "panel panel-default", Html.Attributes.id id ]
         [ div [ class "panel-heading" ]
             [ div [ class "row" ]
                 [ strong [ class "col-sm-4" ]
                     [ a
                         [ let
                             buildInfo =
-                                Maybe.withDefault (Build "" "") record.build
+                                Maybe.withDefault (Build "" "") build
 
                             url =
-                                { product = record.source.product
-                                , version = record.target.version
-                                , platform = record.target.platform
-                                , channel = "all"
-                                , locale = record.target.locale
+                                { product = [ source.product ]
+                                , version = [ target.version ]
+                                , platform = [ target.platform ]
+                                , channel = [ target.channel ]
+                                , locale = [ target.locale ]
                                 , buildId = buildInfo.id
+                                , search = ""
                                 , page = 1
                                 }
                                     |> routeFromFilters
@@ -263,13 +280,13 @@ recordView record =
                             href url
                         ]
                         [ text <|
-                            record.source.product
+                            source.product
                                 ++ " "
-                                ++ record.target.version
+                                ++ target.version
                         ]
                     ]
                 , small [ class "col-sm-4 text-center" ]
-                    [ case record.build of
+                    [ case build of
                         Just { date } ->
                             text date
 
@@ -277,7 +294,7 @@ recordView record =
                             text ""
                     ]
                 , em [ class "col-sm-4 text-right" ]
-                    [ case record.build of
+                    [ case build of
                         Just { id } ->
                             text id
 
@@ -287,11 +304,11 @@ recordView record =
                 ]
             ]
         , div [ class "panel-body" ]
-            [ viewSourceDetails record.source
-            , viewTargetDetails record.target
-            , viewDownloadDetails record.download
-            , viewBuildDetails record.build
-            , viewSystemAddonsDetails record.systemAddons
+            [ viewSourceDetails source
+            , viewTargetDetails target
+            , viewDownloadDetails download
+            , viewBuildDetails build
+            , viewSystemAddonsDetails systemAddons
             ]
         ]
 
@@ -451,6 +468,51 @@ spinner =
     div [ class "loader" ] []
 
 
+facetSelector :
+    String
+    -> Int
+    -> List String
+    -> (String -> Bool -> NewFilter)
+    -> NewFilter
+    -> List Facet
+    -> Html Msg
+facetSelector title total selectedValues filterMsg clearMsg facets =
+    let
+        choice entry =
+            let
+                active =
+                    List.member entry.value selectedValues
+
+                countInfo =
+                    " (" ++ (toString entry.count) ++ ")"
+            in
+                div [ class "checkbox" ]
+                    [ label []
+                        [ input
+                            [ type_ "checkbox"
+                            , value entry.value
+                            , checked active
+                            , onCheck <| UpdateFilter << (filterMsg entry.value)
+                            , disabled <| List.length facets == 1
+                            ]
+                            []
+                        , text <| entry.value ++ countInfo
+                        ]
+                    ]
+    in
+        div [ class "form-group" ]
+            [ p []
+                [ strong [] [ text title ]
+                , if List.length selectedValues > 0 then
+                    button [ class "close", onClick <| UpdateFilter clearMsg ]
+                        [ text "×" ]
+                  else
+                    text ""
+                ]
+            , div [ class "scrollable-choices" ] <| List.map choice facets
+            ]
+
+
 filtersView : Facets -> Filters -> Html Msg
 filtersView facets filters =
     let
@@ -465,11 +527,11 @@ filtersView facets filters =
             , div [ class "panel-body" ]
                 [ div []
                     [ buildIdSearchForm buildId
-                    , facetSelector "Products" total product (UpdateFilter << NewProductFilter) products
-                    , facetSelector "Versions" total version (UpdateFilter << NewVersionFilter) versions
-                    , facetSelector "Platforms" total platform (UpdateFilter << NewPlatformFilter) platforms
-                    , facetSelector "Channels" total channel (UpdateFilter << NewChannelFilter) channels
-                    , facetSelector "Locales" total locale (UpdateFilter << NewLocaleFilter) locales
+                    , facetSelector "Products" total product NewProductFilter ClearProducts products
+                    , facetSelector "Versions" total version NewVersionFilter ClearVersions versions
+                    , facetSelector "Platforms" total platform NewPlatformFilter ClearPlatforms platforms
+                    , facetSelector "Channels" total channel NewChannelFilter ClearChannels channels
+                    , facetSelector "Locales" total locale NewLocaleFilter ClearLocales locales
                     , div [ class "btn-group btn-group-justified" ]
                         [ div [ class "btn-group" ]
                             [ button
@@ -498,7 +560,7 @@ settingsView { pageSize } =
                         , onInput NewPageSize
                         , value <| toString pageSize
                         ]
-                        (List.map optionView [ "100", "200", "500", "1000" ])
+                        (List.map optionView [ "5", "10", "20", "50", "100" ])
                     ]
             ]
         ]

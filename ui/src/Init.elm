@@ -9,12 +9,13 @@ import Url exposing (..)
 
 initFilters : Filters
 initFilters =
-    { product = "all"
-    , version = "all"
-    , platform = "all"
-    , channel = "all"
-    , locale = "all"
+    { product = []
+    , version = []
+    , platform = []
+    , channel = []
+    , locale = []
     , buildId = ""
+    , search = ""
     , page = 1
     }
 
@@ -23,7 +24,7 @@ init : Location -> ( Model, Cmd Msg )
 init location =
     let
         defaultSettings =
-            { pageSize = 100 }
+            { pageSize = 10 }
 
         defaultModel =
             { filters = initFilters

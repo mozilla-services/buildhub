@@ -324,6 +324,7 @@ NIGHTLY_FILENAMES = [
     ("fennec-55.0a1.multi.android-i386.apk", "55.0a1", "multi", "android-i386"),
     ("fennec-55.0a1.multi.android-arm.apk", "55.0a1", "multi", "android-arm"),
     ("firefox-56.0a1.en-US.mac.dmg", "56.0a1", "en-US", "macosx"),
+    ("firefox-55.0a1.ar.win32.installer.exe", "55.0a1", "ar", "win32"),
 ]
 
 
@@ -337,6 +338,7 @@ NIGHTLY_WRONG_FILENAMES = [
     "firefox-tests.bz2",
     "firefox-crashreporter.gz",
     "foobar.bz2",
+    "firefox-55.0a1.ar.win32.installer-stub.exe",
 ]
 
 
@@ -349,6 +351,7 @@ def test_parse_nightly_filename_raise_a_value_error(filename):
 RELEASE_METADATA_FILENAMES = [
     ("firefox", "52.0b7", "firefox-52.0b7.json"),
     ("fennec", "51.0b2", "fennec-51.0b2.en-US.android-i386.json"),
+    ("devedition", "54.0b11", "firefox-54.0b11.json"),
 ]
 
 
@@ -383,6 +386,8 @@ RELEASE_FILENAMES = [
     ("thunderbird", "Thunderbird Setup 11.0b2.exe"),
     ("firefox", "Firefox Setup 17.0b3.exe"),
     ("firefox", "Firefox 50.0.1.dmg"),
+    ("devedition", "Firefox Setup 54.0b11.exe"),
+    ("devedition", "firefox-54.0b11.tar.bz2"),
 ]
 
 
