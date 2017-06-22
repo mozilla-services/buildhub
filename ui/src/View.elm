@@ -287,10 +287,9 @@ recordView filters { id, build, download, source, target, systemAddons } =
                           in
                             href url
                         ]
-                        [ text <|
-                            source.product
-                                ++ " "
-                                ++ target.version
+                        [ highlighSearchTerm filters.product source.product
+                        , text " "
+                        , highlighSearchTerm filters.version target.version
                         ]
                     ]
                 , small [ class "col-sm-4 text-center" ]
@@ -304,7 +303,7 @@ recordView filters { id, build, download, source, target, systemAddons } =
                 , em [ class "col-sm-4 text-right" ]
                     [ case build of
                         Just { id } ->
-                            text id
+                            highlighSearchTerm [ filters.buildId ] id
 
                         Nothing ->
                             text ""
@@ -393,7 +392,7 @@ viewSourceDetails { product } source =
                             text "If you see this, please file a bug. Revision not linked to a repository."
 
                 Nothing ->
-                    text ""
+                    text "unknown"
     in
         table [ class "table table-stripped table-condensed" ]
             [ thead []
