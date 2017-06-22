@@ -16,7 +16,7 @@
   },
   "homepage": "https://mozilla-services.github.io/buildhub/searchkit",
   "scripts": {
-    "deploy": "npm run build && mkdir tmp && cp -R build tmp/searchkit && gh-pages -d tmp --add && rimraf tmp",
+    "deploy": "npm run build && rimraf tmp && mkdir tmp && cp -R build tmp/searchkit && gh-pages -d tmp --add && rimraf tmp",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
