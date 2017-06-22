@@ -2,10 +2,11 @@ import asyncio
 import async_timeout
 import concurrent.futures
 import datetime
+import json
 import logging
+import os
 import sys
 import re
-from os.path import basename
 
 import aiohttp
 import backoff
@@ -22,6 +23,7 @@ PRODUCTS = ("fennec", "firefox", "thunderbird")
 DEFAULT_SERVER = "https://kinto-ota.dev.mozaws.net/v1"
 DEFAULT_BUCKET = "build-hub"
 DEFAULT_COLLECTION = "archives"
+PREVIOUS_DUMP_FILENAME = ".previous_run.json"
 NB_THREADS = 3
 NB_RETRY_REQUEST = 3
 TIMEOUT_SECONDS = 5 * 60
@@ -32,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 def build_record_id(url):
     # Generate an ID that looks like that: firefox_53.0b9_linux-i686_en-US
-    parts = basename(url.replace(' ', '-').lower()).split('.')
+    parts = os.path.basename(url.replace(' ', '-').lower()).split('.')
     url_parts = url.split('/')
 
     try:
@@ -307,9 +309,18 @@ async def main(loop):
     client = cli_utils.create_client_from_args(args)
 
     # Fetch the list of known records ids.
-    records = client.get_records(pages=float("inf"))
+    if os.path.exists(PREVIOUS_DUMP_FILENAME):
+        previous_run_cache = json.load(open(PREVIOUS_DUMP_FILENAME))
+        previous_run_timestamp = '"%s"' % previous_run_cache[0]['last_modified']
+    else:
+        previous_run_cache = []
+        previous_run_timestamp = None
+
+    new_records = client.get_records(_since=previous_run_timestamp, pages=float("inf"))
+    records = new_records + previous_run_cache
     records_ids = set([r['id'] for r in records])
     print("{} existing records found.".format(len(records_ids)))
+    json.dump(records, open(PREVIOUS_DUMP_FILENAME, "w"))
 
     # Start a producer and a consumer with threaded kinto requests.
     queue = asyncio.Queue()
