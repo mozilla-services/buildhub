@@ -22,6 +22,14 @@ view model =
         ]
 
 
+highlighSearchTerm : List String -> String -> Html Msg
+highlighSearchTerm terms term =
+    if List.member term terms then
+        span [ class "highlight" ] [ text term ]
+    else
+        text term
+
+
 clearableTextInput : msg -> List (Attribute msg) -> String -> Html msg
 clearableTextInput onClearMsg attrs txt =
     div [ class "btn-group clearable-text" ]
@@ -62,7 +70,7 @@ mainView { settings, error, facets, filters } =
                 Just facets ->
                     div []
                         [ paginationView facets settings.pageSize filters.page
-                        , div [] <| List.map recordView facets.hits
+                        , div [] <| List.map (recordView filters) facets.hits
                         , if List.length facets.hits > 0 then
                             paginationView facets settings.pageSize filters.page
                           else
@@ -252,8 +260,8 @@ buildIdSearchForm buildId =
         ]
 
 
-recordView : BuildRecord -> Html Msg
-recordView { id, build, download, source, target, systemAddons } =
+recordView : Filters -> BuildRecord -> Html Msg
+recordView filters { id, build, download, source, target, systemAddons } =
     div
         [ class "panel panel-default", Html.Attributes.id id ]
         [ div [ class "panel-heading" ]
@@ -304,17 +312,17 @@ recordView { id, build, download, source, target, systemAddons } =
                 ]
             ]
         , div [ class "panel-body" ]
-            [ viewSourceDetails source
-            , viewTargetDetails target
+            [ viewSourceDetails filters source
+            , viewTargetDetails filters target
             , viewDownloadDetails download
-            , viewBuildDetails build
+            , viewBuildDetails filters build
             , viewSystemAddonsDetails systemAddons
             ]
         ]
 
 
-viewBuildDetails : Maybe Build -> Html Msg
-viewBuildDetails build =
+viewBuildDetails : Filters -> Maybe Build -> Html Msg
+viewBuildDetails filters build =
     case build of
         Just build ->
             div []
@@ -328,7 +336,7 @@ viewBuildDetails build =
                         ]
                     , tbody []
                         [ tr []
-                            [ td [] [ text build.id ]
+                            [ td [] [ highlighSearchTerm [ filters.buildId ] build.id ]
                             , td [] [ text build.date ]
                             ]
                         ]
@@ -371,8 +379,8 @@ viewDownloadDetails download =
             ]
 
 
-viewSourceDetails : Source -> Html Msg
-viewSourceDetails source =
+viewSourceDetails : Filters -> Source -> Html Msg
+viewSourceDetails { product } source =
     let
         revisionUrl =
             case source.revision of
@@ -397,7 +405,7 @@ viewSourceDetails source =
                 ]
             , tbody []
                 [ tr []
-                    [ td [] [ text source.product ]
+                    [ td [] [ highlighSearchTerm product source.product ]
                     , td [] [ text <| Maybe.withDefault "unknown" source.tree ]
                     , td [] [ revisionUrl ]
                     ]
@@ -437,8 +445,8 @@ viewSystemAddonsDetails systemAddons =
                 ]
 
 
-viewTargetDetails : Target -> Html Msg
-viewTargetDetails target =
+viewTargetDetails : Filters -> Target -> Html Msg
+viewTargetDetails filters target =
     div []
         [ h4 [] [ text "Target" ]
         , table
@@ -453,10 +461,10 @@ viewTargetDetails target =
                 ]
             , tbody []
                 [ tr []
-                    [ td [] [ text target.version ]
-                    , td [] [ text target.platform ]
-                    , td [] [ text target.channel ]
-                    , td [] [ text target.locale ]
+                    [ td [] [ highlighSearchTerm filters.version target.version ]
+                    , td [] [ highlighSearchTerm filters.platform target.platform ]
+                    , td [] [ highlighSearchTerm filters.channel target.channel ]
+                    , td [] [ highlighSearchTerm filters.locale target.locale ]
                     ]
                 ]
             ]

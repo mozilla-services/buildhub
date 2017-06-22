@@ -11,6 +11,13 @@ body {
   margin-top: 10px;
 }
 
+.highlight {
+  background-color: yellow;
+  color: #000;
+  padding: .2em .3em 0;
+  border-radius: 2px;
+}
+
 .loader {
     border: 16px solid #999;
     border-top: 16px solid #666;
