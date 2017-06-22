@@ -22,17 +22,51 @@ view model =
         ]
 
 
+clearableTextInput : msg -> List (Attribute msg) -> String -> Html msg
+clearableTextInput onClearMsg attrs txt =
+    div [ class "btn-group clearable-text" ]
+        [ input attrs []
+        , if String.length txt > 0 then
+            span
+                [ class "text-clear-btn"
+                , onClick onClearMsg
+                ]
+                [ i [ class "glyphicon glyphicon-remove" ] [] ]
+          else
+            text ""
+        ]
+
+
+searchForm : Filters -> Html Msg
+searchForm filters =
+    Html.form [ class "search-form well", onSubmit SubmitSearch ]
+        [ clearableTextInput
+            (UpdateFilter ClearSearch)
+            [ type_ "search"
+            , class "form-control"
+            , placeholder "firefox 54 linux"
+            , value filters.search
+            , onInput <| UpdateFilter << NewSearch
+            ]
+            filters.search
+        ]
+
+
 mainView : Model -> Html Msg
 mainView { settings, error, facets, filters } =
     div [ class "row" ]
         [ div [ class "col-sm-9" ]
             [ errorView error
+            , searchForm filters
             , case facets of
                 Just facets ->
                     div []
                         [ paginationView facets settings.pageSize filters.page
                         , div [] <| List.map recordView facets.hits
-                        , paginationView facets settings.pageSize filters.page
+                        , if List.length facets.hits > 0 then
+                            paginationView facets settings.pageSize filters.page
+                          else
+                            text ""
                         ]
 
                 Nothing ->
@@ -160,38 +194,44 @@ paginationView { total, hits } pageSize page =
             [ div [ class "row" ]
                 [ p [ class "col-sm-6" ] <|
                     [ text <|
-                        "Build result"
-                            ++ (if nbBuilds == 1 then
-                                    ""
-                                else
-                                    "s"
-                               )
-                            ++ " "
-                            ++ (toString chunkStart)
-                            ++ ".."
-                            ++ (toString chunkStop)
-                            ++ " of "
-                            ++ toString total
-                            ++ "."
+                        if nbBuilds == 0 then
+                            "No results were found matching your query."
+                        else
+                            "Build result"
+                                ++ (if nbBuilds == 1 then
+                                        ""
+                                    else
+                                        "s"
+                                   )
+                                ++ " "
+                                ++ (toString chunkStart)
+                                ++ ".."
+                                ++ (toString chunkStop)
+                                ++ " of "
+                                ++ toString total
+                                ++ "."
                     ]
-                , div [ class "col-sm-6 text-right" ]
-                    [ div [ class "btn-group" ]
-                        [ if page /= 1 then
-                            button
-                                [ class "btn btn-default", onClick LoadPreviousPage ]
-                                [ text <| "« Page " ++ (toString (page - 1)) ]
-                          else
-                            text ""
-                        , button [ class "btn btn-default active", disabled True ]
-                            [ text <| "Page " ++ (toString page) ]
-                        , if page /= ceiling ((toFloat total) / (toFloat pageSize)) then
-                            button
-                                [ class "btn btn-default", onClick LoadNextPage ]
-                                [ text <| "Page " ++ (toString (page + 1)) ++ " »" ]
-                          else
-                            text ""
+                , if nbBuilds > 0 then
+                    div [ class "col-sm-6 text-right" ]
+                        [ div [ class "btn-group" ]
+                            [ if page /= 1 then
+                                button
+                                    [ class "btn btn-default", onClick LoadPreviousPage ]
+                                    [ text <| "« Page " ++ (toString (page - 1)) ]
+                              else
+                                text ""
+                            , button [ class "btn btn-default active", disabled True ]
+                                [ text <| "Page " ++ (toString page) ]
+                            , if page /= ceiling ((toFloat total) / (toFloat pageSize)) then
+                                button
+                                    [ class "btn btn-default", onClick LoadNextPage ]
+                                    [ text <| "Page " ++ (toString (page + 1)) ++ " »" ]
+                              else
+                                text ""
+                            ]
                         ]
-                    ]
+                  else
+                    text ""
                 ]
             ]
 
@@ -200,14 +240,15 @@ buildIdSearchForm : String -> Html Msg
 buildIdSearchForm buildId =
     div [ class "form-group" ]
         [ label [] [ text "Build id" ]
-        , input
-            [ type_ "text"
+        , clearableTextInput
+            (UpdateFilter ClearBuildId)
+            [ type_ "search"
             , class "form-control"
             , placeholder "Eg. 201705011233"
             , value buildId
             , onInput <| UpdateFilter << NewBuildIdSearch
             ]
-            []
+            buildId
         ]
 
 
@@ -230,6 +271,7 @@ recordView { id, build, download, source, target, systemAddons } =
                                 , channel = [ target.channel ]
                                 , locale = [ target.locale ]
                                 , buildId = buildInfo.id
+                                , search = ""
                                 , page = 1
                                 }
                                     |> routeFromFilters
@@ -451,6 +493,7 @@ facetSelector title total selectedValues filterMsg clearMsg facets =
                             , value entry.value
                             , checked active
                             , onCheck <| UpdateFilter << (filterMsg entry.value)
+                            , disabled <| List.length facets == 1
                             ]
                             []
                         , text <| entry.value ++ countInfo
@@ -517,7 +560,7 @@ settingsView { pageSize } =
                         , onInput NewPageSize
                         , value <| toString pageSize
                         ]
-                        (List.map optionView [ "100", "200", "500", "1000" ])
+                        (List.map optionView [ "5", "10", "20", "50", "100" ])
                     ]
             ]
         ]

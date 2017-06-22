@@ -15,6 +15,7 @@ initFilters =
     , channel = []
     , locale = []
     , buildId = ""
+    , search = ""
     , page = 1
     }
 
@@ -23,7 +24,7 @@ init : Location -> ( Model, Cmd Msg )
 init location =
     let
         defaultSettings =
-            { pageSize = 100 }
+            { pageSize = 10 }
 
         defaultModel =
             { filters = initFilters

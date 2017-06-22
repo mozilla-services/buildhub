@@ -39,6 +39,7 @@ type alias Filters =
     , channel : List String
     , locale : List String
     , buildId : String
+    , search : String
     , page : Int
     }
 
@@ -109,12 +110,15 @@ type NewFilter
     | ClearPlatforms
     | ClearChannels
     | ClearLocales
+    | ClearBuildId
+    | ClearSearch
     | NewProductFilter String Bool
     | NewVersionFilter String Bool
     | NewPlatformFilter String Bool
     | NewChannelFilter String Bool
     | NewLocaleFilter String Bool
     | NewBuildIdSearch String
+    | NewSearch String
 
 
 type alias BuildId =
@@ -141,13 +145,17 @@ type alias Locale =
     String
 
 
+type alias Search =
+    String
+
+
 type alias Page =
     Int
 
 
 type Route
     = MainView
-    | FilteredView Product Channel Platform Version Locale BuildId Page
+    | FilteredView Product Channel Platform Version Locale BuildId Search Page
     | DocsView
 
 
@@ -159,3 +167,4 @@ type Msg
     | UrlChange Location
     | DismissError
     | NewPageSize String
+    | SubmitSearch
