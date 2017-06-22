@@ -22,12 +22,19 @@ view model =
         ]
 
 
-highlighSearchTerm : List String -> String -> Html Msg
-highlighSearchTerm terms term =
-    if List.member term terms then
-        span [ class "highlight" ] [ text term ]
-    else
-        text term
+highlighSearchTerm : String -> List String -> String -> Html Msg
+highlighSearchTerm search terms fieldValue =
+    let
+        fullTerms =
+            search
+                |> String.split " "
+                |> List.filter (not << String.isEmpty)
+                |> List.append terms
+    in
+        if List.member fieldValue fullTerms then
+            span [ class "highlight" ] [ text fieldValue ]
+        else
+            text fieldValue
 
 
 clearableTextInput : msg -> List (Attribute msg) -> String -> Html msg
@@ -287,9 +294,9 @@ recordView filters { id, build, download, source, target, systemAddons } =
                           in
                             href url
                         ]
-                        [ highlighSearchTerm filters.product source.product
+                        [ highlighSearchTerm filters.search filters.product source.product
                         , text " "
-                        , highlighSearchTerm filters.version target.version
+                        , highlighSearchTerm filters.search filters.version target.version
                         ]
                     ]
                 , small [ class "col-sm-4 text-center" ]
@@ -303,7 +310,7 @@ recordView filters { id, build, download, source, target, systemAddons } =
                 , em [ class "col-sm-4 text-right" ]
                     [ case build of
                         Just { id } ->
-                            highlighSearchTerm [ filters.buildId ] id
+                            highlighSearchTerm filters.search [ filters.buildId ] id
 
                         Nothing ->
                             text ""
@@ -335,7 +342,7 @@ viewBuildDetails filters build =
                         ]
                     , tbody []
                         [ tr []
-                            [ td [] [ highlighSearchTerm [ filters.buildId ] build.id ]
+                            [ td [] [ highlighSearchTerm filters.search [ filters.buildId ] build.id ]
                             , td [] [ text build.date ]
                             ]
                         ]
@@ -379,7 +386,7 @@ viewDownloadDetails download =
 
 
 viewSourceDetails : Filters -> Source -> Html Msg
-viewSourceDetails { product } source =
+viewSourceDetails { product, search } source =
     let
         revisionUrl =
             case source.revision of
@@ -404,7 +411,7 @@ viewSourceDetails { product } source =
                 ]
             , tbody []
                 [ tr []
-                    [ td [] [ highlighSearchTerm product source.product ]
+                    [ td [] [ highlighSearchTerm search product source.product ]
                     , td [] [ text <| Maybe.withDefault "unknown" source.tree ]
                     , td [] [ revisionUrl ]
                     ]
@@ -460,10 +467,10 @@ viewTargetDetails filters target =
                 ]
             , tbody []
                 [ tr []
-                    [ td [] [ highlighSearchTerm filters.version target.version ]
-                    , td [] [ highlighSearchTerm filters.platform target.platform ]
-                    , td [] [ highlighSearchTerm filters.channel target.channel ]
-                    , td [] [ highlighSearchTerm filters.locale target.locale ]
+                    [ td [] [ highlighSearchTerm filters.search filters.version target.version ]
+                    , td [] [ highlighSearchTerm filters.search filters.platform target.platform ]
+                    , td [] [ highlighSearchTerm filters.search filters.channel target.channel ]
+                    , td [] [ highlighSearchTerm filters.search filters.locale target.locale ]
                     ]
                 ]
             ]
