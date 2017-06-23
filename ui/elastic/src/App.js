@@ -34,57 +34,56 @@ const searchkit = new SearchkitManager(
   { searchUrlPath: "search" }
 );
 
-const HitsTable = (toggleExpand, expandedEntry) => {
-  return ({ hits }) => {
-    return (
-      <div style={{ width: "100%", boxSizing: "border-box", padding: 8 }}>
-        <table className="sk-table sk-table-striped" style={{ width: "100%", boxSizing: "border-box" }}>
-          <thead>
-            <tr>
-              <th></th>
-              <th>Product</th>
-              <th>Version</th>
-              <th>platform</th>
-              <th>channel</th>
-              <th>locale</th>
-              <th>Tree</th>
-              <th>Size</th>
-              <th>Published on</th>
-              <th>Build ID</th>
-              <th>Revision</th>
-            </tr>
-          </thead>
-          <tbody>
-            {hits.map(
-              ({ _source: { build, download, source, target }, _id }) => {
-                const revisionUrl = source.revision
-                  ? <a href={`${source.repository}/rev/${source.revision}`}>
-                      {source.revision.substring(0, 6)}
-                    </a>
-                  : "";
-                return (
-                  <tr key={_id} id={_id}>
-                    <td><a href={`#${_id}`}>#</a></td>
-                    <td>{source.product}</td>
-                    <td><a href={download.url}>{target.version}</a></td>
-                    <td>{target.platform}</td>
-                    <td>{target.channel}</td>
-                    <td>{target.locale}</td>
-                    <td>{source.tree}</td>
-                    <td>{filesize(download.size)}</td>
-                    <td title={download.date}><time dateTime={download.date}>{new Date(download.date).toLocaleDateString()}</time></td>
-                    <td>{build && build.id}</td>
-                    <td>{revisionUrl}</td>
-                  </tr>
-                );
-              }
-            )
+const HitsTable = ({ hits }) => {
+  return (
+    <div style={{ width: "100%", boxSizing: "border-box", padding: 8 }}>
+      <table className="sk-table sk-table-striped" style={{ width: "100%", boxSizing: "border-box" }}>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Product</th>
+            <th>Version</th>
+            <th>platform</th>
+            <th>channel</th>
+            <th>locale</th>
+            <th>Tree</th>
+            <th>Size</th>
+            <th>Published on</th>
+            <th>Build ID</th>
+            <th>Revision</th>
+          </tr>
+        </thead>
+        <tbody>
+          {hits.map(
+            ({ _source: { build, download, source, target }, _id, highlight }) => {
+              const revisionUrl = source.revision
+                ? <a href={`${source.repository}/rev/${source.revision}`}>
+                    {source.revision.substring(0, 6)}
+                  </a>
+                : "";
+              const getHighlight = (title, value) => {return {__html: ((highlight && highlight[title]) || value)}}
+              return (
+                <tr key={_id} id={_id}>
+                  <td><a href={`#${_id}`}>#</a></td>
+                  <td dangerouslySetInnerHTML={getHighlight("source.product", source.product)}/>
+                  <td><a href={download.url} dangerouslySetInnerHTML={getHighlight("target.version", target.version)}/></td>
+                  <td dangerouslySetInnerHTML={getHighlight("target.platform", target.platform)}/>
+                  <td dangerouslySetInnerHTML={getHighlight("target.channel", target.channel)}/>
+                  <td dangerouslySetInnerHTML={getHighlight("target.locale", target.locale)}/>
+                  <td>{source.tree}</td>
+                  <td>{filesize(download.size)}</td>
+                  <td title={download.date}><time dateTime={download.date}>{new Date(download.date).toLocaleDateString()}</time></td>
+                  <td dangerouslySetInnerHTML={getHighlight("build.id", build && build.id)}/>
+                  <td>{revisionUrl}</td>
+                </tr>
+              );
             }
-          </tbody>
-        </table>
-      </div>
-    );
-  };
+          )
+          }
+        </tbody>
+      </table>
+    </div>
+  );
 };
 
 
@@ -96,22 +95,17 @@ const sortVersions = (filters) => {
   })
 }
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      expandedEntry: null,
-    };
+const fullText = (query, options) => {
+  if(!query){
+    return
   }
+  const fulltextQuery = query.split(" ").map((term) => {return `${term}*`}).join(" ");
+  return {
+    "query_string": Object.assign({query: fulltextQuery}, options)
+  }
+}
 
-  toggleExpand = (event, data, id) => {
-    if (this.state.expandedEntry === id) {
-      this.setState({ expandedEntry: null });
-    } else {
-      this.setState({ expandedEntry: id });
-    }
-  };
-
+class App extends Component {
   render() {
     return (
       <div className="App">
@@ -122,8 +116,23 @@ class App extends Component {
               <SearchBox
                 autofocus={true}
                 searchOnChange={true}
-                placeholder="Search a build ID, eg: 201706*"
-                queryFields={["build.id"]}
+                placeholder="firefox 54 linux"
+                queryBuilder={fullText}
+                queryOptions={{
+                          analyzer: "standard",
+                          default_operator: "AND",
+                          phrase_slop: 1 ,
+                          auto_generate_phrase_queries: true,
+                          analyze_wildcard: true,
+                          lenient: true,
+                          split_on_whitespace: true
+                }}
+                queryFields={["source.product",
+                              "target.channel^1.2",
+                              "target.version^10",
+                              "target.locale^3",
+                              "target.platform^2",
+                              "build.id"]}
               />
             </TopBar>
 
@@ -211,10 +220,15 @@ class App extends Component {
 
                 <Hits
                   hitsPerPage={30}
-                  listComponent={HitsTable(
-                    this.toggleExpand,
-                    this.state.expandedEntry
-                  )}
+                  listComponent={HitsTable}
+                  highlightFields={[
+                    "source.product",
+                    "target.channel",
+                    "target.version",
+                    "target.locale",
+                    "target.platform",
+                    "build.id"
+                  ]}
                 />
                 <NoHits
                   translations={{
