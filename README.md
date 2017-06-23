@@ -3,6 +3,8 @@
 This *experimental* project aims to provide a public database of comprehensive information about
 releases and builds.
 
+Browse the database: [Elm UI](https://mozilla-services.github.io/buildhub/) - [Searchkit UI](https://mozilla-services.github.io/buildhub/searchkit/)
+
 This repository has two main folders:
 
 * [ui/](https://github.com/mozilla-services/buildhub/tree/master/ui#readme): A Web UI to browse the available data
