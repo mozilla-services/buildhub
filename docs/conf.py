@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # Buildhub documentation build configuration file, created by
 # sphinx-quickstart on Mon Feb  2 15:08:06 2015.
