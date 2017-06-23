@@ -19,7 +19,7 @@ You can access the database using the Kinto API:
 
 **Browsing using Elasticsearch**
 
-You can also use an ElasticSearch endpoint for more powerfull queries:
+You can also use an ElasticSearch endpoint for more powerful queries:
 
 .. note::
    
@@ -32,7 +32,7 @@ You can also use an ElasticSearch endpoint for more powerfull queries:
 More about the data schema
 ==========================
 
-A build follow the following structure:
+A build follows the following structure:
 
 .. code-block:: none
 
