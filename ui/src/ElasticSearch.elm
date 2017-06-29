@@ -153,6 +153,7 @@ buildSearchClause search =
                             , ( "split_on_whitespace", Encode.bool True )
                             , ( "fields"
                               , [ "source.product"
+                                , "source.tree"
                                 , "target.channel^1.2"
                                 , "target.version^10"
                                 , "target.locale^3"

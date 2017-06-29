@@ -11,7 +11,7 @@ import Url exposing (..)
 
 view : Model -> Html Msg
 view model =
-    div [ class "container" ]
+    div [ class "container-fluid" ]
         [ headerView model
         , case model.route of
             DocsView ->
@@ -77,7 +77,23 @@ mainView { settings, error, facets, filters } =
                 Just facets ->
                     div []
                         [ paginationView facets settings.pageSize filters.page
-                        , div [] <| List.map (recordView filters) facets.hits
+                        , table [ class "table table-stripped table-hover" ]
+                            [ thead []
+                                [ tr []
+                                    [ th [] [ text "Product" ]
+                                    , th [] [ text "Version" ]
+                                    , th [] [ text "Channel" ]
+                                    , th [] [ text "Tree" ]
+                                    , th [] [ text "Platform" ]
+                                    , th [] [ text "Locale" ]
+                                    , th [] [ text "Build id" ]
+                                    , th [] [ text "Date" ]
+                                    , th [] [ text "Revision" ]
+                                    , th [] []
+                                    ]
+                                ]
+                            , tbody [] <| List.map (recordView filters) facets.hits
+                            ]
                         , if List.length facets.hits > 0 then
                             paginationView facets settings.pageSize filters.page
                           else
@@ -251,64 +267,87 @@ paginationView { total, hits } pageSize page =
             ]
 
 
+buildUrl : BuildRecord -> String
+buildUrl { build, source, target } =
+    let
+        buildInfo =
+            Maybe.withDefault (Build "" "") build
+    in
+        { product = [ source.product ]
+        , version = [ target.version ]
+        , platform = [ target.platform ]
+        , channel = [ target.channel ]
+        , locale = [ target.locale ]
+        , buildId = buildInfo.id
+        , search = ""
+        , page = 1
+        }
+            |> routeFromFilters
+            |> urlFromRoute
+
+
 recordView : Filters -> BuildRecord -> Html Msg
-recordView filters { id, build, download, source, target, systemAddons } =
-    div
-        [ class "panel panel-default", Html.Attributes.id id ]
-        [ div [ class "panel-heading" ]
-            [ div [ class "row" ]
-                [ strong [ class "col-sm-4" ]
-                    [ a
-                        [ let
-                            buildInfo =
-                                Maybe.withDefault (Build "" "") build
+recordView filters ({ id, build, download, source, target, systemAddons } as record) =
+    let
+        filename =
+            String.split "/" download.url
+                |> List.reverse
+                |> List.head
+                |> Maybe.withDefault ""
 
-                            url =
-                                { product = [ source.product ]
-                                , version = [ target.version ]
-                                , platform = [ target.platform ]
-                                , channel = [ target.channel ]
-                                , locale = [ target.locale ]
-                                , buildId = buildInfo.id
-                                , search = ""
-                                , page = 1
-                                }
-                                    |> routeFromFilters
-                                    |> urlFromRoute
-                          in
-                            href url
-                        ]
-                        [ highlighSearchTerm filters.search filters.product source.product
-                        , text " "
-                        , highlighSearchTerm filters.search filters.version target.version
-                        ]
-                    ]
-                , small [ class "col-sm-4 text-center" ]
-                    [ case build of
-                        Just { date } ->
-                            text date
+        revisionUrl =
+            case source.revision of
+                Just revision ->
+                    case source.repository of
+                        Just url ->
+                            a [ href <| url ++ "/rev/" ++ revision ] [ text revision ]
 
                         Nothing ->
-                            text ""
-                    ]
-                , em [ class "col-sm-4 text-right" ]
-                    [ case build of
-                        Just { id } ->
-                            highlighSearchTerm filters.search [ filters.buildId ] id
+                            text "If you see this, please file a bug. Revision not linked to a repository."
 
-                        Nothing ->
-                            text ""
+                Nothing ->
+                    text ""
+    in
+        tr
+            [ Html.Attributes.id id ]
+            [ td []
+                [ a
+                    [ href <| buildUrl record ]
+                    [ highlighSearchTerm filters.search filters.product source.product ]
+                ]
+            , td [] [ highlighSearchTerm filters.search filters.version target.version ]
+            , td [] [ highlighSearchTerm filters.search filters.channel target.channel ]
+            , td [] [ highlighSearchTerm filters.search [] <| Maybe.withDefault "" source.tree ]
+            , td [] [ highlighSearchTerm filters.search filters.platform target.platform ]
+            , td [] [ highlighSearchTerm filters.search filters.locale target.locale ]
+            , td []
+                [ case build of
+                    Just { id } ->
+                        highlighSearchTerm filters.search [ filters.buildId ] id
+
+                    Nothing ->
+                        text ""
+                ]
+            , td []
+                [ case build of
+                    Just { date } ->
+                        text date
+
+                    Nothing ->
+                        text download.date
+                ]
+            , td [] [ revisionUrl ]
+            , td [ class "text-right" ]
+                [ a
+                    [ href download.url
+                    , title <| filename ++ " (" ++ download.mimetype ++ ")"
+                    ]
+                    [ text <| Filesize.formatBase2 download.size
+                    , text " "
+                    , i [ class "glyphicon glyphicon-download" ] []
                     ]
                 ]
             ]
-        , div [ class "panel-body" ]
-            [ viewSourceDetails filters source
-            , viewTargetDetails filters target
-            , viewDownloadDetails download
-            , viewBuildDetails filters build
-            , viewSystemAddonsDetails systemAddons
-            ]
-        ]
 
 
 viewBuildDetails : Filters -> Maybe Build -> Html Msg
@@ -383,7 +422,7 @@ viewSourceDetails { product, search } source =
                             text "If you see this, please file a bug. Revision not linked to a repository."
 
                 Nothing ->
-                    text "unknown"
+                    text ""
     in
         table [ class "table table-stripped table-condensed" ]
             [ thead []
@@ -396,7 +435,7 @@ viewSourceDetails { product, search } source =
             , tbody []
                 [ tr []
                     [ td [] [ highlighSearchTerm search product source.product ]
-                    , td [] [ text <| Maybe.withDefault "unknown" source.tree ]
+                    , td [] [ text <| Maybe.withDefault "" source.tree ]
                     , td [] [ revisionUrl ]
                     ]
                 ]
@@ -557,7 +596,7 @@ settingsView { pageSize } =
                         , onInput NewPageSize
                         , value <| toString pageSize
                         ]
-                        (List.map optionView [ "5", "10", "20", "50", "100" ])
+                        (List.map optionView [ "10", "20", "50", "100" ])
                     ]
             ]
         ]

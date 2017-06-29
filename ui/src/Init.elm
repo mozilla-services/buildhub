@@ -24,7 +24,7 @@ init : Location -> ( Model, Cmd Msg )
 init location =
     let
         defaultSettings =
-            { pageSize = 10 }
+            { pageSize = 20 }
 
         defaultModel =
             { filters = initFilters
