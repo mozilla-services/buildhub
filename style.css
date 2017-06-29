@@ -39,7 +39,7 @@ td {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  max-width: 80px;
+  max-width: 65px;
 }
 
 /* Search form */
