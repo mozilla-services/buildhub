@@ -350,98 +350,6 @@ recordView filters ({ id, build, download, source, target, systemAddons } as rec
             ]
 
 
-viewBuildDetails : Filters -> Maybe Build -> Html Msg
-viewBuildDetails filters build =
-    case build of
-        Just build ->
-            div []
-                [ h4 [] [ text "Build" ]
-                , table [ class "table table-stripped table-condensed" ]
-                    [ thead []
-                        [ tr []
-                            [ th [] [ text "Id" ]
-                            , th [] [ text "Date" ]
-                            ]
-                        ]
-                    , tbody []
-                        [ tr []
-                            [ td [] [ highlighSearchTerm filters.search [ filters.buildId ] build.id ]
-                            , td [] [ text build.date ]
-                            ]
-                        ]
-                    ]
-                ]
-
-        Nothing ->
-            text ""
-
-
-viewDownloadDetails : Download -> Html Msg
-viewDownloadDetails download =
-    let
-        filename =
-            String.split "/" download.url
-                |> List.reverse
-                |> List.head
-                |> Maybe.withDefault ""
-    in
-        div []
-            [ h4 [] [ text "Download" ]
-            , table [ class "table table-stripped table-condensed" ]
-                [ thead []
-                    [ tr []
-                        [ th [] [ text "URL" ]
-                        , th [] [ text "Mimetype" ]
-                        , th [] [ text "Size" ]
-                        , th [] [ text "Published on" ]
-                        ]
-                    ]
-                , tbody []
-                    [ tr []
-                        [ td [] [ a [ href download.url ] [ text filename ] ]
-                        , td [] [ text <| download.mimetype ]
-                        , td [] [ text <| Filesize.formatBase2 download.size ]
-                        , td [] [ text <| download.date ]
-                        ]
-                    ]
-                ]
-            ]
-
-
-viewSourceDetails : Filters -> Source -> Html Msg
-viewSourceDetails { product, search } source =
-    let
-        revisionUrl =
-            case source.revision of
-                Just revision ->
-                    case source.repository of
-                        Just url ->
-                            a [ href <| url ++ "/rev/" ++ revision ] [ text revision ]
-
-                        Nothing ->
-                            text "If you see this, please file a bug. Revision not linked to a repository."
-
-                Nothing ->
-                    text ""
-    in
-        table [ class "table table-stripped table-condensed" ]
-            [ thead []
-                [ tr []
-                    [ th [] [ text "Product" ]
-                    , th [] [ text "Tree" ]
-                    , th [] [ text "Revision" ]
-                    ]
-                ]
-            , tbody []
-                [ tr []
-                    [ td [] [ highlighSearchTerm search product source.product ]
-                    , td [] [ text <| Maybe.withDefault "" source.tree ]
-                    , td [] [ revisionUrl ]
-                    ]
-                ]
-            ]
-
-
 viewSystemAddonsDetails : List SystemAddon -> Html Msg
 viewSystemAddonsDetails systemAddons =
     case systemAddons of
@@ -472,32 +380,6 @@ viewSystemAddonsDetails systemAddons =
                         )
                     ]
                 ]
-
-
-viewTargetDetails : Filters -> Target -> Html Msg
-viewTargetDetails filters target =
-    div []
-        [ h4 [] [ text "Target" ]
-        , table
-            [ class "table table-stripped table-condensed" ]
-            [ thead []
-                [ tr []
-                    [ th [] [ text "Version" ]
-                    , th [] [ text "Platform" ]
-                    , th [] [ text "Channel" ]
-                    , th [] [ text "Locale" ]
-                    ]
-                ]
-            , tbody []
-                [ tr []
-                    [ td [] [ highlighSearchTerm filters.search filters.version target.version ]
-                    , td [] [ highlighSearchTerm filters.search filters.platform target.platform ]
-                    , td [] [ highlighSearchTerm filters.search filters.channel target.channel ]
-                    , td [] [ highlighSearchTerm filters.search filters.locale target.locale ]
-                    ]
-                ]
-            ]
-        ]
 
 
 spinner : Html Msg
