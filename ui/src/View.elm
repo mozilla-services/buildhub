@@ -1,6 +1,7 @@
 module View exposing (view)
 
 import Filesize
+import Json.Decode as Decode
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -22,8 +23,8 @@ view model =
         ]
 
 
-highlighSearchTerm : String -> List String -> String -> Html Msg
-highlighSearchTerm search terms fieldValue =
+highlightSearchTerm : String -> List String -> String -> Html Msg
+highlightSearchTerm search terms fieldValue =
     let
         fullTerms =
             search
@@ -68,7 +69,7 @@ searchForm filters =
 
 
 mainView : Model -> Html Msg
-mainView { settings, error, facets, filters } =
+mainView { settings, error, facets, filters, expanded } =
     div [ class "row" ]
         [ div [ class "col-sm-9" ]
             [ errorView error
@@ -77,23 +78,27 @@ mainView { settings, error, facets, filters } =
                 Just facets ->
                     div []
                         [ paginationView facets settings.pageSize filters.page
-                        , table [ class "table table-stripped table-hover" ]
-                            [ thead []
-                                [ tr []
-                                    [ th [] [ text "Product" ]
-                                    , th [] [ text "Version" ]
-                                    , th [] [ text "Channel" ]
-                                    , th [] [ text "Tree" ]
-                                    , th [] [ text "Platform" ]
-                                    , th [] [ text "Locale" ]
-                                    , th [] [ text "Build id" ]
-                                    , th [] [ text "Date" ]
-                                    , th [] [ text "Revision" ]
-                                    , th [] []
-                                    ]
+                        , table [ class "table table-stripped table-hover" ] <|
+                            List.concat
+                                [ [ thead []
+                                        [ tr []
+                                            [ th [ style [ ( "width", "10px" ) ] ] []
+                                            , th [ style [ ( "width", "10px" ) ] ] []
+                                            , th [] [ text "Product" ]
+                                            , th [] [ text "Version" ]
+                                            , th [] [ text "Channel" ]
+                                            , th [] [ text "Tree" ]
+                                            , th [] [ text "Platform" ]
+                                            , th [] [ text "Locale" ]
+                                            , th [] [ text "Build id" ]
+                                            , th [] [ text "Date" ]
+                                            , th [] [ text "Revision" ]
+                                            , th [] [ text "Download" ]
+                                            ]
+                                        ]
+                                  ]
+                                , List.map (recordView filters expanded) facets.hits
                                 ]
-                            , tbody [] <| List.map (recordView filters) facets.hits
-                            ]
                         , if List.length facets.hits > 0 then
                             paginationView facets settings.pageSize filters.page
                           else
@@ -267,8 +272,8 @@ paginationView { total, hits } pageSize page =
             ]
 
 
-buildUrl : BuildRecord -> String
-buildUrl { build, source, target } =
+buildPermalink : BuildRecord -> String
+buildPermalink { build, source, target } =
     let
         buildInfo =
             Maybe.withDefault (Build "" "") build
@@ -286,8 +291,31 @@ buildUrl { build, source, target } =
             |> urlFromRoute
 
 
-recordView : Filters -> BuildRecord -> Html Msg
-recordView filters ({ id, build, download, source, target, systemAddons } as record) =
+buildBuildIdUrl : String -> String
+buildBuildIdUrl buildId =
+    { product = []
+    , version = []
+    , platform = []
+    , channel = []
+    , locale = []
+    , buildId = buildId
+    , search = ""
+    , page = 1
+    }
+        |> routeFromFilters
+        |> urlFromRoute
+
+
+onClick_ : msg -> Attribute msg
+onClick_ msg =
+    onWithOptions
+        "click"
+        { preventDefault = True, stopPropagation = True }
+        (Decode.succeed msg)
+
+
+recordView : Filters -> Maybe String -> BuildRecord -> Html Msg
+recordView filters expanded ({ id, build, download, source, target, systemAddons } as record) =
     let
         filename =
             String.split "/" download.url
@@ -295,6 +323,199 @@ recordView filters ({ id, build, download, source, target, systemAddons } as rec
                 |> List.head
                 |> Maybe.withDefault ""
 
+        ( revision, revisionUrl ) =
+            case ( source.repository, source.revision ) of
+                ( Just repository, Just revision ) ->
+                    ( revision, Just <| repository ++ "/rev/" ++ revision )
+
+                _ ->
+                    ( "unknown", Nothing )
+
+        sourceTree =
+            Maybe.withDefault "unknown" source.tree
+
+        buildDate =
+            case build of
+                Just { date } ->
+                    date
+
+                Nothing ->
+                    download.date
+    in
+        tbody []
+            [ tr
+                [ Html.Attributes.id id ]
+                [ td []
+                    [ a
+                        [ href <| buildPermalink record
+                        , title "Build permalink"
+                        ]
+                        [ i [ class "glyphicon glyphicon-link" ] [] ]
+                    ]
+                , td []
+                    [ a
+                        [ href <| "#" ++ id
+                        , onClick_ <| ToggleBuildDetails id
+                        , title "View build details"
+                        ]
+                        [ i
+                            [ class <|
+                                "glyphicon glyphicon-eye-"
+                                    ++ (if Maybe.withDefault "" expanded == id then
+                                            "close"
+                                        else
+                                            "open"
+                                       )
+                            ]
+                            []
+                        ]
+                    ]
+                , td [ title source.product ]
+                    [ highlightSearchTerm filters.search filters.product source.product ]
+                , td [ title target.version ]
+                    [ highlightSearchTerm filters.search filters.version target.version ]
+                , td [ title target.channel ]
+                    [ highlightSearchTerm filters.search filters.channel target.channel ]
+                , td [ title sourceTree ]
+                    [ highlightSearchTerm filters.search [] sourceTree ]
+                , td [ title target.platform ]
+                    [ highlightSearchTerm filters.search filters.platform target.platform ]
+                , td [ title target.locale ]
+                    [ highlightSearchTerm filters.search filters.locale target.locale ]
+                , case build of
+                    Just { id } ->
+                        td [ title id ]
+                            [ a
+                                [ href <| buildBuildIdUrl id
+                                , title "Search all builds matching this id"
+                                ]
+                                [ highlightSearchTerm filters.search [ filters.buildId ] id ]
+                            ]
+
+                    Nothing ->
+                        td [] [ text "unknown" ]
+                , td [ title buildDate ] [ text buildDate ]
+                , td [ title revision ]
+                    [ case revisionUrl of
+                        Just url ->
+                            a [ href url ] [ text revision ]
+
+                        Nothing ->
+                            text revision
+                    ]
+                , td [ class "text-right" ]
+                    [ a
+                        [ href download.url
+                        , title <| filename ++ " (" ++ download.mimetype ++ ")"
+                        ]
+                        [ text <| Filesize.formatBase2 download.size
+                        , text " "
+                        , i [ class "glyphicon glyphicon-download" ] []
+                        ]
+                    ]
+                ]
+            , if (Maybe.withDefault "" expanded == id) then
+                tr [ class "build-details" ]
+                    [ td [ colspan 12 ]
+                        [ viewSourceDetails filters source
+                        , viewTargetDetails filters target
+                        , viewDownloadDetails download
+                        , viewBuildDetails filters build
+                        , viewSystemAddonsDetails systemAddons
+                        ]
+                    ]
+              else
+                text ""
+            ]
+
+
+viewTargetDetails : Filters -> Target -> Html Msg
+viewTargetDetails filters target =
+    div []
+        [ h4 [] [ text "Target" ]
+        , table
+            [ class "table table-stripped table-condensed" ]
+            [ thead []
+                [ tr []
+                    [ th [] [ text "Version" ]
+                    , th [] [ text "Platform" ]
+                    , th [] [ text "Channel" ]
+                    , th [] [ text "Locale" ]
+                    ]
+                ]
+            , tbody []
+                [ tr []
+                    [ td [] [ highlightSearchTerm filters.search filters.version target.version ]
+                    , td [] [ highlightSearchTerm filters.search filters.platform target.platform ]
+                    , td [] [ highlightSearchTerm filters.search filters.channel target.channel ]
+                    , td [] [ highlightSearchTerm filters.search filters.locale target.locale ]
+                    ]
+                ]
+            ]
+        ]
+
+
+viewBuildDetails : Filters -> Maybe Build -> Html Msg
+viewBuildDetails filters build =
+    div []
+        [ h4 [] [ text "Build" ]
+        , case build of
+            Just build ->
+                table [ class "table table-stripped table-condensed" ]
+                    [ thead []
+                        [ tr []
+                            [ th [] [ text "Id" ]
+                            , th [] [ text "Date" ]
+                            ]
+                        ]
+                    , tbody []
+                        [ tr []
+                            [ td [] [ highlightSearchTerm filters.search [ filters.buildId ] build.id ]
+                            , td [] [ text build.date ]
+                            ]
+                        ]
+                    ]
+
+            Nothing ->
+                p [] [ text "This record has no build information attached." ]
+        ]
+
+
+viewDownloadDetails : Download -> Html Msg
+viewDownloadDetails download =
+    let
+        filename =
+            String.split "/" download.url
+                |> List.reverse
+                |> List.head
+                |> Maybe.withDefault ""
+    in
+        div []
+            [ h4 [] [ text "Download" ]
+            , table [ class "table table-stripped table-condensed" ]
+                [ thead []
+                    [ tr []
+                        [ th [] [ text "URL" ]
+                        , th [] [ text "Mimetype" ]
+                        , th [] [ text "Size" ]
+                        , th [] [ text "Published on" ]
+                        ]
+                    ]
+                , tbody []
+                    [ tr []
+                        [ td [] [ a [ href download.url ] [ text filename ] ]
+                        , td [] [ text <| download.mimetype ]
+                        , td [] [ text <| Filesize.formatBase2 download.size ]
+                        , td [] [ text <| download.date ]
+                        ]
+                    ]
+                ]
+            ]
+
+
+viewSourceDetails : Filters -> Source -> Html Msg
+viewSourceDetails { product, search } source =
+    let
         revisionUrl =
             case source.revision of
                 Just revision ->
@@ -308,43 +529,19 @@ recordView filters ({ id, build, download, source, target, systemAddons } as rec
                 Nothing ->
                     text ""
     in
-        tr
-            [ Html.Attributes.id id ]
-            [ td []
-                [ a
-                    [ href <| buildUrl record ]
-                    [ highlighSearchTerm filters.search filters.product source.product ]
-                ]
-            , td [] [ highlighSearchTerm filters.search filters.version target.version ]
-            , td [] [ highlighSearchTerm filters.search filters.channel target.channel ]
-            , td [] [ highlighSearchTerm filters.search [] <| Maybe.withDefault "" source.tree ]
-            , td [] [ highlighSearchTerm filters.search filters.platform target.platform ]
-            , td [] [ highlighSearchTerm filters.search filters.locale target.locale ]
-            , td []
-                [ case build of
-                    Just { id } ->
-                        highlighSearchTerm filters.search [ filters.buildId ] id
-
-                    Nothing ->
-                        text ""
-                ]
-            , td []
-                [ case build of
-                    Just { date } ->
-                        text date
-
-                    Nothing ->
-                        text download.date
-                ]
-            , td [] [ revisionUrl ]
-            , td [ class "text-right" ]
-                [ a
-                    [ href download.url
-                    , title <| filename ++ " (" ++ download.mimetype ++ ")"
+        table [ class "table table-stripped table-condensed" ]
+            [ thead []
+                [ tr []
+                    [ th [] [ text "Product" ]
+                    , th [] [ text "Tree" ]
+                    , th [] [ text "Revision" ]
                     ]
-                    [ text <| Filesize.formatBase2 download.size
-                    , text " "
-                    , i [ class "glyphicon glyphicon-download" ] []
+                ]
+            , tbody []
+                [ tr []
+                    [ td [] [ highlightSearchTerm search product source.product ]
+                    , td [] [ text <| Maybe.withDefault "unknown" source.tree ]
+                    , td [] [ revisionUrl ]
                     ]
                 ]
             ]
@@ -352,14 +549,14 @@ recordView filters ({ id, build, download, source, target, systemAddons } as rec
 
 viewSystemAddonsDetails : List SystemAddon -> Html Msg
 viewSystemAddonsDetails systemAddons =
-    case systemAddons of
-        [] ->
-            text ""
+    div []
+        [ h4 [] [ text "System Addons" ]
+        , case systemAddons of
+            [] ->
+                p [] [ text "This build record has no system addons information attached." ]
 
-        _ ->
-            div []
-                [ h4 [] [ text "System Addons" ]
-                , table [ class "table table-stripped table-condensed" ]
+            _ ->
+                table [ class "table table-stripped table-condensed" ]
                     [ thead []
                         [ tr []
                             [ th [] [ text "Id" ]
@@ -379,7 +576,7 @@ viewSystemAddonsDetails systemAddons =
                                 )
                         )
                     ]
-                ]
+        ]
 
 
 spinner : Html Msg

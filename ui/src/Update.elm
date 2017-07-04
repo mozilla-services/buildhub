@@ -133,3 +133,18 @@ update msg ({ filters, settings } as model) =
 
         SubmitSearch ->
             model ! []
+
+        ToggleBuildDetails id ->
+            { model
+                | expanded =
+                    case model.expanded of
+                        Just current ->
+                            if id == current then
+                                Nothing
+                            else
+                                model.expanded
+
+                        Nothing ->
+                            Just id
+            }
+                ! []
