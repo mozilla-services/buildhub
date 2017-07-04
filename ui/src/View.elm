@@ -288,6 +288,21 @@ buildPermalink { build, source, target } =
             |> urlFromRoute
 
 
+buildBuildIdUrl : String -> String
+buildBuildIdUrl buildId =
+    { product = []
+    , version = []
+    , platform = []
+    , channel = []
+    , locale = []
+    , buildId = buildId
+    , search = ""
+    , page = 1
+    }
+        |> routeFromFilters
+        |> urlFromRoute
+
+
 recordView : Filters -> BuildRecord -> Html Msg
 recordView filters ({ id, build, download, source, target, systemAddons } as record) =
     let
@@ -347,7 +362,12 @@ recordView filters ({ id, build, download, source, target, systemAddons } as rec
             , case build of
                 Just { id } ->
                     td [ title id ]
-                        [ highlighSearchTerm filters.search [ filters.buildId ] id ]
+                        [ a
+                            [ href <| buildBuildIdUrl id
+                            , title "Search all matching builds"
+                            ]
+                            [ highlighSearchTerm filters.search [ filters.buildId ] id ]
+                        ]
 
                 Nothing ->
                     td [] [ text "unknown" ]
