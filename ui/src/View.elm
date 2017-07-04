@@ -80,7 +80,9 @@ mainView { settings, error, facets, filters } =
                         , table [ class "table table-stripped table-hover" ]
                             [ thead []
                                 [ tr []
-                                    [ th [] [ text "Product" ]
+                                    [ th [ style [ ( "width", "10px" ) ] ] []
+                                    , th [ style [ ( "width", "10px" ) ] ] []
+                                    , th [] [ text "Product" ]
                                     , th [] [ text "Version" ]
                                     , th [] [ text "Channel" ]
                                     , th [] [ text "Tree" ]
@@ -89,7 +91,7 @@ mainView { settings, error, facets, filters } =
                                     , th [] [ text "Build id" ]
                                     , th [] [ text "Date" ]
                                     , th [] [ text "Revision" ]
-                                    , th [] []
+                                    , th [] [ text "Download" ]
                                     ]
                                 ]
                             , tbody [] <| List.map (recordView filters) facets.hits
@@ -267,8 +269,8 @@ paginationView { total, hits } pageSize page =
             ]
 
 
-buildUrl : BuildRecord -> String
-buildUrl { build, source, target } =
+buildPermalink : BuildRecord -> String
+buildPermalink { build, source, target } =
     let
         buildInfo =
             Maybe.withDefault (Build "" "") build
@@ -295,48 +297,69 @@ recordView filters ({ id, build, download, source, target, systemAddons } as rec
                 |> List.head
                 |> Maybe.withDefault ""
 
-        revisionUrl =
-            case source.revision of
-                Just revision ->
-                    case source.repository of
-                        Just url ->
-                            a [ href <| url ++ "/rev/" ++ revision ] [ text revision ]
+        ( revision, revisionUrl ) =
+            case ( source.repository, source.revision ) of
+                ( Just repository, Just revision ) ->
+                    ( revision, Just <| repository ++ "/rev/" ++ revision )
 
-                        Nothing ->
-                            text "If you see this, please file a bug. Revision not linked to a repository."
+                _ ->
+                    ( "unknown", Nothing )
+
+        sourceTree =
+            Maybe.withDefault "unknown" source.tree
+
+        buildDate =
+            case build of
+                Just { date } ->
+                    date
 
                 Nothing ->
-                    text ""
+                    download.date
     in
         tr
             [ Html.Attributes.id id ]
             [ td []
                 [ a
-                    [ href <| buildUrl record ]
-                    [ highlighSearchTerm filters.search filters.product source.product ]
-                ]
-            , td [] [ highlighSearchTerm filters.search filters.version target.version ]
-            , td [] [ highlighSearchTerm filters.search filters.channel target.channel ]
-            , td [] [ highlighSearchTerm filters.search [] <| Maybe.withDefault "" source.tree ]
-            , td [] [ highlighSearchTerm filters.search filters.platform target.platform ]
-            , td [] [ highlighSearchTerm filters.search filters.locale target.locale ]
-            , td []
-                [ case build of
-                    Just { id } ->
-                        highlighSearchTerm filters.search [ filters.buildId ] id
-
-                    Nothing ->
-                        text ""
+                    [ href <| buildPermalink record
+                    , title "Build permalink"
+                    ]
+                    [ i [ class "glyphicon glyphicon-link" ] [] ]
                 ]
             , td []
-                [ case build of
-                    Just { date } ->
-                        text date
+                [ a
+                    [ href "#"
+                    , title "View build details"
+                    ]
+                    [ i [ class "glyphicon glyphicon-eye-open" ] [] ]
+                ]
+            , td [ title source.product ]
+                [ highlighSearchTerm filters.search filters.product source.product ]
+            , td [ title target.version ]
+                [ highlighSearchTerm filters.search filters.version target.version ]
+            , td [ title target.channel ]
+                [ highlighSearchTerm filters.search filters.channel target.channel ]
+            , td [ title sourceTree ]
+                [ highlighSearchTerm filters.search [] sourceTree ]
+            , td [ title target.platform ]
+                [ highlighSearchTerm filters.search filters.platform target.platform ]
+            , td [ title target.locale ]
+                [ highlighSearchTerm filters.search filters.locale target.locale ]
+            , case build of
+                Just { id } ->
+                    td [ title id ]
+                        [ highlighSearchTerm filters.search [ filters.buildId ] id ]
+
+                Nothing ->
+                    td [] [ text "unknown" ]
+            , td [ title buildDate ] [ text buildDate ]
+            , td [ title revision ]
+                [ case revisionUrl of
+                    Just url ->
+                        a [ href url ] [ text revision ]
 
                     Nothing ->
-                        text download.date
+                        text revision
                 ]
-            , td [] [ revisionUrl ]
             , td [ class "text-right" ]
                 [ a
                     [ href download.url
