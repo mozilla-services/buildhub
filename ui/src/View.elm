@@ -390,7 +390,7 @@ recordView filters expanded ({ id, build, download, source, target, systemAddons
                         td [ title id ]
                             [ a
                                 [ href <| buildBuildIdUrl id
-                                , title "Search all matching builds"
+                                , title "Search all builds matching this id"
                                 ]
                                 [ highlighSearchTerm filters.search [ filters.buildId ] id ]
                             ]
