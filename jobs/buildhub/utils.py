@@ -2,6 +2,8 @@ import datetime
 import os.path
 import re
 
+
+PRODUCTS = ("firefox", "thunderbird", "mobile")
 ARCHIVE_URL = "https://archive.mozilla.org/"
 DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 FILE_EXTENSIONS = "zip|tar.gz|tar.bz2|dmg|apk|exe"

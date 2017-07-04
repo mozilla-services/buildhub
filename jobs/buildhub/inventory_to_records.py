@@ -16,13 +16,13 @@ import backoff
 from .utils import (archive_url, chunked, is_release_build_metadata, is_build_url,
                     record_from_url, localize_nightly_url, merge_metadata, check_record,
                     localize_release_candidate_url,
-                    ARCHIVE_URL, FILE_EXTENSIONS, DATETIME_FORMAT)
+                    ARCHIVE_URL, FILE_EXTENSIONS, DATETIME_FORMAT, PRODUCTS)
 
 
 NB_PARALLEL_REQUESTS = int(os.getenv("NB_PARALLEL_REQUESTS", 8))
 NB_RETRY_REQUEST = int(os.getenv("NB_RETRY_REQUEST", 3))
 TIMEOUT_SECONDS = int(os.getenv("TIMEOUT_SECONDS", 5 * 60))
-PRODUCTS = os.getenv("PRODUCTS", "firefox thunderbird mobile").split(" ")
+PRODUCTS = os.getenv("PRODUCTS", "").split(" ") or PRODUCTS
 
 
 logger = logging.getLogger(__name__)
