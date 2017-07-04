@@ -23,8 +23,8 @@ view model =
         ]
 
 
-highlighSearchTerm : String -> List String -> String -> Html Msg
-highlighSearchTerm search terms fieldValue =
+highlightSearchTerm : String -> List String -> String -> Html Msg
+highlightSearchTerm search terms fieldValue =
     let
         fullTerms =
             search
@@ -374,17 +374,17 @@ recordView filters expanded ({ id, build, download, source, target, systemAddons
                         ]
                     ]
                 , td [ title source.product ]
-                    [ highlighSearchTerm filters.search filters.product source.product ]
+                    [ highlightSearchTerm filters.search filters.product source.product ]
                 , td [ title target.version ]
-                    [ highlighSearchTerm filters.search filters.version target.version ]
+                    [ highlightSearchTerm filters.search filters.version target.version ]
                 , td [ title target.channel ]
-                    [ highlighSearchTerm filters.search filters.channel target.channel ]
+                    [ highlightSearchTerm filters.search filters.channel target.channel ]
                 , td [ title sourceTree ]
-                    [ highlighSearchTerm filters.search [] sourceTree ]
+                    [ highlightSearchTerm filters.search [] sourceTree ]
                 , td [ title target.platform ]
-                    [ highlighSearchTerm filters.search filters.platform target.platform ]
+                    [ highlightSearchTerm filters.search filters.platform target.platform ]
                 , td [ title target.locale ]
-                    [ highlighSearchTerm filters.search filters.locale target.locale ]
+                    [ highlightSearchTerm filters.search filters.locale target.locale ]
                 , case build of
                     Just { id } ->
                         td [ title id ]
@@ -392,7 +392,7 @@ recordView filters expanded ({ id, build, download, source, target, systemAddons
                                 [ href <| buildBuildIdUrl id
                                 , title "Search all builds matching this id"
                                 ]
-                                [ highlighSearchTerm filters.search [ filters.buildId ] id ]
+                                [ highlightSearchTerm filters.search [ filters.buildId ] id ]
                             ]
 
                     Nothing ->
@@ -448,10 +448,10 @@ viewTargetDetails filters target =
                 ]
             , tbody []
                 [ tr []
-                    [ td [] [ highlighSearchTerm filters.search filters.version target.version ]
-                    , td [] [ highlighSearchTerm filters.search filters.platform target.platform ]
-                    , td [] [ highlighSearchTerm filters.search filters.channel target.channel ]
-                    , td [] [ highlighSearchTerm filters.search filters.locale target.locale ]
+                    [ td [] [ highlightSearchTerm filters.search filters.version target.version ]
+                    , td [] [ highlightSearchTerm filters.search filters.platform target.platform ]
+                    , td [] [ highlightSearchTerm filters.search filters.channel target.channel ]
+                    , td [] [ highlightSearchTerm filters.search filters.locale target.locale ]
                     ]
                 ]
             ]
@@ -473,7 +473,7 @@ viewBuildDetails filters build =
                         ]
                     , tbody []
                         [ tr []
-                            [ td [] [ highlighSearchTerm filters.search [ filters.buildId ] build.id ]
+                            [ td [] [ highlightSearchTerm filters.search [ filters.buildId ] build.id ]
                             , td [] [ text build.date ]
                             ]
                         ]
@@ -542,7 +542,7 @@ viewSourceDetails { product, search } source =
                 ]
             , tbody []
                 [ tr []
-                    [ td [] [ highlighSearchTerm search product source.product ]
+                    [ td [] [ highlightSearchTerm search product source.product ]
                     , td [] [ text <| Maybe.withDefault "unknown" source.tree ]
                     , td [] [ revisionUrl ]
                     ]
