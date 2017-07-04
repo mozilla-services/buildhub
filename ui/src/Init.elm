@@ -32,6 +32,7 @@ init location =
             , route = MainView
             , error = Nothing
             , settings = defaultSettings
+            , expanded = []
             }
 
         updatedModel =

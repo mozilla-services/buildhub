@@ -133,3 +133,9 @@ update msg ({ filters, settings } as model) =
 
         SubmitSearch ->
             model ! []
+
+        ToggleBuildDetails id ->
+            if List.member id model.expanded then
+                { model | expanded = List.filter (\i -> i /= id) model.expanded } ! []
+            else
+                { model | expanded = id :: model.expanded } ! []

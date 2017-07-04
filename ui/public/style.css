@@ -42,6 +42,10 @@ td {
   max-width: 65px;
 }
 
+.table-hover>tbody>tr.build-details:hover {
+  background: none;
+}
+
 /* Search form */
 
 .search-form .form-group {

@@ -10,6 +10,7 @@ type alias Model =
     , route : Route
     , error : Maybe String
     , settings : Settings
+    , expanded : List String
     }
 
 
@@ -166,3 +167,4 @@ type Msg
     | DismissError
     | NewPageSize String
     | SubmitSearch
+    | ToggleBuildDetails String

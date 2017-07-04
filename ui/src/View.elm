@@ -1,6 +1,7 @@
 module View exposing (view)
 
 import Filesize
+import Json.Decode as Decode
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -68,7 +69,7 @@ searchForm filters =
 
 
 mainView : Model -> Html Msg
-mainView { settings, error, facets, filters } =
+mainView { settings, error, facets, filters, expanded } =
     div [ class "row" ]
         [ div [ class "col-sm-9" ]
             [ errorView error
@@ -77,25 +78,27 @@ mainView { settings, error, facets, filters } =
                 Just facets ->
                     div []
                         [ paginationView facets settings.pageSize filters.page
-                        , table [ class "table table-stripped table-hover" ]
-                            [ thead []
-                                [ tr []
-                                    [ th [ style [ ( "width", "10px" ) ] ] []
-                                    , th [ style [ ( "width", "10px" ) ] ] []
-                                    , th [] [ text "Product" ]
-                                    , th [] [ text "Version" ]
-                                    , th [] [ text "Channel" ]
-                                    , th [] [ text "Tree" ]
-                                    , th [] [ text "Platform" ]
-                                    , th [] [ text "Locale" ]
-                                    , th [] [ text "Build id" ]
-                                    , th [] [ text "Date" ]
-                                    , th [] [ text "Revision" ]
-                                    , th [] [ text "Download" ]
-                                    ]
+                        , table [ class "table table-stripped table-hover" ] <|
+                            List.concat
+                                [ [ thead []
+                                        [ tr []
+                                            [ th [ style [ ( "width", "10px" ) ] ] []
+                                            , th [ style [ ( "width", "10px" ) ] ] []
+                                            , th [] [ text "Product" ]
+                                            , th [] [ text "Version" ]
+                                            , th [] [ text "Channel" ]
+                                            , th [] [ text "Tree" ]
+                                            , th [] [ text "Platform" ]
+                                            , th [] [ text "Locale" ]
+                                            , th [] [ text "Build id" ]
+                                            , th [] [ text "Date" ]
+                                            , th [] [ text "Revision" ]
+                                            , th [] [ text "Download" ]
+                                            ]
+                                        ]
+                                  ]
+                                , List.map (recordView filters expanded) facets.hits
                                 ]
-                            , tbody [] <| List.map (recordView filters) facets.hits
-                            ]
                         , if List.length facets.hits > 0 then
                             paginationView facets settings.pageSize filters.page
                           else
@@ -303,8 +306,16 @@ buildBuildIdUrl buildId =
         |> urlFromRoute
 
 
-recordView : Filters -> BuildRecord -> Html Msg
-recordView filters ({ id, build, download, source, target, systemAddons } as record) =
+onClick_ : msg -> Attribute msg
+onClick_ msg =
+    onWithOptions
+        "click"
+        { preventDefault = True, stopPropagation = True }
+        (Decode.succeed msg)
+
+
+recordView : Filters -> List String -> BuildRecord -> Html Msg
+recordView filters expanded ({ id, build, download, source, target, systemAddons } as record) =
     let
         filename =
             String.split "/" download.url
@@ -330,64 +341,210 @@ recordView filters ({ id, build, download, source, target, systemAddons } as rec
 
                 Nothing ->
                     download.date
-    in
-        tr
-            [ Html.Attributes.id id ]
-            [ td []
-                [ a
-                    [ href <| buildPermalink record
-                    , title "Build permalink"
-                    ]
-                    [ i [ class "glyphicon glyphicon-link" ] [] ]
-                ]
-            , td []
-                [ a
-                    [ href "#"
-                    , title "View build details"
-                    ]
-                    [ i [ class "glyphicon glyphicon-eye-open" ] [] ]
-                ]
-            , td [ title source.product ]
-                [ highlighSearchTerm filters.search filters.product source.product ]
-            , td [ title target.version ]
-                [ highlighSearchTerm filters.search filters.version target.version ]
-            , td [ title target.channel ]
-                [ highlighSearchTerm filters.search filters.channel target.channel ]
-            , td [ title sourceTree ]
-                [ highlighSearchTerm filters.search [] sourceTree ]
-            , td [ title target.platform ]
-                [ highlighSearchTerm filters.search filters.platform target.platform ]
-            , td [ title target.locale ]
-                [ highlighSearchTerm filters.search filters.locale target.locale ]
-            , case build of
-                Just { id } ->
-                    td [ title id ]
-                        [ a
-                            [ href <| buildBuildIdUrl id
-                            , title "Search all matching builds"
-                            ]
-                            [ highlighSearchTerm filters.search [ filters.buildId ] id ]
-                        ]
 
-                Nothing ->
-                    td [] [ text "unknown" ]
-            , td [ title buildDate ] [ text buildDate ]
-            , td [ title revision ]
-                [ case revisionUrl of
-                    Just url ->
-                        a [ href url ] [ text revision ]
+        isExpanded =
+            List.member id expanded
+    in
+        tbody []
+            [ tr
+                [ Html.Attributes.id id ]
+                [ td []
+                    [ a
+                        [ href <| buildPermalink record
+                        , title "Build permalink"
+                        ]
+                        [ i [ class "glyphicon glyphicon-link" ] [] ]
+                    ]
+                , td []
+                    [ a
+                        [ href "#"
+                        , onClick_ (ToggleBuildDetails id)
+                        , title "View build details"
+                        ]
+                        [ i
+                            [ class <|
+                                "glyphicon glyphicon-eye-"
+                                    ++ (if isExpanded then
+                                            "close"
+                                        else
+                                            "open"
+                                       )
+                            ]
+                            []
+                        ]
+                    ]
+                , td [ title source.product ]
+                    [ highlighSearchTerm filters.search filters.product source.product ]
+                , td [ title target.version ]
+                    [ highlighSearchTerm filters.search filters.version target.version ]
+                , td [ title target.channel ]
+                    [ highlighSearchTerm filters.search filters.channel target.channel ]
+                , td [ title sourceTree ]
+                    [ highlighSearchTerm filters.search [] sourceTree ]
+                , td [ title target.platform ]
+                    [ highlighSearchTerm filters.search filters.platform target.platform ]
+                , td [ title target.locale ]
+                    [ highlighSearchTerm filters.search filters.locale target.locale ]
+                , case build of
+                    Just { id } ->
+                        td [ title id ]
+                            [ a
+                                [ href <| buildBuildIdUrl id
+                                , title "Search all matching builds"
+                                ]
+                                [ highlighSearchTerm filters.search [ filters.buildId ] id ]
+                            ]
 
                     Nothing ->
-                        text revision
-                ]
-            , td [ class "text-right" ]
-                [ a
-                    [ href download.url
-                    , title <| filename ++ " (" ++ download.mimetype ++ ")"
+                        td [] [ text "unknown" ]
+                , td [ title buildDate ] [ text buildDate ]
+                , td [ title revision ]
+                    [ case revisionUrl of
+                        Just url ->
+                            a [ href url ] [ text revision ]
+
+                        Nothing ->
+                            text revision
                     ]
-                    [ text <| Filesize.formatBase2 download.size
-                    , text " "
-                    , i [ class "glyphicon glyphicon-download" ] []
+                , td [ class "text-right" ]
+                    [ a
+                        [ href download.url
+                        , title <| filename ++ " (" ++ download.mimetype ++ ")"
+                        ]
+                        [ text <| Filesize.formatBase2 download.size
+                        , text " "
+                        , i [ class "glyphicon glyphicon-download" ] []
+                        ]
+                    ]
+                ]
+            , if isExpanded then
+                tr [ class "build-details" ]
+                    [ td [ colspan 12 ]
+                        [ viewSourceDetails filters source
+                        , viewTargetDetails filters target
+                        , viewDownloadDetails download
+                        , viewBuildDetails filters build
+                        , viewSystemAddonsDetails systemAddons
+                        ]
+                    ]
+              else
+                text ""
+            ]
+
+
+viewTargetDetails : Filters -> Target -> Html Msg
+viewTargetDetails filters target =
+    div []
+        [ h4 [] [ text "Target" ]
+        , table
+            [ class "table table-stripped table-condensed" ]
+            [ thead []
+                [ tr []
+                    [ th [] [ text "Version" ]
+                    , th [] [ text "Platform" ]
+                    , th [] [ text "Channel" ]
+                    , th [] [ text "Locale" ]
+                    ]
+                ]
+            , tbody []
+                [ tr []
+                    [ td [] [ highlighSearchTerm filters.search filters.version target.version ]
+                    , td [] [ highlighSearchTerm filters.search filters.platform target.platform ]
+                    , td [] [ highlighSearchTerm filters.search filters.channel target.channel ]
+                    , td [] [ highlighSearchTerm filters.search filters.locale target.locale ]
+                    ]
+                ]
+            ]
+        ]
+
+
+viewBuildDetails : Filters -> Maybe Build -> Html Msg
+viewBuildDetails filters build =
+    div []
+        [ h4 [] [ text "Build" ]
+        , case build of
+            Just build ->
+                table [ class "table table-stripped table-condensed" ]
+                    [ thead []
+                        [ tr []
+                            [ th [] [ text "Id" ]
+                            , th [] [ text "Date" ]
+                            ]
+                        ]
+                    , tbody []
+                        [ tr []
+                            [ td [] [ highlighSearchTerm filters.search [ filters.buildId ] build.id ]
+                            , td [] [ text build.date ]
+                            ]
+                        ]
+                    ]
+
+            Nothing ->
+                p [] [ text "This record has no build information attached." ]
+        ]
+
+
+viewDownloadDetails : Download -> Html Msg
+viewDownloadDetails download =
+    let
+        filename =
+            String.split "/" download.url
+                |> List.reverse
+                |> List.head
+                |> Maybe.withDefault ""
+    in
+        div []
+            [ h4 [] [ text "Download" ]
+            , table [ class "table table-stripped table-condensed" ]
+                [ thead []
+                    [ tr []
+                        [ th [] [ text "URL" ]
+                        , th [] [ text "Mimetype" ]
+                        , th [] [ text "Size" ]
+                        , th [] [ text "Published on" ]
+                        ]
+                    ]
+                , tbody []
+                    [ tr []
+                        [ td [] [ a [ href download.url ] [ text filename ] ]
+                        , td [] [ text <| download.mimetype ]
+                        , td [] [ text <| Filesize.formatBase2 download.size ]
+                        , td [] [ text <| download.date ]
+                        ]
+                    ]
+                ]
+            ]
+
+
+viewSourceDetails : Filters -> Source -> Html Msg
+viewSourceDetails { product, search } source =
+    let
+        revisionUrl =
+            case source.revision of
+                Just revision ->
+                    case source.repository of
+                        Just url ->
+                            a [ href <| url ++ "/rev/" ++ revision ] [ text revision ]
+
+                        Nothing ->
+                            text "If you see this, please file a bug. Revision not linked to a repository."
+
+                Nothing ->
+                    text ""
+    in
+        table [ class "table table-stripped table-condensed" ]
+            [ thead []
+                [ tr []
+                    [ th [] [ text "Product" ]
+                    , th [] [ text "Tree" ]
+                    , th [] [ text "Revision" ]
+                    ]
+                ]
+            , tbody []
+                [ tr []
+                    [ td [] [ highlighSearchTerm search product source.product ]
+                    , td [] [ text <| Maybe.withDefault "unknown" source.tree ]
+                    , td [] [ revisionUrl ]
                     ]
                 ]
             ]
@@ -395,14 +552,14 @@ recordView filters ({ id, build, download, source, target, systemAddons } as rec
 
 viewSystemAddonsDetails : List SystemAddon -> Html Msg
 viewSystemAddonsDetails systemAddons =
-    case systemAddons of
-        [] ->
-            text ""
+    div []
+        [ h4 [] [ text "System Addons" ]
+        , case systemAddons of
+            [] ->
+                p [] [ text "This build record has no system addons information attached." ]
 
-        _ ->
-            div []
-                [ h4 [] [ text "System Addons" ]
-                , table [ class "table table-stripped table-condensed" ]
+            _ ->
+                table [ class "table table-stripped table-condensed" ]
                     [ thead []
                         [ tr []
                             [ th [] [ text "Id" ]
@@ -422,7 +579,7 @@ viewSystemAddonsDetails systemAddons =
                                 )
                         )
                     ]
-                ]
+        ]
 
 
 spinner : Html Msg
