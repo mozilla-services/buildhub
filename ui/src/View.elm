@@ -314,7 +314,7 @@ onClick_ msg =
         (Decode.succeed msg)
 
 
-recordView : Filters -> List String -> BuildRecord -> Html Msg
+recordView : Filters -> Maybe String -> BuildRecord -> Html Msg
 recordView filters expanded ({ id, build, download, source, target, systemAddons } as record) =
     let
         filename =
@@ -341,9 +341,6 @@ recordView filters expanded ({ id, build, download, source, target, systemAddons
 
                 Nothing ->
                     download.date
-
-        isExpanded =
-            List.member id expanded
     in
         tbody []
             [ tr
@@ -357,14 +354,14 @@ recordView filters expanded ({ id, build, download, source, target, systemAddons
                     ]
                 , td []
                     [ a
-                        [ href "#"
-                        , onClick_ (ToggleBuildDetails id)
+                        [ href <| "#" ++ id
+                        , onClick_ <| ToggleBuildDetails id
                         , title "View build details"
                         ]
                         [ i
                             [ class <|
                                 "glyphicon glyphicon-eye-"
-                                    ++ (if isExpanded then
+                                    ++ (if Maybe.withDefault "" expanded == id then
                                             "close"
                                         else
                                             "open"
@@ -417,7 +414,7 @@ recordView filters expanded ({ id, build, download, source, target, systemAddons
                         ]
                     ]
                 ]
-            , if isExpanded then
+            , if (Maybe.withDefault "" expanded == id) then
                 tr [ class "build-details" ]
                     [ td [ colspan 12 ]
                         [ viewSourceDetails filters source

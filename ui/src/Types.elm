@@ -10,7 +10,7 @@ type alias Model =
     , route : Route
     , error : Maybe String
     , settings : Settings
-    , expanded : List String
+    , expanded : Maybe String
     }
 
 

@@ -135,7 +135,16 @@ update msg ({ filters, settings } as model) =
             model ! []
 
         ToggleBuildDetails id ->
-            if List.member id model.expanded then
-                { model | expanded = List.filter (\i -> i /= id) model.expanded } ! []
-            else
-                { model | expanded = id :: model.expanded } ! []
+            { model
+                | expanded =
+                    case model.expanded of
+                        Just current ->
+                            if id == current then
+                                Nothing
+                            else
+                                model.expanded
+
+                        Nothing ->
+                            Just id
+            }
+                ! []
