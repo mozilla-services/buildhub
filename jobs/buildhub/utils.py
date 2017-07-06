@@ -135,3 +135,70 @@ def chunked(iterable, size):
     nb_chunks = (len(iterable) // size) + 1
     for i in range(nb_chunks):
         yield iterable[(i * size):((i + 1) * size)]
+
+
+def record_from_url(url):
+    # Extract infos from URL and return a record.
+
+    # Get rid of spaces and capitalized names (eg. 'Firefox Setup.exe')
+    normalized_url = url.replace(' ', '-').lower()
+    url_parts = normalized_url.split('/')
+    filename = os.path.basename(normalized_url)
+    filename_parts = filename.split('.')
+
+    product = filename_parts[0].replace('-setup', '').split('-')[0]
+
+    # Nightly URL
+    # https://archive.mozilla.org/pub/firefox/nightly/2017/05/
+    # 2017-05-15-10-02-38-mozilla-central/firefox-55.0a1.en-US.linux-x86_64.tar.bz2
+    if 'nightly' in url:
+        major_version = filename_parts[0].split('-')[1]
+        version = '{}.{}'.format(major_version, filename_parts[1])
+        locale = filename_parts[2]
+        platform = filename_parts[3]
+        if 'android-api' in url_parts[8]:
+            platform = '-'.join(url_parts[8].split('-')[8:11])
+
+    # Candidates URL
+    # https://archive.mozilla.org/pub/firefox/candidates/50.0-candidates/build1/
+    # linux-x86_64/fr/firefox-50.0.tar.bz2
+    elif 'candidates' in url:
+        major_version = url_parts[7].split('.')[0]
+        candidate_number = url_parts[7].strip('build')
+        platform = url_parts[8]
+        locale = url_parts[9]
+        version = '{}.{}rc{}'.format(major_version, filename_parts[1], candidate_number)
+
+    # Beta, Release or ESR URL
+    # https://archive.mozilla.org/pub/firefox/releases/52.0b6/linux-x86_64/en-US/
+    # firefox-52.0b6.tar.bz2
+    else:
+        version = url_parts[6]
+        locale = url_parts[8]
+        platform = url_parts[7]
+
+    if platform == 'mac':
+        platform = 'macosx'
+
+    channel = guess_channel(url, version)
+
+    record = {
+        "source": {
+            "product": product,
+        },
+        "target": {
+            "platform": platform,
+            "locale": locale,
+            "version": version,
+            "channel": channel,
+        },
+        "download": {
+            "url": url,
+            "mimetype": guess_mimetype(url),
+            "size": None,
+            "date": None,
+        }
+    }
+
+    record["id"] = build_record_id(record)
+    return record
