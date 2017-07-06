@@ -296,10 +296,20 @@ async def fetch_nightlies(session, queue, product, client):
     batch_size = 10
 
     for day_url, (_, files) in zip(days_urls, listings):
+        # Windows releases are published as both .zip and .exe files.
+        # Deduplicate these.
+        deduplicated_files = files
+        installer_exes = [file for file in files if file['name'].endswith('.installer.exe')]
+        if installer_exes:
+            for exe in installer_exes:
+                zip_filename = exe['name'].replace('.installer.exe', '.zip')
+                deduplicated_files = [file for file in deduplicated_files
+                                      if file['name'] != zip_filename]
+
         # Fetch metadata and put into queue in batch.
-        nb_batches = (len(files) // batch_size) + 1
+        nb_batches = (len(deduplicated_files) // batch_size) + 1
         for i in range(nb_batches):
-            files_subset = files[(i * batch_size):((i + 1) * batch_size)]
+            files_subset = deduplicated_files[(i * batch_size):((i + 1) * batch_size)]
 
             # Fetch metadata in batch.
             futures = [fetch_nightly_metadata(session, product, day_url + file_["name"])
