@@ -63,33 +63,6 @@ def build_record_id(record):
     return id_.replace('.', '-').lower()
 
 
-def parse_nightly_filename(filename):
-    """
-    Examples of nightly filenames:
-
-    - firefox-55.0a1.ach.win64.zip
-    - firefox-55.0a1.bn-IN.mac.dmg
-
-    And things we'll want to ignore:
-
-    - firefox-55.0a1.en-US.linux-i686.talos.tests.zip
-    - firefox-55.0a1.en-US.mac.crashreporter-symbols.zip
-    """
-    re_nightly = re.compile(r"\w+-(\d+.+)\."  # product-version
-                            r"([a-z]+(\-[A-Z]+)?)"  # locale
-                            r"\.(.+)"  # platform
-                            r"\.({})$".format(FILE_EXTENSIONS))
-    match = re_nightly.search(filename)
-    if not match or "tests" in filename or "crashreporter" in filename or "stub" in filename:
-        raise ValueError()
-    version = match.group(1)
-    locale = match.group(2)
-    platform = match.group(4).replace('.installer', '')
-    if platform == 'mac':
-        platform = 'macosx'
-    return version, locale, platform
-
-
 def is_release_filename(product, filename):
     """
     Examples of release filenames:
@@ -163,11 +136,11 @@ def record_from_url(url):
     # https://archive.mozilla.org/pub/firefox/candidates/50.0-candidates/build1/
     # linux-x86_64/fr/firefox-50.0.tar.bz2
     elif 'candidates' in url:
-        major_version = url_parts[7].split('.')[0]
+        version = url_parts[6].strip('-candidates')
         candidate_number = url_parts[7].strip('build')
+        version = '{}rc{}'.format(version, candidate_number)
         platform = url_parts[8]
         locale = url_parts[9]
-        version = '{}.{}rc{}'.format(major_version, filename_parts[1], candidate_number)
 
     # Beta, Release or ESR URL
     # https://archive.mozilla.org/pub/firefox/releases/52.0b6/linux-x86_64/en-US/
