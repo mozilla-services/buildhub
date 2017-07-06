@@ -29,6 +29,7 @@ ENTRY_POINTS = {
         'scrape_archives = buildhub.scrape_archives:run',
         'sysaddons_updates = buildhub.sysaddons_updates:run',
         'index_filters = buildhub.index_filters:run',
+        'to-kinto = buildhub.to_kinto:run',
     ],
 }
 
