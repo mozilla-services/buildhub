@@ -27,6 +27,7 @@ REQUIREMENTS = [
 ENTRY_POINTS = {
     'console_scripts': [
         'scrape_archives = buildhub.scrape_archives:run',
+        'check_missing_releases = buildhub.check_missing_releases:run',
         'sysaddons_updates = buildhub.sysaddons_updates:run',
         'index_filters = buildhub.index_filters:run',
     ],
