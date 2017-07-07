@@ -13,14 +13,14 @@ from collections import defaultdict
 import aiohttp
 import backoff
 
-from .utils import (archive_url, is_release_metadata, is_release_filename,
+from .utils import (archive_url, chunked, is_release_metadata, is_release_filename,
                     record_from_url, localize_nightly_url, merge_metadata,
                     ARCHIVE_URL, FILE_EXTENSIONS, DATETIME_FORMAT)
 
 
-BATCH_SIZE = 4
-NB_RETRY_REQUEST = 3
-TIMEOUT_SECONDS = 5 * 60
+NB_PARALLEL_REQUESTS = int(os.getenv("NB_PARALLEL_REQUESTS", 8))
+NB_RETRY_REQUEST = int(os.getenv("NB_RETRY_REQUEST", 3))
+TIMEOUT_SECONDS = int(os.getenv("TIMEOUT_SECONDS", 5 * 60))
 
 
 logger = logging.getLogger(__name__)
@@ -91,34 +91,42 @@ async def fetch_nightly_metadata(session, record):
         return None
 
 
-_candidates = defaultdict(dict)
+_candidates_build_folder = defaultdict(dict)
 
 
 async def scan_candidates(session, product):
-    global _candidates
+    # For each version take the latest build.
+    global _candidates_build_folder
 
-    if len(_candidates) > 0:
+    if len(_candidates_build_folder) > 0:
         return
 
     logger.info("Scan candidates to get their latest build folder...")
     candidates_url = archive_url(product, candidate="/")
     candidates_folders, _ = await fetch_listing(session, candidates_url)
-    # For each version take the latest build.
-    for f in candidates_folders:
-        if f == "archived/":
-            continue
-        version = f.replace("-candidates/", "")
-        builds_url = archive_url(product, version, candidate="/")
-        build_folders, _ = await fetch_listing(session, builds_url)
-        latest_build_folder = sorted(build_folders)[-1]
 
-        _candidates[product][version] = latest_build_folder
+    for chunk in chunked(candidates_folders, NB_PARALLEL_REQUESTS):
+        futures = []
+        versions = []
+        for folder in chunk:
+            if folder == "archived/":
+                continue
+            version = folder.replace("-candidates/", "")
+            versions.append(version)
+            builds_url = archive_url(product, version, candidate="/")
+            future = fetch_listing(session, builds_url)
+            futures.append(future)
+        listings = await asyncio.gather(*futures)
+
+        for version, (build_folders, _) in zip(versions, listings):
+            latest_build_folder = sorted(build_folders)[-1]
+            _candidates_build_folder[product][version] = latest_build_folder
 
 
 async def fetch_release_metadata(session, record):
     """The `candidates` folder contains build info about recent released versions.
     """
-    global _candidates
+    global _candidates_build_folder
 
     product = record["source"]["product"]
     version = record["target"]["version"]
@@ -126,7 +134,7 @@ async def fetch_release_metadata(session, record):
     locale = "en-US"
 
     try:
-        latest_build_folder = "/" + _candidates[product][version]
+        latest_build_folder = "/" + _candidates_build_folder[product][version]
     except KeyError:
         # Version is not listed in candidates. Give up.
         return None
@@ -187,7 +195,7 @@ async def csv_to_records(loop, filename, stdout):
             record["download"]["size"] = filesize
             record["download"]["date"] = lastmodified
 
-            if len(batch) < BATCH_SIZE:
+            if len(batch) < NB_PARALLEL_REQUESTS:
                 batch.append(record)
             else:
                 await process_batch(session, batch, stdout)
