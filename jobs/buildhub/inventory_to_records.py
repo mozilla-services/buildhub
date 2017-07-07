@@ -198,7 +198,20 @@ async def csv_to_records(loop, filename, output):
 async def main(loop):
     parser = argparse.ArgumentParser(description='Load S3 inventory as Kinto releases.')
     parser.add_argument('filename', help='CSV file to load')
+    parser.add_argument('-v', '--verbose', action='store_const',
+                        const=logging.INFO, dest='verbosity',
+                        help='Show all messages.')
+
+    parser.add_argument('-D', '--debug', action='store_const',
+                        const=logging.DEBUG, dest='verbosity',
+                        help='Show all messages, including debug messages.')
     args = parser.parse_args()
+
+    logger.addHandler(logging.StreamHandler())
+    if args.verbosity:
+        logger.setLevel(args.verbosity)
+    else:
+        logger.setLevel(logging.CRITICAL)
 
     await csv_to_records(loop, args.filename, sys.stdout)
 
