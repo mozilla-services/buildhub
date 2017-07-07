@@ -4,18 +4,53 @@ import io
 import json
 import unittest
 
+import aiohttp
+import asynctest
+from aioresponses import aioresponses
+
 from buildhub import inventory_to_records
 
 
 here = os.path.dirname(__file__)
 
 
-class CsvToRecordsTest(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(None)
+class LongResponse:
+    def __init__(*args, **kwargs):
+        pass
+    async def __call__(*args, **kwargs):
+        return self
+    async def __aenter__(self, *args):
+        return self
+    async def __aexit__(self, *args):
+        pass
+    async def json(self):
+        return await asyncio.sleep(10000)
 
+
+class FetchJsonTest(asynctest.TestCase):
+    url = 'http://test.example.com'
+    data = {'foo': 'bar'}
+
+    async def setUp(self):
+        self.session = aiohttp.ClientSession(loop=self.loop)
+        self.addCleanup(self.session.close)
+
+        mocked = aioresponses()
+        mocked.start()
+        mocked.get(self.url, payload=self.data)
+        self.addCleanup(mocked.stop)
+
+    async def test_returns_json_response(self):
+        received = await inventory_to_records.fetch_json(self.session, self.url)
+        assert received == self.data
+
+    async def test_raises_timeout_response(self):
+        with asynctest.patch.object(self.session, "get", LongResponse):
+            with self.assertRaises(asyncio.TimeoutError):
+                await inventory_to_records.fetch_json(self.session, self.url, 0.1)
+
+
+class CsvToRecordsTest(asynctest.TestCase):
     def test_load_simple_file(self):
         filename = os.path.join(here, "data", "inventory-simple.csv")
         stdout = io.StringIO()
