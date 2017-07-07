@@ -5,7 +5,10 @@ Usage:
 
     $ echo '{"data": {"title": "a"}}
     {"data": {"title": "b"}}
-    {"data": {"title": "c"}}' | to-kinto --server=https://... --bucket=bid --collection=cid --auth=user:pass
+    {"data": {"title": "c"}}' | to-kinto --server=https://localhost:8888/v1 \
+                                         --bucket=bid \
+                                         --collection=cid \
+                                         --auth=user:pass
 
 It is meant to be combined with other commands that output records to stdout :)
 

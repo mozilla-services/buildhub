@@ -1,6 +1,8 @@
+import datetime
 import os.path
 import re
 
+DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 FILE_EXTENSIONS = "zip|tar.gz|tar.bz2|dmg|apk|exe"
 KNOWN_MIMETYPES = {
     'apk': 'application/vnd.android.package-archive',
@@ -155,6 +157,10 @@ def record_from_url(url):
 
     channel = guess_channel(url, version)
 
+    if '-' in locale:
+        lang, region = locale.split('-')
+        locale = '{}-{}'.format(lang, region.upper())
+
     record = {
         "source": {
             "product": product,
@@ -168,10 +174,36 @@ def record_from_url(url):
         "download": {
             "url": url,
             "mimetype": guess_mimetype(url),
-            "size": None,
-            "date": None,
         }
     }
 
     record["id"] = build_record_id(record)
+    return record
+
+
+def merge_metadata(record, metadata):
+    if metadata is None:
+        return record
+
+    # XXX: deepcopy instead of mutation
+
+    # Example of metadata:
+    #  https://archive.mozilla.org/pub/thunderbird/candidates \
+    #  /50.0b1-candidates/build2/linux-i686/en-US/thunderbird-50.0b1.json
+    # If the channel is present in the metadata it is more reliable than our guess.
+    channel = metadata.get("moz_update_channel", record['target']['channel'])
+    record['target']['channel'] = channel
+
+    repository = metadata["moz_source_repo"].replace("MOZ_SOURCE_REPO=", "")
+    record['source']['revision'] = metadata["moz_source_stamp"]
+    record['source']['repository'] = repository
+    record['source']['tree'] = repository.split("hg.mozilla.org/", 1)[-1]
+
+    buildid = metadata["buildid"]
+    builddate = datetime.datetime.strptime(buildid[:14], "%Y%m%d%H%M%S")
+    builddate = builddate.strftime(DATETIME_FORMAT)
+    record['build'] = {
+        "id": buildid,
+        "date": builddate,
+    }
     return record

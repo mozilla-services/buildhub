@@ -1,22 +1,27 @@
 import argparse
 import asyncio
+import async_timeout
 import csv
-import concurrent.futures
 import datetime
 import json
+import logging
+import os
+import re
 
 import aiohttp
 import backoff
 
-
 from .utils import (archive_url, is_release_metadata, is_release_filename,
-                    record_from_url, guess_mimetype)
+                    record_from_url, localize_nightly_url, merge_metadata,
+                    FILE_EXTENSIONS, DATETIME_FORMAT)
 
 
 BATCH_SIZE = 4
 NB_RETRY_REQUEST = 3
 TIMEOUT_SECONDS = 5 * 60
-DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+
+
+logger = logging.getLogger(__name__)
 
 
 def read_csv(filename):
@@ -47,37 +52,13 @@ async def fetch_listing(session, url):
         raise ValueError("Could not fetch {}: {}".format(url, e))
 
 
-
 async def fetch_metadata(session, record):
     if record["target"]["channel"] == "nightly":
         metadata = await fetch_nightly_metadata(session, record)
     else:
         metadata = await fetch_release_metadata(session, record)
 
-    if metadata is not None:
-        # XXX: deepcopy instead of mutation
-
-        # Example of metadata:
-        #  https://archive.mozilla.org/pub/thunderbird/candidates \
-        #  /50.0b1-candidates/build2/linux-i686/en-US/thunderbird-50.0b1.json
-        # If the channel is present in the metadata it is more reliable than our guess.
-        channel = metadata.get("moz_update_channel", channel)
-        record['target']['channel'] = channel
-
-        repository = metadata["moz_source_repo"].replace("MOZ_SOURCE_REPO=", "")
-        record['source']['revision'] = metadata["moz_source_stamp"]
-        record['source']['repository'] = repository
-        record['source']['tree'] = repository.split("hg.mozilla.org/", 1)[-1]
-
-        buildid = metadata["buildid"]
-        builddate = datetime.datetime.strptime(buildid[:14], "%Y%m%d%H%M%S")
-        builddate = builddate.strftime(DATETIME_FORMAT)
-        record['build'] = {
-            "id": buildid,
-            "date": builddate,
-        }
-
-    return record
+    return metadata
 
 
 _nightly_metadata = {}
@@ -117,7 +98,10 @@ async def fetch_release_metadata(session, record):
     global _candidates
 
     product = record["source"]["product"]
+    version = record["target"]["version"]
+    platform = record["target"]["platform"]
     locale = record["target"]["locale"]
+
     if locale != "en-US":
         locale = 'en-US'
 
@@ -161,7 +145,9 @@ async def fetch_release_metadata(session, record):
 async def process_batch(session, batch):
     # Parallel fetch of metadata for each item of the batch.
     futures = [fetch_metadata(session, record) for record in batch]
-    results = await asyncio.gather(*futures)
+    metadatas = await asyncio.gather(*futures)
+    results = [merge_metadata(record, metadata)
+               for record, metadata in zip(batch, metadatas)]
     return results
 
 
@@ -177,7 +163,9 @@ async def main(loop):
             bucket_name = entry["Bucket"]
             object_key = entry["Key"]
 
-            url = "https://archive.mozilla.org/" + object_key  # XXX ?
+            product = bucket_name  # XXX ?
+
+            url = "https://archive.mozilla.org/" + bucket_name + object_key  # XXX ?
 
             if not is_release_filename(product, os.path.basename(url)):
                 continue
@@ -191,14 +179,14 @@ async def main(loop):
             # Complete with info that can't be obtained from the URL.
             filesize = int(float(entry["Size"]))  # e.g. 2E+10
             lastmodified = datetime.datetime.strptime(entry["LastModifiedDate"], "%Y-%m-%dT%H%M")
-            lastmodified = builddate.strftime(DATETIME_FORMAT)
+            lastmodified = lastmodified.strftime(DATETIME_FORMAT)
             record["download"]["size"] = filesize
             record["download"]["date"] = lastmodified
 
             if len(batch) < BATCH_SIZE:
                 batch.append(record)
             else:
-                await process_batch(session, batch)
+                results = await process_batch(session, batch)
 
                 for result in results:
                     print(json.dumps(result))
