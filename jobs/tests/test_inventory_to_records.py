@@ -84,6 +84,43 @@ class FetchListingTest(asynctest.TestCase):
                 await inventory_to_records.fetch_listing(self.session, self.url)
 
 
+class FetchNightlyMetadata(asynctest.TestCase):
+    async def setUp(self):
+        self.session = aiohttp.ClientSession(loop=self.loop)
+        self.addCleanup(self.session.close)
+
+    async def test_fetch_nightly_metadata(self):
+        record = {"id": "a", "download": {"url": "http://server.org/linux.fr.installer.exe"}}
+
+        with aioresponses() as m:
+            m.get("http://server.org/linux.en-US.installer.json", payload={
+                "buildid": "20170512"
+            })
+            received = await inventory_to_records.fetch_nightly_metadata(self.session,
+                                                                         record)
+        assert received == {"buildid": "20170512"}
+
+    async def test_does_not_hit_server_if_already_known(self):
+        record = {"id": "a", "download": {"url": "http://server.org/linux.fr.installer.exe"}}
+
+        with aioresponses() as m:
+            m.get("http://server.org/linux.en-US.installer.json", payload={
+                "buildid": "20170512"
+            })
+            await inventory_to_records.fetch_nightly_metadata(self.session, record)
+
+        record["download"]["url"] = record["download"]["url"].replace(".fr.", ".it.")
+        # No need to mock HTTP responses.
+        received = await inventory_to_records.fetch_nightly_metadata(self.session, record)
+        assert received == {"buildid": "20170512"}
+
+    async def test_returns_none_if_not_available(self):
+        record = {"id": "a", "download": {"url": "http://archive.org/linux.fr.installer.exe"}}
+        # XXX: add ability to mock server.org/* on pnuckowski/aioresponses
+        received = await inventory_to_records.fetch_nightly_metadata(self.session, record)
+        assert received is None
+
+
 class CsvToRecordsTest(asynctest.TestCase):
     def test_load_simple_file(self):
         filename = os.path.join(here, 'data', 'inventory-simple.csv')
