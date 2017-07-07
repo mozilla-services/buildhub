@@ -8,6 +8,7 @@ import logging
 import os
 import re
 import sys
+from collections import defaultdict
 
 import aiohttp
 import backoff
@@ -60,15 +61,11 @@ async def fetch_listing(session, url):
 
 async def fetch_metadata(session, record):
     if record["target"]["channel"] == "nightly":
-        metadata = await fetch_nightly_metadata(session, record)
-    else:
-        metadata = await fetch_release_metadata(session, record)
-
-    return metadata
+        return await fetch_nightly_metadata(session, record)
+    return await fetch_release_metadata(session, record)
 
 
 _nightly_metadata = {}
-_nightly_metadata_lock = asyncio.Lock()
 
 
 async def fetch_nightly_metadata(session, record):
@@ -81,22 +78,41 @@ async def fetch_nightly_metadata(session, record):
     # Make sure the nightly_url is turned into a en-US one.
     nightly_url = localize_nightly_url(url)
 
-    with await _nightly_metadata_lock:
-        if nightly_url in _nightly_metadata:
-            return _nightly_metadata[nightly_url]
+    if nightly_url in _nightly_metadata:
+        return _nightly_metadata[nightly_url]
 
-        try:
-            metadata_url = re.sub("\.({})$".format(FILE_EXTENSIONS), ".json", nightly_url)
-            metadata = await fetch_json(session, metadata_url)
-            _nightly_metadata[nightly_url] = metadata
-            return metadata
-        except aiohttp.ClientError:
-            logger.error("Could not fetch metadata for '%s' from '%s'" % (record["id"], url))
-            return None
+    try:
+        metadata_url = re.sub("\.({})$".format(FILE_EXTENSIONS), ".json", nightly_url)
+        metadata = await fetch_json(session, metadata_url)
+        _nightly_metadata[nightly_url] = metadata
+        return metadata
+    except aiohttp.ClientError:
+        logger.error("Could not fetch metadata for '%s' from '%s'" % (record["id"], url))
+        return None
 
 
-_candidates = {}
-_candidates_lock = asyncio.Lock()
+_candidates = defaultdict(dict)
+
+
+async def scan_candidates(session, product):
+    global _candidates
+
+    if len(_candidates) > 0:
+        return
+
+    logger.info("Scan candidates to get their latest build folder...")
+    candidates_url = archive_url(product, candidate="/")
+    candidates_folders, _ = await fetch_listing(session, candidates_url)
+    # For each version take the latest build.
+    for f in candidates_folders:
+        if f == "archived/":
+            continue
+        version = f.replace("-candidates/", "")
+        builds_url = archive_url(product, version, candidate="/")
+        build_folders, _ = await fetch_listing(session, builds_url)
+        latest_build_folder = sorted(build_folders)[-1]
+
+        _candidates[product][version] = latest_build_folder
 
 
 async def fetch_release_metadata(session, record):
@@ -107,47 +123,25 @@ async def fetch_release_metadata(session, record):
     product = record["source"]["product"]
     version = record["target"]["version"]
     platform = record["target"]["platform"]
-    locale = record["target"]["locale"]
+    locale = "en-US"
 
-    if locale != "en-US":
-        locale = 'en-US'
-
-    with await _candidates_lock:
-        # Keep the list of latest available candidates per product, for more efficiency.
-        if _candidates.get(product) is None:
-            candidates_url = archive_url(product, candidate="/")
-            candidates_folders, _ = await fetch_listing(session, candidates_url)
-            # For each version take the latest build.
-            _candidates[product] = {}
-            for f in candidates_folders:
-                if f == "archived/":
-                    continue
-                candidate_version = f.replace("-candidates/", "")
-                builds_url = archive_url(product, candidate_version, candidate="/")
-                build_folders, _ = await fetch_listing(session, builds_url)
-                latest_build_folder = sorted(build_folders)[-1]
-                _candidates[product][candidate_version] = latest_build_folder
-
-    # Candidates are only available for a subset of versions.
-    if version not in _candidates[product]:
-        # XXX: maybe we could inspect archived stuff.
+    try:
+        latest_build_folder = "/" + _candidates[product][version]
+    except KeyError:
+        # Version is not listed in candidates. Give up.
         return None
 
-    latest_build_folder = "/" + _candidates[product][version]
-    try:
-        url = archive_url(product, version, platform, locale, candidate=latest_build_folder)
-        _, files = await fetch_listing(session, url)
+    url = archive_url(product, version, platform, locale, candidate=latest_build_folder)
+    _, files = await fetch_listing(session, url)
 
-        for f_ in files:
-            filename = f_["name"]
-            if is_release_metadata(product, version, filename):
-                url += filename
-                metadata = await fetch_json(session, url)
-                return metadata
+    for f in files:
+        filename = f["name"]
+        if is_release_metadata(product, version, filename):
+            metadata = await fetch_json(session, url + filename)
+            return metadata
 
-    except (ValueError, aiohttp.ClientError) as e:
-        logger.error("Could not fetch metadata for '%s' from '%s'" % (record["id"], url))
-    return None
+    # Version exists in candidates but has no metadata!
+    raise ValueError("Missing metadata for candidate {}".format(url))
 
 
 async def process_batch(session, batch, stdout):
@@ -171,6 +165,9 @@ async def csv_to_records(loop, filename, stdout):
             object_key = entry["Key"]
 
             product = bucket_name  # XXX ?
+
+            # Scan the list of candidates metadata (no-op if already initialized).
+            await scan_candidates(session, product)
 
             url = ARCHIVE_URL + bucket_name + object_key  # XXX ?
 
