@@ -50,6 +50,37 @@ class FetchJsonTest(asynctest.TestCase):
                 await inventory_to_records.fetch_json(self.session, self.url, 0.1)
 
 
+class FetchListingTest(asynctest.TestCase):
+    url = 'http://test.example.com'
+
+    async def setUp(self):
+        self.session = aiohttp.ClientSession(loop=self.loop)
+        self.addCleanup(self.session.close)
+
+    async def test_returns_tuple_with_directories_and_files(self):
+        with aioresponses() as m:
+            m.get(self.url, payload={
+                "prefixes": ["a/", "b/"],
+                "files": [{"name": "foo.txt"}]
+            })
+            received = await inventory_to_records.fetch_listing(self.session, self.url)
+            assert received == (["a/", "b/"], [{"name": "foo.txt"}])
+
+    async def test_raises_valueerror_if_bad_json(self):
+        with aioresponses() as m:
+            m.get(self.url, payload={
+                "prfixes": ["a/", "b/"],
+            })
+            with self.assertRaises(ValueError):
+                await inventory_to_records.fetch_listing(self.session, self.url)
+
+    async def test_raises_valueerror_if_html(self):
+        with aioresponses() as m:
+            m.get(self.url, body="<html></html>")
+            with self.assertRaises(ValueError):
+                await inventory_to_records.fetch_listing(self.session, self.url)
+
+
 class CsvToRecordsTest(asynctest.TestCase):
     def test_load_simple_file(self):
         filename = os.path.join(here, "data", "inventory-simple.csv")
