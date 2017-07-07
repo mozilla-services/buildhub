@@ -35,15 +35,19 @@ def read_csv(filename):
 @backoff.on_exception(backoff.expo,
                       asyncio.TimeoutError,
                       max_tries=NB_RETRY_REQUEST)
-async def fetch_json(session, url):
+async def fetch_json(session, url, timeout=TIMEOUT_SECONDS):
     headers = {
         "Accept": "application/json",
         "User-Agent": "BuildHub;storage-team@mozilla.com"
     }
-    with async_timeout.timeout(TIMEOUT_SECONDS):
-        logger.debug("GET {}".format(url))
-        async with session.get(url, headers=headers, timeout=None) as response:
-            return await response.json()
+    try:
+        with async_timeout.timeout(timeout):
+            logger.debug("GET '{}'".format(url))
+            async with session.get(url, headers=headers, timeout=None) as response:
+                return await response.json()
+    except asyncio.TimeoutError:
+        logger.error("Timeout on GET '{}'".format(url))
+        raise
 
 
 async def fetch_listing(session, url):
@@ -51,7 +55,7 @@ async def fetch_listing(session, url):
         data = await fetch_json(session, url)
         return data["prefixes"], data["files"]
     except (aiohttp.ClientError, KeyError, ValueError) as e:
-        raise ValueError("Could not fetch {}: {}".format(url, e))
+        raise ValueError("Could not fetch '{}': {}".format(url, e))
 
 
 async def fetch_metadata(session, record):
@@ -146,18 +150,19 @@ async def fetch_release_metadata(session, record):
     return None
 
 
-async def process_batch(session, batch, output):
+async def process_batch(session, batch, stdout):
     # Parallel fetch of metadata for each item of the batch.
+    logger.info("Fetch metadata for {} releases...".format(len(batch)))
     futures = [fetch_metadata(session, record) for record in batch]
     metadatas = await asyncio.gather(*futures)
     results = [merge_metadata(record, metadata)
                for record, metadata in zip(batch, metadatas)]
     for result in results:
-        output.write(json.dumps(result) + "\n")
+        stdout.write(json.dumps(result) + "\n")
     return results
 
 
-async def csv_to_records(loop, filename, output):
+async def csv_to_records(loop, filename, stdout):
     batch = []
 
     async with aiohttp.ClientSession(loop=loop) as session:
@@ -188,11 +193,11 @@ async def csv_to_records(loop, filename, output):
             if len(batch) < BATCH_SIZE:
                 batch.append(record)
             else:
-                await process_batch(session, batch, output)
+                await process_batch(session, batch, stdout)
 
                 batch = []  # Go on.
 
-        await process_batch(session, batch, output)  # Last loop iteration.
+        await process_batch(session, batch, stdout)  # Last loop iteration.
 
 
 async def main(loop):

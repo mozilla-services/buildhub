@@ -123,7 +123,7 @@ def is_release_metadata(product, version, filename):
     if product == "devedition":
         product = "firefox"
     re_metadata = re.compile("{}-{}(.*).json".format(product, version))
-    return re_metadata.match(filename)
+    return bool(re_metadata.match(filename))
 
 
 def guess_mimetype(url):
