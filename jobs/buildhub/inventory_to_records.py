@@ -123,6 +123,9 @@ async def scan_candidates(session, product):
             _candidates_build_folder[product][version] = latest_build_folder
 
 
+_release_metadata = {}
+
+
 async def fetch_release_metadata(session, record):
     """The `candidates` folder contains build info about recent released versions.
     """
@@ -140,12 +143,17 @@ async def fetch_release_metadata(session, record):
         return None
 
     url = archive_url(product, version, platform, locale, candidate=latest_build_folder)
-    _, files = await fetch_listing(session, url)
 
+    # We already have the metadata for this platform and version.
+    if url in _release_metadata:
+        return _release_metadata[url]
+
+    _, files = await fetch_listing(session, url)
     for f in files:
         filename = f["name"]
         if is_release_metadata(product, version, filename):
             metadata = await fetch_json(session, url + filename)
+            _release_metadata[url] = metadata
             return metadata
 
     # Version exists in candidates but has no metadata!
