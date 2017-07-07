@@ -7,13 +7,14 @@ import json
 import logging
 import os
 import re
+import sys
 
 import aiohttp
 import backoff
 
 from .utils import (archive_url, is_release_metadata, is_release_filename,
                     record_from_url, localize_nightly_url, merge_metadata,
-                    FILE_EXTENSIONS, DATETIME_FORMAT)
+                    ARCHIVE_URL, FILE_EXTENSIONS, DATETIME_FORMAT)
 
 
 BATCH_SIZE = 4
@@ -25,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 def read_csv(filename):
-    with open(filename, "rb") as csvfile:
+    with open(filename, "r") as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             yield row
@@ -40,6 +41,7 @@ async def fetch_json(session, url):
         "User-Agent": "BuildHub;storage-team@mozilla.com"
     }
     with async_timeout.timeout(TIMEOUT_SECONDS):
+        logger.debug("GET {}".format(url))
         async with session.get(url, headers=headers, timeout=None) as response:
             return await response.json()
 
@@ -70,10 +72,10 @@ async def fetch_nightly_metadata(session, record):
     """
     global _nightly_metadata
 
-    download_url = record["download"]["url"]
+    url = record["download"]["url"]
 
     # Make sure the nightly_url is turned into a en-US one.
-    nightly_url = localize_nightly_url(download_url)
+    nightly_url = localize_nightly_url(url)
 
     with await _nightly_metadata_lock:
         if nightly_url in _nightly_metadata:
@@ -85,6 +87,7 @@ async def fetch_nightly_metadata(session, record):
             _nightly_metadata[nightly_url] = metadata
             return metadata
         except aiohttp.ClientError:
+            logger.error("Could not fetch metadata for '%s' from '%s'" % (record["id"], url))
             return None
 
 
@@ -123,6 +126,7 @@ async def fetch_release_metadata(session, record):
 
     # Candidates are only available for a subset of versions.
     if version not in _candidates[product]:
+        # XXX: maybe we could inspect archived stuff.
         return None
 
     latest_build_folder = "/" + _candidates[product][version]
@@ -142,30 +146,28 @@ async def fetch_release_metadata(session, record):
     return None
 
 
-async def process_batch(session, batch):
+async def process_batch(session, batch, output):
     # Parallel fetch of metadata for each item of the batch.
     futures = [fetch_metadata(session, record) for record in batch]
     metadatas = await asyncio.gather(*futures)
     results = [merge_metadata(record, metadata)
                for record, metadata in zip(batch, metadatas)]
+    for result in results:
+        output.write(json.dumps(result) + "\n")
     return results
 
 
-async def main(loop):
-    parser = argparse.ArgumentParser(description='Load S3 inventory as Kinto releases.')
-    parser.add_argument('filename', help='CSV file to load')
-    args = parser.parse_args()
-
+async def csv_to_records(loop, filename, output):
     batch = []
 
     async with aiohttp.ClientSession(loop=loop) as session:
-        for entry in read_csv(args.filename):
+        for entry in read_csv(filename):
             bucket_name = entry["Bucket"]
             object_key = entry["Key"]
 
             product = bucket_name  # XXX ?
 
-            url = "https://archive.mozilla.org/" + bucket_name + object_key  # XXX ?
+            url = ARCHIVE_URL + bucket_name + object_key  # XXX ?
 
             if not is_release_filename(product, os.path.basename(url)):
                 continue
@@ -186,14 +188,19 @@ async def main(loop):
             if len(batch) < BATCH_SIZE:
                 batch.append(record)
             else:
-                results = await process_batch(session, batch)
-
-                for result in results:
-                    print(json.dumps(result))
+                await process_batch(session, batch, output)
 
                 batch = []  # Go on.
 
-        await process_batch(batch)  # Last loop iteration.
+        await process_batch(session, batch, output)  # Last loop iteration.
+
+
+async def main(loop):
+    parser = argparse.ArgumentParser(description='Load S3 inventory as Kinto releases.')
+    parser.add_argument('filename', help='CSV file to load')
+    args = parser.parse_args()
+
+    await csv_to_records(loop, args.filename, sys.stdout)
 
 
 def run():

@@ -1,10 +1,25 @@
 import pytest
 
 from buildhub.utils import (
-    build_record_id, is_release_metadata, is_release_filename,
+    archive_url, build_record_id, is_release_metadata, is_release_filename,
     guess_mimetype, guess_channel, chunked, localize_nightly_url,
     record_from_url, merge_metadata
 )
+
+
+ARCHIVE_URL_INFOS = [
+    (("firefox", "55.0", "win64", "fr", False, None),
+     "https://archive.mozilla.org/pub/firefox/releases/55.0/win64/fr/"),
+    (("firefox", "55.0a1", "win64", "en-US", "2017/05", None),
+     "https://archive.mozilla.org/pub/firefox/nightly/2017/05/"),
+    (("firefox", "55.0", "win64", "fr", False, "/"),
+     "https://archive.mozilla.org/pub/firefox/candidates/55.0-candidates/win64/fr/"),
+]
+
+
+@pytest.mark.parametrize("info,expected_record", ARCHIVE_URL_INFOS)
+def test_archive_url(info, expected_record):
+    assert archive_url(*info) == expected_record
 
 
 RECORDS = [

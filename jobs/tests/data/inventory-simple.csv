@@ -1,0 +1,4 @@
+Bucket,Key,LastModifiedDate,Size
+firefox,/nightly/2017/05/2017-05-15-10-02-38-mozilla-central/firefox-55.0a1.en-US.linux-x86_64.tar.bz2,2017-06-02T1220,50000
+firefox,/nightly/2017/06/2017-06-02-03-02-04-mozilla-central-l10n/firefox-55.0a1.ach.win32.complete.mar,2017-06-02T1220,50000
+firefox,/releases/52.0/linux-x86_64/fr/firefox-52.0.tar.bz2,2017-06-02T1520,60000

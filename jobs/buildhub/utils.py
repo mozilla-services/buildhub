@@ -2,6 +2,7 @@ import datetime
 import os.path
 import re
 
+ARCHIVE_URL = "https://archive.mozilla.org/pub/"
 DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 FILE_EXTENSIONS = "zip|tar.gz|tar.bz2|dmg|apk|exe"
 KNOWN_MIMETYPES = {
@@ -12,6 +13,32 @@ KNOWN_MIMETYPES = {
     'gz': 'application/x-gzip',
     'exe': 'application/msdos-windows',
     }
+
+
+def archive_url(product, version=None, platform=None, locale=None, nightly=None, candidate=None):
+    product = product if product != "fennec" else "mobile"
+
+    url = ARCHIVE_URL + product
+    if nightly:
+        url += "/nightly/" + nightly + "/"
+    elif candidate:
+        url += "/candidates"
+        if version:
+            url += "/{}-candidates".format(version)
+        url += candidate
+        if platform:
+            url += platform + "/"
+        if locale:
+            url += locale + "/"
+    else:
+        url += "/releases/"
+        if version:
+            url += version + "/"
+        if platform:
+            url += platform + "/"
+        if locale:
+            url += locale + "/"
+    return url
 
 
 def localize_nightly_url(nightly_url):
