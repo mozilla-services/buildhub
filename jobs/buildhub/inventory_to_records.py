@@ -13,7 +13,7 @@ from collections import defaultdict
 import aiohttp
 import backoff
 
-from .utils import (archive_url, chunked, is_release_metadata, is_release_filename,
+from .utils import (archive_url, chunked, is_release_metadata, is_release_filename, is_release_url,
                     record_from_url, localize_nightly_url, merge_metadata, check_record,
                     ARCHIVE_URL, FILE_EXTENSIONS, DATETIME_FORMAT)
 
@@ -168,12 +168,11 @@ async def process_batch(session, batch, stdout):
     results = [merge_metadata(record, metadata)
                for record, metadata in zip(batch, metadatas)]
     for result in results:
-
         try:
             check_record(result)
         except ValueError as e:
             logger.warning(e)
-        stdout.write(json.dumps(result) + "\n")
+        stdout.write(json.dumps({"data": result}) + "\n")
     return results
 
 
@@ -192,6 +191,9 @@ async def csv_to_records(loop, stdin, stdout):
 
             url = ARCHIVE_URL + object_key
 
+            if not is_release_url(product, url):
+                continue
+
             if not is_release_filename(product, os.path.basename(url)):
                 continue
 
@@ -199,7 +201,8 @@ async def csv_to_records(loop, stdin, stdout):
 
             # Complete with info that can't be obtained from the URL.
             filesize = int(float(entry["Size"]))  # e.g. 2E+10
-            lastmodified = datetime.datetime.strptime(entry["LastModifiedDate"], "%Y-%m-%dT%H%M")
+            lastmodified = datetime.datetime.strptime(entry["LastModifiedDate"],
+                                                      "%Y-%m-%dT%H:%M:%S.%fZ")
             lastmodified = lastmodified.strftime(DATETIME_FORMAT)
             record["download"]["size"] = filesize
             record["download"]["date"] = lastmodified

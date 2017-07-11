@@ -23,6 +23,25 @@ def test_archive_url(info, expected_record):
 
 
 RECORDS = [
+    # Old Firefox
+    {
+        "id": "firefox_1-0rc1_linux-i686_ca-ad",
+        "source": {
+            "product": "firefox",
+        },
+        "target": {
+            "version": "1.0rc1",
+            "platform": "linux-i686",
+            "locale": "ca-AD",
+            "channel": "release"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/firefox/releases/1.0rc1/"
+            "firefox-1.0rc1.ca-AD.linux-i686.installer.tar.gz",
+            "mimetype": "application/x-gzip"
+        }
+    },
+
     # Firefox Nightly
     {
         "id": "firefox_nightly_2017-05-15-10-02-38_55-0a1_linux-x86_64_en-us",

@@ -109,8 +109,22 @@ def is_release_filename(product, filename):
         product = "firefox"
     match_filename = filename.replace(' ', '-').lower()
     re_filename = re.compile("{}-(.+)({})$".format(product, FILE_EXTENSIONS))
-    re_exclude = re.compile(".+(sdk|tests|crashreporter|stub)")
+    re_exclude = re.compile(".+(sdk|tests|crashreporter|stub|gtk2.+xft|-source)")
     return re_filename.match(match_filename) and not re_exclude.match(match_filename)
+
+
+def is_release_url(product, url):
+    """
+    - firefox/nightly/experimental/sparc-633408-fix/firefox-4.0b11.en-US.solaris-10-fcs-sparc-fix-633408.tar.bz2
+    - firefox/nightly/2017/06/2017-06-21-15-02-57-date-l10n/firefox-56.0a1.zh-CN.linux-x86_64.tar.bz2
+    - firefox/releases/0.10.1/firefox-1.0PR-i686-linux-gtk2%2Bxft-installer.tar.gz
+    - firefox/nightly/contrib/latest-trunk/firefox-win32-svg-GDI.zip
+    - firefox/releases/0.9rc/firefox-0.9rc-i686-linux-gtk2%2Bxft.tar.gz
+    - firefox/releases/0.8/Firefox-0.8.zip
+    """
+    re_exclude = re.compile(
+        ".+(tinderbox|partner-repacks|latest|contrib|/0\.|date-l10n|mozilla-release|experimental)")
+    return not re_exclude.match(url)
 
 
 def is_release_metadata(product, version, filename):
@@ -171,6 +185,13 @@ def record_from_url(url):
         platform = url_parts[8]
         locale = url_parts[9]
 
+    # Old release url
+    elif len(url_parts) < 9:
+        major_version = filename_parts[0].split('-')[1]
+        version = '{}.{}'.format(major_version, filename_parts[1])
+        locale = filename_parts[2]
+        platform = filename_parts[3]
+
     # Beta, Release or ESR URL
     # https://archive.mozilla.org/pub/firefox/releases/52.0b6/linux-x86_64/en-US/
     # firefox-52.0b6.tar.bz2
@@ -185,8 +206,9 @@ def record_from_url(url):
     channel = guess_channel(url, version)
 
     if '-' in locale:
-        lang, region = locale.split('-')
-        locale = '{}-{}'.format(lang, region.upper())
+        locale_parts = locale.split('-')
+        locale_parts[1] = locale_parts[1].upper()
+        locale = '-'.join(locale_parts)  # fr-FR, ja-JP-mac
 
     record = {
         "source": {
