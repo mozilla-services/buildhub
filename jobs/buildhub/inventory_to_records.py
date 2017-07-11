@@ -28,7 +28,8 @@ logger = logging.getLogger(__name__)
 
 def read_csv(filename):
     with open(filename, "r") as csvfile:
-        reader = csv.DictReader(csvfile)
+        reader = csv.DictReader(csvfile,
+                                fieldnames=["Bucket", "Key", "Size", "LastModifiedDate", "md5"])
         for row in reader:
             yield row
 
