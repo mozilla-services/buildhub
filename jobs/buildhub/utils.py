@@ -123,11 +123,16 @@ def is_release_url(product, url):
     - firefox/nightly/contrib/latest-trunk/firefox-win32-svg-GDI.zip
     - firefox/releases/0.9rc/firefox-0.9rc-i686-linux-gtk2%2Bxft.tar.gz
     - firefox/releases/0.8/Firefox-0.8.zip
-    - firefox/nightly/2017/06/2017-06-21-10-23-01-mozilla-central/firefox-56.0a1.te.en-US.installer.json
+    - firefox/nightly/2017/06/2017-06-21-10-23-01-mozilla-central/\
+          firefox-56.0a1.te.en-US.installer.json
     - firefox/nightly/2017/06/2017-06-20-11-02-48-oak/firefox-55.0a1.en-US.linux-i686.tar.bz2
+    - firefox/nightly/2016/03/2016-03-14-00-15-09-mozilla-esr45/firefox-45.0esrpre.en-US.win64.zip
     """
+    if 'nightly' in url and 'mozilla-central' not in url:
+        return False
+
     re_exclude = re.compile(
-        ".+(tinderbox|partner-repacks|latest|contrib|/0\.|-date|-oak|mozilla-release|experimental)")
+        ".+(tinderbox|partner-repacks|latest|contrib|/0\.|experimental)")
     return not re_exclude.match(url)
 
 
