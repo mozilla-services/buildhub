@@ -99,7 +99,7 @@ async def scan_candidates(session, product):
     # For each version take the latest build.
     global _candidates_build_folder
 
-    if len(_candidates_build_folder) > 0:
+    if product in _candidates_build_folder:
         return
 
     logger.info("Scan candidates to get their latest build folder...")
