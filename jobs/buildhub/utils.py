@@ -109,7 +109,7 @@ def is_release_filename(product, filename):
         product = "firefox"
     match_filename = filename.replace(' ', '-').lower()
     re_filename = re.compile("{}-(.+)({})$".format(product, FILE_EXTENSIONS))
-    re_exclude = re.compile(".+(sdk|tests|crashreporter|stub|gtk2.+xft|-source)")
+    re_exclude = re.compile(".+(sdk|tests|crashreporter|stub|gtk2.+xft|source)")
     return re_filename.match(match_filename) and not re_exclude.match(match_filename)
 
 
@@ -123,9 +123,11 @@ def is_release_url(product, url):
     - firefox/nightly/contrib/latest-trunk/firefox-win32-svg-GDI.zip
     - firefox/releases/0.9rc/firefox-0.9rc-i686-linux-gtk2%2Bxft.tar.gz
     - firefox/releases/0.8/Firefox-0.8.zip
+    - firefox/nightly/2017/06/2017-06-21-10-23-01-mozilla-central/firefox-56.0a1.te.en-US.installer.json
+    - firefox/nightly/2017/06/2017-06-20-11-02-48-oak/firefox-55.0a1.en-US.linux-i686.tar.bz2
     """
     re_exclude = re.compile(
-        ".+(tinderbox|partner-repacks|latest|contrib|/0\.|date-l10n|mozilla-release|experimental)")
+        ".+(tinderbox|partner-repacks|latest|contrib|/0\.|-date|-oak|mozilla-release|experimental)")
     return not re_exclude.match(url)
 
 
