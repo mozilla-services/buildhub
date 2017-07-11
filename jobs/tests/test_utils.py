@@ -518,7 +518,13 @@ NIGHTLY_URLS = [
      "mozilla-central-l10n/firefox-55.0a1.ach.linux-x86_64.tar.bz2",
      "https://archive.mozilla.org/pub/firefox/nightly/2017/05/"
      "2017-05-15-10-02-38-mozilla-central/firefox-55.0a1.en-US.linux-x86_64.tar.bz2"
-     )
+     ),
+
+    # Some random Mac.
+    ("https://archive.mozilla.org/pub/firefox/nightly/2017/06/2017-06-20-03-02-08-"
+     "mozilla-central-l10n/firefox-56.0a1.ru.mac.dmg",
+     "https://archive.mozilla.org/pub/firefox/nightly/2017/06/2017-06-20-03-02-08-"
+     "mozilla-central/firefox-56.0a1.en-US.mac.dmg")
 ]
 
 

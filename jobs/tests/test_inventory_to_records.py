@@ -90,10 +90,10 @@ class FetchNightlyMetadata(asynctest.TestCase):
         self.addCleanup(self.session.close)
 
     async def test_fetch_nightly_metadata(self):
-        record = {"id": "a", "download": {"url": "http://server.org/linux.fr.installer.exe"}}
+        record = {"id": "a", "download": {"url": "http://server.org/firefox.fr.win32.exe"}}
 
         with aioresponses() as m:
-            m.get("http://server.org/linux.en-US.installer.json", payload={
+            m.get("http://server.org/firefox.en-US.win32.json", payload={
                 "buildid": "20170512"
             })
             received = await inventory_to_records.fetch_nightly_metadata(self.session,
@@ -101,10 +101,10 @@ class FetchNightlyMetadata(asynctest.TestCase):
         assert received == {"buildid": "20170512"}
 
     async def test_does_not_hit_server_if_already_known(self):
-        record = {"id": "a", "download": {"url": "http://server.org/linux.fr.installer.exe"}}
+        record = {"id": "a", "download": {"url": "http://server.org/firefox.fr.win32.exe"}}
 
         with aioresponses() as m:
-            m.get("http://server.org/linux.en-US.installer.json", payload={
+            m.get("http://server.org/firefox.en-US.win32.json", payload={
                 "buildid": "20170512"
             })
             await inventory_to_records.fetch_nightly_metadata(self.session, record)
@@ -115,10 +115,22 @@ class FetchNightlyMetadata(asynctest.TestCase):
         assert received == {"buildid": "20170512"}
 
     async def test_returns_none_if_not_available(self):
-        record = {"id": "a", "download": {"url": "http://archive.org/linux.fr.installer.exe"}}
+        record = {"id": "a", "download": {"url": "http://archive.org/firefox.fr.win32.exe"}}
         # XXX: add ability to mock server.org/* on pnuckowski/aioresponses
         received = await inventory_to_records.fetch_nightly_metadata(self.session, record)
         assert received is None
+
+    async def test_fetch_nightly_metadata_from_installer_url(self):
+        record = {"id": "a", "download": {
+            "url": "http://server.org/firefox.fr.win64.installer.exe"}}
+
+        with aioresponses() as m:
+            m.get("http://server.org/firefox.en-US.win64.json", payload={
+                "buildid": "20170512"
+            })
+            received = await inventory_to_records.fetch_nightly_metadata(self.session,
+                                                                         record)
+        assert received == {"buildid": "20170512"}
 
 
 class FetchReleaseMetadata(asynctest.TestCase):

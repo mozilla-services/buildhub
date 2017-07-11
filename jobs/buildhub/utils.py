@@ -43,6 +43,7 @@ def archive_url(product, version=None, platform=None, locale=None, nightly=None,
 
 def localize_nightly_url(nightly_url):
     nightly_url = nightly_url.replace('-l10n', '')
+    nightly_url = nightly_url.replace('.installer', '')
     parts = nightly_url.split('.')
     locale = 'en-US'
     index = -3
