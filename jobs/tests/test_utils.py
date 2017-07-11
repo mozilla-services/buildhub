@@ -3,7 +3,7 @@ import pytest
 from buildhub.utils import (
     archive_url, build_record_id, is_release_metadata, is_release_filename,
     guess_mimetype, guess_channel, chunked, localize_nightly_url,
-    record_from_url, merge_metadata
+    record_from_url, merge_metadata, check_record
 )
 
 
@@ -351,6 +351,11 @@ RECORDS = [
 def test_build_record_id(record):
     record_id = build_record_id(record)
     assert record_id == record["id"]
+
+
+@pytest.mark.parametrize("record", RECORDS)
+def test_check_record(record):
+    check_record(record)  # not raising.
 
 
 RELEASE_METADATA_FILENAMES = [

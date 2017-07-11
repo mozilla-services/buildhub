@@ -208,6 +208,25 @@ def record_from_url(url):
     return record
 
 
+def check_record(record):
+    """Quick sanity check on record."""
+    channel = record["target"]["channel"]
+    if not re.match(r"^(release|aurora|beta|nightly)(-old-id)?$", channel):
+        raise ValueError("Suspicious channel '{}': {}".format(channel, record))
+
+    platform = record["target"]["platform"]
+    if not re.match(r"^(win|mac|linux|android).{0,4}", platform):
+        raise ValueError("Suspicious platform '{}': {}".format(platform, record))
+
+    locale = record["target"]["locale"]
+    if not re.match(r"^([A-Za-z]{2,3}\-?){1,3}$", locale):
+        raise ValueError("Suspicious locale '{}': {}".format(locale, record))
+
+    version = record["target"]["version"]
+    if not re.match(r"^(\d+|\.|esr|rc|b|a)+$", version):
+        raise ValueError("Suspicious version '{}': {}".format(locale, record))
+
+
 def merge_metadata(record, metadata):
     if metadata is None:
         return record

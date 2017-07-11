@@ -14,7 +14,7 @@ import aiohttp
 import backoff
 
 from .utils import (archive_url, chunked, is_release_metadata, is_release_filename,
-                    record_from_url, localize_nightly_url, merge_metadata,
+                    record_from_url, localize_nightly_url, merge_metadata, check_record,
                     ARCHIVE_URL, FILE_EXTENSIONS, DATETIME_FORMAT)
 
 
@@ -168,6 +168,11 @@ async def process_batch(session, batch, stdout):
     results = [merge_metadata(record, metadata)
                for record, metadata in zip(batch, metadatas)]
     for result in results:
+
+        try:
+            check_record(result)
+        except ValueError as e:
+            logger.warning(e)
         stdout.write(json.dumps(result) + "\n")
     return results
 
@@ -191,10 +196,6 @@ async def csv_to_records(loop, stdin, stdout):
                 continue
 
             record = record_from_url(url)
-
-            # XXX: skip existing records
-            # if record["id"] in known_records_ids:
-            #    continue
 
             # Complete with info that can't be obtained from the URL.
             filesize = int(float(entry["Size"]))  # e.g. 2E+10
@@ -228,7 +229,7 @@ async def main(loop):
     if args.verbosity:
         logger.setLevel(args.verbosity)
     else:
-        logger.setLevel(logging.CRITICAL)
+        logger.setLevel(logging.WARNING)
 
     await csv_to_records(loop, sys.stdin, sys.stdout)
 
