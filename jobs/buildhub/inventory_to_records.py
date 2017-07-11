@@ -39,6 +39,7 @@ def read_csv(stream):
 async def fetch_json(session, url, timeout=TIMEOUT_SECONDS):
     headers = {
         "Accept": "application/json",
+        "Cache": "no-cache",
         "User-Agent": "BuildHub;storage-team@mozilla.com"
     }
     try:
