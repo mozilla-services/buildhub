@@ -7,7 +7,7 @@ import aiohttp
 import asynctest
 from aioresponses import aioresponses
 
-from buildhub import inventory_to_records
+from buildhub import inventory_to_records, utils
 
 
 here = os.path.dirname(__file__)
@@ -110,7 +110,7 @@ class FetchNightlyMetadata(asynctest.TestCase):
             await inventory_to_records.fetch_nightly_metadata(self.session, record)
 
         record["download"]["url"] = record["download"]["url"].replace(".fr.", ".it.")
-        # No need to mock HTTP responses.
+        # Now cached, no need to mock HTTP responses.
         received = await inventory_to_records.fetch_nightly_metadata(self.session, record)
         assert received == {"buildid": "20170512"}
 
@@ -119,6 +119,102 @@ class FetchNightlyMetadata(asynctest.TestCase):
         # XXX: add ability to mock server.org/* on pnuckowski/aioresponses
         received = await inventory_to_records.fetch_nightly_metadata(self.session, record)
         assert received is None
+
+
+class FetchReleaseMetadata(asynctest.TestCase):
+    async def setUp(self):
+        self.session = aiohttp.ClientSession(loop=self.loop)
+        self.addCleanup(self.session.close)
+
+        inventory_to_records._candidates_build_folder["firefox"] = {"54.0": "build3/"}
+        self.record = {
+            "source": {"product": "firefox"},
+            "target": {"version": "54.0", "platform": "win64", "locale": "fr-FR"}
+        }
+
+    def tearDown(self):
+        inventory_to_records._candidates_build_folder.clear()
+        inventory_to_records._release_metadata.clear()
+
+    async def test_fetch_release_metadata_unknown_version(self):
+        result = await inventory_to_records.fetch_release_metadata(self.session, {
+            "source": {"product": "firefox"},
+            "target": {"version": "1.0", "platform": "p"}})
+        assert result is None
+
+    async def test_fetch_release_metadata(self):
+        archive_url = utils.ARCHIVE_URL + "pub/firefox/candidates/"
+        with aioresponses() as m:
+            candidate_folder = archive_url + "54.0-candidates/build3/win64/en-US/"
+            m.get(candidate_folder, payload={
+                "prefixes": [], "files": [
+                    {"name": "firefox-54.0.json"}
+                ]
+            })
+            m.get(candidate_folder + "firefox-54.0.json", payload={"buildid": "20170512"})
+            received = await inventory_to_records.fetch_release_metadata(self.session, self.record)
+            assert received == {
+                "buildid": "20170512"
+            }
+        # Now cached, no need to mock HTTP responses.
+        received = await inventory_to_records.fetch_release_metadata(self.session, self.record)
+        assert received == {"buildid": "20170512"}
+
+    async def test_fetch_release_metadata_failing(self):
+        archive_url = utils.ARCHIVE_URL + "pub/firefox/candidates/"
+        with aioresponses() as m:
+            candidate_folder = archive_url + "54.0-candidates/build3/win64/en-US/"
+            m.get(candidate_folder, payload={
+                "prefixes": [], "files": [
+                    {"name": "only-a-random-file.json"}
+                ]
+            })
+            with self.assertRaises(ValueError):
+                await inventory_to_records.fetch_release_metadata(self.session, self.record)
+
+
+class ScanCandidates(asynctest.TestCase):
+    async def setUp(self):
+        self.session = aiohttp.ClientSession(loop=self.loop)
+        self.addCleanup(self.session.close)
+
+    def tearDown(self):
+        inventory_to_records._candidates_build_folder.clear()
+
+    async def test_scan_candidates_does_nothing_if_already_done(self):
+        inventory_to_records._candidates_build_folder["firefox"] = {}
+        await inventory_to_records.scan_candidates(self.session, "firefox")
+
+    async def test_scan_candidates(self):
+        with aioresponses() as m:
+            candidates_listing = utils.ARCHIVE_URL + "pub/firefox/candidates/"
+            m.get(candidates_listing, payload={
+                "prefixes": [
+                    "54.0-candidates/",
+                    "52.0.2esr-candidates/",
+                    "archived/"
+                ], "files": []
+            })
+            m.get(candidates_listing + "52.0.2esr-candidates/", payload={
+                "prefixes": [
+                    "build1/",
+                    "build2/",
+                    "build3/",
+                ], "files": []
+            })
+            m.get(candidates_listing + "54.0-candidates/", payload={
+                "prefixes": [
+                    "build1/",
+                ], "files": []
+            })
+            await inventory_to_records.scan_candidates(self.session, "firefox")
+
+            assert inventory_to_records._candidates_build_folder == {
+                "firefox": {
+                    "54.0": "build1/",
+                    "52.0.2esr": "build3/",
+                }
+            }
 
 
 class CsvToRecordsTest(asynctest.TestCase):
