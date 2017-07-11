@@ -115,8 +115,10 @@ def is_release_filename(product, filename):
 
 def is_release_url(product, url):
     """
-    - firefox/nightly/experimental/sparc-633408-fix/firefox-4.0b11.en-US.solaris-10-fcs-sparc-fix-633408.tar.bz2
-    - firefox/nightly/2017/06/2017-06-21-15-02-57-date-l10n/firefox-56.0a1.zh-CN.linux-x86_64.tar.bz2
+    - firefox/nightly/experimental/sparc-633408-fix/
+          firefox-4.0b11.en-US.solaris-10-fcs-sparc-fix-633408.tar.bz2
+    - firefox/nightly/2017/06/2017-06-21-15-02-57-date-l10n/
+          firefox-56.0a1.zh-CN.linux-x86_64.tar.bz2
     - firefox/releases/0.10.1/firefox-1.0PR-i686-linux-gtk2%2Bxft-installer.tar.gz
     - firefox/nightly/contrib/latest-trunk/firefox-win32-svg-GDI.zip
     - firefox/releases/0.9rc/firefox-0.9rc-i686-linux-gtk2%2Bxft.tar.gz
