@@ -22,6 +22,21 @@ The JSON schema validation can be enabled on the server with the following setti
 
     kinto.experimental_collection_schema_validation = true
 
+S3 inventory
+============
+
+Parse S3 inventory, fetch metadata, and print records as JSON in stdout:
+
+.. code-block:: bash
+
+    cat inventory.csv | inventory-to-records
+
+Load records into Kinto:
+
+.. code-block:: bash
+
+    cat inventory.csv | inventory-to-records | to-kinto --server https://kinto/ --bucket build-hub --collection release --auth user:pass initialization.yaml
+
 
 System-Addons updates
 =====================
