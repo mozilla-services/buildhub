@@ -2,7 +2,7 @@ import datetime
 import os.path
 import re
 
-ARCHIVE_URL = "https://archive.mozilla.org/pub/"
+ARCHIVE_URL = "https://archive.mozilla.org/"
 DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 FILE_EXTENSIONS = "zip|tar.gz|tar.bz2|dmg|apk|exe"
 KNOWN_MIMETYPES = {
@@ -18,7 +18,7 @@ KNOWN_MIMETYPES = {
 def archive_url(product, version=None, platform=None, locale=None, nightly=None, candidate=None):
     product = product if product != "fennec" else "mobile"
 
-    url = ARCHIVE_URL + product
+    url = ARCHIVE_URL + 'pub/' + product
     if nightly:
         url += "/nightly/" + nightly + "/"
     elif candidate:

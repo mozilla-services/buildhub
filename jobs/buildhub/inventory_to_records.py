@@ -180,12 +180,12 @@ async def csv_to_records(loop, filename, stdout):
             bucket_name = entry["Bucket"]
             object_key = entry["Key"]
 
-            product = bucket_name  # XXX ?
+            product = bucket_name.split('-')[-1]
 
             # Scan the list of candidates metadata (no-op if already initialized).
             await scan_candidates(session, product)
 
-            url = ARCHIVE_URL + bucket_name + object_key  # XXX ?
+            url = ARCHIVE_URL + object_key
 
             if not is_release_filename(product, os.path.basename(url)):
                 continue
