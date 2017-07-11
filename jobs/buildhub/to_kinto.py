@@ -130,8 +130,8 @@ async def consume(loop, queue, executor, client, existing):
 
     def records_equal(r1, r2):
         omit = ["last_modified", "schema"]
-        r1c = {k:v for k, v in r1.items() if k not in omit}
-        r2c = {k:v for k, v in r2.items() if k not in omit}
+        r1c = {k: v for k, v in r1.items() if k not in omit}
+        r2c = {k: v for k, v in r2.items() if k not in omit}
         return r1c == r2c
 
     records_by_id = {r['id']: r for r in existing}

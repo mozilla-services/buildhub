@@ -87,7 +87,7 @@ async def fetch_nightly_metadata(session, record):
         _nightly_metadata[nightly_url] = metadata
         return metadata
     except aiohttp.ClientError:
-        logger.error("Could not fetch metadata for '%s' from '%s'" % (record["id"], url))
+        logger.error("Could not fetch metadata for '%s' from '%s'" % (record["id"], metadata_url))
         return None
 
 
