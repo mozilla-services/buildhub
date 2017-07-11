@@ -125,9 +125,9 @@ class CsvToRecordsTest(asynctest.TestCase):
     def test_load_simple_file(self):
         filename = os.path.join(here, 'data', 'inventory-simple.csv')
         stdout = io.StringIO()
-
-        future = inventory_to_records.csv_to_records(self.loop, filename, stdout)
-        self.loop.run_until_complete(future)
+        with open(filename, "r") as stdin:
+            future = inventory_to_records.csv_to_records(self.loop, stdin, stdout)
+            self.loop.run_until_complete(future)
 
         output = stdout.getvalue()
         records = [json.loads(o) for o in output.split('\n') if o]

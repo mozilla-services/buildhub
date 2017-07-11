@@ -26,12 +26,11 @@ TIMEOUT_SECONDS = int(os.getenv("TIMEOUT_SECONDS", 5 * 60))
 logger = logging.getLogger(__name__)
 
 
-def read_csv(filename):
-    with open(filename, "r") as csvfile:
-        reader = csv.DictReader(csvfile,
-                                fieldnames=["Bucket", "Key", "Size", "LastModifiedDate", "md5"])
-        for row in reader:
-            yield row
+def read_csv(stream):
+    fieldnames = ["Bucket", "Key", "Size", "LastModifiedDate", "md5"]
+    reader = csv.DictReader(stream, fieldnames=fieldnames)
+    for row in reader:
+        yield row
 
 
 @backoff.on_exception(backoff.expo,
@@ -173,11 +172,11 @@ async def process_batch(session, batch, stdout):
     return results
 
 
-async def csv_to_records(loop, filename, stdout):
+async def csv_to_records(loop, stdin, stdout):
     batch = []
 
     async with aiohttp.ClientSession(loop=loop) as session:
-        for entry in read_csv(filename):
+        for entry in read_csv(stdin):
             bucket_name = entry["Bucket"]
             object_key = entry["Key"]
 
@@ -216,7 +215,6 @@ async def csv_to_records(loop, filename, stdout):
 
 async def main(loop):
     parser = argparse.ArgumentParser(description='Load S3 inventory as Kinto releases.')
-    parser.add_argument('filename', help='CSV file to load')
     parser.add_argument('-v', '--verbose', action='store_const',
                         const=logging.INFO, dest='verbosity',
                         help='Show all messages.')
@@ -232,7 +230,7 @@ async def main(loop):
     else:
         logger.setLevel(logging.CRITICAL)
 
-    await csv_to_records(loop, args.filename, sys.stdout)
+    await csv_to_records(loop, sys.stdin, sys.stdout)
 
 
 def run():
