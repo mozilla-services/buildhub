@@ -21,6 +21,7 @@ import async_timeout
 import concurrent.futures
 import json
 import logging
+import os
 import sys
 
 from kinto_http import cli_utils
@@ -32,10 +33,33 @@ DEFAULT_COLLECTION = "cid"
 NB_THREADS = 3
 NB_RETRY_REQUEST = 3
 WAIT_TIMEOUT = 5
+PREVIOUS_DUMP_FILENAME = ".previous_run.json"
 
 logger = logging.getLogger(__name__)
 
 done = object()
+
+
+def fetch_existing(client):
+    """Fetch all records since last run. A JSON file on disk is used to store
+    records from previous run.
+    """
+    previous_run_cache = []
+    previous_run_timestamp = None
+
+    if os.path.exists(PREVIOUS_DUMP_FILENAME):
+        previous_run_cache = json.load(open(PREVIOUS_DUMP_FILENAME))
+        previous_run_timestamp = '"%s"' % previous_run_cache[0]['last_modified']
+
+    new_records = client.get_records(_since=previous_run_timestamp, pages=float("inf"))
+    records = new_records + previous_run_cache
+
+    # Atomic write.
+    tmpfilename = PREVIOUS_DUMP_FILENAME + ".tmp"
+    json.dump(records, open(tmpfilename, "w"))
+    os.rename(tmpfilename, PREVIOUS_DUMP_FILENAME)
+
+    return records
 
 
 def publish_records(client, records):
@@ -92,7 +116,7 @@ async def produce(loop, queue):
     await queue.put(done)
 
 
-async def consume(loop, queue, executor, client):
+async def consume(loop, queue, executor, client, existing):
     """Store grabbed releases from the archives website in Kinto.
     """
     def markdone(queue, n):
@@ -103,6 +127,14 @@ async def consume(loop, queue, executor, client):
             logger.info("Pushed {} records".format(len(results)))
             return results
         return done
+
+    def records_equal(r1, r2):
+        omit = ["last_modified", "schema"]
+        r1c = {k:v for k, v in r1.items() if k not in omit}
+        r2c = {k:v for k, v in r2.items() if k not in omit}
+        return r1c == r2c
+
+    records_by_id = {r['id']: r for r in existing}
 
     info = client.server_info()
     ideal_batch_size = info["settings"]["batch_max_requests"]
@@ -119,6 +151,11 @@ async def consume(loop, queue, executor, client):
                     if record is done:
                         queue.task_done()
                         break
+                    # Check if known and hasn't changed.
+                    rid = record["data"].get("id")
+                    if rid in records_by_id and records_equal(record["data"], records_by_id[rid]):
+                        queue.task_done()
+                        continue
                     # Add record to current batch, and wait for more.
                     batch.append(record)
 
@@ -143,6 +180,9 @@ async def main(loop):
         default_retry=NB_RETRY_REQUEST,
         default_collection=DEFAULT_COLLECTION)
 
+    parser.add_argument('--skip', action='store_true',
+                        help='Skip records that exist and are equal.')
+
     args = parser.parse_args(sys.argv[1:])
 
     cli_utils.setup_logger(logger, args)
@@ -152,11 +192,16 @@ async def main(loop):
 
     client = cli_utils.create_client_from_args(args)
 
+    existing = {}
+    if args.skip:
+        # Fetch the list of records to skip records that exist and haven't changed.
+        existing = fetch_existing(client)
+
     # Start a producer and a consumer with threaded kinto requests.
     queue = asyncio.Queue()
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=NB_THREADS)
     # Schedule the consumer
-    consumer_coro = consume(loop, queue, executor, client)
+    consumer_coro = consume(loop, queue, executor, client, existing)
     consumer = asyncio.ensure_future(consumer_coro)
     # Run the producer and wait for completion
     await produce(loop, queue)
