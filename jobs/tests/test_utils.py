@@ -80,6 +80,25 @@ RECORDS = [
         }
     },
 
+    # Firefox DevEdition
+    {
+        "id": "firefox_aurora_55-0b3_macosx_en-us",
+        "source": {
+            "product": "firefox",
+        },
+        "target": {
+            "version": "55.0b3",
+            "platform": "macosx",
+            "locale": "en-US",
+            "channel": "aurora"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/devedition/releases/55.0b3/macosx/en-US/"
+            "firefox-55.0b3.dmg",
+            "mimetype": "application/x-apple-diskimage"
+        }
+    },
+
     # Firefox Beta
     {
         "id": "firefox_beta_52-0b6_linux-x86_64_en-us",

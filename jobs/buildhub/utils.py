@@ -66,7 +66,10 @@ def guess_channel(url, version):
         else:
             channel = 'nightly'
     elif 'b' in version:
-        channel = 'beta'
+        if 'devedition' in url:
+            channel = 'aurora'
+        else:
+            channel = 'beta'
     elif version.endswith('esr'):
         channel = 'esr'
 
