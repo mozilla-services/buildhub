@@ -1,5 +1,4 @@
 import asyncio
-import os
 import io
 import json
 
@@ -8,9 +7,6 @@ import asynctest
 from aioresponses import aioresponses
 
 from buildhub import inventory_to_records, utils
-
-
-here = os.path.dirname(__file__)
 
 
 class LongResponse:
@@ -229,69 +225,101 @@ class ScanCandidates(asynctest.TestCase):
             }
 
 
-class CsvToRecordsTest(asynctest.TestCase):
-    def test_load_simple_file(self):
-        filename = os.path.join(here, 'data', 'inventory-simple.csv')
-        stdout = io.StringIO()
-        with open(filename, "r") as stdin:
-            future = inventory_to_records.csv_to_records(self.loop, stdin, stdout)
-            self.loop.run_until_complete(future)
+class CSVToRecords(asynctest.TestCase):
 
+    remote_content = {
+        "pub/firefox/candidates/": {
+            "prefixes": [
+                "51.0-candidates/",
+                "archived/"
+            ], "files": []
+        },
+        "pub/firefox/candidates/51.0-candidates/": {
+            "prefixes": [
+                "build1/",
+                "build2/",
+            ], "files": []
+        },
+        "pub/firefox/candidates/51.0-candidates/build2/win64/en-US/": {
+            "prefixes": [], "files": [
+                {"name": "firefox-51.0.json"}
+            ]
+        },
+        "pub/firefox/candidates/51.0-candidates/build2/win64/en-US/firefox-51.0.json": {
+            "as": "ml64.exe",
+            "buildid": "20170118123726",
+            "cc": ("c:/builds/moz2_slave/m-rel-w64-00000000000000000000/build/",
+                   "src/vs2015u3/VC/bin/amd64/cl.EXE"),
+            "cxx": ("c:/builds/moz2_slave/m-rel-w64-00000000000000000000/build/",
+                    "src/vs2015u3/VC/bin/amd64/cl.EXE"),
+            "host_alias": "x86_64-pc-mingw32",
+            "host_cpu": "x86_64",
+            "host_os": "mingw32",
+            "host_vendor": "pc",
+            "ld": ("c:/builds/moz2_slave/m-rel-w64-00000000000000000000/build/",
+                   "src/vs2015u3/VC/bin/amd64/link.exe"),
+            "moz_app_id": "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}",
+            "moz_app_maxversion": "51.*",
+            "moz_app_name": "firefox",
+            "moz_app_vendor": "Mozilla",
+            "moz_app_version": "51.0",
+            "moz_pkg_platform": "win64",
+            "moz_source_repo": "MOZ_SOURCE_REPO=https://hg.mozilla.org/releases/mozilla-release",
+            "moz_source_stamp": "ea82b5e20cbbd103f8fa65f0df0386ee4135cc47",
+            "moz_update_channel": "release",
+            "target_alias": "x86_64-pc-mingw32",
+            "target_cpu": "x86_64",
+            "target_os": "mingw32",
+            "target_vendor": "pc"
+        }
+
+    }
+
+    async def setUp(self):
+        mocked = aioresponses()
+        mocked.start()
+        for url, payload in self.remote_content.items():
+            mocked.get(utils.ARCHIVE_URL + url, payload=payload)
+        self.addCleanup(mocked.stop)
+
+        self.stdin = io.StringIO(
+            ("net-mozaws-delivery-firefox,pub/firefox/releases/51.0/win64/fy-NL/"
+             "Firefox Setup 51.0.exe,67842,2017-06-11T12:20:10.2Z,"
+             "f1aa742ef0973db098947bd6d875f193\n"))
+
+    def tearDown(self):
+        inventory_to_records._candidates_build_folder.clear()
+
+    async def test_csv_to_records(self):
+        stdout = io.StringIO()
+        await inventory_to_records.csv_to_records(self.loop, self.stdin, stdout)
         output = stdout.getvalue()
         records = [json.loads(o) for o in output.split('\n') if o]
         assert records == [{
-            "data": {
-                'id': 'firefox_nightly_2017-05-15-10-02-38_55-0a1_linux-x86_64_en-us',
+            'data': {
+                'id': 'firefox_51-0_win64_fy-nl',
                 'build': {
-                    'id': '20170515100238',
-                    'date': '2017-05-15T10:02:38Z'
-                },
-                'source': {
-                    'product': 'firefox',
-                    'revision': 'e66dedabe582ba7b394aee4f89ed70fe389b3c46',
-                    'repository': 'https://hg.mozilla.org/mozilla-central',
-                    'tree': 'mozilla-central'
-                },
-                'target': {
-                    'platform': 'linux-x86_64',
-                    'locale': 'en-US',
-                    'version': '55.0a1',
-                    'channel': 'nightly'
+                    'id': '20170118123726',
+                    'date': '2017-01-18T12:37:26Z'
                 },
                 'download': {
-                    'url': ('https://archive.mozilla.org/pub/firefox/nightly/'
-                            '2017/05/2017-05-15-10-02-38-mozilla-central/'
-                            'firefox-55.0a1.en-US.linux-x86_64.tar.bz2'),
-                    'mimetype': 'application/x-bzip2',
-                    'size': 50000,
-                    'date': '2017-06-02T12:20:10Z'
-                }
-            }
-        }, {
-            "data": {
-                'id': 'firefox_52-0_linux-x86_64_fr',
-                'build': {
-                    'id': '20170302120751',
-                    'date': '2017-03-02T12:07:51Z'
+                    'date': '2017-06-11T12:20:10Z',
+                    'mimetype': 'application/msdos-windows',
+                    'size': 67842,
+                    'url': ('https://archive.mozilla.org/pub/firefox/releases/51.0/win64/'
+                            'fy-NL/Firefox Setup 51.0.exe')
                 },
                 'source': {
                     'product': 'firefox',
-                    'revision': '44d6a57ab554308585a67a13035d31b264be781e',
                     'repository': 'https://hg.mozilla.org/releases/mozilla-release',
+                    'revision': 'ea82b5e20cbbd103f8fa65f0df0386ee4135cc47',
                     'tree': 'releases/mozilla-release'
                 },
                 'target': {
-                    'platform': 'linux-x86_64',
-                    'locale': 'fr',
-                    'version': '52.0',
-                    'channel': 'release'
-                },
-                'download': {
-                    'url': ('https://archive.mozilla.org/pub/firefox/releases/52.0/'
-                            'linux-x86_64/fr/firefox-52.0.tar.bz2'),
-                    'mimetype': 'application/x-bzip2',
-                    'size': 60000,
-                    'date': '2017-06-02T15:20:10Z'
+                    'channel': 'release',
+                    'locale': 'fy-NL',
+                    'platform': 'win64',
+                    'version': '51.0'
                 }
             }
         }]
