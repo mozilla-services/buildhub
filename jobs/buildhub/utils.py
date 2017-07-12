@@ -93,27 +93,6 @@ def build_record_id(record):
     return id_.replace('.', '-').lower()
 
 
-def is_release_filename(product, filename):
-    """
-    Examples of release filenames:
-
-    - firefox-53.0.tar.bz2
-
-    And things we'll want to ignore:
-
-    - firefox-1.5.0.5.tar.gz.asc
-    - firefox-52.0.win32.sdk.zip
-    - Thunderbird 10.0.12esr.dmg
-    - Firefox Setup 17.0b3.exe
-    """
-    if product == "devedition":
-        product = "firefox"
-    match_filename = filename.replace(' ', '-').lower()
-    re_filename = re.compile("{}-(.+)({})$".format(product, FILE_EXTENSIONS))
-    re_exclude = re.compile(".+(sdk|tests|crashreporter|stub|gtk2.+xft|source|asan)")
-    return re_filename.match(match_filename) and not re_exclude.match(match_filename)
-
-
 def is_release_url(product, url):
     """
     - firefox/nightly/experimental/sparc-633408-fix/
@@ -136,7 +115,27 @@ def is_release_url(product, url):
 
     re_exclude = re.compile(
         ".+(tinderbox|partner-repacks|latest|contrib|/0\.|experimental|debug)")
-    return not re_exclude.match(url)
+    if re_exclude.match(url):
+        return False
+    """
+    Examples of release filenames:
+
+    - firefox-53.0.tar.bz2
+
+    And things we'll want to ignore:
+
+    - firefox-1.5.0.5.tar.gz.asc
+    - firefox-52.0.win32.sdk.zip
+    - Thunderbird 10.0.12esr.dmg
+    - Firefox Setup 17.0b3.exe
+    """
+    if product == "devedition":
+        product = "firefox"
+    filename = os.path.basename(url)
+    match_filename = filename.replace(' ', '-').lower()
+    re_filename = re.compile("{}-(.+)({})$".format(product, FILE_EXTENSIONS))
+    re_exclude = re.compile(".+(sdk|tests|crashreporter|stub|gtk2.+xft|source|asan)")
+    return re_filename.match(match_filename) and not re_exclude.match(match_filename)
 
 
 def is_release_metadata(product, version, filename):

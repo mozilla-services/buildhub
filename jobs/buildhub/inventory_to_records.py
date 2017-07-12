@@ -13,7 +13,7 @@ from collections import defaultdict
 import aiohttp
 import backoff
 
-from .utils import (archive_url, chunked, is_release_metadata, is_release_filename, is_release_url,
+from .utils import (archive_url, chunked, is_release_metadata, is_release_url,
                     record_from_url, localize_nightly_url, merge_metadata, check_record,
                     ARCHIVE_URL, FILE_EXTENSIONS, DATETIME_FORMAT)
 
@@ -198,9 +198,6 @@ async def csv_to_records(loop, stdin, stdout):
             url = ARCHIVE_URL + object_key
 
             if not is_release_url(product, url):
-                continue
-
-            if not is_release_filename(product, os.path.basename(url)):
                 continue
 
             record = record_from_url(url)
