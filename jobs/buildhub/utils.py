@@ -110,7 +110,7 @@ def is_release_filename(product, filename):
         product = "firefox"
     match_filename = filename.replace(' ', '-').lower()
     re_filename = re.compile("{}-(.+)({})$".format(product, FILE_EXTENSIONS))
-    re_exclude = re.compile(".+(sdk|tests|crashreporter|stub|gtk2.+xft|source)")
+    re_exclude = re.compile(".+(sdk|tests|crashreporter|stub|gtk2.+xft|source|asan)")
     return re_filename.match(match_filename) and not re_exclude.match(match_filename)
 
 
@@ -128,12 +128,14 @@ def is_release_url(product, url):
           firefox-56.0a1.te.en-US.installer.json
     - firefox/nightly/2017/06/2017-06-20-11-02-48-oak/firefox-55.0a1.en-US.linux-i686.tar.bz2
     - firefox/nightly/2016/03/2016-03-14-00-15-09-mozilla-esr45/firefox-45.0esrpre.en-US.win64.zip
+    - firefox/nightly/2014/12/2014-12-10-mozilla-central-debug/ \
+          firefox-37.0a1.en-US.debug-linux-x86_64-asan.tar.bz2
     """
     if 'nightly' in url and 'mozilla-central' not in url:
         return False
 
     re_exclude = re.compile(
-        ".+(tinderbox|partner-repacks|latest|contrib|/0\.|experimental)")
+        ".+(tinderbox|partner-repacks|latest|contrib|/0\.|experimental|debug)")
     return not re_exclude.match(url)
 
 
