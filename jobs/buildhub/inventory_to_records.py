@@ -53,8 +53,6 @@ async def fetch_json(session, url, timeout=TIMEOUT_SECONDS):
 
 
 async def fetch_listing(session, url):
-    if 'eme' in url:
-        url = url.replace('eme', 'EME')
     try:
         data = await fetch_json(session, url)
         return data["prefixes"], data["files"]
@@ -146,9 +144,6 @@ async def fetch_release_metadata(session, record):
         return None
 
     url = archive_url(product, version, platform, locale, candidate=latest_build_folder)
-
-    if 'eme' in url:
-        url = url.replace('eme', 'EME')
 
     # We already have the metadata for this platform and version.
     if url in _release_metadata:

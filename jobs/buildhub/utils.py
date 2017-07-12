@@ -18,6 +18,9 @@ KNOWN_MIMETYPES = {
 def archive_url(product, version=None, platform=None, locale=None, nightly=None, candidate=None):
     product = product if product != "fennec" else "mobile"
 
+    if platform is not None:
+        platform = platform.replace('eme', 'EME')
+
     url = ARCHIVE_URL + 'pub/' + product
     if nightly:
         url += "/nightly/" + nightly + "/"
