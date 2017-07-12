@@ -139,7 +139,7 @@ RECORDS = [
 
     # Firefox ESR
     {
-        "id": "firefox_52-0esr_linux-x86_64_en-us",
+        "id": "firefox_esr_52-0esr_linux-x86_64_en-us",
         "source": {
             "product": "firefox",
         },
@@ -147,7 +147,7 @@ RECORDS = [
             "version": "52.0esr",
             "platform": "linux-x86_64",
             "locale": "en-US",
-            "channel": "release"
+            "channel": "esr"
         },
         "download": {
             "url": "https://archive.mozilla.org/pub/firefox/releases/52.0esr/linux-x86_64/en-US/"
@@ -215,7 +215,7 @@ RECORDS = [
 
     # Thunderbird Mac OS X Release
     {
-        "id": "thunderbird_10-0-12esr_macosx_pt-br",
+        "id": "thunderbird_esr_10-0-12esr_macosx_pt-br",
         "source": {
             "product": "thunderbird",
         },
@@ -223,7 +223,7 @@ RECORDS = [
             "version": "10.0.12esr",
             "platform": "macosx",
             "locale": "pt-BR",
-            "channel": "release"
+            "channel": "esr"
         },
         "download": {
             "url": "https://archive.mozilla.org/pub/thunderbird/releases/10.0.12esr/mac/pt-BR/"
@@ -234,7 +234,7 @@ RECORDS = [
 
     # Thunderbird Release
     {
-        "id": "thunderbird_17-0-8esr_linux-x86_64_gd",
+        "id": "thunderbird_esr_17-0-8esr_linux-x86_64_gd",
         "source": {
             "product": "thunderbird",
         },
@@ -242,7 +242,7 @@ RECORDS = [
             "version": "17.0.8esr",
             "platform": "linux-x86_64",
             "locale": "gd",
-            "channel": "release"
+            "channel": "esr"
         },
         "download": {
             "url": "https://archive.mozilla.org/pub/thunderbird/releases/17.0.8esr/linux-x86_64/"

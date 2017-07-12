@@ -26,8 +26,6 @@ REQUIREMENTS = [
 
 ENTRY_POINTS = {
     'console_scripts': [
-        'sysaddons_updates = buildhub.sysaddons_updates:run',
-        'index_filters = buildhub.index_filters:run',
         'to-kinto = buildhub.to_kinto:run',
         'inventory-to-records = buildhub.inventory_to_records:run',
     ],

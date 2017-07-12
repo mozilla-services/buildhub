@@ -65,9 +65,10 @@ def guess_channel(url, version):
             channel = 'aurora'
         else:
             channel = 'nightly'
-    else:
-        if 'b' in version:
-            channel = 'beta'
+    elif 'b' in version:
+        channel = 'beta'
+    elif version.endswith('esr'):
+        channel = 'esr'
 
     # Fennec can have different app store ids.
     if 'old-id' in url:
