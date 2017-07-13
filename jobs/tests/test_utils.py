@@ -270,6 +270,44 @@ RECORDS = [
         }
     },
 
+    # Firefox second beta
+    {
+        'source': {
+            'product': 'firefox'
+        },
+        'id': 'firefox_beta_38-0-5b1-2_linux-i686_es-ar',
+        'target': {
+            'locale': 'es-AR',
+            'version': '38.0.5b1-2',
+            'platform': 'linux-i686',
+            'channel': 'beta'
+        },
+        'download': {
+            'url': ('https://archive.mozilla.org/pub/firefox/releases/38.0.5b1-2/'
+                    'linux-i686/es-AR/firefox-38.0.5b1.tar.bz2'),
+            'mimetype': 'application/x-bzip2'
+        }
+    },
+
+    # Firefox preview
+    {
+        'source': {
+            'product': 'firefox'
+        },
+        'id': 'firefox_nightly_2010-03-28-03-mozilla-central_3-7a4pre_win32_en-us',
+        'target': {
+            'locale': 'en-US',
+            'version': '3.7a4pre',
+            'platform': 'win32',
+            'channel': 'nightly'
+        },
+        'download': {
+            'url': ('https://archive.mozilla.org/pub/firefox/nightly/2010/03/'
+                    '2010-03-28-03-mozilla-central/firefox-3.7a4pre.en-US.win32.zip'),
+            'mimetype': 'application/zip'
+        }
+    },
+
     # Thunderbird Windows Beta
     {
         "id": "thunderbird_beta_11-0b2_win32_eu",
