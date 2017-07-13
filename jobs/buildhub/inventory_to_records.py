@@ -145,6 +145,9 @@ async def fetch_release_metadata(session, record):
     platform = record["target"]["platform"]
     locale = "en-US"
 
+    # Metadata for EME-free are the same as original release.
+    platform = platform.rstrip("-EME-free")
+
     try:
         latest_build_folder = "/" + _candidates_build_folder[product][version]
     except KeyError:

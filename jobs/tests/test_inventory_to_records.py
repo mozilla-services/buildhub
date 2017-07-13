@@ -186,6 +186,24 @@ class FetchReleaseMetadata(asynctest.TestCase):
         # If we retry, no request is made.
         assert await inventory_to_records.fetch_release_metadata(self.session, self.record) is None
 
+    async def test_fetch_metadata_from_eme_url(self):
+        record = {
+            "source": {"product": "firefox"},
+            "target": {"version": "54.0", "platform": "linux-x86_64-EME-free", "locale": "fr-FR"}
+        }
+        with aioresponses() as m:
+            archive_url = utils.ARCHIVE_URL + "pub/firefox/candidates/"
+            candidate_folder = archive_url + "54.0-candidates/build3/linux-x86_64/en-US/"
+            m.get(candidate_folder, payload={
+                "prefixes": [], "files": [
+                    {"name": "firefox-54.0.json"}
+                ]
+            })
+            m.get(candidate_folder + "firefox-54.0.json", payload={"buildid": "20170512"})
+            received = await inventory_to_records.fetch_release_metadata(self.session,
+                                                                         record)
+            assert received == {"buildid": "20170512"}
+
 
 class ScanCandidates(asynctest.TestCase):
     async def setUp(self):
