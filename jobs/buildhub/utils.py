@@ -120,8 +120,8 @@ def is_release_url(product, url):
     if 'nightly' in url and 'mozilla-central' not in url:
         return False
 
-    re_exclude = re.compile(
-        ".+(tinderbox|partner-repacks|latest|contrib|/0\.|experimental|debug|sha1-installers)")
+    re_exclude = re.compile(".+(tinderbox|partner-repacks|latest|contrib|/0\.|"
+                            "experimental|debug|sha1-installers|candidates)")
     if re_exclude.match(url):
         return False
     """
