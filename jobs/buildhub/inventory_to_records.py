@@ -178,39 +178,72 @@ async def process_batch(session, batch, stdout):
 
 
 async def csv_to_records(loop, stdin, stdout):
-    batch = []
+
+    def inventory_by_folder(stdin):
+        previous = None
+        result = []
+        for entry in read_csv(stdin):
+            object_key = entry["Key"]
+            folder = os.path.dirname(object_key)
+
+            if previous is None:
+                previous = folder
+
+            if previous == folder:
+                result.append(entry)
+            else:
+                yield result
+                previous = folder
+                result = [entry]
+        if result:
+            yield result
+
+    def deduplicate_windows_entries(entries):
+        # Windows releases are published as both .zip and .exe files.
+        # Deduplicate these (keep .zip if .exe is present, else .exe only)
+        longer_first = sorted(entries, key=lambda e: len(e["Key"]), reverse=True)
+        deduplicate = {
+            e["Key"].rstrip('.installer.exe').rstrip('.exe').rstrip('.zip'): e
+            for e in longer_first}
+        return deduplicate.values()
 
     async with aiohttp.ClientSession(loop=loop) as session:
-        for entry in read_csv(stdin):
-            bucket_name = entry["Bucket"]
-            object_key = entry["Key"]
+        batch = []
 
-            product = bucket_name.split('-')[-1]
+        for entries in inventory_by_folder(stdin):
 
-            # Scan the list of candidates metadata (no-op if already initialized).
-            await scan_candidates(session, product)
+            entries = deduplicate_windows_entries(entries)
 
-            url = ARCHIVE_URL + object_key
+            for entry in entries:
+                bucket_name = entry["Bucket"]
+                object_key = entry["Key"]
 
-            if not is_release_url(product, url):
-                continue
+                product = bucket_name.split('-')[-1]
 
-            record = record_from_url(url)
+                # Scan the list of candidates metadata (no-op if already initialized).
+                await scan_candidates(session, product)
 
-            # Complete with info that can't be obtained from the URL.
-            filesize = int(float(entry["Size"]))  # e.g. 2E+10
-            lastmodified = datetime.datetime.strptime(entry["LastModifiedDate"],
-                                                      "%Y-%m-%dT%H:%M:%S.%fZ")
-            lastmodified = lastmodified.strftime(DATETIME_FORMAT)
-            record["download"]["size"] = filesize
-            record["download"]["date"] = lastmodified
+                url = ARCHIVE_URL + object_key
 
-            if len(batch) < NB_PARALLEL_REQUESTS:
-                batch.append(record)
-            else:
-                await process_batch(session, batch, stdout)
+                if not is_release_url(product, url):
+                    continue
 
-                batch = []  # Go on.
+                record = record_from_url(url)
+
+                # Complete with info that can't be obtained from the URL.
+                filesize = int(float(entry["Size"]))  # e.g. 2E+10
+                lastmodified = datetime.datetime.strptime(entry["LastModifiedDate"],
+                                                          "%Y-%m-%dT%H:%M:%S.%fZ")
+                lastmodified = lastmodified.strftime(DATETIME_FORMAT)
+                record["download"]["size"] = filesize
+                record["download"]["date"] = lastmodified
+
+                if len(batch) < NB_PARALLEL_REQUESTS:
+                    batch.append(record)
+                else:
+                    await process_batch(session, batch, stdout)
+
+                    batch = []  # Go on.
 
         await process_batch(session, batch, stdout)  # Last loop iteration.
 
