@@ -66,7 +66,10 @@ def guess_channel(url, version):
         else:
             channel = 'nightly'
     elif 'b' in version:
-        channel = 'beta'
+        if 'devedition' in url:
+            channel = 'aurora'
+        else:
+            channel = 'beta'
     elif version.endswith('esr'):
         channel = 'esr'
 
@@ -248,7 +251,7 @@ def record_from_url(url):
 def check_record(record):
     """Quick sanity check on record."""
     channel = record["target"]["channel"]
-    if not re.match(r"^(release|aurora|beta|nightly)(-old-id)?$", channel):
+    if not re.match(r"^(release|esr|aurora|beta|nightly)(-old-id)?$", channel):
         raise ValueError("Suspicious channel '{}': {}".format(channel, record))
 
     platform = record["target"]["platform"]
