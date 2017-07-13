@@ -263,8 +263,8 @@ def check_record(record):
         raise ValueError("Suspicious locale '{}': {}".format(locale, record))
 
     version = record["target"]["version"]
-    if not re.match(r"^(\d+|\.|esr|rc|b|a)+$", version):
-        raise ValueError("Suspicious version '{}': {}".format(locale, record))
+    if not re.match(r"^(\d+|\.|esr|rc|b|a|pre|-funnelcake|-real|plugin)+$", version):
+        raise ValueError("Suspicious version '{}': {}".format(version, record))
 
 
 def merge_metadata(record, metadata):

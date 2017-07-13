@@ -213,6 +213,63 @@ RECORDS = [
         }
     },
 
+    # Firefox funnelcake
+    {
+        'id': 'firefox_22-0-funnelcake23_linux-i686_id',
+        'source': {
+            'product': 'firefox'
+        },
+        'target': {
+            'locale': 'id',
+            'version': '22.0-funnelcake23',
+            'platform': 'linux-i686',
+            'channel': 'release'
+        },
+        'download': {
+            'url': ('https://archive.mozilla.org/pub/firefox/releases/'
+                    '22.0-funnelcake23/linux-i686/id/firefox-22.0.tar.bz2'),
+            'mimetype': 'application/x-bzip2',
+        }
+    },
+
+    # Firefox real version (?)
+    {
+        'id': 'firefox_3-0-19-real-real_linux-i686_si',
+        'source': {
+            'product': 'firefox'
+        },
+        'target': {
+            'locale': 'si',
+            'version': '3.0.19-real-real',
+            'platform': 'linux-i686',
+            'channel': 'release'
+        },
+        'download': {
+            'url': ('https://archive.mozilla.org/pub/firefox/releases/3.0.19-real-real/'
+                    'linux-i686/si/firefox-3.0.19.tar.bz2'),
+            'mimetype': 'application/x-bzip2'
+        }
+    },
+
+    # Firefox plugin version (?)
+    {
+        'id': 'firefox_3-6-3plugin1_linux-i686_fi',
+        'source': {
+            'product': 'firefox'
+        },
+        'target': {
+            'locale': 'fi',
+            'version': '3.6.3plugin1',
+            'platform': 'linux-i686',
+            'channel': 'release'
+        },
+        'download': {
+            'url': ('https://archive.mozilla.org/pub/firefox/releases/3.6.3plugin1/'
+                    'linux-i686/fi/firefox-3.6.3plugin1.tar.bz2'),
+            'mimetype': 'application/x-bzip2'
+        }
+    },
+
     # Thunderbird Windows Beta
     {
         "id": "thunderbird_beta_11-0b2_win32_eu",
