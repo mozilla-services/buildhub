@@ -149,16 +149,20 @@ async def fetch_release_metadata(session, record):
     if url in _release_metadata:
         return _release_metadata[url]
 
-    _, files = await fetch_listing(session, url)
-    for f in files:
-        filename = f["name"]
-        if is_release_metadata(product, version, filename):
-            metadata = await fetch_json(session, url + filename)
-            _release_metadata[url] = metadata
-            return metadata
+    try:
+        _, files = await fetch_listing(session, url)
+        for f in files:
+            filename = f["name"]
+            if is_release_metadata(product, version, filename):
+                metadata = await fetch_json(session, url + filename)
+                _release_metadata[url] = metadata
+                return metadata
+    except ValueError:
+        pass
 
     # Version exists in candidates but has no metadata!
-    raise ValueError("Missing metadata for candidate {}".format(url))
+    e = ValueError("Missing metadata for candidate {}".format(url))
+    logger.warning(e)
 
 
 async def process_batch(session, batch, stdout):
