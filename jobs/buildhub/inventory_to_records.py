@@ -96,6 +96,33 @@ async def fetch_nightly_metadata(session, record):
         _nightly_metadata[nightly_url] = metadata
         return metadata
     except aiohttp.ClientError:
+
+        # Very old nightly metadata is published as .txt files.
+        try:
+            # e.g. https://archive.mozilla.org/pub/firefox/nightly/2011/05/
+            #      2011-05-05-03-mozilla-central/firefox-6.0a1.en-US.mac.txt
+            old_metadata_url = re.sub("\.({})$".format(FILE_EXTENSIONS), ".txt", nightly_url)
+            async with session.get(old_metadata_url) as response:
+                old_metadata = await response.text()
+                m = re.search("^(\d+)\n(http.+)/rev/(.+)$", old_metadata)
+                if m:
+                    return {
+                        "buildid": m.group(1),
+                        "moz_source_repo": m.group(2),
+                        "moz_source_stamp": m.group(3),
+                    }
+                # e.g. https://archive.mozilla.org/pub/firefox/nightly/2010/07/2010-07-04-05
+                #      -mozilla-central/firefox-4.0b2pre.en-US.win64-x86_64.txt
+                m = re.search("^(\d+) (.+)$", old_metadata)
+                if m:
+                    return {
+                        "buildid": m.group(1),
+                        "moz_source_stamp": m.group(2),
+                        "moz_source_repo": "http://hg.mozilla.org/mozilla-central",
+                    }
+        except aiohttp.ClientError as e:
+            pass
+
         logger.error("Could not fetch metadata for '%s' from '%s'" % (record["id"], metadata_url))
         return None
 

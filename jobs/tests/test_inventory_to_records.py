@@ -132,6 +132,33 @@ class FetchNightlyMetadata(asynctest.TestCase):
                                                                          record)
         assert received == {"buildid": "20170512"}
 
+    async def test_fetch_old_nightly_metadata_from_txt(self):
+        record = {"id": "a", "download": {
+            "url": "http://server.org/firefox-6.0a1.en-US.linux-x86_64.tar.bz2"}}
+        with aioresponses() as m:
+            m.get("http://server.org/firefox-6.0a1.en-US.linux-x86_64.txt",
+                  body=("20110505030608\n"
+                        "http://hg.mozilla.org/mozilla-central/rev/31879b88cc82"),
+                  headers={"Content-type": "text/plain"})
+            received = await inventory_to_records.fetch_nightly_metadata(self.session,
+                                                                         record)
+        assert received == {"buildid": "20110505030608",
+                            "moz_source_repo": "http://hg.mozilla.org/mozilla-central",
+                            "moz_source_stamp": "31879b88cc82"}
+
+    async def test_fetch_very_old_nightly_metadata_from_txt(self):
+        record = {"id": "a", "download": {
+            "url": "http://server.org/firefox-6.0a1.en-US.linux-x86_64.tar.bz2"}}
+        with aioresponses() as m:
+            m.get("http://server.org/firefox-6.0a1.en-US.linux-x86_64.txt",
+                  body=("20100704054020 55f39d8d866c"),
+                  headers={"Content-type": "text/plain"})
+            received = await inventory_to_records.fetch_nightly_metadata(self.session,
+                                                                         record)
+        assert received == {"buildid": "20100704054020",
+                            "moz_source_repo": "http://hg.mozilla.org/mozilla-central",
+                            "moz_source_stamp": "55f39d8d866c"}
+
 
 class FetchReleaseMetadata(asynctest.TestCase):
     async def setUp(self):
