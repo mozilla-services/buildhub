@@ -179,6 +179,8 @@ class FetchReleaseMetadata(asynctest.TestCase):
             })
             with self.assertRaises(ValueError):
                 await inventory_to_records.fetch_release_metadata(self.session, self.record)
+        # If we retry, no request is made.
+        assert await inventory_to_records.fetch_release_metadata(self.session, self.record) is None
 
 
 class ScanCandidates(asynctest.TestCase):

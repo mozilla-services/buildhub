@@ -61,9 +61,13 @@ async def fetch_listing(session, url):
 
 
 async def fetch_metadata(session, record):
-    if record["target"]["channel"] == "nightly":
-        return await fetch_nightly_metadata(session, record)
-    return await fetch_release_metadata(session, record)
+    try:
+        if record["target"]["channel"] == "nightly":
+            return await fetch_nightly_metadata(session, record)
+        return await fetch_release_metadata(session, record)
+    except ValueError as e:
+        logger.warning(e)
+    return None
 
 
 _nightly_metadata = {}
@@ -149,20 +153,17 @@ async def fetch_release_metadata(session, record):
     if url in _release_metadata:
         return _release_metadata[url]
 
-    try:
-        _, files = await fetch_listing(session, url)
-        for f in files:
-            filename = f["name"]
-            if is_release_metadata(product, version, filename):
-                metadata = await fetch_json(session, url + filename)
-                _release_metadata[url] = metadata
-                return metadata
-    except ValueError:
-        pass
+    _, files = await fetch_listing(session, url)
+    for f in files:
+        filename = f["name"]
+        if is_release_metadata(product, version, filename):
+            metadata = await fetch_json(session, url + filename)
+            _release_metadata[url] = metadata
+            return metadata
 
     # Version exists in candidates but has no metadata!
-    e = ValueError("Missing metadata for candidate {}".format(url))
-    logger.warning(e)
+    _release_metadata[url] = None  # Don't try it anymore.
+    raise ValueError("Missing metadata for candidate {}".format(url))
 
 
 async def process_batch(session, batch, stdout):
