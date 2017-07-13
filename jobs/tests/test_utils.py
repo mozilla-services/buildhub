@@ -80,6 +80,25 @@ RECORDS = [
         }
     },
 
+    # Firefox DevEdition
+    {
+        "id": "firefox_aurora_55-0b3_macosx_en-us",
+        "source": {
+            "product": "firefox",
+        },
+        "target": {
+            "version": "55.0b3",
+            "platform": "macosx",
+            "locale": "en-US",
+            "channel": "aurora"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/devedition/releases/55.0b3/macosx/en-US/"
+            "firefox-55.0b3.dmg",
+            "mimetype": "application/x-apple-diskimage"
+        }
+    },
+
     # Firefox Beta
     {
         "id": "firefox_beta_52-0b6_linux-x86_64_en-us",
@@ -194,7 +213,7 @@ RECORDS = [
         }
     },
 
-    # Thunderbird Windows Release
+    # Thunderbird Windows Beta
     {
         "id": "thunderbird_beta_11-0b2_win32_eu",
         "source": {
@@ -213,7 +232,7 @@ RECORDS = [
         }
     },
 
-    # Thunderbird Mac OS X Release
+    # Thunderbird Mac OS X ESR
     {
         "id": "thunderbird_esr_10-0-12esr_macosx_pt-br",
         "source": {
@@ -232,7 +251,7 @@ RECORDS = [
         }
     },
 
-    # Thunderbird Release
+    # Thunderbird ESR
     {
         "id": "thunderbird_esr_17-0-8esr_linux-x86_64_gd",
         "source": {
@@ -247,6 +266,44 @@ RECORDS = [
         "download": {
             "url": "https://archive.mozilla.org/pub/thunderbird/releases/17.0.8esr/linux-x86_64/"
             "gd/thunderbird-17.0.8esr.tar.bz2",
+            "mimetype": "application/x-bzip2"
+        }
+    },
+
+    # Thunderbird Pre-ESR Switch Release
+    {
+        "id": "thunderbird_17-0_linux-x86_64_gd",
+        "source": {
+            "product": "thunderbird",
+        },
+        "target": {
+            "version": "17.0",
+            "platform": "linux-x86_64",
+            "locale": "gd",
+            "channel": "release"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/thunderbird/releases/17.0/linux-x86_64/"
+            "gd/thunderbird-17.0.tar.bz2",
+            "mimetype": "application/x-bzip2"
+        }
+    },
+
+    # Thunderbird Post-ESR Switch Release
+    {
+        "id": "thunderbird_24-0_linux-x86_64_gd",
+        "source": {
+            "product": "thunderbird",
+        },
+        "target": {
+            "version": "24.0",
+            "platform": "linux-x86_64",
+            "locale": "gd",
+            "channel": "release"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/thunderbird/releases/24.0/linux-x86_64/"
+            "gd/thunderbird-24.0.tar.bz2",
             "mimetype": "application/x-bzip2"
         }
     },
