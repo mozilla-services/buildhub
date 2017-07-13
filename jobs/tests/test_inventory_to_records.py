@@ -285,7 +285,13 @@ class CSVToRecords(asynctest.TestCase):
         self.stdin = io.StringIO(
             ("net-mozaws-delivery-firefox,pub/firefox/releases/51.0/win64/fy-NL/"
              "Firefox Setup 51.0.exe,67842,2017-06-11T12:20:10.2Z,"
-             "f1aa742ef0973db098947bd6d875f193\n"))
+             "f1aa742ef0973db098947bd6d875f193\n"
+             "net-mozaws-delivery-firefox,pub/firefox/nightly/2017/06/"
+             "2017-06-16-03-02-07-mozilla-central-l10n/firefox-56.0a1.ach.win32."
+             "installer.exe,45678,2017-06-16T03:02:07.0Z\n"
+             "net-mozaws-delivery-firefox,pub/firefox/nightly/2017/06/"
+             "2017-06-16-03-02-07-mozilla-central-l10n/firefox-56.0a1.ach.win32."
+             "zip,45678,2017-06-16T03:02:07.0Z\n"))
 
     def tearDown(self):
         inventory_to_records._candidates_build_folder.clear()
@@ -295,6 +301,7 @@ class CSVToRecords(asynctest.TestCase):
         await inventory_to_records.csv_to_records(self.loop, self.stdin, stdout)
         output = stdout.getvalue()
         records = [json.loads(o) for o in output.split('\n') if o]
+
         assert records == [{
             'data': {
                 'id': 'firefox_51-0_win64_fy-nl',
@@ -320,6 +327,27 @@ class CSVToRecords(asynctest.TestCase):
                     'locale': 'fy-NL',
                     'platform': 'win64',
                     'version': '51.0'
+                }
+            }
+        }, {
+            'data': {
+                'id': 'firefox_nightly_2017-06-16-03-02-07_56-0a1_win32_ach',
+                'download': {
+                    'date': '2017-06-16T03:02:07Z',
+                    'mimetype': 'application/zip',
+                    'size': 45678,
+                    'url': ('https://archive.mozilla.org/pub/firefox/nightly/'
+                            '2017/06/2017-06-16-03-02-07-mozilla-central-l10n/'
+                            'firefox-56.0a1.ach.win32.zip')
+                },
+                'source': {
+                    'product': 'firefox'
+                },
+                'target': {
+                    'channel': 'nightly',
+                    'locale': 'ach',
+                    'platform': 'win32',
+                    'version': '56.0a1'
                 }
             }
         }]
