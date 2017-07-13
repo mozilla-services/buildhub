@@ -173,7 +173,7 @@ async def fetch_release_metadata(session, record):
     locale = "en-US"
 
     # Metadata for EME-free are the same as original release.
-    platform = platform.replace("-EME-free", "")
+    platform = platform.replace("-eme-free", "")
 
     try:
         latest_build_folder = "/" + _candidates_build_folder[product][version]

@@ -216,7 +216,7 @@ class FetchReleaseMetadata(asynctest.TestCase):
     async def test_fetch_metadata_from_eme_url(self):
         record = {
             "source": {"product": "firefox"},
-            "target": {"version": "54.0", "platform": "linux-x86_64-EME-free", "locale": "fr-FR"}
+            "target": {"version": "54.0", "platform": "linux-x86_64-eme-free", "locale": "fr-FR"}
         }
         with aioresponses() as m:
             archive_url = utils.ARCHIVE_URL + "pub/firefox/candidates/"
