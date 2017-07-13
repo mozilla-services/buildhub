@@ -46,7 +46,11 @@ async def fetch_json(session, url, timeout=TIMEOUT_SECONDS):
         with async_timeout.timeout(timeout):
             logger.debug("GET '{}'".format(url))
             async with session.get(url, headers=headers, timeout=None) as response:
-                return await response.json()
+                try:
+                    return await response.json()
+                except aiohttp.ClientResponseError as e:
+                    # Some JSON files are served with wrong content-type.
+                    return await response.json(content_type="application/octet-stream")
     except asyncio.TimeoutError:
         logger.error("Timeout on GET '{}'".format(url))
         raise

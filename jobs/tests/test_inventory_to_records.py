@@ -34,13 +34,17 @@ class FetchJsonTest(asynctest.TestCase):
         self.session = aiohttp.ClientSession(loop=self.loop)
         self.addCleanup(self.session.close)
 
-        mocked = aioresponses()
-        mocked.start()
-        mocked.get(self.url, payload=self.data)
-        self.addCleanup(mocked.stop)
-
     async def test_returns_json_response(self):
-        received = await inventory_to_records.fetch_json(self.session, self.url)
+        with aioresponses() as m:
+            m.get(self.url, payload=self.data)
+            received = await inventory_to_records.fetch_json(self.session, self.url)
+        assert received == self.data
+
+    async def test_supports_octet_stream(self):
+        with aioresponses() as m:
+            headers = {"Content-Type": "application/octet-stream"}
+            m.get(self.url, body=json.dumps(self.data), headers=headers)
+            received = await inventory_to_records.fetch_json(self.session, self.url)
         assert received == self.data
 
     async def test_raises_timeout_response(self):
