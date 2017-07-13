@@ -173,7 +173,7 @@ async def fetch_release_metadata(session, record):
     locale = "en-US"
 
     # Metadata for EME-free are the same as original release.
-    platform = platform.rstrip("-EME-free")
+    platform = platform.replace("-EME-free", "")
 
     try:
         latest_build_folder = "/" + _candidates_build_folder[product][version]
@@ -242,7 +242,9 @@ async def csv_to_records(loop, stdin, stdout):
         # Deduplicate these (keep .zip if .exe is present, else .exe only)
         longer_first = sorted(entries, key=lambda e: len(e["Key"]), reverse=True)
         deduplicate = {
-            e["Key"].rstrip('.installer.exe').rstrip('.exe').rstrip('.zip'): e
+            e["Key"].replace('.installer.exe', '')
+                    .replace('.exe', '')
+                    .replace('.zip', ''): e
             for e in longer_first}
         return deduplicate.values()
 
