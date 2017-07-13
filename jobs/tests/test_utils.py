@@ -583,6 +583,7 @@ WRONG_RELEASE_FILENAMES = [
     ("fennec", "fennec-21.0b1.multi.android-arm-armv6.tests.zip"),
     ("fennec", "fennec-24.0b1.en-US.android-arm.crashreporter-symbols.zip"),
     ("firefox", "Firefox Setup Stub 49.0.exe"),
+    ("firefox", "/releases/sha1-installers/aurora/firefox-45.0a2.ja.win32.installer.exe")
 ]
 
 
