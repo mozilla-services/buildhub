@@ -586,6 +586,7 @@ WRONG_RELEASE_FILENAMES = [
     ("firefox", "/releases/sha1-installers/aurora/firefox-45.0a2.ja.win32.installer.exe"),
     ("firefox", ("/candidates/51.0.1-candidates/build3/funnelcake99-testing/v1/win32/en-US/"
                  "firefox-51.0.1.en-US.win32.installer.exe")),
+    ("firefox", "firefox-56.0a1.en-US.win64.stylo-bindings.zip"),
 ]
 
 
