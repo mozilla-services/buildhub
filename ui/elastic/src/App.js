@@ -142,7 +142,7 @@ const fullText = (query, options) => {
   if (!query) {
     return;
   }
-  const fulltextQuery = query
+  const fulltextQuery = query.startsWith("'") ? query.slice(1) : query
     .split(" ")
     .map(term => {
       return `${term}*`;
@@ -187,7 +187,7 @@ class App extends Component {
               <div className="elasticsearch-query-doc">
                 <a
                   href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax"
-                  title="You may use Elasticsearch query string syntax">
+                  title="You may use Elasticsearch query string syntax by prefixing it with a single quote">
                   ?
                 </a>
               </div>
