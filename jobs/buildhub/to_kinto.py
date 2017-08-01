@@ -40,24 +40,28 @@ logger = logging.getLogger(__name__)
 done = object()
 
 
-def fetch_existing(client):
+def fetch_existing(client, cache_file=PREVIOUS_DUMP_FILENAME):
     """Fetch all records since last run. A JSON file on disk is used to store
     records from previous run.
     """
     previous_run_cache = []
     previous_run_timestamp = None
 
-    if os.path.exists(PREVIOUS_DUMP_FILENAME):
-        previous_run_cache = json.load(open(PREVIOUS_DUMP_FILENAME))
-        previous_run_timestamp = '"%s"' % previous_run_cache[0]['last_modified']
+    if os.path.exists(cache_file):
+        previous_run_cache = json.load(open(cache_file))
+        highest_timestamp = max([r['last_modified'] for r in previous_run_cache])
+        previous_run_timestamp = '"%s"' % highest_timestamp
 
     new_records = client.get_records(_since=previous_run_timestamp, pages=float("inf"))
-    records = new_records + previous_run_cache
+
+    merge_by_id = {r["id"]: r for r in previous_run_cache + new_records}
+    records = list(merge_by_id.values())
 
     # Atomic write.
-    tmpfilename = PREVIOUS_DUMP_FILENAME + ".tmp"
-    json.dump(records, open(tmpfilename, "w"))
-    os.rename(tmpfilename, PREVIOUS_DUMP_FILENAME)
+    if len(records) > 0:
+        tmpfilename = cache_file + ".tmp"
+        json.dump(records, open(tmpfilename, "w"))
+        os.rename(tmpfilename, cache_file)
 
     return records
 
