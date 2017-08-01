@@ -152,7 +152,7 @@ const sortVersions = filters => {
         if (subPartB[2] && !subPartA[2]) {
           return -1
         }
-        return subPartA[2] - subPartB[2]
+        return subPartB[2].localeCompare(subPartA[2])
       }
       if (subPartA[3] !== subPartB[3]) {
         return parseInt(subPartB[3], 10) - parseInt(subPartA[3], 10)
