@@ -4,6 +4,16 @@ body {
   font-family: sans-serif;
 }
 
+.elasticsearch-query-doc {
+  font-size: 16px;
+  margin-top: 7px;
+}
+
+.elasticsearch-query-doc a {
+  color: #fff;
+  padding: 20px 0 20px 15px;
+}
+
 .sk-panel__content {
   max-height: 300px;
   overflow-y: auto;
