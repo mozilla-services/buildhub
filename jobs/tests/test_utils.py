@@ -1,11 +1,47 @@
 import pytest
+
 from buildhub.utils import (
-    build_record_id, parse_nightly_filename, is_release_metadata, is_release_filename,
-    guess_mimetype, guess_channel, chunked, localize_nightly_url
+    archive_url, build_record_id, is_release_metadata, is_release_url,
+    guess_mimetype, guess_channel, chunked, localize_nightly_url,
+    record_from_url, merge_metadata, check_record
 )
 
 
+ARCHIVE_URL_INFOS = [
+    (("firefox", "55.0", "win64", "fr", False, None),
+     "https://archive.mozilla.org/pub/firefox/releases/55.0/win64/fr/"),
+    (("firefox", "55.0a1", "win64", "en-US", "2017/05", None),
+     "https://archive.mozilla.org/pub/firefox/nightly/2017/05/"),
+    (("firefox", "55.0", "win64", "fr", False, "/"),
+     "https://archive.mozilla.org/pub/firefox/candidates/55.0-candidates/win64/fr/"),
+]
+
+
+@pytest.mark.parametrize("info,expected_record", ARCHIVE_URL_INFOS)
+def test_archive_url(info, expected_record):
+    assert archive_url(*info) == expected_record
+
+
 RECORDS = [
+    # Old Firefox
+    {
+        "id": "firefox_1-0rc1_linux-i686_ca-ad",
+        "source": {
+            "product": "firefox",
+        },
+        "target": {
+            "version": "1.0rc1",
+            "platform": "linux-i686",
+            "locale": "ca-AD",
+            "channel": "release"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/firefox/releases/1.0rc1/"
+            "firefox-1.0rc1.ca-AD.linux-i686.installer.tar.gz",
+            "mimetype": "application/x-gzip"
+        }
+    },
+
     # Firefox Nightly
     {
         "id": "firefox_nightly_2017-05-15-10-02-38_55-0a1_linux-x86_64_en-us",
@@ -20,7 +56,8 @@ RECORDS = [
         },
         "download": {
             "url": "https://archive.mozilla.org/pub/firefox/nightly/2017/05/"
-            "2017-05-15-10-02-38-mozilla-central/firefox-55.0a1.en-US.linux-x86_64.tar.bz2"
+            "2017-05-15-10-02-38-mozilla-central/firefox-55.0a1.en-US.linux-x86_64.tar.bz2",
+            "mimetype": "application/x-bzip2"
         }
      },
 
@@ -38,7 +75,27 @@ RECORDS = [
         },
         "download": {
             "url": "https://archive.mozilla.org/pub/firefox/nightly/2017/04/"
-            "2017-04-03-00-40-02-mozilla-aurora/firefox-54.0a2.en-US.mac.dmg"
+            "2017-04-03-00-40-02-mozilla-aurora/firefox-54.0a2.en-US.mac.dmg",
+            "mimetype": "application/x-apple-diskimage"
+        }
+    },
+
+    # Firefox DevEdition
+    {
+        "id": "firefox_aurora_55-0b3_macosx_en-us",
+        "source": {
+            "product": "firefox",
+        },
+        "target": {
+            "version": "55.0b3",
+            "platform": "macosx",
+            "locale": "en-US",
+            "channel": "aurora"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/devedition/releases/55.0b3/macosx/en-US/"
+            "firefox-55.0b3.dmg",
+            "mimetype": "application/x-apple-diskimage"
         }
     },
 
@@ -56,7 +113,8 @@ RECORDS = [
         },
         "download": {
             "url": "https://archive.mozilla.org/pub/firefox/releases/52.0b6/linux-x86_64/en-US/"
-            "firefox-52.0b6.tar.bz2"
+            "firefox-52.0b6.tar.bz2",
+            "mimetype": "application/x-bzip2"
         }
     },
 
@@ -74,7 +132,8 @@ RECORDS = [
         },
         "download": {
             "url": "https://archive.mozilla.org/pub/firefox/candidates/50.0-candidates/build1/"
-            "linux-x86_64/fr/firefox-50.0.tar.bz2"
+            "linux-x86_64/fr/firefox-50.0.tar.bz2",
+            "mimetype": "application/x-bzip2"
         }
     },
 
@@ -92,7 +151,8 @@ RECORDS = [
         },
         "download": {
             "url": "https://archive.mozilla.org/pub/firefox/releases/52.0/linux-x86_64/fr/"
-            "firefox-52.0.tar.bz2"
+            "firefox-52.0.tar.bz2",
+            "mimetype": "application/x-bzip2"
         }
     },
 
@@ -111,6 +171,7 @@ RECORDS = [
         "download": {
             "url": "https://archive.mozilla.org/pub/firefox/releases/52.0esr/linux-x86_64/en-US/"
             "firefox-52.0esr.tar.bz2",
+            "mimetype": "application/x-bzip2"
         }
     },
 
@@ -129,6 +190,7 @@ RECORDS = [
         "download": {
             "url": "https://archive.mozilla.org/pub/firefox/releases/16.0b6/win32/bs/"
             "Firefox Setup 16.0b6.exe",
+            "mimetype": "application/msdos-windows"
         }
     },
 
@@ -147,10 +209,106 @@ RECORDS = [
         "download": {
             "url": "https://archive.mozilla.org/pub/firefox/releases/50.0.1/mac/ko/"
             "Firefox 50.0.1.dmg",
+            "mimetype": "application/x-apple-diskimage"
         }
     },
 
-    # Thunderbird Windows Release
+    # Firefox funnelcake
+    {
+        'id': 'firefox_22-0-funnelcake23_linux-i686_id',
+        'source': {
+            'product': 'firefox'
+        },
+        'target': {
+            'locale': 'id',
+            'version': '22.0-funnelcake23',
+            'platform': 'linux-i686',
+            'channel': 'release'
+        },
+        'download': {
+            'url': ('https://archive.mozilla.org/pub/firefox/releases/'
+                    '22.0-funnelcake23/linux-i686/id/firefox-22.0.tar.bz2'),
+            'mimetype': 'application/x-bzip2',
+        }
+    },
+
+    # Firefox real version (?)
+    {
+        'id': 'firefox_3-0-19-real-real_linux-i686_si',
+        'source': {
+            'product': 'firefox'
+        },
+        'target': {
+            'locale': 'si',
+            'version': '3.0.19-real-real',
+            'platform': 'linux-i686',
+            'channel': 'release'
+        },
+        'download': {
+            'url': ('https://archive.mozilla.org/pub/firefox/releases/3.0.19-real-real/'
+                    'linux-i686/si/firefox-3.0.19.tar.bz2'),
+            'mimetype': 'application/x-bzip2'
+        }
+    },
+
+    # Firefox plugin version (?)
+    {
+        'id': 'firefox_3-6-3plugin1_linux-i686_fi',
+        'source': {
+            'product': 'firefox'
+        },
+        'target': {
+            'locale': 'fi',
+            'version': '3.6.3plugin1',
+            'platform': 'linux-i686',
+            'channel': 'release'
+        },
+        'download': {
+            'url': ('https://archive.mozilla.org/pub/firefox/releases/3.6.3plugin1/'
+                    'linux-i686/fi/firefox-3.6.3plugin1.tar.bz2'),
+            'mimetype': 'application/x-bzip2'
+        }
+    },
+
+    # Firefox second beta
+    {
+        'source': {
+            'product': 'firefox'
+        },
+        'id': 'firefox_beta_38-0-5b1-2_linux-i686_es-ar',
+        'target': {
+            'locale': 'es-AR',
+            'version': '38.0.5b1-2',
+            'platform': 'linux-i686',
+            'channel': 'beta'
+        },
+        'download': {
+            'url': ('https://archive.mozilla.org/pub/firefox/releases/38.0.5b1-2/'
+                    'linux-i686/es-AR/firefox-38.0.5b1.tar.bz2'),
+            'mimetype': 'application/x-bzip2'
+        }
+    },
+
+    # Firefox preview
+    {
+        'source': {
+            'product': 'firefox'
+        },
+        'id': 'firefox_nightly_2010-03-28-03-mozilla-central_3-7a4pre_win32_en-us',
+        'target': {
+            'locale': 'en-US',
+            'version': '3.7a4pre',
+            'platform': 'win32',
+            'channel': 'nightly'
+        },
+        'download': {
+            'url': ('https://archive.mozilla.org/pub/firefox/nightly/2010/03/'
+                    '2010-03-28-03-mozilla-central/firefox-3.7a4pre.en-US.win32.zip'),
+            'mimetype': 'application/zip'
+        }
+    },
+
+    # Thunderbird Windows Beta
     {
         "id": "thunderbird_beta_11-0b2_win32_eu",
         "source": {
@@ -165,10 +323,11 @@ RECORDS = [
         "download": {
             "url": "https://archive.mozilla.org/pub/thunderbird/releases/11.0b2/win32/eu/"
             "Thunderbird Setup 11.0b2.exe",
+            "mimetype": "application/msdos-windows"
         }
     },
 
-    # Thunderbird Mac OS X Release
+    # Thunderbird Mac OS X ESR
     {
         "id": "thunderbird_esr_10-0-12esr_macosx_pt-br",
         "source": {
@@ -183,10 +342,11 @@ RECORDS = [
         "download": {
             "url": "https://archive.mozilla.org/pub/thunderbird/releases/10.0.12esr/mac/pt-BR/"
             "Thunderbird 10.0.12esr.dmg",
+            "mimetype": "application/x-apple-diskimage"
         }
     },
 
-    # Thunderbird Release
+    # Thunderbird ESR
     {
         "id": "thunderbird_esr_17-0-8esr_linux-x86_64_gd",
         "source": {
@@ -201,6 +361,45 @@ RECORDS = [
         "download": {
             "url": "https://archive.mozilla.org/pub/thunderbird/releases/17.0.8esr/linux-x86_64/"
             "gd/thunderbird-17.0.8esr.tar.bz2",
+            "mimetype": "application/x-bzip2"
+        }
+    },
+
+    # Thunderbird Pre-ESR Switch Release
+    {
+        "id": "thunderbird_17-0_linux-x86_64_gd",
+        "source": {
+            "product": "thunderbird",
+        },
+        "target": {
+            "version": "17.0",
+            "platform": "linux-x86_64",
+            "locale": "gd",
+            "channel": "release"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/thunderbird/releases/17.0/linux-x86_64/"
+            "gd/thunderbird-17.0.tar.bz2",
+            "mimetype": "application/x-bzip2"
+        }
+    },
+
+    # Thunderbird Post-ESR Switch Release
+    {
+        "id": "thunderbird_24-0_linux-x86_64_gd",
+        "source": {
+            "product": "thunderbird",
+        },
+        "target": {
+            "version": "24.0",
+            "platform": "linux-x86_64",
+            "locale": "gd",
+            "channel": "release"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/thunderbird/releases/24.0/linux-x86_64/"
+            "gd/thunderbird-24.0.tar.bz2",
+            "mimetype": "application/x-bzip2"
         }
     },
 
@@ -219,6 +418,7 @@ RECORDS = [
         "download": {
             "url": "https://archive.mozilla.org/pub/mobile/releases/39.0b5/android-api-9/sl/"
             "fennec-39.0b5.sl.android-arm.apk",
+            "mimetype": "application/vnd.android.package-archive"
         }
     },
 
@@ -237,6 +437,7 @@ RECORDS = [
         "download": {
             "url": "https://archive.mozilla.org/pub/mobile/releases/42.0b2/android-api-9/fr/"
             "fennec-42.0b2.fr.android-arm.apk",
+            "mimetype": "application/vnd.android.package-archive"
         }
     },
 
@@ -256,6 +457,7 @@ RECORDS = [
         "download": {
             "url": "https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-05-30-10-01-27-"
             "mozilla-central-android-api-15/fennec-55.0a1.multi.android-arm.apk",
+            "mimetype": "application/vnd.android.package-archive"
         }
     },
     {
@@ -272,6 +474,7 @@ RECORDS = [
         "download": {
             "url": "https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-05-30-10-01-27-"
             "mozilla-central-android-api-15-old-id/fennec-55.0a1.multi.android-arm.apk",
+            "mimetype": "application/vnd.android.package-archive"
         }
     },
 
@@ -290,6 +493,7 @@ RECORDS = [
         "download": {
             "url": "https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-05-30-10-01-27-"
             "mozilla-central-android-x86/fennec-55.0a1.multi.android-i386.apk",
+            "mimetype": "application/vnd.android.package-archive"
         }
     },
     {
@@ -306,6 +510,7 @@ RECORDS = [
         "download": {
             "url": "https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-05-30-10-01-27-"
             "mozilla-central-android-x86-old-id/fennec-55.0a1.multi.android-i386.apk",
+            "mimetype": "application/vnd.android.package-archive"
         }
     },
 
@@ -319,33 +524,9 @@ def test_build_record_id(record):
     assert record_id == record["id"]
 
 
-NIGHTLY_FILENAMES = [
-    ("firefox-55.0a1.en-US.linux-x86_64.tar.bz2", "55.0a1", "en-US", "linux-x86_64"),
-    ("fennec-55.0a1.multi.android-i386.apk", "55.0a1", "multi", "android-i386"),
-    ("fennec-55.0a1.multi.android-arm.apk", "55.0a1", "multi", "android-arm"),
-    ("firefox-56.0a1.en-US.mac.dmg", "56.0a1", "en-US", "macosx"),
-    ("firefox-55.0a1.ar.win32.installer.exe", "55.0a1", "ar", "win32"),
-]
-
-
-@pytest.mark.parametrize("filename,version,locale,platform", NIGHTLY_FILENAMES)
-def test_parse_nightly_filename(filename, version, locale, platform):
-    results = parse_nightly_filename(filename)
-    assert results == (version, locale, platform)
-
-
-NIGHTLY_WRONG_FILENAMES = [
-    "firefox-tests.bz2",
-    "firefox-crashreporter.gz",
-    "foobar.bz2",
-    "firefox-55.0a1.ar.win32.installer-stub.exe",
-]
-
-
-@pytest.mark.parametrize("filename", NIGHTLY_WRONG_FILENAMES)
-def test_parse_nightly_filename_raise_a_value_error(filename):
-    with pytest.raises(ValueError):
-        parse_nightly_filename(filename)
+@pytest.mark.parametrize("record", RECORDS)
+def test_check_record(record):
+    check_record(record)  # not raising.
 
 
 RELEASE_METADATA_FILENAMES = [
@@ -392,8 +573,8 @@ RELEASE_FILENAMES = [
 
 
 @pytest.mark.parametrize("product,filename", RELEASE_FILENAMES)
-def test_is_release_filename(product, filename):
-    assert is_release_filename(product, filename)
+def test_is_release_url(product, filename):
+    assert is_release_url(product, filename)
 
 
 WRONG_RELEASE_FILENAMES = [
@@ -402,12 +583,16 @@ WRONG_RELEASE_FILENAMES = [
     ("fennec", "fennec-21.0b1.multi.android-arm-armv6.tests.zip"),
     ("fennec", "fennec-24.0b1.en-US.android-arm.crashreporter-symbols.zip"),
     ("firefox", "Firefox Setup Stub 49.0.exe"),
+    ("firefox", "/releases/sha1-installers/aurora/firefox-45.0a2.ja.win32.installer.exe"),
+    ("firefox", ("/candidates/51.0.1-candidates/build3/funnelcake99-testing/v1/win32/en-US/"
+                 "firefox-51.0.1.en-US.win32.installer.exe")),
+    ("firefox", "firefox-56.0a1.en-US.win64.stylo-bindings.zip"),
 ]
 
 
 @pytest.mark.parametrize("product,filename", WRONG_RELEASE_FILENAMES)
-def test_wrong_release_filename(product, filename):
-    assert not is_release_filename(product, filename)
+def test_wrong_release_url(product, filename):
+    assert not is_release_url(product, filename)
 
 
 URLS_MIMETYPES = [
@@ -489,10 +674,74 @@ NIGHTLY_URLS = [
      "mozilla-central-l10n/firefox-55.0a1.ach.linux-x86_64.tar.bz2",
      "https://archive.mozilla.org/pub/firefox/nightly/2017/05/"
      "2017-05-15-10-02-38-mozilla-central/firefox-55.0a1.en-US.linux-x86_64.tar.bz2"
-     )
+     ),
+
+    # Some random Mac.
+    ("https://archive.mozilla.org/pub/firefox/nightly/2017/06/2017-06-20-03-02-08-"
+     "mozilla-central-l10n/firefox-56.0a1.ru.mac.dmg",
+     "https://archive.mozilla.org/pub/firefox/nightly/2017/06/2017-06-20-03-02-08-"
+     "mozilla-central/firefox-56.0a1.en-US.mac.dmg")
 ]
 
 
 @pytest.mark.parametrize("localized_url,american_url", NIGHTLY_URLS)
 def test_localize_nightly_url(localized_url, american_url):
     assert localize_nightly_url(localized_url) == american_url
+
+
+@pytest.mark.parametrize("record", RECORDS)
+def test_record_from_url(record):
+    url = record["download"]["url"]
+    from_url = record_from_url(url)
+    assert from_url == record
+
+
+METADATA_RECORDS = [
+    ({"source": {"product": "firefox"}}, None, {"source": {"product": "firefox"}}),
+    ({
+        "target": {"channel": "release"},
+        "source": {"product": "firefox"}
+     }, {
+        "buildid": "201706121152",
+        "moz_source_repo": "a",
+        "moz_source_stamp": "b",
+     }, {
+        "target": {"channel": "release"},
+        "source": {
+            "product": "firefox",
+            "revision": "b",
+            "repository": "a",
+            "tree": "a",
+        },
+        "build": {
+            "date": "2017-06-12T11:05:02Z",
+            "id": "201706121152"
+        }
+    }),
+    ({
+        "target": {"channel": "release"},
+        "source": {"product": "firefox"}
+     }, {
+        "buildid": "201706121152",
+        "moz_source_repo": "MOZ_SOURCE_REPO=https://hg.mozilla.org/central/beta",
+        "moz_source_stamp": "b0925nfubg",
+     }, {
+        "target": {"channel": "release"},
+        "source": {
+            "product": "firefox",
+            "revision": "b0925nfubg",
+            "repository": "https://hg.mozilla.org/central/beta",
+            "tree": "central/beta",
+        },
+        "build": {
+            "date": "2017-06-12T11:05:02Z",
+            "id": "201706121152"
+        }
+    }),
+]
+
+
+@pytest.mark.parametrize("record,metadata,expected", METADATA_RECORDS)
+def test_merge_metadata(record, metadata, expected):
+    result = merge_metadata(record, metadata)
+    assert result == expected

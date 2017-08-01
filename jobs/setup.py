@@ -26,7 +26,8 @@ REQUIREMENTS = [
 
 ENTRY_POINTS = {
     'console_scripts': [
-        'scrape_archives = buildhub.scrape_archives:run',
+        'to-kinto = buildhub.to_kinto:run',
+        'inventory-to-records = buildhub.inventory_to_records:run',
     ],
 }
 

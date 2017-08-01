@@ -22,22 +22,64 @@ The JSON schema validation can be enabled on the server with the following setti
 
     kinto.experimental_collection_schema_validation = true
 
+S3 inventory
+============
 
-Scrape archives
-===============
-
-Scrape nightly, beta and releases from https://archives.mozilla.org and publishes records on a ``releases`` collection.
-
-The archives website is a folder tree whose folder and file listings can be obtained in JSON.
-
-This script walks through every version, platform and locale folders to pick the release archives for Firefox, Thunderbird and Fennec.
-
-For the English locale (``en-US``), and for a limited set of versions (aka. «candidates») a set of metadata is available (build id, revision, ...). The script will leave those related fields empty when the metadata is not available for a particular archive.
+In order to fetch inventories from S3, install the dedicated Amazon Services client:
 
 .. code-block:: bash
 
-    python3 scrape_archives.py --server http://localhost:8888/v1 --auth user:pass --debug
+   sudo apt-get install awscli
 
-.. note::
+List available manifests in inventories folder:
 
-    Currently, it won't scan nightlies before the current month.
+.. code-block:: bash
+
+    aws --no-sign-request --region us-east-1 s3 ls "s3://net-mozaws-prod-delivery-inventory-us-east-1/public/inventories/net-mozaws-prod-delivery-firefox/delivery-firefox/"
+
+Download the latest manifest:
+
+.. code-block:: bash
+
+    aws --no-sign-request --region us-east-1 s3 cp s3://net-mozaws-prod-delivery-inventory-us-east-1/public/inventories/net-mozaws-prod-delivery-firefox/delivery-firefox/2017-07-13T00-09Z/manifest.json
+
+Download the associated files (using `jq <https://stedolan.github.io/jq/download/>`_):
+
+.. code-block:: bash
+
+    files=$(jq -r '.files[] | .key' < 2017-08-01T00-12Z/manifest.json)
+    for file in $files; do
+        aws --no-sign-request --region us-east-1 s3 cp "s3://net-mozaws-prod-delivery-inventory-us-east-1/public/$file" .
+    done
+
+Concatenate all CSV into one:
+
+.. code-block:: bash
+
+    zcat *.gz > inventory.csv
+
+Parse S3 inventory, fetch metadata, and print records as JSON in stdout:
+
+.. code-block:: bash
+
+    cat inventory.csv | inventory-to-records > records.data
+
+Load records into Kinto:
+
+.. code-block:: bash
+
+    cat records.data | to-kinto --server https://kinto/ --bucket build-hub --collection release --auth user:pass initialization.yaml
+
+
+System-Addons updates
+=====================
+
+Fetch information about available system addons updates for every Firefox release.
+Each addon has its ID, a builtin version (if any), and an update available from AUS (if any).
+
+The script will fetch addons updates only if the ``systemaddons`` field of the archive record is set (e.g. not null).
+
+.. code-block:: bash
+
+    python3 sysaddons_update.py --server http://localhost:8888/v1 --auth user:pass --debug
+
