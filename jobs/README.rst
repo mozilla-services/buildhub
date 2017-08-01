@@ -25,17 +25,50 @@ The JSON schema validation can be enabled on the server with the following setti
 S3 inventory
 ============
 
+In order to fetch inventories from S3, install the dedicated Amazon Services client:
+
+.. code-block:: bash
+
+   sudo apt-get install awscli
+
+List available manifests in inventories folder:
+
+.. code-block:: bash
+
+    aws --no-sign-request --region us-east-1 s3 ls "s3://net-mozaws-prod-delivery-inventory-us-east-1/public/inventories/net-mozaws-prod-delivery-firefox/delivery-firefox/"
+
+Download the latest manifest:
+
+.. code-block:: bash
+
+    aws --no-sign-request --region us-east-1 s3 cp s3://net-mozaws-prod-delivery-inventory-us-east-1/public/inventories/net-mozaws-prod-delivery-firefox/delivery-firefox/2017-07-13T00-09Z/manifest.json
+
+Download the associated files (using `jq <https://stedolan.github.io/jq/download/>`_):
+
+.. code-block:: bash
+
+    files=$(jq -r '.files[] | .key' < 2017-08-01T00-12Z/manifest.json)
+    for file in $files; do
+        aws --no-sign-request --region us-east-1 s3 cp "s3://net-mozaws-prod-delivery-inventory-us-east-1/public/$file" .
+    done
+
+Concatenate all CSV into one:
+
+.. code-block:: bash
+
+    zcat *.gz > inventory.csv
+
 Parse S3 inventory, fetch metadata, and print records as JSON in stdout:
 
 .. code-block:: bash
 
-    cat inventory.csv | inventory-to-records
+    cat inventory.csv | inventory-to-records > records.data
 
 Load records into Kinto:
 
 .. code-block:: bash
 
-    cat inventory.csv | inventory-to-records | to-kinto --server https://kinto/ --bucket build-hub --collection release --auth user:pass initialization.yaml
+    cat records.data | to-kinto --server https://kinto/ --bucket build-hub --collection release --auth user:pass initialization.yaml
 
 
 System-Addons updates
