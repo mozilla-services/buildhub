@@ -587,6 +587,11 @@ WRONG_RELEASE_FILENAMES = [
     ("firefox", ("/candidates/51.0.1-candidates/build3/funnelcake99-testing/v1/win32/en-US/"
                  "firefox-51.0.1.en-US.win32.installer.exe")),
     ("firefox", "firefox-56.0a1.en-US.win64.stylo-bindings.zip"),
+    ("thunderbird", "/pub/thunderbird/releases/1.0rc/thunderbird-1.0rc-win32.zip"),
+    ("thunderbird", "/pub/thunderbird/extensions/inspector/thunderbird-dominspector-0.9%2B.zip"),
+    ("thunderbird", "/pub/thunderbird/test/inlinespellcheck-test-build/thunderbird-win32.zip"),
+    ("thunderbird", "/pub/thunderbird/test/standard8-jmalloc-test/special-test-no-jemalloc.exe"),
+    ("firefox", "/pub/firefox/try-builds/jg%40m.com-e/try-win64/firefox-56.0a1.en-US.win64.zip"),
 ]
 
 
