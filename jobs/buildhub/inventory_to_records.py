@@ -257,10 +257,9 @@ async def csv_to_records(loop, stdin, stdout):
             entries = deduplicate_windows_entries(entries)
 
             for entry in entries:
-                bucket_name = entry["Bucket"]
                 object_key = entry["Key"]
 
-                product = bucket_name.split('-')[-1]
+                product = object_key.split('/')[1]  # pub/thunderbird/nightly/...
                 if product not in PRODUCTS:
                     continue
 
