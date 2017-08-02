@@ -146,7 +146,7 @@ async def scan_candidates(session, product):
         futures = []
         versions = []
         for folder in chunk:
-            if folder == "archived/":
+            if "-candidates" not in folder:
                 continue
             version = folder.replace("-candidates/", "")
             versions.append(version)
