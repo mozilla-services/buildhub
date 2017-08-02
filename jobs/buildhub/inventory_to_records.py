@@ -21,6 +21,7 @@ from .utils import (archive_url, chunked, is_release_metadata, is_release_url,
 NB_PARALLEL_REQUESTS = int(os.getenv("NB_PARALLEL_REQUESTS", 8))
 NB_RETRY_REQUEST = int(os.getenv("NB_RETRY_REQUEST", 3))
 TIMEOUT_SECONDS = int(os.getenv("TIMEOUT_SECONDS", 5 * 60))
+PRODUCTS = os.getenv("PRODUCTS", "firefox thunderbird mobile").split(" ")
 
 
 logger = logging.getLogger(__name__)
@@ -137,7 +138,7 @@ async def scan_candidates(session, product):
     if product in _candidates_build_folder:
         return
 
-    logger.info("Scan candidates to get their latest build folder...")
+    logger.info("Scan '{}' candidates to get their latest build folder...".format(product))
     candidates_url = archive_url(product, candidate="/")
     candidates_folders, _ = await fetch_listing(session, candidates_url)
 
@@ -145,7 +146,7 @@ async def scan_candidates(session, product):
         futures = []
         versions = []
         for folder in chunk:
-            if folder == "archived/":
+            if "-candidates" not in folder:
                 continue
             version = folder.replace("-candidates/", "")
             versions.append(version)
@@ -256,10 +257,15 @@ async def csv_to_records(loop, stdin, stdout):
             entries = deduplicate_windows_entries(entries)
 
             for entry in entries:
-                bucket_name = entry["Bucket"]
                 object_key = entry["Key"]
 
-                product = bucket_name.split('-')[-1]
+                try:
+                    product = object_key.split('/')[1]  # /pub/thunderbird/nightly/...
+                except IndexError:
+                    continue  # e.g. https://archive.mozilla.org/favicon.ico
+
+                if product not in PRODUCTS:
+                    continue
 
                 # Scan the list of candidates metadata (no-op if already initialized).
                 await scan_candidates(session, product)

@@ -31,17 +31,23 @@ In order to fetch inventories from S3, install the dedicated Amazon Services cli
 
    sudo apt-get install awscli
 
-List available manifests in inventories folder:
+We are interested in two listing: ``firefox`` and ``archive`` (thunderbird, mobile).
 
 .. code-block:: bash
 
-    aws --no-sign-request --region us-east-1 s3 ls "s3://net-mozaws-prod-delivery-inventory-us-east-1/public/inventories/net-mozaws-prod-delivery-firefox/delivery-firefox/"
+    export LISTING=archive
+
+List available manifests in the inventories folder:
+
+.. code-block:: bash
+
+    aws --no-sign-request --region us-east-1 s3 ls "s3://net-mozaws-prod-delivery-inventory-us-east-1/public/inventories/net-mozaws-prod-delivery-$LISTING/delivery-$LISTING/"
 
 Download the latest manifest:
 
 .. code-block:: bash
 
-    aws --no-sign-request --region us-east-1 s3 cp s3://net-mozaws-prod-delivery-inventory-us-east-1/public/inventories/net-mozaws-prod-delivery-firefox/delivery-firefox/2017-07-13T00-09Z/manifest.json
+    aws --no-sign-request --region us-east-1 s3 cp s3://net-mozaws-prod-delivery-inventory-us-east-1/public/inventories/net-mozaws-prod-delivery-$LISTING/delivery-$LISTING/2017-08-02T00-11Z/manifest.json
 
 Download the associated files (using `jq <https://stedolan.github.io/jq/download/>`_):
 
@@ -69,6 +75,8 @@ Load records into Kinto:
 .. code-block:: bash
 
     cat records.data | to-kinto --server https://kinto/ --bucket build-hub --collection release --auth user:pass initialization.yaml
+
+Repeat with ``LISTING=firefox``.
 
 
 System-Addons updates
