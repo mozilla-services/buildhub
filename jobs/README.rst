@@ -35,13 +35,13 @@ List available manifests in inventories folder:
 
 .. code-block:: bash
 
-    aws --no-sign-request --region us-east-1 s3 ls "s3://net-mozaws-prod-delivery-inventory-us-east-1/public/inventories/net-mozaws-prod-delivery-firefox/delivery-firefox/"
+    aws --no-sign-request --region us-east-1 s3 ls "s3://net-mozaws-prod-delivery-inventory-us-east-1/public/inventories/net-mozaws-prod-delivery-archive/delivery-archive/"
 
 Download the latest manifest:
 
 .. code-block:: bash
 
-    aws --no-sign-request --region us-east-1 s3 cp s3://net-mozaws-prod-delivery-inventory-us-east-1/public/inventories/net-mozaws-prod-delivery-firefox/delivery-firefox/2017-07-13T00-09Z/manifest.json
+    aws --no-sign-request --region us-east-1 s3 cp s3://net-mozaws-prod-delivery-inventory-us-east-1/public/inventories/net-mozaws-prod-delivery-archive/delivery-archive/2017-08-02T00-11Z/manifest.json
 
 Download the associated files (using `jq <https://stedolan.github.io/jq/download/>`_):
 
