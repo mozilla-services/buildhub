@@ -134,29 +134,35 @@ const sortVersions = filters => {
   return filters.sort((a, b) => {
     const partsA = a.key.split(".")
     const partsB = b.key.split(".")
-    if (partsA[0] !== partsB[0]) {
-      // sort on major version.
-      return parseInt(partsB[0], 10) - parseInt(partsA[0], 10)
+    if (partsA.length < 2 || partsB.length < 2) {
+      // Bogus version, list is last.
+      return 1;
     }
-    if (partsA[1] !== partsB[1]) {
-      const subPartRegex = /^(\d+)([a-zA-Z]+)?(\d+)?([a-zA-Z]+)?/ // Eg: 0b12pre
-      const subPartA = partsA[1].match(subPartRegex) // Eg: ["0b1pre", "0", "b", "12", "pre"]
-      const subPartB = partsB[1].match(subPartRegex)
-      if (subPartA[1] !== subPartB[1]) {
-        return parseInt(subPartB[1], 10) - parseInt(subPartA[1], 10)
+    let i = 0;
+    while (partsA[i] === partsB[i]) { // Skip all the parts that are equal.
+      i++
+    }
+    if (!partsA[i] || !partsB[i]) {
+      // Both versions have the same parts, but one has more parts, eg 56.0 and 56.0.1.
+      return partsB.length - partsA.length
+    }
+    const subPartRegex = /^(\d+)([a-zA-Z]+)?(\d+)?([a-zA-Z]+)?/ // Eg: 0b12pre
+    const subPartA = partsA[i].match(subPartRegex) // Eg: ["0b1pre", "0", "b", "12", "pre"]
+    const subPartB = partsB[i].match(subPartRegex)
+    if (subPartA[1] !== subPartB[1]) {
+      return parseInt(subPartB[1], 10) - parseInt(subPartA[1], 10)
+    }
+    if (subPartA[2] !== subPartB[2]) {
+      if (subPartA[2] && !subPartB[2]) {
+        return 1
       }
-      if (subPartA[2] !== subPartB[2]) {
-        if (subPartA[2] && !subPartB[2]) {
-          return 1
-        }
-        if (subPartB[2] && !subPartA[2]) {
-          return -1
-        }
-        return subPartB[2].localeCompare(subPartA[2])
+      if (subPartB[2] && !subPartA[2]) {
+        return -1
       }
-      if (subPartA[3] !== subPartB[3]) {
-        return parseInt(subPartB[3], 10) - parseInt(subPartA[3], 10)
-      }
+      return subPartB[2].localeCompare(subPartA[2])
+    }
+    if (subPartA[3] !== subPartB[3]) {
+      return parseInt(subPartB[3], 10) - parseInt(subPartA[3], 10)
     }
     return parseInt(partsB[2], 10) - parseInt(partsA[2], 10)
   })
