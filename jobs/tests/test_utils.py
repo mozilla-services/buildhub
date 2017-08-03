@@ -592,6 +592,7 @@ WRONG_RELEASE_FILENAMES = [
     ("thunderbird", "/pub/thunderbird/test/inlinespellcheck-test-build/thunderbird-win32.zip"),
     ("thunderbird", "/pub/thunderbird/test/standard8-jmalloc-test/special-test-no-jemalloc.exe"),
     ("firefox", "/pub/firefox/try-builds/jg%40m.com-e/try-win64/firefox-56.0a1.en-US.win64.zip"),
+    ("firefox", "/pub/firefox/releases/namoroka/alpha2/wince-arm/en-US/firefox-3.6a2.zip")
 ]
 
 
