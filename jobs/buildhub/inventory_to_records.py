@@ -240,11 +240,14 @@ async def csv_to_records(loop, stdin, stdout):
 
     def deduplicate_windows_entries(entries):
         # Windows releases are published as both .zip and .exe files.
-        # Deduplicate these (keep .zip if .exe is present, else .exe only)
+        # Deduplicate these (keep .zip if .exe is present, else .exe only).
+        # Some old Linux versions (1.5b2) were published with installer.tar.gz.
         longer_first = sorted(entries, key=lambda e: len(e["Key"]), reverse=True)
         deduplicate = {
             e["Key"].replace('.installer.exe', '')
                     .replace('.exe', '')
+                    .replace('.installer.tar.gz', '')
+                    .replace('.tar.gz', '')
                     .replace('.zip', ''): e
             for e in longer_first}
         return deduplicate.values()

@@ -87,4 +87,24 @@ class CsvToRecordsTest(asynctest.TestCase):
                     'date': '2017-06-02T15:20:10Z'
                 }
             }
+        }, {
+            'data': {
+                'id': 'firefox_beta_1-5b2_linux-i686_en-us',
+                'download': {
+                    'date': '2015-10-09T15:20:10Z',
+                    'mimetype': 'application/x-gzip',
+                    'size': 60000,
+                    'url': ('https://archive.mozilla.org/pub/firefox/releases/1.5b2/'
+                            'linux-i686/en-US/firefox-1.5b2.tar.gz')
+                },
+                'source': {
+                    'product': 'firefox'
+                },
+                'target': {
+                    'channel': 'beta',
+                    'locale': 'en-US',
+                    'platform': 'linux-i686',
+                    'version': '1.5b2'
+                }
+            }
         }]
