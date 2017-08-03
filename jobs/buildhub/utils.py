@@ -303,4 +303,8 @@ def merge_metadata(record, metadata):
         "id": buildid,
         "date": builddate,
     }
+    # For release builds, we have the build number:
+    if "buildnumber" in metadata:
+        record['build']['number'] = metadata["buildnumber"]
+
     return record

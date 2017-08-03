@@ -193,11 +193,15 @@ class FetchReleaseMetadata(asynctest.TestCase):
             m.get(candidate_folder + "firefox-54.0.json", payload={"buildid": "20170512"})
             received = await inventory_to_records.fetch_release_metadata(self.session, self.record)
             assert received == {
-                "buildid": "20170512"
+                "buildid": "20170512",
+                "buildnumber": 3,
             }
         # Now cached, no need to mock HTTP responses.
         received = await inventory_to_records.fetch_release_metadata(self.session, self.record)
-        assert received == {"buildid": "20170512"}
+        assert received == {
+            "buildid": "20170512",
+            "buildnumber": 3,
+        }
 
     async def test_fetch_release_metadata_failing(self):
         archive_url = utils.ARCHIVE_URL + "pub/firefox/candidates/"
@@ -229,7 +233,10 @@ class FetchReleaseMetadata(asynctest.TestCase):
             m.get(candidate_folder + "firefox-54.0.json", payload={"buildid": "20170512"})
             received = await inventory_to_records.fetch_release_metadata(self.session,
                                                                          record)
-            assert received == {"buildid": "20170512"}
+            assert received == {
+                "buildid": "20170512",
+                "buildnumber": 3,
+            }
 
 
 class ScanCandidates(asynctest.TestCase):
@@ -358,7 +365,8 @@ class CSVToRecords(asynctest.TestCase):
                 'id': 'firefox_51-0_win64_fy-nl',
                 'build': {
                     'id': '20170118123726',
-                    'date': '2017-01-18T12:37:26Z'
+                    'date': '2017-01-18T12:37:26Z',
+                    'number': 2
                 },
                 'download': {
                     'date': '2017-06-11T12:20:10Z',

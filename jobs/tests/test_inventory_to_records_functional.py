@@ -66,7 +66,8 @@ class CsvToRecordsTest(asynctest.TestCase):
                 'id': 'firefox_52-0_linux-x86_64_fr',
                 'build': {
                     'id': '20170302120751',
-                    'date': '2017-03-02T12:07:51Z'
+                    'date': '2017-03-02T12:07:51Z',
+                    'number': 2
                 },
                 'source': {
                     'product': 'firefox',

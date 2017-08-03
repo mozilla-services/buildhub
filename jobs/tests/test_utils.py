@@ -755,6 +755,7 @@ METADATA_RECORDS = [
         "source": {"product": "firefox"}
      }, {
         "buildid": "201706121152",
+        "buildnumber": 3,
         "moz_source_repo": "MOZ_SOURCE_REPO=https://hg.mozilla.org/central/beta",
         "moz_source_stamp": "b0925nfubg",
      }, {
@@ -767,7 +768,8 @@ METADATA_RECORDS = [
         },
         "build": {
             "date": "2017-06-12T11:05:02Z",
-            "id": "201706121152"
+            "id": "201706121152",
+            "number": 3
         }
     }),
 ]

@@ -177,12 +177,14 @@ async def fetch_release_metadata(session, record):
     platform = platform.replace("-eme-free", "")
 
     try:
-        latest_build_folder = "/" + _candidates_build_folder[product][version]
+        latest_build_folder = _candidates_build_folder[product][version]
     except KeyError:
         # Version is not listed in candidates. Give up.
         return None
 
-    url = archive_url(product, version, platform, locale, candidate=latest_build_folder)
+    build_number = int(latest_build_folder.strip('/')[-1])  # build3 -> 3
+
+    url = archive_url(product, version, platform, locale, candidate="/" + latest_build_folder)
 
     # We already have the metadata for this platform and version.
     if url in _release_metadata:
@@ -193,6 +195,7 @@ async def fetch_release_metadata(session, record):
         filename = f["name"]
         if is_release_build_metadata(product, version, filename):
             metadata = await fetch_json(session, url + filename)
+            metadata["buildnumber"] = build_number
             _release_metadata[url] = metadata
             return metadata
 

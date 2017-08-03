@@ -91,6 +91,10 @@ build-hub:
                   format: date-time
                   title: Build date
                   description: 'i.e: 2017-04-13T21:49:00Z'
+                number:
+                  type: integer
+                  title: Version
+                  description: Build number
             target:
               type: object
               additionalProperties: false
@@ -190,6 +194,7 @@ build-hub:
             ui:order:
               - id
               - date
+              - number
           target:
             ui:order:
               - platform
