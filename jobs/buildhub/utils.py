@@ -16,6 +16,8 @@ KNOWN_MIMETYPES = {
 
 
 def archive_url(product, version=None, platform=None, locale=None, nightly=None, candidate=None):
+    """Returns the related URL on archive.mozilla.org
+    """
     product = product if product != "fennec" else "mobile"
 
     if platform is not None:
@@ -100,7 +102,7 @@ def build_record_id(record):
     return id_.replace('.', '-').lower()
 
 
-def is_release_url(product, url):
+def is_build_url(product, url):
     """
     - firefox/nightly/experimental/sparc-633408-fix/
           firefox-4.0b11.en-US.solaris-10-fcs-sparc-fix-633408.tar.bz2
@@ -126,7 +128,7 @@ def is_release_url(product, url):
     if re_exclude.match(url):
         return False
     """
-    Examples of release filenames:
+    Examples of build filenames:
 
     - firefox-53.0.tar.bz2
 
@@ -146,7 +148,7 @@ def is_release_url(product, url):
     return re_filename.match(match_filename) and not re_exclude.match(match_filename)
 
 
-def is_release_metadata(product, version, filename):
+def is_release_build_metadata(product, version, filename):
     """
     Examples of release metadata filenames:
 

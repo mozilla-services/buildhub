@@ -8,8 +8,4 @@ This document describes changes between each past release.
 
 **Initial version**
 
-- Scrape product releases and nightlies from https://archives.mozilla.org
-- Fetch system addons update information from Balrog
-- Add mimetype support (#47)
-- Infer channel from URL (fixes #8)
-- Skip tests files and crashreporters symbols (fixes #57)
+- Read build information from S3 inventories and https://archives.mozilla.org

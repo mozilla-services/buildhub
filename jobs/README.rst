@@ -1,4 +1,4 @@
-This folder contains several scripts to aggregate build information from different sources and keeping it up to date.
+This folder contains several scripts to aggregate build information from Mozilla archives (and eventually keeping it up to date).
 
 .. note::
 
@@ -77,17 +77,3 @@ Load records into Kinto:
     cat records.data | to-kinto --server https://kinto/ --bucket build-hub --collection release --auth user:pass initialization.yaml
 
 Repeat with ``LISTING=firefox``.
-
-
-System-Addons updates
-=====================
-
-Fetch information about available system addons updates for every Firefox release.
-Each addon has its ID, a builtin version (if any), and an update available from AUS (if any).
-
-The script will fetch addons updates only if the ``systemaddons`` field of the archive record is set (e.g. not null).
-
-.. code-block:: bash
-
-    python3 sysaddons_update.py --server http://localhost:8888/v1 --auth user:pass --debug
-

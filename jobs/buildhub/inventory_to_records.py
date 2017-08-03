@@ -13,7 +13,7 @@ from collections import defaultdict
 import aiohttp
 import backoff
 
-from .utils import (archive_url, chunked, is_release_metadata, is_release_url,
+from .utils import (archive_url, chunked, is_release_build_metadata, is_build_url,
                     record_from_url, localize_nightly_url, merge_metadata, check_record,
                     ARCHIVE_URL, FILE_EXTENSIONS, DATETIME_FORMAT)
 
@@ -79,7 +79,7 @@ _nightly_metadata = {}
 
 
 async def fetch_nightly_metadata(session, record):
-    """A JSON file containing build info is published along the nightly archive.
+    """A JSON file containing build info is published along the nightly build archive.
     """
     global _nightly_metadata
 
@@ -191,7 +191,7 @@ async def fetch_release_metadata(session, record):
     _, files = await fetch_listing(session, url)
     for f in files:
         filename = f["name"]
-        if is_release_metadata(product, version, filename):
+        if is_release_build_metadata(product, version, filename):
             metadata = await fetch_json(session, url + filename)
             _release_metadata[url] = metadata
             return metadata
@@ -275,7 +275,7 @@ async def csv_to_records(loop, stdin, stdout):
 
                 url = ARCHIVE_URL + object_key
 
-                if not is_release_url(product, url):
+                if not is_build_url(product, url):
                     continue
 
                 record = record_from_url(url)
@@ -299,7 +299,8 @@ async def csv_to_records(loop, stdin, stdout):
 
 
 async def main(loop):
-    parser = argparse.ArgumentParser(description='Load S3 inventory as Kinto releases.')
+    parser = argparse.ArgumentParser(description=('Read S3 CSV inventory from stdin '
+                                                  'and print out Kinto records.'))
     parser.add_argument('-v', '--verbose', action='store_const',
                         const=logging.INFO, dest='verbosity',
                         help='Show all messages.')
