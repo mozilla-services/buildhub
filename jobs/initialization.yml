@@ -155,35 +155,12 @@ build-hub:
                   type: integer
                   title: Size
                   description: Size of the archive in bytes
-            systemaddons:
-              type: array
-              title: Systemaddons
-              items:
-                type: object
-                additionalProperties: false
-                required:
-                  - id
-                  - builtin
-                  - updated
-                properties:
-                  id:
-                    type: string
-                    title: ID
-                  builtin:
-                    type: string
-                    title: Built in version
-                    description: Version in release
-                  updated:
-                    type: string
-                    title: Updated version
-                    description: Last update version
         uiSchema:
           ui:order:
             - source
             - download
             - build
             - target
-            - systemaddons
           download:
             ui:order:
               - url
@@ -206,9 +183,3 @@ build-hub:
               - locale
               - version
               - channel
-          systemaddons:
-            items:
-              ui:order:
-                - id
-                - builtin
-                - updated
