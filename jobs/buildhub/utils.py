@@ -121,7 +121,7 @@ def is_release_url(product, url):
         return False
 
     re_exclude = re.compile(".+(tinderbox|try-builds|partner-repacks|latest|contrib|/0\.|"
-                            "experimental|debug|sha1-installers|candidates|"
+                            "experimental|namoroka|debug|sha1-installers|candidates|"
                             "stylo-bindings|/1.0rc/|dominspector|/test/)")
     if re_exclude.match(url):
         return False
