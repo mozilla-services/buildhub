@@ -47,6 +47,7 @@ class CsvToRecordsTest(asynctest.TestCase):
                 },
                 'target': {
                     'platform': 'linux-x86_64',
+                    'os': 'linux',
                     'locale': 'en-US',
                     'version': '55.0a1',
                     'channel': 'nightly'
@@ -75,6 +76,7 @@ class CsvToRecordsTest(asynctest.TestCase):
                 },
                 'target': {
                     'platform': 'linux-x86_64',
+                    'os': 'linux',
                     'locale': 'fr',
                     'version': '52.0',
                     'channel': 'release'
@@ -104,6 +106,7 @@ class CsvToRecordsTest(asynctest.TestCase):
                     'channel': 'beta',
                     'locale': 'en-US',
                     'platform': 'linux-i686',
+                    'os': 'linux',
                     'version': '1.5b2'
                 }
             }

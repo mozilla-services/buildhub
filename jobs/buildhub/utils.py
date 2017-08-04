@@ -82,6 +82,13 @@ def guess_channel(url, version):
     return channel
 
 
+def normalized_platform(platform):
+    for p in ("linux", "win", "mac", "android", "maemo"):
+        if p in platform:
+            return p
+    raise ValueError("Unknown plaform {}".format(platform))
+
+
 def build_record_id(record):
     version = record["target"]["version"]
 
@@ -237,6 +244,7 @@ def record_from_url(url):
         },
         "target": {
             "platform": platform,
+            "os": normalized_platform(platform),
             "locale": locale,
             "version": version,
             "channel": channel,
