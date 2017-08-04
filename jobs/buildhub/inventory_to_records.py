@@ -238,7 +238,7 @@ async def csv_to_records(loop, stdin, stdout):
         if result:
             yield result
 
-    def deduplicate_windows_entries(entries):
+    def deduplicate_entries(entries):
         # Windows releases are published as both .zip and .exe files.
         # Deduplicate these (keep .zip if .exe is present, else .exe only).
         # Some old Linux versions (1.5b2) were published with installer.tar.gz.
@@ -257,7 +257,7 @@ async def csv_to_records(loop, stdin, stdout):
 
         for entries in inventory_by_folder(stdin):
 
-            entries = deduplicate_windows_entries(entries)
+            entries = deduplicate_entries(entries)
 
             for entry in entries:
                 object_key = entry["Key"]
