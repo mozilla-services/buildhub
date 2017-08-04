@@ -12,7 +12,7 @@ Usage:
 
 It is meant to be combined with other commands that output records to stdout :)
 
-    $ load-inventory filename.csv | to-kinto --auth=user:pass
+    $ cat filename.csv | inventory-to-records | to-kinto --auth=user:pass
     $ scrape-archives | to-kinto --auth=user:pass
 
 """

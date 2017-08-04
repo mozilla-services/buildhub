@@ -142,19 +142,19 @@ build-hub:
                 url:
                   type: string
                   title: URL
-                  description: URL of the archive
+                  description: URL of the build
                 mimetype:
                   type: string
-                  title: Archive's mimetype
+                  title: Mimetype
                 date:
                   type: string
                   format: date-time
                   title: Date
-                  description: Date of the archive
+                  description: Build publication date
                 size:
                   type: integer
                   title: Size
-                  description: Size of the archive in bytes
+                  description: In bytes
             systemaddons:
               type: array
               title: Systemaddons

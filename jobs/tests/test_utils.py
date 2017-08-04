@@ -1,7 +1,7 @@
 import pytest
 
 from buildhub.utils import (
-    archive_url, build_record_id, is_release_metadata, is_release_url,
+    archive_url, build_record_id, is_release_build_metadata, is_build_url,
     guess_mimetype, guess_channel, chunked, localize_nightly_url,
     record_from_url, merge_metadata, check_record
 )
@@ -537,8 +537,8 @@ RELEASE_METADATA_FILENAMES = [
 
 
 @pytest.mark.parametrize("product,version,filename", RELEASE_METADATA_FILENAMES)
-def test_is_release_metadata(product, version, filename):
-    assert is_release_metadata(product, version, filename)
+def test_is_release_build_metadata(product, version, filename):
+    assert is_release_build_metadata(product, version, filename)
 
 
 WRONG_RELEASE_METADATA_FILENAMES = [
@@ -550,7 +550,7 @@ WRONG_RELEASE_METADATA_FILENAMES = [
 
 @pytest.mark.parametrize("product,version,filename", WRONG_RELEASE_METADATA_FILENAMES)
 def test_wrong_release_metadata(product, version, filename):
-    assert not is_release_metadata(product, version, filename)
+    assert not is_release_build_metadata(product, version, filename)
 
 
 RELEASE_FILENAMES = [
@@ -573,8 +573,8 @@ RELEASE_FILENAMES = [
 
 
 @pytest.mark.parametrize("product,filename", RELEASE_FILENAMES)
-def test_is_release_url(product, filename):
-    assert is_release_url(product, filename)
+def test_is_build_url(product, filename):
+    assert is_build_url(product, filename)
 
 
 WRONG_RELEASE_FILENAMES = [
@@ -598,7 +598,7 @@ WRONG_RELEASE_FILENAMES = [
 
 @pytest.mark.parametrize("product,filename", WRONG_RELEASE_FILENAMES)
 def test_wrong_release_url(product, filename):
-    assert not is_release_url(product, filename)
+    assert not is_build_url(product, filename)
 
 
 URLS_MIMETYPES = [
