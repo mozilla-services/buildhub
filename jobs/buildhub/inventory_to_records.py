@@ -15,6 +15,7 @@ import backoff
 
 from .utils import (archive_url, chunked, is_release_build_metadata, is_build_url,
                     record_from_url, localize_nightly_url, merge_metadata, check_record,
+                    localize_release_candidate_url,
                     ARCHIVE_URL, FILE_EXTENSIONS, DATETIME_FORMAT)
 
 
@@ -69,6 +70,8 @@ async def fetch_metadata(session, record):
     try:
         if record["target"]["channel"] == "nightly":
             return await fetch_nightly_metadata(session, record)
+        if "rc" in record["target"]["version"]:
+            return await fetch_release_candidate_metadata(session, record)
         return await fetch_release_metadata(session, record)
     except ValueError as e:
         logger.warning(e)
@@ -126,6 +129,30 @@ async def fetch_nightly_metadata(session, record):
 
         logger.error("Could not fetch metadata for '%s' from '%s'" % (record["id"], metadata_url))
         return None
+
+
+_rc_metadata = {}
+
+
+async def fetch_release_candidate_metadata(session, record):
+    """A JSON file containing build info is published along the nightly build archive.
+    """
+    global _rc_metadata
+
+    url = record["download"]["url"]
+
+    # Make sure the nightly_url is turned into a en-US one.
+    rc_url = localize_release_candidate_url(url)
+
+    if rc_url in _rc_metadata:
+        return _rc_metadata[rc_url]
+
+    metadata_url = re.sub("\.({})$".format(FILE_EXTENSIONS), ".json", rc_url)
+    metadata = await fetch_json(session, metadata_url)
+    # XXX
+    metadata["buildnumber"] = 2
+    _rc_metadata[rc_url] = metadata
+    return metadata
 
 
 _candidates_build_folder = defaultdict(dict)

@@ -60,6 +60,11 @@ def localize_nightly_url(nightly_url):
     return '.'.join(parts)
 
 
+def localize_release_candidate_url(rc_url):
+    # XXX
+    return rc_url.replace("zh-TW", "en-US")
+
+
 def guess_channel(url, version):
     channel = 'release'
     if 'nightly' in url:
@@ -130,8 +135,8 @@ def is_build_url(product, url):
         return False
 
     re_exclude = re.compile(".+(tinderbox|try-builds|partner-repacks|latest|contrib|/0\.|"
-                            "experimental|namoroka|debug|sha1-installers|candidates|"
-                            "stylo-bindings|/1.0rc/|dominspector|/test/)")
+                            "experimental|namoroka|debug|sha1-installers|candidates/archived|"
+                            "stylo-bindings|/1.0rc/|dominspector|/test/|testing)")
     if re_exclude.match(url):
         return False
     """

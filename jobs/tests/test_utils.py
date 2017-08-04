@@ -143,6 +143,25 @@ RECORDS = [
         }
     },
 
+    # Firefox Beta Candidates
+    {
+        "id": "firefox_beta_55-0b9rc2_win64_zh-tw",
+        "source": {
+            "product": "firefox",
+        },
+        "target": {
+            "version": "55.0b9rc2",
+            "platform": "win64",
+            "locale": "zh-TW",
+            "channel": "beta"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/firefox/candidates/55.0b9-candidates/build2/"
+            "win64/zh-TW/firefox-55.0b9.zip",
+            "mimetype": "application/zip"
+        }
+    },
+
     # Firefox Release
     {
         "id": "firefox_52-0_linux-x86_64_fr",
@@ -595,6 +614,8 @@ RELEASE_FILENAMES = [
     ("firefox", "Firefox 50.0.1.dmg"),
     ("devedition", "Firefox Setup 54.0b11.exe"),
     ("devedition", "firefox-54.0b11.tar.bz2"),
+    ("firefox", ("pub/firefox/candidates/50.0-candidates/build1/"
+                 "linux-x86_64/fr/firefox-50.0.tar.bz2")),
 ]
 
 

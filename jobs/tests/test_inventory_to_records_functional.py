@@ -111,4 +111,32 @@ class CsvToRecordsTest(asynctest.TestCase):
                     'version': '1.5b2'
                 }
             }
+        }, {
+            'data': {
+                'id': 'firefox_beta_55-0b9rc2_win64_zh-tw',
+                'download': {
+                    'date': '2017-07-13T23:37:21Z',
+                    'mimetype': 'application/zip',
+                    'size': 53251778,
+                    'url': 'https://archive.mozilla.org/pub/firefox/candidates/'
+                           '55.0b9-candidates/build2/win64/zh-TW/firefox-55.0b9.zip'
+                },
+                'build': {
+                    'id': '20170713130618',
+                    'date': '2017-07-13T13:06:18Z',
+                    'number': 2
+                },
+                'source': {
+                    'product': 'firefox',
+                    'revision': '91e10e2411762dea81d5df70d9fefe96fe619353',
+                    'repository': 'https://hg.mozilla.org/releases/mozilla-beta',
+                    'tree': 'releases/mozilla-beta'
+                },
+                'target': {
+                    'channel': 'beta',
+                    'locale': 'zh-TW',
+                    'platform': 'win64',
+                    'version': '55.0b9rc2'
+                }
+            }
         }]
