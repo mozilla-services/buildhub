@@ -108,6 +108,12 @@ build-hub:
                   type: string
                   title: OS
                   description: Operating system family
+                  enum:
+                    - linux
+                    - win
+                    - mac
+                    - android
+                    - maemo
                 locale:
                   type: string
                   title: Locale
