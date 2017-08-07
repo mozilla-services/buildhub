@@ -173,9 +173,8 @@ async def fetch_release_metadata(session, record):
     platform = record["target"]["platform"]
     locale = "en-US"
 
-    # Metadata for EME-free are the same as original release.
-    platform = platform.replace("-eme-free", "")
-
+    # Metadata for EME-free and sha1 repacks are the same as original release.
+    platform = re.sub("-(eme-free|sha1)", "", platform, flags=re.I)
     try:
         latest_build_folder = "/" + _candidates_build_folder[product][version]
     except KeyError:

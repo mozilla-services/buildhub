@@ -214,6 +214,7 @@ class FetchReleaseMetadata(asynctest.TestCase):
         assert await inventory_to_records.fetch_release_metadata(self.session, self.record) is None
 
     async def test_fetch_metadata_from_eme_url(self):
+        # /pub/firefox/candidates/54.0-candidates/build3/mac-EME-free/dsb/Firefox%2054.0.dmg
         record = {
             "source": {"product": "firefox"},
             "target": {"version": "54.0", "platform": "linux-x86_64-eme-free", "locale": "fr-FR"}
@@ -227,6 +228,26 @@ class FetchReleaseMetadata(asynctest.TestCase):
                 ]
             })
             m.get(candidate_folder + "firefox-54.0.json", payload={"buildid": "20170512"})
+            received = await inventory_to_records.fetch_release_metadata(self.session,
+                                                                         record)
+            assert received == {"buildid": "20170512"}
+
+    async def test_fetch_metadata_from_sha1(self):
+        # /pub/firefox/releases/45.3.0esr/win64-sha1/fy-NL/Firefox%20Setup%2045.3.0esr.exe
+        inventory_to_records._candidates_build_folder["firefox"] = {"45.3.0esr": "build3/"}
+        record = {
+            "source": {"product": "firefox"},
+            "target": {"version": "45.3.0esr", "platform": "win64-sha1", "locale": "fy-NL"}
+        }
+        with aioresponses() as m:
+            archive_url = utils.ARCHIVE_URL + "pub/firefox/candidates/"
+            candidate_folder = archive_url + "45.3.0esr-candidates/build3/win64/en-US/"
+            m.get(candidate_folder, payload={
+                "prefixes": [], "files": [
+                    {"name": "firefox-45.3.0esr.json"}
+                ]
+            })
+            m.get(candidate_folder + "firefox-45.3.0esr.json", payload={"buildid": "20170512"})
             received = await inventory_to_records.fetch_release_metadata(self.session,
                                                                          record)
             assert received == {"buildid": "20170512"}

@@ -686,7 +686,7 @@ NIGHTLY_URLS = [
     ("https://archive.mozilla.org/pub/firefox/nightly/2017/06/2017-06-20-03-02-08-"
      "mozilla-central-l10n/firefox-56.0a1.ru.mac.dmg",
      "https://archive.mozilla.org/pub/firefox/nightly/2017/06/2017-06-20-03-02-08-"
-     "mozilla-central/firefox-56.0a1.en-US.mac.dmg")
+     "mozilla-central/firefox-56.0a1.en-US.mac.dmg"),
 ]
 
 
