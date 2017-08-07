@@ -141,16 +141,23 @@ async def fetch_release_candidate_metadata(session, record):
 
     url = record["download"]["url"]
 
-    # Make sure the nightly_url is turned into a en-US one.
+    # Make sure the rc URL is turned into a en-US one.
     rc_url = localize_release_candidate_url(url)
 
     if rc_url in _rc_metadata:
         return _rc_metadata[rc_url]
 
     metadata_url = re.sub("\.({})$".format(FILE_EXTENSIONS), ".json", rc_url)
-    metadata = await fetch_json(session, metadata_url)
-    # XXX
-    metadata["buildnumber"] = 2
+    try:
+        metadata = await fetch_json(session, metadata_url)
+    except aiohttp.ClientError as e:
+        logger.error(metadata_url)
+        raise
+
+    # We already have the build number in the version (1.5rc3)
+    m = re.search("rc(\d+)", record["target"]["version"])
+    metadata["buildnumber"] = int(m.group(1))
+
     _rc_metadata[rc_url] = metadata
     return metadata
 

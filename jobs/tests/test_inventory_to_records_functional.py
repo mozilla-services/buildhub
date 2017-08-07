@@ -136,6 +136,7 @@ class CsvToRecordsTest(asynctest.TestCase):
                     'channel': 'beta',
                     'locale': 'zh-TW',
                     'platform': 'win64',
+                    'os': 'win',
                     'version': '55.0b9rc2'
                 }
             }

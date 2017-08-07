@@ -160,6 +160,39 @@ class FetchNightlyMetadata(asynctest.TestCase):
                             "moz_source_stamp": "55f39d8d866c"}
 
 
+class FetchRCMetadata(asynctest.TestCase):
+    async def setUp(self):
+        self.session = aiohttp.ClientSession(loop=self.loop)
+        self.addCleanup(self.session.close)
+
+    def tearDown(self):
+        inventory_to_records._rc_metadata.clear()
+
+    async def test_fetch_rc_metadata(self):
+        with aioresponses() as m:
+            m.get("http://server.org/54.0-candidates/build3/"
+                  "win64/en-US/firefox.en-US.win32.json",
+                  payload={"buildid": "20170512"})
+            result = await inventory_to_records.fetch_release_candidate_metadata(
+                self.session, {
+                    "download": {
+                        "url": "http://server.org/54.0-candidates/build3/"
+                               "win64/en-US/firefox.en-US.win32.zip"
+                    },
+                    "target": {"version": "1.0rc3"}
+                })
+            assert result == {"buildid": "20170512", "buildnumber": 3}
+
+    async def test_does_not_hit_server_if_already_known(self):
+        url = "http://server.org/54.0-candidates/build3/win64/en-US/firefox.en-US.win32.zip"
+        metadata = {"a": 1, "b": 2}
+        inventory_to_records._rc_metadata[url] = metadata
+        result = await inventory_to_records.fetch_release_candidate_metadata(self.session, {
+                "download": {"url": url}
+            })
+        assert result == metadata
+
+
 class FetchReleaseMetadata(asynctest.TestCase):
     async def setUp(self):
         self.session = aiohttp.ClientSession(loop=self.loop)

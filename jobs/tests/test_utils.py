@@ -2,8 +2,8 @@ import pytest
 
 from buildhub.utils import (
     archive_url, build_record_id, is_release_build_metadata, is_build_url,
-    guess_mimetype, guess_channel, chunked, localize_nightly_url,
-    record_from_url, merge_metadata, check_record, normalized_platform
+    guess_mimetype, guess_channel, chunked, localize_nightly_url, normalized_platform,
+    localize_release_candidate_url, record_from_url, merge_metadata, check_record
 )
 
 
@@ -152,6 +152,7 @@ RECORDS = [
         "target": {
             "version": "55.0b9rc2",
             "platform": "win64",
+            'os': 'win',
             "locale": "zh-TW",
             "channel": "beta"
         },
@@ -740,6 +741,19 @@ NIGHTLY_URLS = [
 @pytest.mark.parametrize("localized_url,american_url", NIGHTLY_URLS)
 def test_localize_nightly_url(localized_url, american_url):
     assert localize_nightly_url(localized_url) == american_url
+
+
+RC_URLS = [
+    ("https://archive.mozilla.org/pub/firefox/candidates/54.0b9-candidates/build1/"
+     "win64/ta/Firefox%20Setup%2054.0b9.exe",
+     "https://archive.mozilla.org/pub/firefox/candidates/54.0b9-candidates/build1/"
+     "win64/en-US/Firefox%20Setup%2054.0b9.exe"),
+]
+
+
+@pytest.mark.parametrize("localized_url,american_url", RC_URLS)
+def test_localize_rc_url(localized_url, american_url):
+    assert localize_release_candidate_url(localized_url) == american_url
 
 
 @pytest.mark.parametrize("record", RECORDS)
