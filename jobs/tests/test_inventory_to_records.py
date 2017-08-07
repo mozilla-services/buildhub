@@ -377,6 +377,7 @@ class CSVToRecords(asynctest.TestCase):
                     'channel': 'release',
                     'locale': 'fy-NL',
                     'platform': 'win64',
+                    'os': 'win',
                     'version': '51.0'
                 }
             }
@@ -398,6 +399,7 @@ class CSVToRecords(asynctest.TestCase):
                     'channel': 'nightly',
                     'locale': 'ach',
                     'platform': 'win32',
+                    'os': 'win',
                     'version': '56.0a1'
                 }
             }

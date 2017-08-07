@@ -37,6 +37,9 @@ build-hub:
                 platform:
                   type: "keyword"
                   index: "not_analyzed"
+                os:
+                  type: "keyword"
+                  index: "not_analyzed"
                 locale:
                   type: "keyword"
                   index: "not_analyzed"
@@ -101,6 +104,16 @@ build-hub:
                   type: string
                   title: Platform
                   description: Operating system and Architecture
+                os:
+                  type: string
+                  title: OS
+                  description: Operating system family
+                  enum:
+                    - linux
+                    - win
+                    - mac
+                    - android
+                    - maemo
                 locale:
                   type: string
                   title: Locale
@@ -180,6 +193,7 @@ build-hub:
           target:
             ui:order:
               - platform
+              - os
               - locale
               - version
               - channel

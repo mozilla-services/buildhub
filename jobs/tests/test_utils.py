@@ -3,7 +3,7 @@ import pytest
 from buildhub.utils import (
     archive_url, build_record_id, is_release_build_metadata, is_build_url,
     guess_mimetype, guess_channel, chunked, localize_nightly_url,
-    record_from_url, merge_metadata, check_record
+    record_from_url, merge_metadata, check_record, normalized_platform
 )
 
 
@@ -32,6 +32,7 @@ RECORDS = [
         "target": {
             "version": "1.0rc1",
             "platform": "linux-i686",
+            "os": "linux",
             "locale": "ca-AD",
             "channel": "release"
         },
@@ -51,6 +52,7 @@ RECORDS = [
         "target": {
             "version": "55.0a1",
             "platform": "linux-x86_64",
+            "os": "linux",
             "locale": "en-US",
             "channel": "nightly"
         },
@@ -70,6 +72,7 @@ RECORDS = [
         "target": {
             "version": "54.0a2",
             "platform": "macosx",
+            "os": "mac",
             "locale": "en-US",
             "channel": "aurora"
         },
@@ -89,6 +92,7 @@ RECORDS = [
         "target": {
             "version": "55.0b3",
             "platform": "macosx",
+            "os": "mac",
             "locale": "en-US",
             "channel": "aurora"
         },
@@ -108,6 +112,7 @@ RECORDS = [
         "target": {
             "version": "52.0b6",
             "platform": "linux-x86_64",
+            "os": "linux",
             "locale": "en-US",
             "channel": "beta"
         },
@@ -127,6 +132,7 @@ RECORDS = [
         "target": {
             "version": "50.0rc1",
             "platform": "linux-x86_64",
+            "os": "linux",
             "locale": "fr",
             "channel": "release"
         },
@@ -146,6 +152,7 @@ RECORDS = [
         "target": {
             "version": "52.0",
             "platform": "linux-x86_64",
+            "os": "linux",
             "locale": "fr",
             "channel": "release"
         },
@@ -165,6 +172,7 @@ RECORDS = [
         "target": {
             "version": "52.0esr",
             "platform": "linux-x86_64",
+            "os": "linux",
             "locale": "en-US",
             "channel": "esr"
         },
@@ -184,6 +192,7 @@ RECORDS = [
         "target": {
             "version": "16.0b6",
             "platform": "win32",
+            "os": "win",
             "locale": "bs",
             "channel": "beta"
         },
@@ -203,6 +212,7 @@ RECORDS = [
         "target": {
             "version": "50.0.1",
             "platform": "macosx",
+            "os": "mac",
             "locale": "ko",
             "channel": "release"
         },
@@ -223,6 +233,7 @@ RECORDS = [
             'locale': 'id',
             'version': '22.0-funnelcake23',
             'platform': 'linux-i686',
+            "os": "linux",
             'channel': 'release'
         },
         'download': {
@@ -242,6 +253,7 @@ RECORDS = [
             'locale': 'si',
             'version': '3.0.19-real-real',
             'platform': 'linux-i686',
+            "os": "linux",
             'channel': 'release'
         },
         'download': {
@@ -261,6 +273,7 @@ RECORDS = [
             'locale': 'fi',
             'version': '3.6.3plugin1',
             'platform': 'linux-i686',
+            "os": "linux",
             'channel': 'release'
         },
         'download': {
@@ -280,6 +293,7 @@ RECORDS = [
             'locale': 'es-AR',
             'version': '38.0.5b1-2',
             'platform': 'linux-i686',
+            "os": "linux",
             'channel': 'beta'
         },
         'download': {
@@ -299,6 +313,7 @@ RECORDS = [
             'locale': 'en-US',
             'version': '3.7a4pre',
             'platform': 'win32',
+            "os": "win",
             'channel': 'nightly'
         },
         'download': {
@@ -317,6 +332,7 @@ RECORDS = [
         "target": {
             "version": "11.0b2",
             "platform": "win32",
+            "os": "win",
             "locale": "eu",
             "channel": "beta"
         },
@@ -336,6 +352,7 @@ RECORDS = [
         "target": {
             "version": "10.0.12esr",
             "platform": "macosx",
+            "os": "mac",
             "locale": "pt-BR",
             "channel": "esr"
         },
@@ -355,6 +372,7 @@ RECORDS = [
         "target": {
             "version": "17.0.8esr",
             "platform": "linux-x86_64",
+            "os": "linux",
             "locale": "gd",
             "channel": "esr"
         },
@@ -374,6 +392,7 @@ RECORDS = [
         "target": {
             "version": "17.0",
             "platform": "linux-x86_64",
+            "os": "linux",
             "locale": "gd",
             "channel": "release"
         },
@@ -393,6 +412,7 @@ RECORDS = [
         "target": {
             "version": "24.0",
             "platform": "linux-x86_64",
+            "os": "linux",
             "locale": "gd",
             "channel": "release"
         },
@@ -412,6 +432,7 @@ RECORDS = [
         "target": {
             "version": "39.0b5",
             "platform": "android-api-9",
+            "os": "android",
             "locale": "sl",
             "channel": "beta"
         },
@@ -431,6 +452,7 @@ RECORDS = [
         "target": {
             "version": "42.0b2",
             "platform": "android-api-9",
+            "os": "android",
             "locale": "fr",
             "channel": "beta"
         },
@@ -451,6 +473,7 @@ RECORDS = [
         "target": {
             "version": "55.0a1",
             "platform": "android-api-15",
+            "os": "android",
             "locale": "multi",
             "channel": "nightly"
         },
@@ -468,6 +491,7 @@ RECORDS = [
         "target": {
             "version": "55.0a1",
             "platform": "android-api-15",
+            "os": "android",
             "locale": "multi",
             "channel": "nightly-old-id"
         },
@@ -487,6 +511,7 @@ RECORDS = [
         "target": {
             "version": "55.0a1",
             "platform": "android-i386",
+            "os": "android",
             "locale": "multi",
             "channel": "nightly"
         },
@@ -504,6 +529,7 @@ RECORDS = [
         "target": {
             "version": "55.0a1",
             "platform": "android-i386",
+            "os": "android",
             "locale": "multi",
             "channel": "nightly-old-id"
         },
@@ -751,3 +777,55 @@ METADATA_RECORDS = [
 def test_merge_metadata(record, metadata, expected):
     result = merge_metadata(record, metadata)
     assert result == expected
+
+
+NORMALIZED_PLATFORMS = (
+    ("android", "android"),
+    ("android", "android-aarch64"),
+    ("android", "android-api-11"),
+    ("android", "android-api-15"),
+    ("android", "android-api-9"),
+    ("android", "android-arm"),
+    ("android", "android-armv6"),
+    ("android", "android-i386"),
+    ("android", "android-r7"),
+    ("android", "android-x86"),
+    ("android", "android-xul"),
+    ("linux", "linux"),
+    ("linux", "linux-i686"),
+    ("linux", "linux-x86_64"),
+    ("linux", "linux-x86_64-eme-free"),
+    ("mac", "mac-EME-free"),
+    ("mac", "mac-ppc"),
+    ("mac", "mac-shark"),
+    ("mac", "mac64"),
+    ("mac", "macosx"),
+    ("maemo", "maemo"),
+    ("maemo", "maemo4"),
+    ("maemo", "maemo5-gtk"),
+    ("win", "win32"),
+    ("win", "win32-EME-free"),
+    ("win", "win32-EUballot"),
+    ("win", "win32-EUballot-rc2"),
+    ("win", "win32-funnelcake26"),
+    ("win", "win32-funnelcake27"),
+    ("win", "win32-funnelcake28"),
+    ("win", "win32-funnelcake29"),
+    ("win", "win32-sha1"),
+    ("win", "win64"),
+    ("win", "win64-EME-free"),
+    ("win", "win64-sha1"),
+    ("win", "win64-x86_64"),
+    ("win", "wince-arm"),
+)
+
+
+@pytest.mark.parametrize("expected,platform", NORMALIZED_PLATFORMS)
+def test_normalized_platform(expected, platform):
+    result = normalized_platform(platform)
+    assert result == expected
+
+
+def test_normalized_unknown_platform():
+    with pytest.raises(ValueError):
+        normalized_platform("namokora")
