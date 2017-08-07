@@ -110,24 +110,29 @@ async def fetch_nightly_metadata(session, record):
                 old_metadata = await response.text()
                 m = re.search("^(\d+)\n(http.+)/rev/(.+)$", old_metadata)
                 if m:
-                    return {
+                    metadata = {
                         "buildid": m.group(1),
                         "moz_source_repo": m.group(2),
                         "moz_source_stamp": m.group(3),
                     }
+                    _nightly_metadata[nightly_url] = metadata
+                    return metadata
                 # e.g. https://archive.mozilla.org/pub/firefox/nightly/2010/07/2010-07-04-05
                 #      -mozilla-central/firefox-4.0b2pre.en-US.win64-x86_64.txt
                 m = re.search("^(\d+) (.+)$", old_metadata)
                 if m:
-                    return {
+                    metadata = {
                         "buildid": m.group(1),
                         "moz_source_stamp": m.group(2),
                         "moz_source_repo": "http://hg.mozilla.org/mozilla-central",
                     }
+                    _nightly_metadata[nightly_url] = metadata
+                    return metadata
         except aiohttp.ClientError as e:
             pass
 
         logger.error("Could not fetch metadata for '%s' from '%s'" % (record["id"], metadata_url))
+        _nightly_metadata[url] = None  # Don't try it anymore.
         return None
 
 
@@ -210,9 +215,8 @@ async def fetch_release_metadata(session, record):
     platform = record["target"]["platform"]
     locale = "en-US"
 
-    # Metadata for EME-free are the same as original release.
-    platform = platform.replace("-eme-free", "")
-
+    # Metadata for EME-free and sha1 repacks are the same as original release.
+    platform = re.sub("-(eme-free|sha1)", "", platform, flags=re.I)
     try:
         latest_build_folder = _candidates_build_folder[product][version]
     except KeyError:
