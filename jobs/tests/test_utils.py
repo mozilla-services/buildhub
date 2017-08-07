@@ -748,6 +748,10 @@ RC_URLS = [
      "win64/ta/Firefox%20Setup%2054.0b9.exe",
      "https://archive.mozilla.org/pub/firefox/candidates/54.0b9-candidates/build1/"
      "win64/en-US/Firefox%20Setup%2054.0b9.exe"),
+    ("https://archive.mozilla.org/pub/firefox/candidates/52.0.2-candidates/build1/"
+     "linux-x86_64-EME-free/cak/firefox-52.0.2.tar.bz2",
+     "https://archive.mozilla.org/pub/firefox/candidates/52.0.2-candidates/build1/"
+     "linux-x86_64/en-US/firefox-52.0.2.tar.bz2")
 ]
 
 

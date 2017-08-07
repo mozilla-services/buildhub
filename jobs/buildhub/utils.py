@@ -63,7 +63,8 @@ def localize_nightly_url(nightly_url):
 def localize_release_candidate_url(rc_url):
     tokens = rc_url.split('/')
     tokens[-2] = "en-US"
-    return "/".join(tokens)
+    us_url = "/".join(tokens)
+    return us_url.replace("-EME-free", "")
 
 
 def guess_channel(url, version):
