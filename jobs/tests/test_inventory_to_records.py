@@ -89,6 +89,9 @@ class FetchNightlyMetadata(asynctest.TestCase):
         self.session = aiohttp.ClientSession(loop=self.loop)
         self.addCleanup(self.session.close)
 
+    def tearDown(self):
+        inventory_to_records._nightly_metadata.clear()
+
     async def test_fetch_nightly_metadata(self):
         record = {"id": "a", "download": {"url": "http://server.org/firefox.fr.win32.exe"}}
 
