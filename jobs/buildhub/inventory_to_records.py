@@ -151,8 +151,10 @@ async def fetch_release_candidate_metadata(session, record):
     try:
         metadata = await fetch_json(session, metadata_url)
     except aiohttp.ClientError as e:
-        logger.error(metadata_url)
-        raise
+        # Old RC like https://archive.mozilla.org/pub/firefox/releases/1.0rc1/
+        # don't have metadata.
+        logger.error("Could not fetch metadata for '%s' from '%s'" % (record["id"], metadata_url))
+        return None
 
     # We already have the build number in the version (1.5rc3)
     m = re.search("rc(\d+)", record["target"]["version"])
