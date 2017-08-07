@@ -15,6 +15,7 @@ import backoff
 
 from .utils import (archive_url, chunked, is_release_build_metadata, is_build_url,
                     record_from_url, localize_nightly_url, merge_metadata, check_record,
+                    localize_release_candidate_url,
                     ARCHIVE_URL, FILE_EXTENSIONS, DATETIME_FORMAT)
 
 
@@ -69,6 +70,8 @@ async def fetch_metadata(session, record):
     try:
         if record["target"]["channel"] == "nightly":
             return await fetch_nightly_metadata(session, record)
+        if "rc" in record["target"]["version"]:
+            return await fetch_release_candidate_metadata(session, record)
         return await fetch_release_metadata(session, record)
     except ValueError as e:
         logger.warning(e)
@@ -128,6 +131,40 @@ async def fetch_nightly_metadata(session, record):
         return None
 
 
+_rc_metadata = {}
+
+
+async def fetch_release_candidate_metadata(session, record):
+    """A JSON file containing build info is published along the nightly build archive.
+    """
+    global _rc_metadata
+
+    url = record["download"]["url"]
+
+    # Make sure the rc URL is turned into a en-US one.
+    rc_url = localize_release_candidate_url(url)
+
+    if rc_url in _rc_metadata:
+        return _rc_metadata[rc_url]
+
+    metadata_url = re.sub("\.({})$".format(FILE_EXTENSIONS), ".json", rc_url)
+    try:
+        metadata = await fetch_json(session, metadata_url)
+    except aiohttp.ClientError as e:
+        # Old RC like https://archive.mozilla.org/pub/firefox/releases/1.0rc1/
+        # don't have metadata.
+        logger.error("Could not fetch metadata for '%s' from '%s'" % (record["id"], metadata_url))
+        _rc_metadata[rc_url] = None  # Don't try it anymore.
+        return None
+
+    # We already have the build number in the version (1.5rc3)
+    m = re.search("rc(\d+)", record["target"]["version"])
+    metadata["buildnumber"] = int(m.group(1))
+
+    _rc_metadata[rc_url] = metadata
+    return metadata
+
+
 _candidates_build_folder = defaultdict(dict)
 
 
@@ -177,12 +214,14 @@ async def fetch_release_metadata(session, record):
     platform = platform.replace("-eme-free", "")
 
     try:
-        latest_build_folder = "/" + _candidates_build_folder[product][version]
+        latest_build_folder = _candidates_build_folder[product][version]
     except KeyError:
         # Version is not listed in candidates. Give up.
         return None
 
-    url = archive_url(product, version, platform, locale, candidate=latest_build_folder)
+    build_number = int(latest_build_folder.strip('/')[-1])  # build3 -> 3
+
+    url = archive_url(product, version, platform, locale, candidate="/" + latest_build_folder)
 
     # We already have the metadata for this platform and version.
     if url in _release_metadata:
@@ -193,6 +232,7 @@ async def fetch_release_metadata(session, record):
         filename = f["name"]
         if is_release_build_metadata(product, version, filename):
             metadata = await fetch_json(session, url + filename)
+            metadata["buildnumber"] = build_number
             _release_metadata[url] = metadata
             return metadata
 

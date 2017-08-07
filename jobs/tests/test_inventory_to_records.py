@@ -160,6 +160,39 @@ class FetchNightlyMetadata(asynctest.TestCase):
                             "moz_source_stamp": "55f39d8d866c"}
 
 
+class FetchRCMetadata(asynctest.TestCase):
+    async def setUp(self):
+        self.session = aiohttp.ClientSession(loop=self.loop)
+        self.addCleanup(self.session.close)
+
+    def tearDown(self):
+        inventory_to_records._rc_metadata.clear()
+
+    async def test_fetch_rc_metadata(self):
+        with aioresponses() as m:
+            m.get("http://server.org/54.0-candidates/build3/"
+                  "win64/en-US/firefox.en-US.win32.json",
+                  payload={"buildid": "20170512"})
+            result = await inventory_to_records.fetch_release_candidate_metadata(
+                self.session, {
+                    "download": {
+                        "url": "http://server.org/54.0-candidates/build3/"
+                               "win64/en-US/firefox.en-US.win32.zip"
+                    },
+                    "target": {"version": "1.0rc3"}
+                })
+            assert result == {"buildid": "20170512", "buildnumber": 3}
+
+    async def test_does_not_hit_server_if_already_known(self):
+        url = "http://server.org/54.0-candidates/build3/win64/en-US/firefox.en-US.win32.zip"
+        metadata = {"a": 1, "b": 2}
+        inventory_to_records._rc_metadata[url] = metadata
+        result = await inventory_to_records.fetch_release_candidate_metadata(self.session, {
+                "download": {"url": url}
+            })
+        assert result == metadata
+
+
 class FetchReleaseMetadata(asynctest.TestCase):
     async def setUp(self):
         self.session = aiohttp.ClientSession(loop=self.loop)
@@ -193,11 +226,15 @@ class FetchReleaseMetadata(asynctest.TestCase):
             m.get(candidate_folder + "firefox-54.0.json", payload={"buildid": "20170512"})
             received = await inventory_to_records.fetch_release_metadata(self.session, self.record)
             assert received == {
-                "buildid": "20170512"
+                "buildid": "20170512",
+                "buildnumber": 3,
             }
         # Now cached, no need to mock HTTP responses.
         received = await inventory_to_records.fetch_release_metadata(self.session, self.record)
-        assert received == {"buildid": "20170512"}
+        assert received == {
+            "buildid": "20170512",
+            "buildnumber": 3,
+        }
 
     async def test_fetch_release_metadata_failing(self):
         archive_url = utils.ARCHIVE_URL + "pub/firefox/candidates/"
@@ -229,7 +266,10 @@ class FetchReleaseMetadata(asynctest.TestCase):
             m.get(candidate_folder + "firefox-54.0.json", payload={"buildid": "20170512"})
             received = await inventory_to_records.fetch_release_metadata(self.session,
                                                                          record)
-            assert received == {"buildid": "20170512"}
+            assert received == {
+                "buildid": "20170512",
+                "buildnumber": 3,
+            }
 
 
 class ScanCandidates(asynctest.TestCase):
@@ -358,7 +398,8 @@ class CSVToRecords(asynctest.TestCase):
                 'id': 'firefox_51-0_win64_fy-nl',
                 'build': {
                     'id': '20170118123726',
-                    'date': '2017-01-18T12:37:26Z'
+                    'date': '2017-01-18T12:37:26Z',
+                    'number': 2
                 },
                 'download': {
                     'date': '2017-06-11T12:20:10Z',

@@ -2,8 +2,8 @@ import pytest
 
 from buildhub.utils import (
     archive_url, build_record_id, is_release_build_metadata, is_build_url,
-    guess_mimetype, guess_channel, chunked, localize_nightly_url,
-    record_from_url, merge_metadata, check_record, normalized_platform
+    guess_mimetype, guess_channel, chunked, localize_nightly_url, normalized_platform,
+    localize_release_candidate_url, record_from_url, merge_metadata, check_record
 )
 
 
@@ -140,6 +140,26 @@ RECORDS = [
             "url": "https://archive.mozilla.org/pub/firefox/candidates/50.0-candidates/build1/"
             "linux-x86_64/fr/firefox-50.0.tar.bz2",
             "mimetype": "application/x-bzip2"
+        }
+    },
+
+    # Firefox Beta Candidates
+    {
+        "id": "firefox_beta_55-0b9rc2_win64_zh-tw",
+        "source": {
+            "product": "firefox",
+        },
+        "target": {
+            "version": "55.0b9rc2",
+            "platform": "win64",
+            'os': 'win',
+            "locale": "zh-TW",
+            "channel": "beta"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/firefox/candidates/55.0b9-candidates/build2/"
+            "win64/zh-TW/firefox-55.0b9.zip",
+            "mimetype": "application/zip"
         }
     },
 
@@ -595,6 +615,8 @@ RELEASE_FILENAMES = [
     ("firefox", "Firefox 50.0.1.dmg"),
     ("devedition", "Firefox Setup 54.0b11.exe"),
     ("devedition", "firefox-54.0b11.tar.bz2"),
+    ("firefox", ("pub/firefox/candidates/50.0-candidates/build1/"
+                 "linux-x86_64/fr/firefox-50.0.tar.bz2")),
 ]
 
 
@@ -721,6 +743,23 @@ def test_localize_nightly_url(localized_url, american_url):
     assert localize_nightly_url(localized_url) == american_url
 
 
+RC_URLS = [
+    ("https://archive.mozilla.org/pub/firefox/candidates/54.0b9-candidates/build1/"
+     "win64/ta/Firefox%20Setup%2054.0b9.exe",
+     "https://archive.mozilla.org/pub/firefox/candidates/54.0b9-candidates/build1/"
+     "win64/en-US/Firefox%20Setup%2054.0b9.exe"),
+    ("https://archive.mozilla.org/pub/firefox/candidates/52.0.2-candidates/build1/"
+     "linux-x86_64-EME-free/cak/firefox-52.0.2.tar.bz2",
+     "https://archive.mozilla.org/pub/firefox/candidates/52.0.2-candidates/build1/"
+     "linux-x86_64/en-US/firefox-52.0.2.tar.bz2")
+]
+
+
+@pytest.mark.parametrize("localized_url,american_url", RC_URLS)
+def test_localize_rc_url(localized_url, american_url):
+    assert localize_release_candidate_url(localized_url) == american_url
+
+
 @pytest.mark.parametrize("record", RECORDS)
 def test_record_from_url(record):
     url = record["download"]["url"]
@@ -755,6 +794,7 @@ METADATA_RECORDS = [
         "source": {"product": "firefox"}
      }, {
         "buildid": "201706121152",
+        "buildnumber": 3,
         "moz_source_repo": "MOZ_SOURCE_REPO=https://hg.mozilla.org/central/beta",
         "moz_source_stamp": "b0925nfubg",
      }, {
@@ -767,7 +807,8 @@ METADATA_RECORDS = [
         },
         "build": {
             "date": "2017-06-12T11:05:02Z",
-            "id": "201706121152"
+            "id": "201706121152",
+            "number": 3
         }
     }),
 ]
