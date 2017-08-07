@@ -154,6 +154,7 @@ async def fetch_release_candidate_metadata(session, record):
         # Old RC like https://archive.mozilla.org/pub/firefox/releases/1.0rc1/
         # don't have metadata.
         logger.error("Could not fetch metadata for '%s' from '%s'" % (record["id"], metadata_url))
+        _rc_metadata[rc_url] = None  # Don't try it anymore.
         return None
 
     # We already have the build number in the version (1.5rc3)
