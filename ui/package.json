@@ -1,35 +1,28 @@
 {
-  "name": "buildhub-ui",
-  "version": "0.0.1",
-  "description": "Firefox System Build info manager.",
-  "scripts": {
-    "build": "npm run copy-assets && elm-make src/Main.elm --output=build/app.js",
-    "copy-assets": "rimraf build && mkdir build && cp -r public/* build",
-    "debug": "elm-live src/Main.elm --warn --dir=public/ --output=public/app.js --debug",
-    "deploy": "npm run build && npm run optimize && gh-pages --add --dist build/",
-    "optimize": "uglifyjs build/app.js -c -m -o build/app.js",
-    "start": "elm-live src/Main.elm --warn --dir=public/ --output=public/app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/mozilla-services/buildhub.git"
-  },
-  "keywords": [
-    "firefox"
-  ],
-  "author": "\"Storage Team\" <storage-team@mozilla.com>",
-  "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/mozilla-services/buildhub/issues"
-  },
-  "homepage": "https://github.com/mozilla-services/buildhub#readme",
-  "devDependencies": {
-    "copyfiles": "^1.2.0",
-    "elm": "^0.18.0",
-    "elm-live": "^2.7.4",
-    "gh-pages": "^0.12.0",
+  "name": "elastic",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "filesize": "^3.5.10",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
     "rimraf": "^2.6.1",
-    "uglify-js": "^3.0.15"
-  }
+    "searchkit": "^2.1.0"
+  },
+  "devDependencies": {
+    "gh-pages": "^1.0.0",
+    "prettier": "^1.4.4",
+    "react-scripts": "1.0.7"
+  },
+  "homepage": "https://mozilla-services.github.io/buildhub",
+  "scripts": {
+    "deploy": "npm run build && rimraf tmp && mkdir tmp && cp -R build/* tmp/ && gh-pages -d tmp --add && rimraf tmp",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "cs-check": "prettier -l $npm_package_prettierOptions 'src/*.js'",
+    "cs-format": "prettier $npm_package_prettierOptions 'src/*.js' --write"
+  },
+  "prettierOptions": "--jsx-bracket-same-line --trailing-comma es5 --semi"
 }
