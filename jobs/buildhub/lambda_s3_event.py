@@ -1,11 +1,5 @@
-import aiohttp
 import datetime
-import json
-import logging
 import os
-from io import BytesIO
-from collections import namedtuple
-from urllib.parse import urlparse
 
 import kinto_http
 
@@ -14,38 +8,38 @@ from .inventory_to_records import fetch_listing, fetch_json
 
 
 def fetch_release_metadata(record):
+    # XXX
     return None
-    # product = record["source"]["product"]
-    # version = record["target"]["version"]
 
-    # builds_url = archive_url(product, version, candidate="/")
-    # build_folders = await fetch_listing(session, builds_url)
-    # latest_build_folder = "/" + sorted(build_folders)[-1]
-    # url = archive_url(product, version, platform, locale, candidate=latest_build_folder)
-    # _, files = await fetch_listing(session, url)
-    # for f in files:
-    #     filename = f["name"]
-    #     if utils.is_release_build_metadata(product, version, filename):
-    #         metadata = await fetch_json(session, url + filename)
-    #         return metadata
-    # raise
+    session = None  # loop
+    product = record["source"]["product"]
+    version = record["target"]["version"]
+    platform = record["target"]["platform"]
+    locale = record["target"]["locale"]
+
+    builds_url = utils.archive_url(product, version, candidate="/")
+    build_folders = fetch_listing(session, builds_url)
+    latest_build_folder = "/" + sorted(build_folders)[-1]
+    url = utils.archive_url(product, version, platform, locale, candidate=latest_build_folder)
+    _, files = fetch_listing(session, url)
+    for f in files:
+        filename = f["name"]
+        if utils.is_release_build_metadata(product, version, filename):
+            metadata = fetch_json(session, url + filename)
+            return metadata
+    raise ValueError("")
 
 
 def lambda_handler(event, context):
-    server_url = "http://localhost:8888/v1"
-    kinto_auth = ("user", "pass")
+    server_url = os.getenv("SERVER_URL", "http://localhost:8888/v1")
+    bucket = os.getenv("BUCKET", "build-hub")
+    collection = os.getenv("COLLECTION", "releases")
+    kinto_auth = tuple(os.getenv("AUTH", "user:pass").split(":"))
+
     kinto_client = kinto_http.Client(server_url=server_url, auth=kinto_auth)
-    bucket = "build-hub"
-    collection = "releases"
 
-    version = "55.0a1"
-    filename = "toto.exe"
-
-    logging.basicConfig()
-    logger = logging.getLogger(__name__)
-
-    event_time = datetime.datetime.strptime(event['eventTime'],
-                                            "%Y-%m-%dT%H:%M:%S.%fZ")
+    # Use event time as archive publication.
+    event_time = datetime.datetime.strptime(event['eventTime'], "%Y-%m-%dT%H:%M:%S.%fZ")
     event_time = event_time.strftime(utils.DATETIME_FORMAT)
 
     # http://docs.aws.amazon.com/AmazonS3/latest/dev/notification-content-structure.html
@@ -54,29 +48,20 @@ def lambda_handler(event, context):
         filesize = record['s3']['object']['size']
         url = utils.ARCHIVE_URL + key
 
-
         try:
             product = key.split('/')[1]  # /pub/thunderbird/nightly/...
         except IndexError:
             continue  # e.g. https://archive.mozilla.org/favicon.ico
 
-        if product not in utils.PRODUCTS:
-            logger.warning('Skip product {}'.format(product))
+        if product not in utils.ALL_PRODUCTS:
+            print('Skip product {}'.format(product))
             continue
 
-        logger.info('Processing {} item: {}'.format(product, key))
+        print('Processing {} item: {}'.format(product, key))
 
-        # If Release metadata.
-        if utils.is_release_build_metadata(product, version, filename):
-            logger.info('Release metadata found {}'.format(key))
-            # XXX: Find corresponding release files (e.g every platforms/locales/...)
-
-        # elif RC metadata
-        # elif Nightly metadata
-        # elif Nightly archive
-        # elif RC archive
-        # elif Release archive
-        elif utils.is_build_url(product, url):
+        # Release / Nightly archive
+        print(url, utils.is_build_url(product, url))
+        if utils.is_build_url(product, url):
             record = utils.record_from_url(url)
             record["download"]["size"] = filesize
             record["download"]["date"] = event_time
@@ -87,7 +72,7 @@ def lambda_handler(event, context):
             except ValueError as e:
                 # If JSON metadata not available, archive will be handled when JSON
                 # is delivered.
-                logger.warning('JSON metadata not available {}'.format(record["id"]))
+                print('JSON metadata not available {}'.format(record["id"]))
                 continue
             # Merge obtained metadata.
             record = utils.merge_metadata(record, metadata)
@@ -96,7 +81,15 @@ def lambda_handler(event, context):
                                        bucket=bucket,
                                        collection=collection,
                                        if_not_exists=True)
-            logger.info('Created {}'.format(record["id"]))
+            print('Created {}'.format(record["id"]))
+        # elif RC archive
 
+        # If Release metadata.
+        if utils.is_release_build_metadata(product, "55.0a1", "toto.exe"):
+            print('Release metadata found {}'.format(key))
+            # XXX: Find corresponding release files (e.g every platforms/locales/...)
+
+        # elif RC metadata
+        # elif Nightly metadata
         else:
-            logger.warning('Ignored {}'.format(key))
+            print('Ignored {}'.format(key))
