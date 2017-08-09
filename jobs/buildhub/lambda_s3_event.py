@@ -105,8 +105,12 @@ async def main(loop, event):
                 platform = metadata["moz_pkg_platform"]
                 if "linux" in platform:
                     archive_url = url.replace(".json", ".tar.bz2")
+                elif "win" in platform:
+                    archive_url = url.replace(".json", ".zip")
+                elif "mac" in platform:
+                    archive_url = url.replace(".json", ".dmg")
                 else:
-                    archive_url = "XXX"
+                    raise ValueError("Unknown platform {}".format(platform))
                 # Check if english version is here.
                 exists = await check_exists(session, archive_url)
                 if exists:
@@ -125,6 +129,8 @@ async def main(loop, event):
                                          url)
                 _, files = await fetch_listing(session, l10n_folder_url)
                 for f in files:
+                    if platform not in f["name"]:
+                        continue  # metadata are by platform.
                     nightly_url = l10n_folder_url + f["name"]
                     if utils.is_build_url(product, nightly_url):
                         record = utils.record_from_url(nightly_url)
