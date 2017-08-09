@@ -133,6 +133,45 @@ class FromArchive(asynctest.TestCase):
     def tearDown(self):
         inventory_to_records._candidates_build_folder.clear()
 
+    async def test_from_release_archive_before_metadata(self):
+        event = fake_event("pub/firefox/releases/55.0/mac/ar/Firefox 55.0.dmg")
+        await lambda_s3_event.main(self.loop, event)
+
+        assert not self.mock_create_record.called
+
+    async def test_from_nightly_archive_before_metadata(self):
+        event = fake_event("pub/firefox/nightly/2016/05/2016-05-02-03-02-07-"
+                           "mozilla-central-l10n/firefox-49.0a1.ast.linux-i686.tar.bz2")
+        await lambda_s3_event.main(self.loop, event)
+
+        assert not self.mock_create_record.called
+
+    async def test_from_rc_archive_before_metadata(self):
+        event = fake_event("pub/firefox/candidates/56.0b1-candidates/build5/mac-EME-free/"
+                           "de/Firefox 56.0b1.dmg")
+        await lambda_s3_event.main(self.loop, event)
+
+        assert not self.mock_create_record.called
+
+    async def test_from_non_archive_files(self):
+        event = fake_event("pub/firefox/releases/54.0.1-funnelcake117/win32/en-US/"
+                           "Firefox Setup 54.0.1.exe.asc")
+        await lambda_s3_event.main(self.loop, event)
+
+        assert not self.mock_create_record.called
+
+    async def test_from_unknown_product(self):
+        event = fake_event("pub/calendar/releases/1.0b1/linux-x86_64/en-US/sunbird-1.0b1.tar.bz2")
+        await lambda_s3_event.main(self.loop, event)
+
+        assert not self.mock_create_record.called
+
+    async def test_from_unrelated_files(self):
+        event = fake_event("favicon.ico")
+        await lambda_s3_event.main(self.loop, event)
+
+        assert not self.mock_create_record.called
+
     async def test_from_release_archive(self):
         event = fake_event("pub/firefox/releases/54.0/win64/fr/Firefox Setup 54.0.exe")
         await lambda_s3_event.main(self.loop, event)
