@@ -339,12 +339,12 @@ class FromMetadata(asynctest.TestCase):
     def tearDown(self):
         inventory_to_records._candidates_build_folder.clear()
 
-    async def test_from_nightly_metadata(self):
+    async def test_from_nightly_metadata_linux(self):
         event = fake_event("pub/firefox/nightly/2017/08/2017-08-05-10-03-34-mozilla-central/"
                            "firefox-57.0a1.en-US.linux-x86_64.json")
         await lambda_s3_event.main(self.loop, event)
 
-        self.mock_create_record.assert_called_with(
+        self.mock_create_record.assert_any_call(
             bucket='build-hub',
             collection='releases',
             data={
@@ -370,6 +370,72 @@ class FromMetadata(asynctest.TestCase):
                     'url': 'https://archive.mozilla.org/pub/firefox/nightly/2017/08/'
                            '2017-08-05-10-03-34-mozilla-central/'
                            'firefox-57.0a1.en-US.linux-x86_64.tar.bz2',
+                    'mimetype': 'application/x-bzip2',
+                    'size': 51001024,
+                    'date': '2017-08-08T17:06:52Z'
+                },
+            },
+            if_not_exists=True)
+
+        self.mock_create_record.assert_any_call(
+            bucket='build-hub',
+            collection='releases',
+            data={
+                'id': 'firefox_nightly_2017-08-05-10-03-34_57-0a1_linux-x86_64_ru',
+                'source': {
+                    'product': 'firefox',
+                    'revision': '933a04a91ce3bd44b230937083a835cb60637084',
+                    'repository': 'https://hg.mozilla.org/mozilla-central',
+                    'tree': 'mozilla-central'
+                },
+                'build': {
+                    'id': '20170805100334',
+                    'date': '2017-08-05T10:03:34Z'
+                },
+                'target': {
+                    'platform': 'linux-x86_64',
+                    'os': 'linux',
+                    'locale': 'ru',
+                    'version': '57.0a1',
+                    'channel': 'nightly'
+                },
+                'download': {
+                    'url': 'https://archive.mozilla.org/pub/firefox/nightly/2017/08/'
+                           '2017-08-05-10-03-34-mozilla-central-l10n/'
+                           'firefox-57.0a1.ru.linux-x86_64.tar.bz2',
+                    'mimetype': 'application/x-bzip2',
+                    'size': 51001024,
+                    'date': '2017-08-08T17:06:52Z'
+                },
+            },
+            if_not_exists=True)
+
+        self.mock_create_record.assert_any_call(
+            bucket='build-hub',
+            collection='releases',
+            data={
+                'id': 'firefox_nightly_2017-08-05-10-03-34_57-0a1_linux-x86_64_pt-pt',
+                'source': {
+                    'product': 'firefox',
+                    'revision': '933a04a91ce3bd44b230937083a835cb60637084',
+                    'repository': 'https://hg.mozilla.org/mozilla-central',
+                    'tree': 'mozilla-central'
+                },
+                'build': {
+                    'id': '20170805100334',
+                    'date': '2017-08-05T10:03:34Z'
+                },
+                'target': {
+                    'platform': 'linux-x86_64',
+                    'os': 'linux',
+                    'locale': 'pt-PT',
+                    'version': '57.0a1',
+                    'channel': 'nightly'
+                },
+                'download': {
+                    'url': 'https://archive.mozilla.org/pub/firefox/nightly/2017/08/'
+                           '2017-08-05-10-03-34-mozilla-central-l10n/'
+                           'firefox-57.0a1.pt-PT.linux-x86_64.tar.bz2',
                     'mimetype': 'application/x-bzip2',
                     'size': 51001024,
                     'date': '2017-08-08T17:06:52Z'

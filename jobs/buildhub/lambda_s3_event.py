@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import os
+import re
 
 import aiohttp
 import async_timeout
@@ -108,7 +109,6 @@ async def main(loop, event):
                     archive_url = "XXX"
                 # Check if english version is here.
                 exists = await check_exists(session, archive_url)
-                print("check_exists", url, exists)
                 if exists:
                     record = utils.record_from_url(archive_url)
                     record["download"]["size"] = filesize
@@ -119,10 +119,24 @@ async def main(loop, event):
                                                bucket=bucket,
                                                collection=collection,
                                                if_not_exists=True)
-
-
-
                 # Check also localized versions.
+                l10n_folder_url = re.sub("-mozilla-central/(.+)",
+                                         "-mozilla-central-l10n/",
+                                         url)
+                _, files = await fetch_listing(session, l10n_folder_url)
+                for f in files:
+                    nightly_url = l10n_folder_url + f["name"]
+                    if utils.is_build_url(product, nightly_url):
+                        record = utils.record_from_url(nightly_url)
+                        record["download"]["size"] = filesize
+                        record["download"]["date"] = event_time
+                        record = utils.merge_metadata(record, metadata)
+                        utils.check_record(record)
+                        kinto_client.create_record(data=record,
+                                                   bucket=bucket,
+                                                   collection=collection,
+                                                   if_not_exists=True)
+
             else:
                 print('Ignored {}'.format(key))
 
