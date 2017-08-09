@@ -177,6 +177,13 @@ def is_release_build_metadata(product, version, filename):
     return bool(re_metadata.match(filename))
 
 
+def is_nightly_build_metadata(product, url):
+    if 'nightly' not in url:
+        return False
+    re_metadata = re.compile(".+/{}-(.*)\.(.*)\.(.*)\.json$".format(product))
+    return bool(re_metadata.match(url))
+
+
 def guess_mimetype(url):
     """Try to guess what kind of mimetype a given archive URL would be."""
     _, extension = os.path.splitext(url)

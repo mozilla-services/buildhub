@@ -1,12 +1,26 @@
 import asyncio
-import aiohttp
 import datetime
 import os
 
+import aiohttp
+import async_timeout
 import kinto_http
 
 from . import utils
-from .inventory_to_records import fetch_metadata, scan_candidates
+from .inventory_to_records import fetch_json, fetch_listing, fetch_metadata, scan_candidates
+
+
+TIMEOUT_SECONDS = int(os.getenv("TIMEOUT_SECONDS", 5 * 60))
+
+
+async def check_exists(session, url, timeout=TIMEOUT_SECONDS):
+    try:
+        with async_timeout.timeout(timeout):
+            # async with session.head(url, timeout=None) as response:
+            async with session.get(url, timeout=None) as response:
+                return response.status == 200
+    except aiohttp.ClientError:
+        raise
 
 
 async def main(loop, event):
@@ -59,21 +73,56 @@ async def main(loop, event):
 
                 # Merge obtained metadata.
                 record = utils.merge_metadata(record, metadata)
+
+                # Check that fields values look OK.
+                utils.check_record(record)
+
                 # Push result to Kinto.
                 kinto_client.create_record(data=record,
                                            bucket=bucket,
                                            collection=collection,
                                            if_not_exists=True)
                 print('Created {}'.format(record["id"]))
-            # elif
 
-            # If Release metadata.
-            if utils.is_release_build_metadata(product, "55.0a1", "toto.exe"):
-                print('Release metadata found {}'.format(key))
-                # XXX: Find corresponding release files (e.g every platforms/locales/...)
+            # RC metadata
+            # pub/firefox/candidates/55.0b12-candidates/build1/mac/en-US/firefox-55.0b12.json
+            # -> EME-free
+            # -> list languages
+            # ->
+            # Theorically release should not be there yet :)
+            # if utils.is_release_build_metadata(product, "55.0a1", "toto.exe"):
+            #     print('Release metadata found {}'.format(key))
+            #     # XXX: Find corresponding release files (e.g every platforms/locales/...)
 
-            # elif RC metadata
-            # elif Nightly metadata
+            # Nightly metadata
+            # pub/firefox/nightly/2017/08/2017-08-08-11-40-32-mozilla-central/
+            # firefox-57.0a1.en-US.linux-i686.json
+            # -l10n/...
+            if utils.is_nightly_build_metadata(product, url):
+                metadata = await fetch_json(session, url)
+
+                platform = metadata["moz_pkg_platform"]
+                if "linux" in platform:
+                    archive_url = url.replace(".json", ".tar.bz2")
+                else:
+                    archive_url = "XXX"
+                # Check if english version is here.
+                exists = await check_exists(session, archive_url)
+                print("check_exists", url, exists)
+                if exists:
+                    record = utils.record_from_url(archive_url)
+                    record["download"]["size"] = filesize
+                    record["download"]["date"] = event_time
+                    record = utils.merge_metadata(record, metadata)
+                    utils.check_record(record)
+                    kinto_client.create_record(data=record,
+                                               bucket=bucket,
+                                               collection=collection,
+                                               if_not_exists=True)
+
+
+
+                # Check also localized versions.
             else:
                 print('Ignored {}'.format(key))
 

@@ -283,3 +283,96 @@ class FromArchive(asynctest.TestCase):
                 },
             },
             if_not_exists=True)
+
+
+class FromMetadata(asynctest.TestCase):
+    remote_content = {
+        "pub/firefox/nightly/2017/08/2017-08-05-10-03-34-mozilla-central-l10n/": {
+            "prefixes": [], "files": [
+                {"name": "firefox-57.0a1.ru.linux-i686.tar.bz2"},
+                {"name": "firefox-57.0a1.ru.linux-i686.tar.bz2.asc"},
+                {"name": "firefox-57.0a1.ru.linux-x86_64.tar.bz2"},
+                {"name": "firefox-57.0a1.ru.linux-x86_64.tar.bz2.asc"},
+                {"name": "firefox-57.0a1.pt-PT.linux-x86_64.tar.bz2"},
+            ]
+        },
+        "pub/firefox/nightly/2017/08/2017-08-05-10-03-34-mozilla-central/"
+        "firefox-57.0a1.en-US.linux-x86_64.tar.bz2": {},
+        "pub/firefox/nightly/2017/08/2017-08-05-10-03-34-mozilla-central/"
+        "firefox-57.0a1.en-US.linux-x86_64.json": {
+            "as": "$(CC)",
+            "buildid": "20170805100334",
+            "cc": "/usr/bin/ccache /home/worker/workspace/build/src/gcc/bin/gcc -std=gnu99",
+            "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/gcc/bin/g++ -std=gnu++11",
+            "host_alias": "x86_64-pc-linux-gnu",
+            "host_cpu": "x86_64",
+            "host_os": "linux-gnu",
+            "host_vendor": "pc",
+            "moz_app_id": "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}",
+            "moz_app_maxversion": "57.0a1",
+            "moz_app_name": "firefox",
+            "moz_app_vendor": "Mozilla",
+            "moz_app_version": "57.0a1",
+            "moz_pkg_platform": "linux-x86_64",
+            "moz_source_repo": "MOZ_SOURCE_REPO=https://hg.mozilla.org/mozilla-central",
+            "moz_source_stamp": "933a04a91ce3bd44b230937083a835cb60637084",
+            "moz_update_channel": "nightly",
+            "target_alias": "x86_64-pc-linux-gnu",
+            "target_cpu": "x86_64",
+            "target_os": "linux-gnu",
+            "target_vendor": "pc"
+        },
+
+    }
+
+    def setUp(self):
+        patch = mock.patch("buildhub.lambda_s3_event.kinto_http.Client.create_record")
+        self.addCleanup(patch.stop)
+        self.mock_create_record = patch.start()
+
+        mocked = aioresponses()
+        mocked.start()
+        for url, payload in self.remote_content.items():
+            mocked.get(utils.ARCHIVE_URL + url, payload=payload)
+        self.addCleanup(mocked.stop)
+
+    def tearDown(self):
+        inventory_to_records._candidates_build_folder.clear()
+
+    async def test_from_nightly_metadata(self):
+        event = fake_event("pub/firefox/nightly/2017/08/2017-08-05-10-03-34-mozilla-central/"
+                           "firefox-57.0a1.en-US.linux-x86_64.json")
+        await lambda_s3_event.main(self.loop, event)
+
+        self.mock_create_record.assert_called_with(
+            bucket='build-hub',
+            collection='releases',
+            data={
+                'id': 'firefox_nightly_2017-08-05-10-03-34_57-0a1_linux-x86_64_en-us',
+                'source': {
+                    'product': 'firefox',
+                    'revision': '933a04a91ce3bd44b230937083a835cb60637084',
+                    'repository': 'https://hg.mozilla.org/mozilla-central',
+                    'tree': 'mozilla-central'
+                },
+                'build': {
+                    'id': '20170805100334',
+                    'date': '2017-08-05T10:03:34Z'
+                },
+                'target': {
+                    'platform': 'linux-x86_64',
+                    'os': 'linux',
+                    'locale': 'en-US',
+                    'version': '57.0a1',
+                    'channel': 'nightly'
+                },
+                'download': {
+                    'url': 'https://archive.mozilla.org/pub/firefox/nightly/2017/08/'
+                           '2017-08-05-10-03-34-mozilla-central/'
+                           'firefox-57.0a1.en-US.linux-x86_64.tar.bz2',
+                    'mimetype': 'application/x-bzip2',
+                    'size': 51001024,
+                    'date': '2017-08-08T17:06:52Z'
+                },
+            },
+            if_not_exists=True)
