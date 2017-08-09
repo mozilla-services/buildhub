@@ -21,7 +21,7 @@ def fake_event(key):
     }
 
 
-class FromArchive(asynctest.TestCase):
+class FromArchiveFirefox(asynctest.TestCase):
     remote_content = {
         "pub/firefox/candidates/": {
             "prefixes": [
@@ -285,7 +285,7 @@ class FromArchive(asynctest.TestCase):
             if_not_exists=True)
 
 
-class FromMetadata(asynctest.TestCase):
+class FromNightlyMetadataFirefox(asynctest.TestCase):
     remote_content = {
         "pub/firefox/nightly/2017/08/2017-08-05-10-03-34-mozilla-central-l10n/": {
             "prefixes": [], "files": [
@@ -380,6 +380,30 @@ class FromMetadata(asynctest.TestCase):
             "target_os": "darwin",
             "target_vendor": "apple"
         },
+        "pub/firefox/nightly/2017/08/2017-08-09-10-03-26-mozilla-central/"
+        "firefox-57.0a1.en-US.linux-i686.json": {
+            "as": "$(CC)",
+            "buildid": "20170809100326",
+            "cc": "/usr/bin/ccache /home/worker/workspace/build/src/gcc/bin/gcc -m32 -march=pentium-m -std=gnu99",
+            "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/gcc/bin/g++ -m32 -march=pentium-m -std=gnu++11",
+            "host_alias": "i686-pc-linux-gnu",
+            "host_cpu": "i686",
+            "host_os": "linux-gnu",
+            "host_vendor": "pc",
+            "moz_app_id": "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}",
+            "moz_app_maxversion": "57.0a1",
+            "moz_app_name": "firefox",
+            "moz_app_vendor": "Mozilla",
+            "moz_app_version": "57.0a1",
+            "moz_pkg_platform": "linux-i686",
+            "moz_source_repo": "MOZ_SOURCE_REPO=https://hg.mozilla.org/mozilla-central",
+            "moz_source_stamp": "4c5fbf49376351679dcc49f4cff26c3c2e055ccc",
+            "moz_update_channel": "nightly",
+            "target_alias": "i686-pc-linux-gnu",
+            "target_cpu": "i686",
+            "target_os": "linux-gnu",
+            "target_vendor": "pc"
+        },
     }
 
     def setUp(self):
@@ -393,8 +417,12 @@ class FromMetadata(asynctest.TestCase):
             mocked.get(utils.ARCHIVE_URL + url, payload=payload)
         self.addCleanup(mocked.stop)
 
-    def tearDown(self):
-        inventory_to_records._candidates_build_folder.clear()
+    async def test_from_nightly_metadata_linux_release_missing(self):
+        event = fake_event("pub/firefox/nightly/2017/08/2017-08-09-10-03-26-mozilla-central/"
+                           "firefox-57.0a1.en-US.linux-i686.json")
+        await lambda_s3_event.main(self.loop, event)
+
+        assert not self.mock_create_record.called
 
     async def test_from_nightly_metadata_linux(self):
         event = fake_event("pub/firefox/nightly/2017/08/2017-08-05-10-03-34-mozilla-central/"
@@ -575,3 +603,96 @@ class FromMetadata(asynctest.TestCase):
                 },
             },
             if_not_exists=True)
+
+
+class FromArchiveAndroid(asynctest.TestCase):
+    pass
+
+
+class FromMetadataAndroid(asynctest.TestCase):
+    remote_content = {
+        "pub/mobile/nightly/2017/08/2017-08-01-15-03-46-mozilla-central-android-api-15/"
+        "fennec-56.0a1.multi.android-arm.apk": {},
+        "pub/mobile/nightly/2017/08/2017-08-01-15-03-46-mozilla-central-android-api-15/"
+        "fennec-56.0a1.multi.android-arm.json": {
+            "as": "$(CC)",
+            "buildid": "20170801150346",
+            "cc": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                  "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/"
+                  "arm-linux-androideabi-gcc -std=gnu99",
+            "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                   "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/"
+                   "arm-linux-androideabi-g++ -std=gnu++11",
+            "host_alias": "x86_64-pc-linux-gnu",
+            "host_cpu": "x86_64",
+            "host_os": "linux-gnu",
+            "host_vendor": "pc",
+            "moz_app_id": "{aa3c5121-dab2-40e2-81ca-7ea25febc110}",
+            "moz_app_maxversion": "57.0a1",
+            "moz_app_name": "fennec",
+            "moz_app_vendor": "Mozilla",
+            "moz_app_version": "57.0a1",
+            "moz_pkg_platform": "android-arm",
+            "moz_source_repo": "MOZ_SOURCE_REPO=https://hg.mozilla.org/mozilla-central",
+            "moz_source_stamp": "52285ea5e54c73d3ed824544cef2ee3f195f05e6",
+            "moz_update_channel": "nightly",
+            "target_alias": "arm-unknown-linux-androideabi",
+            "target_cpu": "arm",
+            "target_os": "linux-androideabi",
+            "target_vendor": "unknown"
+        },
+    }
+    def setUp(self):
+        patch = mock.patch("buildhub.lambda_s3_event.kinto_http.Client.create_record")
+        self.addCleanup(patch.stop)
+        self.mock_create_record = patch.start()
+
+        mocked = aioresponses()
+        mocked.start()
+        for url, payload in self.remote_content.items():
+            mocked.get(utils.ARCHIVE_URL + url, payload=payload)
+        self.addCleanup(mocked.stop)
+
+    async def test_from_nightly_multi_arm(self):
+        event = fake_event("pub/mobile/nightly/2017/08/2017-08-01-15-03-46-mozilla-central"
+                           "-android-api-15/fennec-56.0a1.multi.android-arm.json")
+        await lambda_s3_event.main(self.loop, event)
+
+        self.mock_create_record.assert_called_with(
+            bucket='build-hub',
+            collection='releases',
+            data={
+                'id': 'fennec_nightly_2017-08-01-15-03-46_56-0a1_android-api-15_multi',
+                'source': {
+                    'product': 'fennec',
+                    'revision': '52285ea5e54c73d3ed824544cef2ee3f195f05e6',
+                    'repository': 'https://hg.mozilla.org/mozilla-central',
+                    'tree': 'mozilla-central'
+                },
+                'build': {
+                    'id': '20170801150346',
+                    'date': '2017-08-01T15:03:46Z'
+                },
+                'target': {
+                    'platform': 'android-api-15',
+                    'os': 'android',
+                    'locale': 'multi',
+                    'version': '56.0a1',
+                    'channel': 'nightly'
+                },
+                'download': {
+                    'url': 'https://archive.mozilla.org/pub/mobile/nightly/2017/'
+                           '08/2017-08-01-15-03-46-mozilla-central'
+                           '-android-api-15/fennec-56.0a1.multi.android-arm.apk',
+                    'mimetype': 'application/vnd.android.package-archive',
+                    'size': 51001024,
+                    'date': '2017-08-08T17:06:52Z'
+                },
+            },
+            if_not_exists=True)
+
+    # pub/mobile/nightly/2017/08/2017-08-01-15-03-46-date-android-aarch64/fennec-56.0a1.multi.android-aarch64.json
+    # pub/mobile/nightly/2017/08/2017-08-01-15-03-46-date-android-x86/fennec-56.0a1.multi.android-i386.json
+    # pub/mobile/nightly/2017/08/2017-08-01-15-03-46-date-android-x86-old-id/fennec-56.0a1.multi.android-i386.json
+    # pub/mobile/nightly/2017/08/2017-08-01-15-03-46-date-android-api-15-l10n/fennec-56.0a1.ar.android-arm.apk
+    # pub/mobile/nightly/2017/08/2017-08-01-15-03-46-date-android-api-15/fennec-56.0a1.multi.android-arm.json

@@ -503,6 +503,7 @@ RECORDS = [
             "mimetype": "application/vnd.android.package-archive"
         }
     },
+
     {
         "id": "fennec_nightly-old-id_2017-05-30-10-01-27_55-0a1_android-api-15_multi",
         "source": {

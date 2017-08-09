@@ -21,7 +21,7 @@ async def check_exists(session, url, timeout=TIMEOUT_SECONDS):
             async with session.get(url, timeout=None) as response:
                 return response.status == 200
     except aiohttp.ClientError:
-        raise
+        return False
 
 
 async def main(loop, event):
@@ -109,6 +109,8 @@ async def main(loop, event):
                     archive_url = url.replace(".json", ".zip")
                 elif "mac" in platform:
                     archive_url = url.replace(".json", ".dmg")
+                elif "android" in platform:
+                    archive_url = url.replace(".json", ".apk")
                 else:
                     raise ValueError("Unknown platform {}".format(platform))
                 # Check if english version is here.
@@ -127,7 +129,10 @@ async def main(loop, event):
                 l10n_folder_url = re.sub("-mozilla-central/(.+)",
                                          "-mozilla-central-l10n/",
                                          url)
-                _, files = await fetch_listing(session, l10n_folder_url)
+                try:
+                    _, files = await fetch_listing(session, l10n_folder_url)
+                except ValueError:
+                    files = []  # No -l10/ folder published yet.
                 for f in files:
                     if platform not in f["name"]:
                         continue  # metadata are by platform.
