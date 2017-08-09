@@ -1,7 +1,9 @@
-import unittest
 from unittest import mock
 
-from buildhub.lambda_s3_event import lambda_handler
+import asynctest
+from aioresponses import aioresponses
+
+from buildhub import utils, inventory_to_records, lambda_s3_event
 
 
 def fake_event(key):
@@ -19,15 +21,121 @@ def fake_event(key):
     }
 
 
-class FromArchive(unittest.TestCase):
+class FromArchive(asynctest.TestCase):
+    remote_content = {
+        "pub/firefox/candidates/": {
+            "prefixes": [
+                "54.0-candidates/",
+                "archived/"
+            ], "files": []
+        },
+        "pub/firefox/candidates/54.0-candidates/": {
+            "prefixes": [
+                "build1/",
+                "build2/",
+            ], "files": []
+        },
+        "pub/firefox/candidates/54.0-candidates/build2/win64/en-US/": {
+            "prefixes": [], "files": [
+                {"name": "firefox-54.0.zip"},
+                {"name": "firefox-54.0.json"},
+            ]
+        },
+        "pub/firefox/candidates/54.0-candidates/build2/win64/en-US/firefox-54.0.json": {
+            "as": "ml64.exe",
+            "buildid": "20170608105825",
+            "cc": "c:/builds/moz2_slave/m-rel-w64-00000000000000000000/build/src/"
+                  "vs2015u3/VC/bin/amd64/cl.exe",
+            "cxx": "c:/builds/moz2_slave/m-rel-w64-00000000000000000000/build/src/"
+                   "vs2015u3/VC/bin/amd64/cl.exe",
+            "host_alias": "x86_64-pc-mingw32",
+            "host_cpu": "x86_64",
+            "host_os": "mingw32",
+            "host_vendor": "pc",
+            "moz_app_id": "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}",
+            "moz_app_maxversion": "54.*",
+            "moz_app_name": "firefox",
+            "moz_app_vendor": "Mozilla",
+            "moz_app_version": "54.0",
+            "moz_pkg_platform": "win64",
+            "moz_source_repo": "MOZ_SOURCE_REPO=https://hg.mozilla.org/releases/mozilla-release",
+            "moz_source_stamp": "e832ed037a3c23004be73178e546d240e57b6ee1",
+            "moz_update_channel": "release",
+            "target_alias": "x86_64-pc-mingw32",
+            "target_cpu": "x86_64",
+            "target_os": "mingw32",
+            "target_vendor": "pc"
+        },
+        "pub/firefox/nightly/2017/08/2017-08-05-10-03-34-mozilla-central/"
+        "firefox-57.0a1.en-US.win32.json": {
+            "as": "ml.exe",
+            "buildid": "20170805100334",
+            "cc": "z:/build/build/src/vs2015u3/VC/bin/amd64_x86/cl.exe",
+            "cxx": "z:/build/build/src/vs2015u3/VC/bin/amd64_x86/cl.exe",
+            "host_alias": "i686-pc-mingw32",
+            "host_cpu": "i686",
+            "host_os": "mingw32",
+            "host_vendor": "pc",
+            "moz_app_id": "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}",
+            "moz_app_maxversion": "57.0a1",
+            "moz_app_name": "firefox",
+            "moz_app_vendor": "Mozilla",
+            "moz_app_version": "57.0a1",
+            "moz_pkg_platform": "win32",
+            "moz_source_repo": "MOZ_SOURCE_REPO=https://hg.mozilla.org/mozilla-central",
+            "moz_source_stamp": "933a04a91ce3bd44b230937083a835cb60637084",
+            "moz_update_channel": "nightly",
+            "target_alias": "i686-pc-mingw32",
+            "target_cpu": "i686",
+            "target_os": "mingw32",
+            "target_vendor": "pc"
+        },
+        "pub/firefox/candidates/51.0-candidates/build1/linux-x86_64/en-US/firefox-51.0.json": {
+            "as": "$(CC)",
+            "buildid": "20170116133120",
+            "cc": "/builds/slave/m-rel-l64-00000000000000000000/build/src/"
+                  "gcc/bin/gcc -std=gnu99",
+            "cxx": "/builds/slave/m-rel-l64-00000000000000000000/"
+                   "build/src/gcc/bin/g++ -std=gnu++11",
+            "host_alias": "x86_64-pc-linux-gnu",
+            "host_cpu": "x86_64",
+            "host_os": "linux-gnu",
+            "host_vendor": "pc",
+            "ld": "ld",
+            "moz_app_id": "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}",
+            "moz_app_maxversion": "51.*",
+            "moz_app_name": "firefox",
+            "moz_app_vendor": "Mozilla",
+            "moz_app_version": "51.0",
+            "moz_pkg_platform": "linux-x86_64",
+            "moz_source_repo": "MOZ_SOURCE_REPO=https://hg.mozilla.org/releases/mozilla-release",
+            "moz_source_stamp": "85d16b0be539271da6484435f71c562acd9c3c56",
+            "moz_update_channel": "release",
+            "target_alias": "x86_64-pc-linux-gnu",
+            "target_cpu": "x86_64",
+            "target_os": "linux-gnu",
+            "target_vendor": "pc"
+        }
+
+    }
+
     def setUp(self):
         patch = mock.patch("buildhub.lambda_s3_event.kinto_http.Client.create_record")
         self.addCleanup(patch.stop)
         self.mock_create_record = patch.start()
 
-    def test_from_release_archive(self):
+        mocked = aioresponses()
+        mocked.start()
+        for url, payload in self.remote_content.items():
+            mocked.get(utils.ARCHIVE_URL + url, payload=payload)
+        self.addCleanup(mocked.stop)
+
+    def tearDown(self):
+        inventory_to_records._candidates_build_folder.clear()
+
+    async def test_from_release_archive(self):
         event = fake_event("pub/firefox/releases/54.0/win64/fr/Firefox Setup 54.0.exe")
-        lambda_handler(event, None)
+        await lambda_s3_event.main(self.loop, event)
 
         self.mock_create_record.assert_called_with(
             bucket='build-hub',
@@ -35,7 +143,15 @@ class FromArchive(unittest.TestCase):
             data={
                 'id': 'firefox_54-0_win64_fr',
                 'source': {
-                    'product': 'firefox'
+                    'product': 'firefox',
+                    'revision': 'e832ed037a3c23004be73178e546d240e57b6ee1',
+                    'repository': 'https://hg.mozilla.org/releases/mozilla-release',
+                    'tree': 'releases/mozilla-release'
+                },
+                'build': {
+                    'id': '20170608105825',
+                    'date': '2017-06-08T10:58:25Z',
+                    'number': 2
                 },
                 'target': {
                     'platform': 'win64',
@@ -54,10 +170,10 @@ class FromArchive(unittest.TestCase):
             },
             if_not_exists=True)
 
-    def test_from_nightly_archive(self):
+    async def test_from_nightly_archive(self):
         event = fake_event("pub/firefox/nightly/2017/08/2017-08-05-10-03-34-"
                            "mozilla-central-l10n/firefox-57.0a1.ru.win32.zip")
-        lambda_handler(event, None)
+        await lambda_s3_event.main(self.loop, event)
 
         self.mock_create_record.assert_called_with(
             bucket='build-hub',
@@ -65,7 +181,14 @@ class FromArchive(unittest.TestCase):
             data={
                 'id': 'firefox_nightly_2017-08-05-10-03-34_57-0a1_win32_ru',
                 'source': {
-                    'product': 'firefox'
+                    'product': 'firefox',
+                    'revision': '933a04a91ce3bd44b230937083a835cb60637084',
+                    'repository': 'https://hg.mozilla.org/mozilla-central',
+                    'tree': 'mozilla-central'
+                },
+                'build': {
+                    'id': '20170805100334',
+                    'date': '2017-08-05T10:03:34Z'
                 },
                 'target': {
                     'platform': 'win32',
@@ -84,10 +207,10 @@ class FromArchive(unittest.TestCase):
             },
             if_not_exists=True)
 
-    def test_from_rc_archive(self):
+    async def test_from_rc_archive(self):
         event = fake_event("pub/firefox/candidates/51.0-candidates/build1/linux-x86_64-EME-free/"
                            "zh-TW/firefox-51.0.tar.bz2")
-        lambda_handler(event, None)
+        await lambda_s3_event.main(self.loop, event)
 
         self.mock_create_record.assert_called_with(
             bucket='build-hub',
@@ -95,7 +218,15 @@ class FromArchive(unittest.TestCase):
             data={
                 'id': 'firefox_51-0rc1_linux-x86_64-eme-free_zh-tw',
                 'source': {
-                    'product': 'firefox'
+                    'product': 'firefox',
+                    'revision': '85d16b0be539271da6484435f71c562acd9c3c56',
+                    'repository': 'https://hg.mozilla.org/releases/mozilla-release',
+                    'tree': 'releases/mozilla-release'
+                },
+                'build': {
+                    'id': '20170116133120',
+                    'date': '2017-01-16T13:31:20Z',
+                    'number': 1
                 },
                 'target': {
                     'platform': 'linux-x86_64-eme-free',
