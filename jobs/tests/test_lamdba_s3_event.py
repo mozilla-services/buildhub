@@ -21,7 +21,26 @@ def fake_event(key):
     }
 
 
-class FromArchiveFirefox(asynctest.TestCase):
+class BaseTest(asynctest.TestCase):
+
+    remote_content = {}
+
+    def setUp(self):
+        patch = mock.patch("buildhub.lambda_s3_event.kinto_http.Client.create_record")
+        self.addCleanup(patch.stop)
+        self.mock_create_record = patch.start()
+
+        mocked = aioresponses()
+        mocked.start()
+        for url, payload in self.remote_content.items():
+            mocked.get(utils.ARCHIVE_URL + url, payload=payload)
+        self.addCleanup(mocked.stop)
+
+    def tearDown(self):
+        inventory_to_records._candidates_build_folder.clear()
+
+
+class FromArchiveFirefox(BaseTest):
     remote_content = {
         "pub/firefox/candidates/": {
             "prefixes": [
@@ -118,20 +137,6 @@ class FromArchiveFirefox(asynctest.TestCase):
         }
 
     }
-
-    def setUp(self):
-        patch = mock.patch("buildhub.lambda_s3_event.kinto_http.Client.create_record")
-        self.addCleanup(patch.stop)
-        self.mock_create_record = patch.start()
-
-        mocked = aioresponses()
-        mocked.start()
-        for url, payload in self.remote_content.items():
-            mocked.get(utils.ARCHIVE_URL + url, payload=payload)
-        self.addCleanup(mocked.stop)
-
-    def tearDown(self):
-        inventory_to_records._candidates_build_folder.clear()
 
     async def test_from_release_archive_before_metadata(self):
         event = fake_event("pub/firefox/releases/55.0/mac/ar/Firefox 55.0.dmg")
@@ -285,7 +290,7 @@ class FromArchiveFirefox(asynctest.TestCase):
             if_not_exists=True)
 
 
-class FromNightlyMetadataFirefox(asynctest.TestCase):
+class FromNightlyMetadataFirefox(BaseTest):
     remote_content = {
         "pub/firefox/nightly/2017/08/2017-08-05-10-03-34-mozilla-central-l10n/": {
             "prefixes": [], "files": [
@@ -407,17 +412,6 @@ class FromNightlyMetadataFirefox(asynctest.TestCase):
             "target_vendor": "pc"
         },
     }
-
-    def setUp(self):
-        patch = mock.patch("buildhub.lambda_s3_event.kinto_http.Client.create_record")
-        self.addCleanup(patch.stop)
-        self.mock_create_record = patch.start()
-
-        mocked = aioresponses()
-        mocked.start()
-        for url, payload in self.remote_content.items():
-            mocked.get(utils.ARCHIVE_URL + url, payload=payload)
-        self.addCleanup(mocked.stop)
 
     async def test_from_nightly_metadata_linux_release_missing(self):
         event = fake_event("pub/firefox/nightly/2017/08/2017-08-09-10-03-26-mozilla-central/"
@@ -614,11 +608,11 @@ class FromNightlyMetadataFirefox(asynctest.TestCase):
             if_not_exists=True)
 
 
-class FromArchiveAndroid(asynctest.TestCase):
+class FromArchiveAndroid(BaseTest):
     pass
 
 
-class FromMetadataAndroid(asynctest.TestCase):
+class FromMetadataAndroid(BaseTest):
     remote_content = {
         "pub/mobile/nightly/2017/08/2017-08-01-15-03-46-mozilla-central-android-api-15/"
         "fennec-56.0a1.multi.android-arm.apk": {},
@@ -651,17 +645,6 @@ class FromMetadataAndroid(asynctest.TestCase):
             "target_vendor": "unknown"
         },
     }
-
-    def setUp(self):
-        patch = mock.patch("buildhub.lambda_s3_event.kinto_http.Client.create_record")
-        self.addCleanup(patch.stop)
-        self.mock_create_record = patch.start()
-
-        mocked = aioresponses()
-        mocked.start()
-        for url, payload in self.remote_content.items():
-            mocked.get(utils.ARCHIVE_URL + url, payload=payload)
-        self.addCleanup(mocked.stop)
 
     async def test_from_nightly_date_are_ignored(self):
         event = fake_event("pub/mobile/nightly/2017/08/2017-08-01-15-03-46-date-android"
