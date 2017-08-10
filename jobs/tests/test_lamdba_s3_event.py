@@ -777,6 +777,43 @@ class FromArchiveAndroid(BaseTest):
             },
             if_not_exists=True)
 
+    async def test_from_release_archive_multi(self):
+        event = fake_event("pub/mobile/releases/55.0/android-x86/multi/"
+                           "fennec-55.0.multi.android-i386.apk")
+        await lambda_s3_event.main(self.loop, event)
+
+        self.mock_create_record.assert_called_with(
+            bucket='build-hub',
+            collection='releases',
+            data={
+                'id': 'fennec_55-0_android-x86_multi',
+                'source': {
+                    'product': 'fennec',
+                    'revision': '9e30e915f1325f041d01c722bd640300f32dc9c3',
+                    'repository': 'https://hg.mozilla.org/releases/mozilla-release',
+                    'tree': 'releases/mozilla-release'
+                },
+                'build': {
+                    'id': '20170803202939',
+                    'date': '2017-08-03T20:29:39Z',
+                    'number': 2,
+                },
+                'target': {
+                    'platform': 'android-x86',
+                    'os': 'android',
+                    'locale': 'multi',
+                    'version': '55.0',
+                    'channel': 'release'
+                },
+                'download': {
+                    'url': 'https://archive.mozilla.org/pub/mobile/releases/55.0/android-x86/multi/fennec-55.0.multi.android-i386.apk',
+                    'mimetype': 'application/vnd.android.package-archive',
+                    'size': 51001024,
+                    'date': '2017-08-08T17:06:52Z'
+                },
+            },
+            if_not_exists=True)
+
     async def test_from_nightly_archive_multi(self):
         event = fake_event("pub/mobile/nightly/2017/08/2017-08-09-10-03-39-mozilla"
                            "-central-android-aarch64/fennec-57.0a1.multi.android-aarch64.apk")
