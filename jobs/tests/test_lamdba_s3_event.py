@@ -384,8 +384,10 @@ class FromNightlyMetadataFirefox(asynctest.TestCase):
         "firefox-57.0a1.en-US.linux-i686.json": {
             "as": "$(CC)",
             "buildid": "20170809100326",
-            "cc": "/usr/bin/ccache /home/worker/workspace/build/src/gcc/bin/gcc -m32 -march=pentium-m -std=gnu99",
-            "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/gcc/bin/g++ -m32 -march=pentium-m -std=gnu++11",
+            "cc": "/usr/bin/ccache /home/worker/workspace/build/src/gcc/bin/gcc "
+                  "-m32 -march=pentium-m -std=gnu99",
+            "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/gcc/bin/g++ "
+                   "-m32 -march=pentium-m -std=gnu++11",
             "host_alias": "i686-pc-linux-gnu",
             "host_cpu": "i686",
             "host_os": "linux-gnu",
@@ -420,6 +422,13 @@ class FromNightlyMetadataFirefox(asynctest.TestCase):
     async def test_from_nightly_metadata_linux_release_missing(self):
         event = fake_event("pub/firefox/nightly/2017/08/2017-08-09-10-03-26-mozilla-central/"
                            "firefox-57.0a1.en-US.linux-i686.json")
+        await lambda_s3_event.main(self.loop, event)
+
+        assert not self.mock_create_record.called
+
+    async def test_from_nightly_date_is_ignored(self):
+        event = fake_event("firefox/nightly/2017/08/2017-08-01-15-03-43-date/"
+                           "firefox-56.0a1.en-US.linux-i686.json")
         await lambda_s3_event.main(self.loop, event)
 
         assert not self.mock_create_record.called
@@ -642,6 +651,7 @@ class FromMetadataAndroid(asynctest.TestCase):
             "target_vendor": "unknown"
         },
     }
+
     def setUp(self):
         patch = mock.patch("buildhub.lambda_s3_event.kinto_http.Client.create_record")
         self.addCleanup(patch.stop)
@@ -652,6 +662,13 @@ class FromMetadataAndroid(asynctest.TestCase):
         for url, payload in self.remote_content.items():
             mocked.get(utils.ARCHIVE_URL + url, payload=payload)
         self.addCleanup(mocked.stop)
+
+    async def test_from_nightly_date_are_ignored(self):
+        event = fake_event("pub/mobile/nightly/2017/08/2017-08-01-15-03-46-date-android"
+                           "-api-15/fennec-56.0a1.multi.android-arm.json")
+        await lambda_s3_event.main(self.loop, event)
+
+        assert not self.mock_create_record.called
 
     async def test_from_nightly_multi_arm(self):
         event = fake_event("pub/mobile/nightly/2017/08/2017-08-01-15-03-46-mozilla-central"
@@ -695,4 +712,3 @@ class FromMetadataAndroid(asynctest.TestCase):
     # pub/mobile/nightly/2017/08/2017-08-01-15-03-46-date-android-x86/fennec-56.0a1.multi.android-i386.json
     # pub/mobile/nightly/2017/08/2017-08-01-15-03-46-date-android-x86-old-id/fennec-56.0a1.multi.android-i386.json
     # pub/mobile/nightly/2017/08/2017-08-01-15-03-46-date-android-api-15-l10n/fennec-56.0a1.ar.android-arm.apk
-    # pub/mobile/nightly/2017/08/2017-08-01-15-03-46-date-android-api-15/fennec-56.0a1.multi.android-arm.json

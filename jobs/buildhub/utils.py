@@ -180,6 +180,9 @@ def is_release_build_metadata(product, version, filename):
 def is_nightly_build_metadata(product, url):
     if 'nightly' not in url:
         return False
+    if 'nightly' in url and 'mozilla-central' not in url:
+        # pub/mobile/nightly/2017/08/2017-08-01-15-03-46-date-android-api-15/...
+        return False
     if product == "mobile":
         product = "fennec"
     re_metadata = re.compile(".+/{}-(.*)\.(.*)\.(.*)\.json$".format(product))
