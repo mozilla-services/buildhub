@@ -55,7 +55,6 @@ async def main(loop, event):
                 print('Skip product {}'.format(product))
                 continue
 
-
             # Release / Nightly / RC archive.
             if utils.is_build_url(product, url):
                 print('Processing {} archive: {}'.format(product, key))
