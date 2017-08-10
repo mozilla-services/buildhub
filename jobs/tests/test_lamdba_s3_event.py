@@ -306,14 +306,18 @@ class FromRCMetadataFirefox(BaseTest):
             ]
         },
         "pub/firefox/candidates/56.0b1-candidates/build4/linux-x86_64/ca/": {
-            "prefixes": [], "files": [
-                {"name": "firefox-56.0b1.tar.bz2"}
-            ]
+            "prefixes": [], "files": [{
+                "name": "firefox-56.0b1.tar.bz2",
+                "last_modified": "2017-08-03T20:55:11Z",
+                "size": 34138800
+            }]
         },
         "pub/firefox/candidates/56.0b1-candidates/build4/linux-x86_64/en-US/": {
-            "prefixes": [], "files": [
-                {"name": "firefox-56.0b1.tar.bz2"}
-            ]
+            "prefixes": [], "files": [{
+                "name": "firefox-56.0b1.tar.bz2",
+                "last_modified": "2017-08-03T20:55:11Z",
+                "size": 34138800
+            }]
         },
         "pub/firefox/candidates/56.0b1-candidates/build4/linux-x86_64/es-ES/": {
             "prefixes": [], "files": [
@@ -380,8 +384,8 @@ class FromRCMetadataFirefox(BaseTest):
                     'url': 'https://archive.mozilla.org/pub/firefox/candidates/56.0b1-candidates/'
                            'build4/linux-x86_64/en-US/firefox-56.0b1.tar.bz2',
                     'mimetype': 'application/x-bzip2',
-                    'size': 51001024,
-                    'date': '2017-08-08T17:06:52Z'
+                    'size': 34138800,
+                    'date': '2017-08-03T20:55:11Z'
                 },
             },
             if_not_exists=True)
@@ -413,8 +417,8 @@ class FromRCMetadataFirefox(BaseTest):
                     'url': 'https://archive.mozilla.org/pub/firefox/candidates/56.0b1-candidates/'
                            'build4/linux-x86_64/ca/firefox-56.0b1.tar.bz2',
                     'mimetype': 'application/x-bzip2',
-                    'size': 51001024,
-                    'date': '2017-08-08T17:06:52Z'
+                    'size': 34138800,
+                    'date': '2017-08-03T20:55:11Z'
                 },
             },
             if_not_exists=True)
@@ -423,21 +427,42 @@ class FromRCMetadataFirefox(BaseTest):
 class FromNightlyMetadataFirefox(BaseTest):
     remote_content = {
         "pub/firefox/nightly/2017/08/2017-08-05-10-03-34-mozilla-central-l10n/": {
-            "prefixes": [], "files": [
-                {"name": "firefox-57.0a1.ru.linux-i686.tar.bz2"},
-                {"name": "firefox-57.0a1.ru.linux-i686.tar.bz2.asc"},
-                {"name": "firefox-57.0a1.ru.linux-x86_64.tar.bz2"},
-                {"name": "firefox-57.0a1.ru.linux-x86_64.tar.bz2.asc"},
-                {"name": "firefox-57.0a1.pt-PT.linux-x86_64.tar.bz2"},
-            ]
+            "prefixes": [], "files": [{
+                "name": "firefox-57.0a1.ru.linux-i686.tar.bz2",
+                "last_modified": "2017-08-03T20:55:11Z",
+                "size": 34138800
+            }, {
+                "name": "firefox-57.0a1.ru.linux-i686.tar.bz2.asc"
+            }, {
+                "name": "firefox-57.0a1.ru.linux-x86_64.tar.bz2",
+                "last_modified": "2017-08-03T20:55:11Z",
+                "size": 34138800
+            }, {
+                "name": "firefox-57.0a1.ru.linux-x86_64.tar.bz2.asc"
+            }, {
+                "name": "firefox-57.0a1.pt-PT.linux-x86_64.tar.bz2",
+                "last_modified": "2017-08-03T20:55:11Z",
+                "size": 34138800
+            }]
         },
-        # Fake release files.
-        "pub/firefox/nightly/2017/08/2017-08-05-10-03-34-mozilla-central/"
-        "firefox-57.0a1.en-US.win32.zip": {},
-        "pub/firefox/nightly/2017/08/2017-08-05-10-03-34-mozilla-central/"
-        "firefox-57.0a1.en-US.linux-x86_64.tar.bz2": {},
-        "pub/firefox/nightly/2017/08/2017-08-05-10-03-34-mozilla-central/"
-        "firefox-57.0a1.en-US.mac.dmg": {},
+        "pub/firefox/nightly/2017/08/2017-08-09-10-03-26-mozilla-central/": {
+            "prefixes": [], "files": []
+        },
+        "pub/firefox/nightly/2017/08/2017-08-05-10-03-34-mozilla-central/": {
+            "prefixes": [], "files": [{
+                "name": "firefox-57.0a1.en-US.linux-x86_64.tar.bz2",
+                "last_modified": "2017-08-03T20:55:11Z",
+                "size": 34138800
+            }, {
+                "name": "firefox-57.0a1.en-US.win32.zip",
+                "last_modified": "2017-08-03T20:55:11Z",
+                "size": 34138800
+            }, {
+                "name": "firefox-57.0a1.en-US.mac.dmg",
+                "last_modified": "2017-08-03T20:55:11Z",
+                "size": 34138800
+            }]
+        },
         # Metadata.
         "pub/firefox/nightly/2017/08/2017-08-05-10-03-34-mozilla-central/"
         "firefox-57.0a1.en-US.linux-x86_64.json": {
@@ -589,8 +614,8 @@ class FromNightlyMetadataFirefox(BaseTest):
                            '2017-08-05-10-03-34-mozilla-central/'
                            'firefox-57.0a1.en-US.linux-x86_64.tar.bz2',
                     'mimetype': 'application/x-bzip2',
-                    'size': 51001024,
-                    'date': '2017-08-08T17:06:52Z'
+                    'size': 34138800,
+                    'date': '2017-08-03T20:55:11Z'
                 },
             },
             if_not_exists=True)
@@ -622,8 +647,8 @@ class FromNightlyMetadataFirefox(BaseTest):
                            '2017-08-05-10-03-34-mozilla-central-l10n/'
                            'firefox-57.0a1.ru.linux-x86_64.tar.bz2',
                     'mimetype': 'application/x-bzip2',
-                    'size': 51001024,
-                    'date': '2017-08-08T17:06:52Z'
+                    'size': 34138800,
+                    'date': '2017-08-03T20:55:11Z'
                 },
             },
             if_not_exists=True)
@@ -655,8 +680,8 @@ class FromNightlyMetadataFirefox(BaseTest):
                            '2017-08-05-10-03-34-mozilla-central-l10n/'
                            'firefox-57.0a1.pt-PT.linux-x86_64.tar.bz2',
                     'mimetype': 'application/x-bzip2',
-                    'size': 51001024,
-                    'date': '2017-08-08T17:06:52Z'
+                    'size': 34138800,
+                    'date': '2017-08-03T20:55:11Z'
                 },
             },
             if_not_exists=True)
@@ -693,8 +718,8 @@ class FromNightlyMetadataFirefox(BaseTest):
                            '2017-08-05-10-03-34-mozilla-central/'
                            'firefox-57.0a1.en-US.win32.zip',
                     'mimetype': 'application/zip',
-                    'size': 51001024,
-                    'date': '2017-08-08T17:06:52Z'
+                    'size': 34138800,
+                    'date': '2017-08-03T20:55:11Z'
                 },
             },
             if_not_exists=True)
@@ -731,8 +756,8 @@ class FromNightlyMetadataFirefox(BaseTest):
                            '2017-08-05-10-03-34-mozilla-central/'
                            'firefox-57.0a1.en-US.mac.dmg',
                     'mimetype': 'application/x-apple-diskimage',
-                    'size': 51001024,
-                    'date': '2017-08-08T17:06:52Z'
+                    'size': 34138800,
+                    'date': '2017-08-03T20:55:11Z'
                 },
             },
             if_not_exists=True)
@@ -1076,14 +1101,18 @@ class FromRCMetadataAndroid(BaseTest):
             ], "files": [],
         },
         "pub/mobile/candidates/56.0b1-candidates/build1/android-api-15/ca/": {
-            "prefixes": [], "files": [
-                {"name": "fennec-56.0b1.ca.android-arm.apk"}
-            ]
+            "prefixes": [], "files": [{
+                "name": "fennec-56.0b1.ca.android-arm.apk",
+                "last_modified": "2017-08-03T20:55:11Z",
+                "size": 34138800
+            }]
         },
         "pub/mobile/candidates/56.0b1-candidates/build1/android-api-15/en-US/": {
-            "prefixes": [], "files": [
-                {"name": "fennec-56.0b1.en-US.android-arm.apk"}
-            ]
+            "prefixes": [], "files": [{
+                "name": "fennec-56.0b1.en-US.android-arm.apk",
+                "last_modified": "2017-08-03T20:55:11Z",
+                "size": 34138800
+            }]
         },
         "pub/mobile/candidates/56.0b1-candidates/build1/android-api-15/es-ES/": {
             "prefixes": [], "files": [
@@ -1155,8 +1184,8 @@ class FromRCMetadataAndroid(BaseTest):
                            '56.0b1-candidates/build1/android-api-15/ca/'
                            'fennec-56.0b1.ca.android-arm.apk',
                     'mimetype': 'application/vnd.android.package-archive',
-                    'size': 51001024,
-                    'date': '2017-08-08T17:06:52Z'
+                    'size': 34138800,
+                    'date': '2017-08-03T20:55:11Z'
                 },
             },
             if_not_exists=True)
@@ -1189,8 +1218,8 @@ class FromRCMetadataAndroid(BaseTest):
                            '56.0b1-candidates/build1/android-api-15/en-US/'
                            'fennec-56.0b1.en-US.android-arm.apk',
                     'mimetype': 'application/vnd.android.package-archive',
-                    'size': 51001024,
-                    'date': '2017-08-08T17:06:52Z'
+                    'size': 34138800,
+                    'date': '2017-08-03T20:55:11Z'
                 },
             },
             if_not_exists=True)
@@ -1198,8 +1227,13 @@ class FromRCMetadataAndroid(BaseTest):
 
 class FromNightlyMetadataAndroid(BaseTest):
     remote_content = {
-        "pub/mobile/nightly/2017/08/2017-08-01-15-03-46-mozilla-central-android-api-15/"
-        "fennec-56.0a1.multi.android-arm.apk": {},
+        "pub/mobile/nightly/2017/08/2017-08-01-15-03-46-mozilla-central-android-api-15/": {
+            "prefixes": [], "files": [{
+                "name": "fennec-56.0a1.multi.android-arm.apk",
+                "last_modified": "2017-08-03T20:55:11Z",
+                "size": 34138800
+            }]
+        },
         "pub/mobile/nightly/2017/08/2017-08-01-15-03-46-mozilla-central-android-api-15/"
         "fennec-56.0a1.multi.android-arm.json": {
             "as": "$(CC)",
@@ -1229,8 +1263,13 @@ class FromNightlyMetadataAndroid(BaseTest):
             "target_vendor": "unknown"
         },
         # Pure english. Check that no l10n are associated (keep that for multi)
-        "pub/mobile/nightly/2017/08/2017-08-01-15-03-46-mozilla-central-android-api-15/en-US/"
-        "fennec-56.0a1.en-US.android-arm.apk": {},
+        "pub/mobile/nightly/2017/08/2017-08-01-15-03-46-mozilla-central-android-api-15/en-US/": {
+            "prefixes": [], "files": [{
+                "name": "fennec-56.0a1.en-US.android-arm.apk",
+                "last_modified": "2017-08-03T20:55:11Z",
+                "size": 34138800
+            }]
+        },
         "pub/mobile/nightly/2017/08/2017-08-01-15-03-46-mozilla-central-android-api-15/en-US/"
         "fennec-56.0a1.en-US.android-arm.json": {
             "as": "$(CC)",
@@ -1260,14 +1299,22 @@ class FromNightlyMetadataAndroid(BaseTest):
             "target_vendor": "unknown"
         },
         "pub/mobile/nightly/2017/08/2017-08-01-15-03-46-mozilla-central-android-api-15-l10n/": {
-            "prefixes": [], "files": [
-                {"name": "fennec-56.0a1.fr.android-arm.apk"},
-                {"name": "fennec-56.0a1.fr.android-arm.checksums"},
-            ]
+            "prefixes": [], "files": [{
+                "name": "fennec-56.0a1.fr.android-arm.apk",
+                "last_modified": "2017-08-03T20:55:11Z",
+                "size": 34138800
+            }, {
+                "name": "fennec-56.0a1.fr.android-arm.checksums"
+            }]
         },
         # Old-id stuff.
-        "pub/mobile/nightly/2017/08/2017-08-02-10-03-02-mozilla-central-android-api-15-old-id/"
-        "fennec-57.0a1.multi.android-arm.apk": {},
+        "pub/mobile/nightly/2017/08/2017-08-02-10-03-02-mozilla-central-android-api-15-old-id/": {
+            "prefixes": [], "files": [{
+                "name": "fennec-57.0a1.multi.android-arm.apk",
+                "last_modified": "2017-08-03T20:55:11Z",
+                "size": 34138800
+            }]
+        },
         "pub/mobile/nightly/2017/08/2017-08-02-10-03-02-mozilla-central-android-api-15-old-id/"
         "fennec-57.0a1.multi.android-arm.json": {
             "as": "$(CC)",
@@ -1297,6 +1344,9 @@ class FromNightlyMetadataAndroid(BaseTest):
             "target_vendor": "unknown"
         },
         # Find localized archives from a multi json.
+        "pub/mobile/nightly/2017/08/2017-08-09-10-03-39-mozilla-central-android-api-15/": {
+            "prefixes": [], "files": []
+        },
         "pub/mobile/nightly/2017/08/2017-08-09-10-03-39-mozilla-central-android-api-15/"
         "fennec-57.0a1.multi.android-arm.json": {
             "as": "$(CC)",
@@ -1326,13 +1376,21 @@ class FromNightlyMetadataAndroid(BaseTest):
             "target_vendor": "unknown"
         },
         "pub/mobile/nightly/2017/08/2017-08-09-10-03-39-mozilla-central-android-api-15-l10n/": {
-            "prefixes": [], "files": [
-                {"name": "fennec-57.0a1.be.android-arm.apk"},
-                {"name": "fennec-57.0a1.be.android-arm.checksums"},
-                {"name": "fennec-57.0a1.hi-IN.android-arm.apk"},
-                {"name": "fennec-57.0a1.hi-IN.android-arm.checksums"},
-                {"name": "fennec-57.0a1.hi-IN.android-arm.checksums.asc"},
-            ]
+            "prefixes": [], "files": [{
+                "name": "fennec-57.0a1.be.android-arm.apk",
+                "last_modified": "2017-08-03T20:55:11Z",
+                "size": 34138800
+            }, {
+                "name": "fennec-57.0a1.be.android-arm.checksums"
+            }, {
+                "name": "fennec-57.0a1.hi-IN.android-arm.apk",
+                "last_modified": "2017-08-03T20:55:11Z",
+                "size": 34138800
+            }, {
+                "name": "fennec-57.0a1.hi-IN.android-arm.checksums"
+            }, {
+                "name": "fennec-57.0a1.hi-IN.android-arm.checksums.asc"
+            }]
         }
     }
 
@@ -1375,8 +1433,8 @@ class FromNightlyMetadataAndroid(BaseTest):
                            '08/2017-08-01-15-03-46-mozilla-central'
                            '-android-api-15/fennec-56.0a1.multi.android-arm.apk',
                     'mimetype': 'application/vnd.android.package-archive',
-                    'size': 51001024,
-                    'date': '2017-08-08T17:06:52Z'
+                    'size': 34138800,
+                    'date': '2017-08-03T20:55:11Z'
                 },
             },
             if_not_exists=True)
@@ -1416,8 +1474,8 @@ class FromNightlyMetadataAndroid(BaseTest):
                            '08/2017-08-01-15-03-46-mozilla-central'
                            '-android-api-15/en-US/fennec-56.0a1.en-US.android-arm.apk',
                     'mimetype': 'application/vnd.android.package-archive',
-                    'size': 51001024,
-                    'date': '2017-08-08T17:06:52Z'
+                    'size': 34138800,
+                    'date': '2017-08-03T20:55:11Z'
                 },
             },
             if_not_exists=True)
@@ -1454,8 +1512,8 @@ class FromNightlyMetadataAndroid(BaseTest):
                            '2017-08-02-10-03-02-mozilla-central-android-api-15-old-id/'
                            'fennec-57.0a1.multi.android-arm.apk',
                     'mimetype': 'application/vnd.android.package-archive',
-                    'size': 51001024,
-                    'date': '2017-08-08T17:06:52Z'
+                    'size': 34138800,
+                    'date': '2017-08-03T20:55:11Z'
                 },
             },
             if_not_exists=True)
@@ -1496,8 +1554,8 @@ class FromNightlyMetadataAndroid(BaseTest):
                            '2017-08-09-10-03-39-mozilla-central-android-api-15-l10n/'
                            'fennec-57.0a1.hi-IN.android-arm.apk',
                     'mimetype': 'application/vnd.android.package-archive',
-                    'size': 51001024,
-                    'date': '2017-08-08T17:06:52Z'
+                    'size': 34138800,
+                    'date': '2017-08-03T20:55:11Z'
                 },
             },
             if_not_exists=True)
@@ -1529,8 +1587,8 @@ class FromNightlyMetadataAndroid(BaseTest):
                            '2017-08-09-10-03-39-mozilla-central-android-api-15-l10n/'
                            'fennec-57.0a1.be.android-arm.apk',
                     'mimetype': 'application/vnd.android.package-archive',
-                    'size': 51001024,
-                    'date': '2017-08-08T17:06:52Z'
+                    'size': 34138800,
+                    'date': '2017-08-03T20:55:11Z'
                 },
             },
             if_not_exists=True)
