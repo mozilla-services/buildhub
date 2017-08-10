@@ -15,6 +15,12 @@ KNOWN_MIMETYPES = {
     'gz': 'application/x-gzip',
     'exe': 'application/msdos-windows',
     }
+PLATFORM_EXTENSIONS = {
+    "linux": ".tar.bz2",
+    "win": ".zip",
+    "mac": ".dmg",
+    "android": ".apk"
+}
 
 
 def archive_url(product, version=None, platform=None, locale=None, nightly=None, candidate=None):
@@ -197,6 +203,13 @@ def guess_mimetype(url):
     """Try to guess what kind of mimetype a given archive URL would be."""
     _, extension = os.path.splitext(url)
     return KNOWN_MIMETYPES.get(extension.strip('.'), None)
+
+
+def extension_for_platform(platform):
+    for p, extension in PLATFORM_EXTENSIONS.items():
+        if p in platform:
+            return extension
+    raise ValueError("Unknown platform {}".format(platform))
 
 
 def chunked(iterable, size):

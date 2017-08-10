@@ -99,21 +99,14 @@ async def main(loop, event):
             # pub/firefox/nightly/2017/08/2017-08-08-11-40-32-mozilla-central/
             # firefox-57.0a1.en-US.linux-i686.json
             # -l10n/...
-            if utils.is_nightly_build_metadata(product, url):
+            elif utils.is_nightly_build_metadata(product, url):
                 metadata = await fetch_json(session, url)
 
-                platform = metadata["moz_pkg_platform"]
-                if "linux" in platform:
-                    archive_url = url.replace(".json", ".tar.bz2")
-                elif "win" in platform:
-                    archive_url = url.replace(".json", ".zip")
-                elif "mac" in platform:
-                    archive_url = url.replace(".json", ".dmg")
-                elif "android" in platform:
-                    archive_url = url.replace(".json", ".apk")
-                else:
-                    raise ValueError("Unknown platform {}".format(platform))
                 # Check if english version is here.
+                platform = metadata["moz_pkg_platform"]
+                extension = utils.extension_for_platform(platform)
+                archive_url = url.replace(".json", extension)
+
                 exists = await check_exists(session, archive_url)
                 if exists:
                     record = utils.record_from_url(archive_url)
