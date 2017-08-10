@@ -611,8 +611,47 @@ class FromNightlyMetadataFirefox(BaseTest):
 class FromArchiveAndroid(BaseTest):
     remote_content = {
         "pub/mobile/candidates/": {
-            "prefixes": [], "files": []
+            "prefixes": [
+                "55.0-candidates/"
+            ], "files": []
         },
+        "pub/mobile/candidates/55.0-candidates/": {
+            "prefixes": [
+                "build1/",
+                "build2/",
+            ], "files": []
+        },
+        "pub/mobile/candidates/55.0-candidates/build2/android-x86/en-US/": {
+            "prefixes": [], "files": [
+                {"name": "fennec-55.0.en-US.android-i386.json"}
+            ]
+        },
+        # Release english metadata
+        "pub/mobile/candidates/55.0-candidates/build2/android-x86/en-US/"
+        "fennec-55.0.en-US.android-i386.json": {
+            "as": "$(CC)",
+            "buildid": "20170803202939",
+            "cc": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/toolchains/x86-4.9/prebuilt/linux-x86_64/bin/i686-linux-android-gcc -std=gnu99",
+            "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/toolchains/x86-4.9/prebuilt/linux-x86_64/bin/i686-linux-android-g++ -std=gnu++11",
+            "host_alias": "x86_64-pc-linux-gnu",
+            "host_cpu": "x86_64",
+            "host_os": "linux-gnu",
+            "host_vendor": "pc",
+            "moz_app_id": "{aa3c5121-dab2-40e2-81ca-7ea25febc110}",
+            "moz_app_maxversion": "55.*",
+            "moz_app_name": "fennec",
+            "moz_app_vendor": "Mozilla",
+            "moz_app_version": "55.0",
+            "moz_pkg_platform": "android-i386",
+            "moz_source_repo": "MOZ_SOURCE_REPO=https://hg.mozilla.org/releases/mozilla-release",
+            "moz_source_stamp": "9e30e915f1325f041d01c722bd640300f32dc9c3",
+            "moz_update_channel": "release",
+            "target_alias": "i386-pc-linux-android",
+            "target_cpu": "i386",
+            "target_os": "linux-android",
+            "target_vendor": "pc"
+        },
+        # Nightly metadata
         "pub/mobile/nightly/2017/08/2017-08-09-10-03-39-mozilla"
         "-central-android-aarch64/fennec-57.0a1.multi.android-aarch64.json": {
             "as": "$(CC)",
@@ -693,6 +732,50 @@ class FromArchiveAndroid(BaseTest):
             "target_vendor": "pc"
         }
     }
+
+    async def test_from_release_archive_before_metadata(self):
+        event = fake_event("pub/mobile/releases/55.0/android-api-15/en-US/"
+                           "fennec-55.0.en-US.android-arm.apk")
+        await lambda_s3_event.main(self.loop, event)
+
+        assert not self.mock_create_record.called
+
+    async def test_from_release_archive_english(self):
+        event = fake_event("pub/mobile/releases/55.0/android-x86/en-US/"
+                           "fennec-55.0.en-US.android-i386.apk")
+        await lambda_s3_event.main(self.loop, event)
+
+        self.mock_create_record.assert_called_with(
+            bucket='build-hub',
+            collection='releases',
+            data={
+                'id': 'fennec_55-0_android-x86_en-us',
+                'source': {
+                    'product': 'fennec',
+                    'revision': '9e30e915f1325f041d01c722bd640300f32dc9c3',
+                    'repository': 'https://hg.mozilla.org/releases/mozilla-release',
+                    'tree': 'releases/mozilla-release'
+                },
+                'build': {
+                    'id': '20170803202939',
+                    'date': '2017-08-03T20:29:39Z',
+                    'number': 2,
+                },
+                'target': {
+                    'platform': 'android-x86',
+                    'os': 'android',
+                    'locale': 'en-US',
+                    'version': '55.0',
+                    'channel': 'release'
+                },
+                'download': {
+                    'url': 'https://archive.mozilla.org/pub/mobile/releases/55.0/android-x86/en-US/fennec-55.0.en-US.android-i386.apk',
+                    'mimetype': 'application/vnd.android.package-archive',
+                    'size': 51001024,
+                    'date': '2017-08-08T17:06:52Z'
+                },
+            },
+            if_not_exists=True)
 
     async def test_from_nightly_archive_multi(self):
         event = fake_event("pub/mobile/nightly/2017/08/2017-08-09-10-03-39-mozilla"

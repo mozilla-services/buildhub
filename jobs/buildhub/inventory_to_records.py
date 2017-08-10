@@ -177,6 +177,9 @@ async def scan_candidates(session, product):
     # For each version take the latest build.
     global _candidates_build_folder
 
+    if product == "mobile":
+        product = "fennec"
+
     if product in _candidates_build_folder:
         return
 
