@@ -42,6 +42,8 @@ async def main(loop, event):
 
     async with aiohttp.ClientSession(loop=loop) as session:
         for record in event['Records']:
+            records_to_create = []
+
             key = record['s3']['object']['key']
             filesize = record['s3']['object']['size']
             url = utils.ARCHIVE_URL + key
@@ -60,8 +62,6 @@ async def main(loop, event):
                 print('Processing {} archive: {}'.format(product, key))
 
                 record = utils.record_from_url(url)
-                record["download"]["size"] = filesize
-                record["download"]["date"] = event_time
 
                 # Fetch release metadata.
                 await scan_candidates(session, product)
@@ -74,19 +74,12 @@ async def main(loop, event):
 
                 # Merge obtained metadata.
                 record = utils.merge_metadata(record, metadata)
-
-                # Check that fields values look OK.
-                utils.check_record(record)
-
-                # Push result to Kinto.
-                kinto_client.create_record(data=record,
-                                           bucket=bucket,
-                                           collection=collection,
-                                           if_not_exists=True)
-                print('Created {}'.format(record["id"]))
+                records_to_create.append(record)
 
             # RC metadata
             elif utils.is_rc_build_metadata(product, url):
+                print('Processing {} RC metadata: {}'.format(product, key))
+
                 # pub/firefox/candidates/55.0b12-candidates/build1/mac/en-US/
                 # firefox-55.0b12.json
                 metadata = await fetch_json(session, url)
@@ -101,14 +94,8 @@ async def main(loop, event):
                         rc_url = l10n_parent_url + locale + f["name"]
                         if utils.is_build_url(product, rc_url):
                             record = utils.record_from_url(rc_url)
-                            record["download"]["size"] = filesize
-                            record["download"]["date"] = event_time
                             record = utils.merge_metadata(record, metadata)
-                            utils.check_record(record)
-                            kinto_client.create_record(data=record,
-                                                       bucket=bucket,
-                                                       collection=collection,
-                                                       if_not_exists=True)
+                            records_to_create.append(record)
                 # Theorically release should never be there yet :)
                 # And repacks like EME-free/sha1 don't seem to be published in RC.
 
@@ -117,7 +104,7 @@ async def main(loop, event):
             # firefox-57.0a1.en-US.linux-i686.json
             # -l10n/...
             elif utils.is_nightly_build_metadata(product, url):
-                print('Processing {} metadata: {}'.format(product, key))
+                print('Processing {} nightly metadata: {}'.format(product, key))
 
                 metadata = await fetch_json(session, url)
 
@@ -129,14 +116,8 @@ async def main(loop, event):
                 exists = await check_exists(session, archive_url)
                 if exists:
                     record = utils.record_from_url(archive_url)
-                    record["download"]["size"] = filesize
-                    record["download"]["date"] = event_time
                     record = utils.merge_metadata(record, metadata)
-                    utils.check_record(record)
-                    kinto_client.create_record(data=record,
-                                               bucket=bucket,
-                                               collection=collection,
-                                               if_not_exists=True)
+                    records_to_create.append(record)
                 # Check also localized versions.
                 l10n_folder_url = re.sub("-mozilla-central([^/]*)/([^/]+)$",
                                          "-mozilla-central\\1-l10n/",
@@ -153,17 +134,25 @@ async def main(loop, event):
                     nightly_url = l10n_folder_url + f["name"]
                     if utils.is_build_url(product, nightly_url):
                         record = utils.record_from_url(nightly_url)
-                        record["download"]["size"] = filesize
-                        record["download"]["date"] = event_time
                         record = utils.merge_metadata(record, metadata)
-                        utils.check_record(record)
-                        kinto_client.create_record(data=record,
-                                                   bucket=bucket,
-                                                   collection=collection,
-                                                   if_not_exists=True)
+                        records_to_create.append(record)
 
             else:
                 print('Ignored {}'.format(key))
+
+            for record in records_to_create:
+                # XXX: this is wrong for metadata events
+                record["download"]["size"] = filesize
+                record["download"]["date"] = event_time
+                # Check that fields values look OK.
+                utils.check_record(record)
+                # Push result to Kinto.
+                kinto_client.create_record(data=record,
+                                           bucket=bucket,
+                                           collection=collection,
+                                           if_not_exists=True)
+                print('Created {}'.format(record["id"]))
+
 
 
 def lambda_handler(event, context):
