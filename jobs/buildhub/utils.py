@@ -62,7 +62,7 @@ def localize_nightly_url(nightly_url):
     index = -3
     if 'tar' in nightly_url:
         index = -4
-    if 'mobile' in nightly_url:
+    if '/mobile/' in nightly_url and '/en-US/' not in nightly_url:
         locale = 'multi'
     parts[index] = locale
     return '.'.join(parts)
