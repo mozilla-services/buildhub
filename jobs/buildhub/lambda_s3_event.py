@@ -86,14 +86,31 @@ async def main(loop, event):
                 print('Created {}'.format(record["id"]))
 
             # RC metadata
-            # pub/firefox/candidates/55.0b12-candidates/build1/mac/en-US/firefox-55.0b12.json
-            # -> EME-free
-            # -> list languages
-            # ->
-            # Theorically release should not be there yet :)
-            # if utils.is_release_build_metadata(product, "55.0a1", "toto.exe"):
-            #     print('Release metadata found {}'.format(key))
-            #     # XXX: Find corresponding release files (e.g every platforms/locales/...)
+            elif utils.is_rc_build_metadata(product, url):
+                # pub/firefox/candidates/55.0b12-candidates/build1/mac/en-US/
+                # firefox-55.0b12.json
+                metadata = await fetch_json(session, url)
+                metadata["buildnumber"] = int(re.search("/build(\d+)/", url).group(1))
+
+                # Check if localized languages are here (including en-US archive).
+                l10n_parent_url = re.sub("en-US/.+", "", url)
+                l10n_folders, _ = await fetch_listing(session, l10n_parent_url)
+                for locale in l10n_folders:
+                    _, files = await fetch_listing(session, l10n_parent_url + locale)
+                    for f in files:
+                        rc_url = l10n_parent_url + locale + f["name"]
+                        if utils.is_build_url(product, rc_url):
+                            record = utils.record_from_url(rc_url)
+                            record["download"]["size"] = filesize
+                            record["download"]["date"] = event_time
+                            record = utils.merge_metadata(record, metadata)
+                            utils.check_record(record)
+                            kinto_client.create_record(data=record,
+                                                       bucket=bucket,
+                                                       collection=collection,
+                                                       if_not_exists=True)
+                # Theorically release should never be there yet :)
+                # And repacks like EME-free/sha1 don't seem to be published in RC.
 
             # Nightly metadata
             # pub/firefox/nightly/2017/08/2017-08-08-11-40-32-mozilla-central/

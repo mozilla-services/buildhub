@@ -3,7 +3,8 @@ import pytest
 from buildhub.utils import (
     archive_url, build_record_id, is_release_build_metadata, is_build_url,
     guess_mimetype, guess_channel, chunked, localize_nightly_url, normalized_platform,
-    localize_release_candidate_url, record_from_url, merge_metadata, check_record
+    localize_release_candidate_url, record_from_url, merge_metadata, check_record,
+    is_rc_build_metadata
 )
 
 
@@ -598,6 +599,32 @@ WRONG_RELEASE_METADATA_FILENAMES = [
 @pytest.mark.parametrize("product,version,filename", WRONG_RELEASE_METADATA_FILENAMES)
 def test_wrong_release_metadata(product, version, filename):
     assert not is_release_build_metadata(product, version, filename)
+
+
+RC_METADATA_FILENAMES = [
+    ("mobile", "pub/mobile/candidates/56.0b1-candidates/build1/android-api-15/en-US/"
+               "fennec-56.0b1.en-US.android-arm.json"),
+    ("firefox", "pub/firefox/candidates/56.0b1-candidates/build4/linux-x86_64/en-US/"
+                "firefox-56.0b1.json")
+]
+
+
+@pytest.mark.parametrize("product,url", RC_METADATA_FILENAMES)
+def test_is_rc_build_metadata(product, url):
+    assert is_rc_build_metadata(product, url)
+
+
+WRONG_RC_METADATA_FILENAMES = [
+    ("mobile", "pub/mobile/candidates/56.0b1-candidates/build1/android-api-15/en-US/"
+               "fennec-56.0b1.en-US.android-arm.mozinfo.json"),
+    ("firefox", "pub/firefox/candidates/56.0b1-candidates/build4/linux-x86_64/en-US/"
+                "firefox-56.0b1.mozinfo.json")
+]
+
+
+@pytest.mark.parametrize("product,url", WRONG_RC_METADATA_FILENAMES)
+def test_is_not_rc_build_metadata(product, url):
+    assert not is_rc_build_metadata(product, url)
 
 
 RELEASE_FILENAMES = [

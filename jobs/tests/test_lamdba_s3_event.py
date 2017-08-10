@@ -290,6 +290,136 @@ class FromArchiveFirefox(BaseTest):
             if_not_exists=True)
 
 
+class FromRCMetadataFirefox(BaseTest):
+    remote_content = {
+        "pub/firefox/candidates/56.0b1-candidates/build4/linux-x86_64/": {
+            "prefixes": [
+                "es-ES/",
+                "ca/",
+                "en-US/",
+                "xpi/",
+            ], "files": [],
+        },
+        "pub/firefox/candidates/56.0b1-candidates/build4/linux-x86_64/xpi/": {
+            "prefixes": [], "files": [
+                {"name": "en-US.xpi"}
+            ]
+        },
+        "pub/firefox/candidates/56.0b1-candidates/build4/linux-x86_64/ca/": {
+            "prefixes": [], "files": [
+                {"name": "firefox-56.0b1.tar.bz2"}
+            ]
+        },
+        "pub/firefox/candidates/56.0b1-candidates/build4/linux-x86_64/en-US/": {
+            "prefixes": [], "files": [
+                {"name": "firefox-56.0b1.tar.bz2"}
+            ]
+        },
+        "pub/firefox/candidates/56.0b1-candidates/build4/linux-x86_64/es-ES/": {
+            "prefixes": [], "files": [
+                {"name": "firefox-56.0b1.checksums"}
+            ]
+        },
+        "pub/firefox/candidates/56.0b1-candidates/build4/linux-x86_64/en-US/"
+        "firefox-56.0b1.json": {
+            "as": "$(CC)",
+            "buildid": "20170808170225",
+            "cc": "/usr/bin/ccache /home/worker/workspace/build/src/gcc/bin/gcc -std=gnu99",
+            "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/gcc/bin/g++ -std=gnu++11",
+            "host_alias": "x86_64-pc-linux-gnu",
+            "host_cpu": "x86_64",
+            "host_os": "linux-gnu",
+            "host_vendor": "pc",
+            "moz_app_id": "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}",
+            "moz_app_maxversion": "56.*",
+            "moz_app_name": "firefox",
+            "moz_app_vendor": "Mozilla",
+            "moz_app_version": "56.0",
+            "moz_pkg_platform": "linux-x86_64",
+            "moz_source_repo": "MOZ_SOURCE_REPO=https://hg.mozilla.org/releases/mozilla-beta",
+            "moz_source_stamp": "da6760885a24e03e13f3b566f319fc255dbb4027",
+            "moz_update_channel": "beta",
+            "target_alias": "x86_64-pc-linux-gnu",
+            "target_cpu": "x86_64",
+            "target_os": "linux-gnu",
+            "target_vendor": "pc"
+        }
+    }
+
+    async def test_pick_rc_and_locales(self):
+        event = fake_event("pub/firefox/candidates/56.0b1-candidates/build4/linux-x86_64/"
+                           "en-US/firefox-56.0b1.json")
+        await lambda_s3_event.main(self.loop, event)
+
+        assert self.mock_create_record.call_count == 2
+
+        self.mock_create_record.assert_any_call(
+            bucket='build-hub',
+            collection='releases',
+            data={
+                'id': 'firefox_beta_56-0b1rc4_linux-x86_64_en-us',
+                'source': {
+                    'product': 'firefox',
+                    'revision': 'da6760885a24e03e13f3b566f319fc255dbb4027',
+                    'repository': 'https://hg.mozilla.org/releases/mozilla-beta',
+                    'tree': 'releases/mozilla-beta'
+                },
+                'build': {
+                    'id': '20170808170225',
+                    'date': '2017-08-08T17:02:25Z',
+                    'number': 4,
+                },
+                'target': {
+                    'platform': 'linux-x86_64',
+                    'os': 'linux',
+                    'locale': 'en-US',
+                    'version': '56.0b1rc4',
+                    'channel': 'beta'
+                },
+                'download': {
+                    'url': 'https://archive.mozilla.org/pub/firefox/candidates/56.0b1-candidates/'
+                           'build4/linux-x86_64/en-US/firefox-56.0b1.tar.bz2',
+                    'mimetype': 'application/x-bzip2',
+                    'size': 51001024,
+                    'date': '2017-08-08T17:06:52Z'
+                },
+            },
+            if_not_exists=True)
+
+        self.mock_create_record.assert_any_call(
+            bucket='build-hub',
+            collection='releases',
+            data={
+                'id': 'firefox_beta_56-0b1rc4_linux-x86_64_ca',
+                'source': {
+                    'product': 'firefox',
+                    'revision': 'da6760885a24e03e13f3b566f319fc255dbb4027',
+                    'repository': 'https://hg.mozilla.org/releases/mozilla-beta',
+                    'tree': 'releases/mozilla-beta'
+                },
+                'build': {
+                    'id': '20170808170225',
+                    'date': '2017-08-08T17:02:25Z',
+                    'number': 4,
+                },
+                'target': {
+                    'platform': 'linux-x86_64',
+                    'os': 'linux',
+                    'locale': 'ca',
+                    'version': '56.0b1rc4',
+                    'channel': 'beta'
+                },
+                'download': {
+                    'url': 'https://archive.mozilla.org/pub/firefox/candidates/56.0b1-candidates/'
+                           'build4/linux-x86_64/ca/firefox-56.0b1.tar.bz2',
+                    'mimetype': 'application/x-bzip2',
+                    'size': 51001024,
+                    'date': '2017-08-08T17:06:52Z'
+                },
+            },
+            if_not_exists=True)
+
+
 class FromNightlyMetadataFirefox(BaseTest):
     remote_content = {
         "pub/firefox/nightly/2017/08/2017-08-05-10-03-34-mozilla-central-l10n/": {
@@ -936,7 +1066,137 @@ class FromArchiveAndroid(BaseTest):
             if_not_exists=True)
 
 
-class FromMetadataAndroid(BaseTest):
+class FromRCMetadataAndroid(BaseTest):
+    remote_content = {
+        "pub/mobile/candidates/56.0b1-candidates/build1/android-api-15/": {
+            "prefixes": [
+                "es-ES/",
+                "ca/",
+                "en-US/",
+            ], "files": [],
+        },
+        "pub/mobile/candidates/56.0b1-candidates/build1/android-api-15/ca/": {
+            "prefixes": [], "files": [
+                {"name": "fennec-56.0b1.ca.android-arm.apk"}
+            ]
+        },
+        "pub/mobile/candidates/56.0b1-candidates/build1/android-api-15/en-US/": {
+            "prefixes": [], "files": [
+                {"name": "fennec-56.0b1.en-US.android-arm.apk"}
+            ]
+        },
+        "pub/mobile/candidates/56.0b1-candidates/build1/android-api-15/es-ES/": {
+            "prefixes": [], "files": [
+                {"name": "fennec-56.0b1.en-US.android-arm.txt"}
+            ]
+        },
+        "pub/mobile/candidates/56.0b1-candidates/build1/android-api-15/en-US/"
+        "fennec-56.0b1.en-US.android-arm.json": {
+            "as": "$(CC)",
+            "buildid": "20170807232150",
+            "cc": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                  "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/"
+                  "arm-linux-androideabi-gcc -std=gnu99",
+            "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                   "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/"
+                   "bin/arm-linux-androideabi-g++ -std=gnu++11",
+            "host_alias": "x86_64-pc-linux-gnu",
+            "host_cpu": "x86_64",
+            "host_os": "linux-gnu",
+            "host_vendor": "pc",
+            "moz_app_id": "{aa3c5121-dab2-40e2-81ca-7ea25febc110}",
+            "moz_app_maxversion": "56.*",
+            "moz_app_name": "fennec",
+            "moz_app_vendor": "Mozilla",
+            "moz_app_version": "56.0",
+            "moz_pkg_platform": "android-arm",
+            "moz_source_repo": "MOZ_SOURCE_REPO=https://hg.mozilla.org/releases/mozilla-beta",
+            "moz_source_stamp": "6c489d5df6d4d85ddb297666e8c1cbbda96a852c",
+            "moz_update_channel": "beta",
+            "target_alias": "arm-unknown-linux-androideabi",
+            "target_cpu": "arm",
+            "target_os": "linux-androideabi",
+            "target_vendor": "unknown"
+        }
+    }
+
+    async def test_pick_rc_and_locales(self):
+        event = fake_event("pub/mobile/candidates/56.0b1-candidates/build1/"
+                           "android-api-15/en-US/fennec-56.0b1.en-US.android-arm.json")
+        await lambda_s3_event.main(self.loop, event)
+
+        assert self.mock_create_record.call_count == 2
+
+        self.mock_create_record.assert_any_call(
+            bucket='build-hub',
+            collection='releases',
+            data={
+                'id': 'fennec_beta_56-0b1rc1_android-api-15_ca',
+                'source': {
+                    'product': 'fennec',
+                    'revision': '6c489d5df6d4d85ddb297666e8c1cbbda96a852c',
+                    'repository': 'https://hg.mozilla.org/releases/mozilla-beta',
+                    'tree': 'releases/mozilla-beta'
+                },
+                'build': {
+                    'id': '20170807232150',
+                    'date': '2017-08-07T23:21:50Z',
+                    'number': 1
+                },
+                'target': {
+                    'platform': 'android-api-15',
+                    'os': 'android',
+                    'locale': 'ca',
+                    'version': '56.0b1rc1',
+                    'channel': 'beta'
+                },
+                'download': {
+                    'url': 'https://archive.mozilla.org/pub/mobile/candidates/'
+                           '56.0b1-candidates/build1/android-api-15/ca/'
+                           'fennec-56.0b1.ca.android-arm.apk',
+                    'mimetype': 'application/vnd.android.package-archive',
+                    'size': 51001024,
+                    'date': '2017-08-08T17:06:52Z'
+                },
+            },
+            if_not_exists=True)
+
+        self.mock_create_record.assert_any_call(
+            bucket='build-hub',
+            collection='releases',
+            data={
+                'id': 'fennec_beta_56-0b1rc1_android-api-15_en-us',
+                'source': {
+                    'product': 'fennec',
+                    'revision': '6c489d5df6d4d85ddb297666e8c1cbbda96a852c',
+                    'repository': 'https://hg.mozilla.org/releases/mozilla-beta',
+                    'tree': 'releases/mozilla-beta'
+                },
+                'build': {
+                    'id': '20170807232150',
+                    'date': '2017-08-07T23:21:50Z',
+                    'number': 1
+                },
+                'target': {
+                    'platform': 'android-api-15',
+                    'os': 'android',
+                    'locale': 'en-US',
+                    'version': '56.0b1rc1',
+                    'channel': 'beta'
+                },
+                'download': {
+                    'url': 'https://archive.mozilla.org/pub/mobile/candidates/'
+                           '56.0b1-candidates/build1/android-api-15/en-US/'
+                           'fennec-56.0b1.en-US.android-arm.apk',
+                    'mimetype': 'application/vnd.android.package-archive',
+                    'size': 51001024,
+                    'date': '2017-08-08T17:06:52Z'
+                },
+            },
+            if_not_exists=True)
+
+
+class FromNightlyMetadataAndroid(BaseTest):
     remote_content = {
         "pub/mobile/nightly/2017/08/2017-08-01-15-03-46-mozilla-central-android-api-15/"
         "fennec-56.0a1.multi.android-arm.apk": {},

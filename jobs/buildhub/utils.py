@@ -199,6 +199,20 @@ def is_nightly_build_metadata(product, url):
     return bool(re_metadata.match(url))
 
 
+def is_rc_build_metadata(product, url):
+    if product == "mobile":
+        product = "fennec"
+    m = re.search("/candidates/(.+)-candidates", url)
+    if not m:
+        return False
+    version = m.group(1)
+    if product == "fennec":  # fennec-56.0b1.en-US.android-arm.json
+        re_metadata = re.compile(".+/{}-{}\.([^\.]+)\.([^\.]+)\.json$".format(product, version))
+    else:  # firefox-56.0b1.json
+        re_metadata = re.compile(".+/{}-{}\.json$".format(product, version))
+    return bool(re_metadata.match(url))
+
+
 def guess_mimetype(url):
     """Try to guess what kind of mimetype a given archive URL would be."""
     _, extension = os.path.splitext(url)
