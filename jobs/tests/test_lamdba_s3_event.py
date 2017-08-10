@@ -644,12 +644,48 @@ class FromMetadataAndroid(BaseTest):
             "target_os": "linux-androideabi",
             "target_vendor": "unknown"
         },
+        # Pure english. Check that no l10n are associated (keep that for multi)
         "pub/mobile/nightly/2017/08/2017-08-01-15-03-46-mozilla-central-android-api-15/en-US/"
-            "fennec-56.0a1.en-US.android-arm.apk": {},
+        "fennec-56.0a1.en-US.android-arm.apk": {},
         "pub/mobile/nightly/2017/08/2017-08-01-15-03-46-mozilla-central-android-api-15/en-US/"
-            "fennec-56.0a1.en-US.android-arm.json": {
+        "fennec-56.0a1.en-US.android-arm.json": {
             "as": "$(CC)",
             "buildid": "20170801150346",
+            "cc": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                  "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/"
+                  "arm-linux-androideabi-gcc -std=gnu99",
+            "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                   "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/"
+                   "arm-linux-androideabi-g++ -std=gnu++11",
+            "host_alias": "x86_64-pc-linux-gnu",
+            "host_cpu": "x86_64",
+            "host_os": "linux-gnu",
+            "host_vendor": "pc",
+            "moz_app_id": "{aa3c5121-dab2-40e2-81ca-7ea25febc110}",
+            "moz_app_maxversion": "57.0a1",
+            "moz_app_name": "fennec",
+            "moz_app_vendor": "Mozilla",
+            "moz_app_version": "56.0a1",
+            "moz_pkg_platform": "android-arm",
+            "moz_source_repo": "MOZ_SOURCE_REPO=https://hg.mozilla.org/mozilla-central",
+            "moz_source_stamp": "52285ea5e54c73d3ed824544cef2ee3f195f05e6",
+            "moz_update_channel": "nightly",
+            "target_alias": "arm-unknown-linux-androideabi",
+            "target_cpu": "arm",
+            "target_os": "linux-androideabi",
+            "target_vendor": "unknown"
+        },
+        "pub/mobile/nightly/2017/08/2017-08-01-15-03-46-mozilla-central-android-api-15-l10n/": {
+            "prefixes": [], "files": [
+                {"name": "fennec-56.0a1.fr.android-arm.apk"},
+                {"name": "fennec-56.0a1.fr.android-arm.checksums"},
+            ]
+        },
+        # Old-id stuff.
+        "pub/mobile/nightly/2017/08/2017-08-02-10-03-02-mozilla-central-android-api-15-old-id/fennec-57.0a1.multi.android-arm.apk": {},
+        "pub/mobile/nightly/2017/08/2017-08-02-10-03-02-mozilla-central-android-api-15-old-id/fennec-57.0a1.multi.android-arm.json": {
+            "as": "$(CC)",
+            "buildid": "20170802100302",
             "cc": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
                   "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/"
                   "arm-linux-androideabi-gcc -std=gnu99",
@@ -668,11 +704,44 @@ class FromMetadataAndroid(BaseTest):
             "moz_pkg_platform": "android-arm",
             "moz_source_repo": "MOZ_SOURCE_REPO=https://hg.mozilla.org/mozilla-central",
             "moz_source_stamp": "52285ea5e54c73d3ed824544cef2ee3f195f05e6",
+            "moz_update_channel": "nightly-old-id",
+            "target_alias": "arm-unknown-linux-androideabi",
+            "target_cpu": "arm",
+            "target_os": "linux-androideabi",
+            "target_vendor": "unknown"
+        },
+        # Find localized archives from a multi json.
+        "pub/mobile/nightly/2017/08/2017-08-09-10-03-39-mozilla-central-android-api-15/fennec-57.0a1.multi.android-arm.json": {
+            "as": "$(CC)",
+            "buildid": "20170809100339",
+            "cc": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/arm-linux-androideabi-gcc -std=gnu99",
+            "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/arm-linux-androideabi-g++ -std=gnu++11",
+            "host_alias": "x86_64-pc-linux-gnu",
+            "host_cpu": "x86_64",
+            "host_os": "linux-gnu",
+            "host_vendor": "pc",
+            "moz_app_id": "{aa3c5121-dab2-40e2-81ca-7ea25febc110}",
+            "moz_app_maxversion": "57.0a1",
+            "moz_app_name": "fennec",
+            "moz_app_vendor": "Mozilla",
+            "moz_app_version": "57.0a1",
+            "moz_pkg_platform": "android-arm",
+            "moz_source_repo": "MOZ_SOURCE_REPO=https://hg.mozilla.org/mozilla-central",
+            "moz_source_stamp": "4c5fbf49376351679dcc49f4cff26c3c2e055ccc",
             "moz_update_channel": "nightly",
             "target_alias": "arm-unknown-linux-androideabi",
             "target_cpu": "arm",
             "target_os": "linux-androideabi",
             "target_vendor": "unknown"
+        },
+        "pub/mobile/nightly/2017/08/2017-08-09-10-03-39-mozilla-central-android-api-15-l10n/": {
+            "prefixes": [], "files": [
+                {"name": "fennec-57.0a1.be.android-arm.apk"},
+                {"name": "fennec-57.0a1.be.android-arm.checksums"},
+                {"name": "fennec-57.0a1.hi-IN.android-arm.apk"},
+                {"name": "fennec-57.0a1.hi-IN.android-arm.checksums"},
+                {"name": "fennec-57.0a1.hi-IN.android-arm.checksums.asc"},
+            ]
         }
     }
 
@@ -688,7 +757,7 @@ class FromMetadataAndroid(BaseTest):
                            "-android-api-15/fennec-56.0a1.multi.android-arm.json")
         await lambda_s3_event.main(self.loop, event)
 
-        self.mock_create_record.assert_called_with(
+        self.mock_create_record.assert_any_call(
             bucket='build-hub',
             collection='releases',
             data={
@@ -726,6 +795,9 @@ class FromMetadataAndroid(BaseTest):
                            "-android-api-15/en-US/fennec-56.0a1.en-US.android-arm.json")
         await lambda_s3_event.main(self.loop, event)
 
+        # Do not create records for l10n files from en-US metadata.
+        assert self.mock_create_record.call_count == 1
+
         self.mock_create_record.assert_called_with(
             bucket='build-hub',
             collection='releases',
@@ -759,6 +831,112 @@ class FromMetadataAndroid(BaseTest):
             },
             if_not_exists=True)
 
+    async def test_from_nightly_multi_old_id(self):
+        event = fake_event("pub/mobile/nightly/2017/08/2017-08-02-10-03-02-mozilla-central-android-api-15-old-id/fennec-57.0a1.multi.android-arm.json")
+        await lambda_s3_event.main(self.loop, event)
+
+        self.mock_create_record.assert_called_with(
+            bucket='build-hub',
+            collection='releases',
+            data={
+                'id': 'fennec_nightly-old-id_2017-08-02-10-03-02_57-0a1_android-api-15_multi',
+                'source': {
+                    'product': 'fennec',
+                    'revision': '52285ea5e54c73d3ed824544cef2ee3f195f05e6',
+                    'repository': 'https://hg.mozilla.org/mozilla-central',
+                    'tree': 'mozilla-central'
+                },
+                'build': {
+                    'id': '20170802100302',
+                    'date': '2017-08-02T10:03:02Z'
+                },
+                'target': {
+                    'platform': 'android-api-15',
+                    'os': 'android',
+                    'locale': 'multi',
+                    'version': '57.0a1',
+                    'channel': 'nightly-old-id'
+                },
+                'download': {
+                    'url': 'https://archive.mozilla.org/pub/mobile/nightly/2017/08/'
+                           '2017-08-02-10-03-02-mozilla-central-android-api-15-old-id/'
+                           'fennec-57.0a1.multi.android-arm.apk',
+                    'mimetype': 'application/vnd.android.package-archive',
+                    'size': 51001024,
+                    'date': '2017-08-08T17:06:52Z'
+                },
+            },
+            if_not_exists=True)
+
+    async def test_from_nightly_arm_fetches_other_languages(self):
+        event = fake_event("pub/mobile/nightly/2017/08/2017-08-09-10-03-39-mozilla-central-android-api-15/fennec-57.0a1.multi.android-arm.json")
+        await lambda_s3_event.main(self.loop, event)
+
+        # Note: simulate multi archive is not published yet. Only l10n derivatives
+        # (see remote_content)
+        assert self.mock_create_record.call_count == 2
+
+        self.mock_create_record.assert_any_call(
+            bucket='build-hub',
+            collection='releases',
+            data={
+                'id': 'fennec_nightly_2017-08-09-10-03-39_57-0a1_android-api-15_hi-in',
+                'source': {
+                    'product': 'fennec',
+                    'revision': '4c5fbf49376351679dcc49f4cff26c3c2e055ccc',
+                    'repository': 'https://hg.mozilla.org/mozilla-central',
+                    'tree': 'mozilla-central'
+                },
+                'build': {
+                    'id': '20170809100339',
+                    'date': '2017-08-09T10:03:39Z'
+                },
+                'target': {
+                    'platform': 'android-api-15',
+                    'os': 'android',
+                    'locale': 'hi-IN',
+                    'version': '57.0a1',
+                    'channel': 'nightly'
+                },
+                'download': {
+                    'url': 'https://archive.mozilla.org/pub/mobile/nightly/2017/08/2017-08-09-10-03-39-mozilla-central-android-api-15-l10n/fennec-57.0a1.hi-IN.android-arm.apk',
+                    'mimetype': 'application/vnd.android.package-archive',
+                    'size': 51001024,
+                    'date': '2017-08-08T17:06:52Z'
+                },
+            },
+            if_not_exists=True)
+
+        self.mock_create_record.assert_any_call(
+            bucket='build-hub',
+            collection='releases',
+            data={
+                'id': 'fennec_nightly_2017-08-09-10-03-39_57-0a1_android-api-15_be',
+                'source': {
+                    'product': 'fennec',
+                    'revision': '4c5fbf49376351679dcc49f4cff26c3c2e055ccc',
+                    'repository': 'https://hg.mozilla.org/mozilla-central',
+                    'tree': 'mozilla-central'
+                },
+                'build': {
+                    'id': '20170809100339',
+                    'date': '2017-08-09T10:03:39Z'
+                },
+                'target': {
+                    'platform': 'android-api-15',
+                    'os': 'android',
+                    'locale': 'be',
+                    'version': '57.0a1',
+                    'channel': 'nightly'
+                },
+                'download': {
+                    'url': 'https://archive.mozilla.org/pub/mobile/nightly/2017/08/2017-08-09-10-03-39-mozilla-central-android-api-15-l10n/fennec-57.0a1.be.android-arm.apk',
+                    'mimetype': 'application/vnd.android.package-archive',
+                    'size': 51001024,
+                    'date': '2017-08-08T17:06:52Z'
+                },
+            },
+            if_not_exists=True)
 
     # 2017-08-09-10-03-39-mozilla-central-android-aarch64/fennec-57.0a1.multi.android-aarch64.json
     # 2017-08-09-10-03-39-mozilla-central-android-aarch64/fennec-57.0a1.multi.android-aarch64.apk

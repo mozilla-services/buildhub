@@ -134,6 +134,8 @@ def is_build_url(product, url):
     - firefox/nightly/2016/03/2016-03-14-00-15-09-mozilla-esr45/firefox-45.0esrpre.en-US.win64.zip
     - firefox/nightly/2014/12/2014-12-10-mozilla-central-debug/ \
           firefox-37.0a1.en-US.debug-linux-x86_64-asan.tar.bz2
+    - mobile/nightly/2017/08/2017-08-09-10-03-39-mozilla-central-android-api-15-l10n/
+          fennec-57.0a1.hi-IN.android-arm.apk
     """
     if 'nightly' in url and 'mozilla-central' not in url:
         return False
@@ -157,6 +159,8 @@ def is_build_url(product, url):
     """
     if product == "devedition":
         product = "firefox"
+    if product == "mobile":
+        product = "fennec"
     filename = os.path.basename(url)
     match_filename = filename.replace(' ', '-').lower()
     re_filename = re.compile("{}-(.+)({})$".format(product, FILE_EXTENSIONS))

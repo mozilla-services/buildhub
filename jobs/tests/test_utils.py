@@ -618,6 +618,8 @@ RELEASE_FILENAMES = [
     ("devedition", "firefox-54.0b11.tar.bz2"),
     ("firefox", ("pub/firefox/candidates/50.0-candidates/build1/"
                  "linux-x86_64/fr/firefox-50.0.tar.bz2")),
+    ("mobile", "pub/mobile/nightly/2017/08/2017-08-09-10-03-39-mozilla-central-"
+               "android-api-15-l10n/fennec-57.0a1.hi-IN.android-arm.apk"),
 ]
 
 

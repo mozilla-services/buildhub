@@ -126,16 +126,18 @@ async def main(loop, event):
                                                collection=collection,
                                                if_not_exists=True)
                 # Check also localized versions.
-                l10n_folder_url = re.sub("-mozilla-central/(.+)",
-                                         "-mozilla-central-l10n/",
+                l10n_folder_url = re.sub("-mozilla-central([^/]*)/([^/]+)$",
+                                         "-mozilla-central\\1-l10n/",
                                          url)
                 try:
                     _, files = await fetch_listing(session, l10n_folder_url)
                 except ValueError:
                     files = []  # No -l10/ folder published yet.
                 for f in files:
-                    if platform not in f["name"]:
-                        continue  # metadata are by platform.
+                    if platform not in f["name"] and product != "mobile":
+                        # metadata are by platform.
+                        # (mobile platforms are contained by folder)
+                        continue
                     nightly_url = l10n_folder_url + f["name"]
                     if utils.is_build_url(product, nightly_url):
                         record = utils.record_from_url(nightly_url)
