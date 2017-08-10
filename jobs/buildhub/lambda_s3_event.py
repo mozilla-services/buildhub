@@ -55,10 +55,11 @@ async def main(loop, event):
                 print('Skip product {}'.format(product))
                 continue
 
-            print('Processing {} item: {}'.format(product, key))
 
             # Release / Nightly / RC archive.
             if utils.is_build_url(product, url):
+                print('Processing {} archive: {}'.format(product, key))
+
                 record = utils.record_from_url(url)
                 record["download"]["size"] = filesize
                 record["download"]["date"] = event_time
@@ -100,6 +101,8 @@ async def main(loop, event):
             # firefox-57.0a1.en-US.linux-i686.json
             # -l10n/...
             elif utils.is_nightly_build_metadata(product, url):
+                print('Processing {} metadata: {}'.format(product, key))
+
                 metadata = await fetch_json(session, url)
 
                 # Check if english version is here.

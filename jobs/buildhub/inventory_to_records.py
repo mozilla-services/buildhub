@@ -68,7 +68,7 @@ async def fetch_listing(session, url):
 
 async def fetch_metadata(session, record):
     try:
-        if record["target"]["channel"] == "nightly":
+        if "nightly" in record["target"]["channel"]:  # nightly-old-id
             return await fetch_nightly_metadata(session, record)
         if "rc" in record["target"]["version"]:
             return await fetch_release_candidate_metadata(session, record)
