@@ -7,7 +7,8 @@ import aiohttp
 import kinto_http
 
 from . import utils
-from .inventory_to_records import fetch_json, fetch_listing, fetch_metadata, scan_candidates
+from .inventory_to_records import (NB_RETRY_REQUEST, fetch_json, fetch_listing,
+    fetch_metadata, scan_candidates)
 
 
 async def main(loop, event):
@@ -20,7 +21,8 @@ async def main(loop, event):
     collection = os.getenv("COLLECTION", "releases")
     kinto_auth = tuple(os.getenv("AUTH", "user:pass").split(":"))
 
-    kinto_client = kinto_http.Client(server_url=server_url, auth=kinto_auth)
+    kinto_client = kinto_http.Client(server_url=server_url, auth=kinto_auth,
+                                     retry=NB_RETRY_REQUEST)
 
     # Use event time as archive publication.
     event_time = datetime.datetime.strptime(event['eventTime'], "%Y-%m-%dT%H:%M:%S.%fZ")
