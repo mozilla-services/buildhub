@@ -49,8 +49,9 @@ def fetch_existing(client, cache_file=PREVIOUS_DUMP_FILENAME):
 
     if os.path.exists(cache_file):
         previous_run_cache = json.load(open(cache_file))
-        highest_timestamp = max([r['last_modified'] for r in previous_run_cache])
-        previous_run_timestamp = '"%s"' % highest_timestamp
+        if len(previous_run_cache) > 0:
+            highest_timestamp = max([r['last_modified'] for r in previous_run_cache])
+            previous_run_timestamp = '"%s"' % highest_timestamp
 
     new_records = client.get_records(_since=previous_run_timestamp, pages=float("inf"))
 
@@ -97,12 +98,12 @@ def publish_records(client, records):
     return results
 
 
-async def produce(loop, queue):
+async def produce(loop, stdin, queue):
     """Reads JSON the stdin asynchronuously where each line is a record.
     """
     reader = asyncio.StreamReader(loop=loop)
     reader_protocol = asyncio.StreamReaderProtocol(reader)
-    await loop.connect_read_pipe(lambda: reader_protocol, sys.stdin)
+    await loop.connect_read_pipe(lambda: reader_protocol, stdin)
 
     while "stdin receives input":
         line = await reader.readline()
@@ -176,7 +177,7 @@ async def consume(loop, queue, executor, client, existing):
             task.add_done_callback(markdone(queue, len(batch)))
 
 
-async def main(loop):
+async def main(loop, stdin, *args):
     parser = cli_utils.add_parser_options(
         description="Read records from stdin as JSON and push them to Kinto",
         default_server=DEFAULT_SERVER,
@@ -187,17 +188,17 @@ async def main(loop):
     parser.add_argument('--skip', action='store_true',
                         help='Skip records that exist and are equal.')
 
-    args = parser.parse_args(sys.argv[1:])
+    cli_args = parser.parse_args()
 
-    cli_utils.setup_logger(logger, args)
+    cli_utils.setup_logger(logger, cli_args)
 
     logger.info("Publish at {server}/buckets/{bucket}/collections/{collection}"
-                .format(**args.__dict__))
+                .format(**cli_args.__dict__))
 
-    client = cli_utils.create_client_from_args(args)
+    client = cli_utils.create_client_from_args(cli_args)
 
     existing = {}
-    if args.skip:
+    if cli_args.skip:
         # Fetch the list of records to skip records that exist and haven't changed.
         existing = fetch_existing(client)
 
@@ -208,7 +209,7 @@ async def main(loop):
     consumer_coro = consume(loop, queue, executor, client, existing)
     consumer = asyncio.ensure_future(consumer_coro)
     # Run the producer and wait for completion
-    await produce(loop, queue)
+    await produce(loop, stdin, queue)
     # Wait until the consumer is done consuming everything.
     await queue.join()
     # The consumer is still awaiting for the producer, cancel it.
@@ -217,7 +218,7 @@ async def main(loop):
 
 def run():
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(loop))
+    loop.run_until_complete(main(loop, sys.stdin, *sys.argv[1:]))
     loop.close()
 
 
