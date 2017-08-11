@@ -1,0 +1,12 @@
+{
+    "eventTime": "2017-08-08T17:06:52.030Z",
+    "Records": [{
+        "s3": {
+            "bucket": {"name": "archive-firefox"},
+            "object": {
+                "key": "pub/firefox/releases/54.0/win64/fr/Firefox Setup 54.0.exe",
+                "size": 51001024
+            }
+        }
+    }]
+}
