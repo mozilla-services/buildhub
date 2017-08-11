@@ -6,8 +6,8 @@ import re
 import aiohttp
 import kinto_http
 
-from . import utils
-from .inventory_to_records import (
+from buildhub import utils
+from buildhub.inventory_to_records import (
     NB_RETRY_REQUEST, fetch_json, fetch_listing, fetch_metadata, scan_candidates)
 
 
