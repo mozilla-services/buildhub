@@ -293,7 +293,7 @@ class FetchReleaseMetadata(asynctest.TestCase):
             m.get(candidate_folder + "firefox-45.3.0esr.json", payload={"buildid": "20170512"})
             received = await inventory_to_records.fetch_release_metadata(self.session,
                                                                          record)
-            assert received == {"buildid": "20170512"}
+            assert received == {"buildid": "20170512", "buildnumber": 3}
 
 
 class ScanCandidates(asynctest.TestCase):
