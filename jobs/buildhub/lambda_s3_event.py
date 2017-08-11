@@ -7,8 +7,8 @@ import aiohttp
 import kinto_http
 
 from . import utils
-from .inventory_to_records import (NB_RETRY_REQUEST, fetch_json, fetch_listing,
-    fetch_metadata, scan_candidates)
+from .inventory_to_records import (
+    NB_RETRY_REQUEST, fetch_json, fetch_listing, fetch_metadata, scan_candidates)
 
 
 async def main(loop, event):
