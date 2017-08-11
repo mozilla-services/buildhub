@@ -22,10 +22,8 @@ matrix:
       install:
         - cd ui
         - npm install
-        - elm-package install --yes
       script:
         - npm run build
       cache:
         directories:
           - "node_modules"
-          - "elm-stuff"
