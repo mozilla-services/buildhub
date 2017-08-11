@@ -98,3 +98,7 @@ The lambda accepts the following configuration (from environment variables):
 * ``AUTH`` (default: ``user:pass``)
 * ``NB_RETRY_REQUEST`` (default: ``3``)
 * ``TIMEOUT_SECONDS`` (default: ``300``)
+
+In order to build the S3 Lambda Zip archive in an isolated environment, we use Docker:
+
+* ``make get_zip``
