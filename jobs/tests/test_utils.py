@@ -4,7 +4,7 @@ from buildhub.utils import (
     archive_url, build_record_id, is_release_build_metadata, is_build_url,
     guess_mimetype, guess_channel, chunked, localize_nightly_url, normalized_platform,
     localize_release_candidate_url, record_from_url, merge_metadata, check_record,
-    is_rc_build_metadata
+    is_rc_build_metadata, is_nightly_build_metadata
 )
 
 
@@ -601,6 +601,30 @@ def test_wrong_release_metadata(product, version, filename):
     assert not is_release_build_metadata(product, version, filename)
 
 
+NIGHTLY_METADATA_FILENAMES = [
+    ("mobile", "pub/mobile/nightly/2017/08/2017-08-01-15-03-46-mozilla-central-android-api-15/"
+               "fennec-56.0a1.multi.android-arm.json"),
+]
+
+
+@pytest.mark.parametrize("product,url", NIGHTLY_METADATA_FILENAMES)
+def test_is_nightly_build_metadata(product, url):
+    assert is_nightly_build_metadata(product, url)
+
+
+WRONG_NIGHTLY_METADATA_FILENAMES = [
+    ("mobile", "pub/mobile/nightly/2017/08/2017-08-01-15-03-46-date-android-api-15/"
+               "fennec-56.0a1.multi.android-arm.json"),
+    ("firefox", "pub/firefox/candidates/56.0b1-candidates/build4/linux-x86_64/en-US/"
+                "firefox-56.0b1.json")
+]
+
+
+@pytest.mark.parametrize("product,url", WRONG_NIGHTLY_METADATA_FILENAMES)
+def test_is_not_nightly_build_metadata(product, url):
+    assert not is_nightly_build_metadata(product, url)
+
+
 RC_METADATA_FILENAMES = [
     ("mobile", "pub/mobile/candidates/56.0b1-candidates/build1/android-api-15/en-US/"
                "fennec-56.0b1.en-US.android-arm.json"),
@@ -728,6 +752,12 @@ NIGHTLY_URLS = [
      "mozilla-central-android-api-15-l10n/fennec-55.0a1.ar.android-arm.apk",
      "https://archive.mozilla.org/pub/mobile/nightly/2017/06/2017-06-01-10-02-05-"
      "mozilla-central-android-api-15/fennec-55.0a1.multi.android-arm.apk"),
+
+    # Mobile ARM english
+    ("https://archive.mozilla.org/pub/mobile/nightly/2017/06/2017-06-01-10-02-05-"
+     "mozilla-central-android-api-15/en-US/fennec-55.0a1.en-US.android-arm.apk",
+     "https://archive.mozilla.org/pub/mobile/nightly/2017/06/2017-06-01-10-02-05-"
+     "mozilla-central-android-api-15/en-US/fennec-55.0a1.en-US.android-arm.apk"),
 
     # Mobile i386 not localized
     ("https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-05-30-10-01-27-"
