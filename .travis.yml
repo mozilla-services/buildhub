@@ -1,8 +1,8 @@
 language: python
-python: 3.5
+python: 3.6
 cache: pip
 env:
-  - TOX_ENV=py35
+  - TOX_ENV=py36
   - TOX_ENV=flake8
 install:
   - pip install tox
@@ -19,9 +19,6 @@ after_success:
   - coveralls
 matrix:
   include:
-    - python: 3.6
-      env:
-        - TOX_ENV=py36
     - language: node_js
       node_js: 7
       install:

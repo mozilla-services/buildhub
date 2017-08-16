@@ -98,20 +98,10 @@ def publish_records(client, records):
     return results
 
 
-async def produce(loop, stdin, queue):
-    """Reads JSON the stdin asynchronuously where each line is a record.
+async def produce(loop, records, queue):
+    """Reads an asynchronuous generator of records and puts them into the queue.
     """
-    reader = asyncio.StreamReader(loop=loop)
-    reader_protocol = asyncio.StreamReaderProtocol(reader)
-    await loop.connect_read_pipe(lambda: reader_protocol, stdin)
-
-    while "stdin receives input":
-        line = await reader.readline()
-        if not line:  # EOF.
-            break
-
-        record = json.loads(line.decode("utf-8"))
-
+    async for record in records:
         if "data" not in record and "permission" not in record:
             raise ValueError("Invalid record (missing 'data' attribute)")
 
@@ -177,7 +167,21 @@ async def consume(loop, queue, executor, client, existing):
             task.add_done_callback(markdone(queue, len(batch)))
 
 
-async def main(loop, stdin, *args):
+async def stream_as_generator(loop, stream):
+    reader = asyncio.StreamReader(loop=loop)
+    reader_protocol = asyncio.StreamReaderProtocol(reader)
+    await loop.connect_read_pipe(lambda: reader_protocol, stream)
+
+    while "stream receives input":
+        line = await reader.readline()
+        if not line:  # EOF.
+            break
+
+        record = json.loads(line.decode("utf-8"))
+        yield record
+
+
+async def main(loop, stdin_generator, *args):
     parser = cli_utils.add_parser_options(
         description="Read records from stdin as JSON and push them to Kinto",
         default_server=DEFAULT_SERVER,
@@ -188,7 +192,7 @@ async def main(loop, stdin, *args):
     parser.add_argument('--skip', action='store_true',
                         help='Skip records that exist and are equal.')
 
-    cli_args = parser.parse_args()
+    cli_args = parser.parse_args(args=args)
 
     cli_utils.setup_logger(logger, cli_args)
 
@@ -209,7 +213,7 @@ async def main(loop, stdin, *args):
     consumer_coro = consume(loop, queue, executor, client, existing)
     consumer = asyncio.ensure_future(consumer_coro)
     # Run the producer and wait for completion
-    await produce(loop, stdin, queue)
+    await produce(loop, stdin_generator, queue)
     # Wait until the consumer is done consuming everything.
     await queue.join()
     # The consumer is still awaiting for the producer, cancel it.
@@ -218,7 +222,8 @@ async def main(loop, stdin, *args):
 
 def run():
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(loop, sys.stdin, *sys.argv[1:]))
+    stdin_generator = stream_as_generator(loop, sys.stdin)
+    loop.run_until_complete(main(loop, stdin_generator, *sys.argv[1:]))
     loop.close()
 
 
