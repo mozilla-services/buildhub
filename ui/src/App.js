@@ -139,7 +139,7 @@ const sortVersions = filters => {
       return 1;
     }
     let i = 0;
-    while (partsA[i] === partsB[i]) { // Skip all the parts that are equal.
+    while ((partsA[i] === partsB[i]) && (i <= partsA.length)) { // Skip all the parts that are equal.
       i++
     }
     if (!partsA[i] || !partsB[i]) {
