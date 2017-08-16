@@ -16,13 +16,13 @@ import backoff
 from .utils import (archive_url, chunked, is_release_build_metadata, is_build_url,
                     record_from_url, localize_nightly_url, merge_metadata, check_record,
                     localize_release_candidate_url,
-                    ARCHIVE_URL, FILE_EXTENSIONS, DATETIME_FORMAT)
+                    ARCHIVE_URL, FILE_EXTENSIONS, DATETIME_FORMAT, ALL_PRODUCTS)
 
 
 NB_PARALLEL_REQUESTS = int(os.getenv("NB_PARALLEL_REQUESTS", 8))
 NB_RETRY_REQUEST = int(os.getenv("NB_RETRY_REQUEST", 3))
 TIMEOUT_SECONDS = int(os.getenv("TIMEOUT_SECONDS", 5 * 60))
-PRODUCTS = os.getenv("PRODUCTS", "firefox thunderbird mobile").split(" ")
+PRODUCTS = os.getenv("PRODUCTS", " ".join(ALL_PRODUCTS)).split(" ")
 
 
 logger = logging.getLogger(__name__)
@@ -68,7 +68,7 @@ async def fetch_listing(session, url):
 
 async def fetch_metadata(session, record):
     try:
-        if record["target"]["channel"] == "nightly":
+        if "nightly" in record["target"]["channel"]:  # nightly-old-id
             return await fetch_nightly_metadata(session, record)
         if "rc" in record["target"]["version"]:
             return await fetch_release_candidate_metadata(session, record)
@@ -176,6 +176,9 @@ _candidates_build_folder = defaultdict(dict)
 async def scan_candidates(session, product):
     # For each version take the latest build.
     global _candidates_build_folder
+
+    if product == "mobile":
+        product = "fennec"
 
     if product in _candidates_build_folder:
         return

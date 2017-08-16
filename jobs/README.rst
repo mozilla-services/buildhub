@@ -77,3 +77,28 @@ Load records into Kinto:
     cat records.data | to-kinto --server https://kinto/ --bucket build-hub --collection release --auth user:pass initialization.yaml
 
 Repeat with ``LISTING=firefox``.
+
+
+S3 Event lambda
+===============
+
+The Amazon Lambda function is in charge of keeping the database up-to-date.
+
+When releases are published on S3, a `S3 Event <http://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html>`_ is triggered and `the lambda is invoked <http://docs.aws.amazon.com/lambda/latest/dg/with-s3.html>`_.
+
+.. note::
+
+    Since release records contain information from JSON metadata files, we handle the case when the JSON metdata file is published before the actual archive, and vice-versa.
+
+The lambda accepts the following configuration (from environment variables):
+
+* ``SERVER_URL`` (default: ``http://localhost:8888/v1``)
+* ``BUCKET`` (default: ``build-hub``)
+* ``COLLECTION`` (default: ``releases``)
+* ``AUTH`` (default: ``user:pass``)
+* ``NB_RETRY_REQUEST`` (default: ``3``)
+* ``TIMEOUT_SECONDS`` (default: ``300``)
+
+In order to build the S3 Lambda Zip archive in an isolated environment, we use Docker:
+
+* ``make get_zip``

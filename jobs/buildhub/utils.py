@@ -2,6 +2,8 @@ import datetime
 import os.path
 import re
 
+
+ALL_PRODUCTS = ("firefox", "thunderbird", "mobile")
 ARCHIVE_URL = "https://archive.mozilla.org/"
 DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 FILE_EXTENSIONS = "zip|tar.gz|tar.bz2|dmg|apk|exe"
@@ -54,7 +56,7 @@ def localize_nightly_url(nightly_url):
     index = -3
     if 'tar' in nightly_url:
         index = -4
-    if 'mobile' in nightly_url:
+    if '/mobile/' in nightly_url and '/en-US/' not in nightly_url:
         locale = 'multi'
     parts[index] = locale
     return '.'.join(parts)
@@ -132,6 +134,8 @@ def is_build_url(product, url):
     - firefox/nightly/2016/03/2016-03-14-00-15-09-mozilla-esr45/firefox-45.0esrpre.en-US.win64.zip
     - firefox/nightly/2014/12/2014-12-10-mozilla-central-debug/ \
           firefox-37.0a1.en-US.debug-linux-x86_64-asan.tar.bz2
+    - mobile/nightly/2017/08/2017-08-09-10-03-39-mozilla-central-android-api-15-l10n/
+          fennec-57.0a1.hi-IN.android-arm.apk
     """
     if 'nightly' in url and 'mozilla-central' not in url:
         return False
@@ -155,6 +159,8 @@ def is_build_url(product, url):
     """
     if product == "devedition":
         product = "firefox"
+    if product == "mobile":
+        product = "fennec"
     filename = os.path.basename(url)
     match_filename = filename.replace(' ', '-').lower()
     re_filename = re.compile("{}-(.+)({})$".format(product, FILE_EXTENSIONS))
@@ -173,6 +179,32 @@ def is_release_build_metadata(product, version, filename):
         product = "firefox"
     re_metadata = re.compile("{}-{}(.*).json".format(product, version))
     return bool(re_metadata.match(filename))
+
+
+def is_nightly_build_metadata(product, url):
+    if 'nightly' not in url:
+        return False
+    if 'nightly' in url and 'mozilla-central' not in url:
+        # pub/mobile/nightly/2017/08/2017-08-01-15-03-46-date-android-api-15/...
+        return False
+    if product == "mobile":
+        product = "fennec"
+    re_metadata = re.compile(".+/{}-(.*)\.(.*)\.(.*)\.json$".format(product))
+    return bool(re_metadata.match(url))
+
+
+def is_rc_build_metadata(product, url):
+    if product == "mobile":
+        product = "fennec"
+    m = re.search("/candidates/(.+)-candidates", url)
+    if not m:
+        return False
+    version = m.group(1)
+    if product == "fennec":  # fennec-56.0b1.en-US.android-arm.json
+        re_metadata = re.compile(".+/{}-{}\.([^\.]+)\.([^\.]+)\.json$".format(product, version))
+    else:  # firefox-56.0b1.json
+        re_metadata = re.compile(".+/{}-{}\.json$".format(product, version))
+    return bool(re_metadata.match(url))
 
 
 def guess_mimetype(url):

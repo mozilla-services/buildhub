@@ -1,4 +1,4 @@
-VIRTUALENV = virtualenv --python=python3
+VIRTUALENV = virtualenv --python=python3.6
 VENV := $(shell echo $${VIRTUAL_ENV-.venv})
 DOC_STAMP = $(VENV)/.doc_env_installed.stamp
 PYTHON = $(VENV)/bin/python3
@@ -10,6 +10,25 @@ help:
 virtualenv: $(PYTHON)
 $(PYTHON):
 	$(VIRTUALENV) $(VENV)
+
+clean:
+	rm -fr venv $(VENV) lambda.zip
+
+virtualenv:
+	virtualenv $(VENV) --python=python3.6
+	$(VENV)/bin/pip install jobs/
+
+zip: clean virtualenv
+	cd $(VENV)/lib/python3.6/site-packages/; zip -r ../../../../lambda.zip *
+
+build_image:
+	docker build -t buildhub .
+
+get_zip: build_image
+	docker rm buildhub || true
+	docker run --name buildhub buildhub
+	docker cp buildhub:/app/lambda.zip .
+
 
 install-docs: $(DOC_STAMP)
 $(DOC_STAMP): $(PYTHON) docs/requirements.txt
