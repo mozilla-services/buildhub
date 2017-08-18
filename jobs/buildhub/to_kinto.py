@@ -175,28 +175,9 @@ async def parse_json(lines):
         yield record
 
 
-async def main(loop, stdin_generator, *args):
-    parser = cli_utils.add_parser_options(
-        description="Read records from stdin as JSON and push them to Kinto",
-        default_server=DEFAULT_SERVER,
-        default_bucket=DEFAULT_BUCKET,
-        default_retry=NB_RETRY_REQUEST,
-        default_collection=DEFAULT_COLLECTION)
-
-    parser.add_argument('--skip', action='store_true',
-                        help='Skip records that exist and are equal.')
-
-    cli_args = parser.parse_args(args=args)
-
-    cli_utils.setup_logger(logger, cli_args)
-
-    logger.info("Publish at {server}/buckets/{bucket}/collections/{collection}"
-                .format(**cli_args.__dict__))
-
-    client = cli_utils.create_client_from_args(cli_args)
-
+async def main(loop, stdin_generator, client, skip_existing=True):
     existing = {}
-    if cli_args.skip:
+    if skip_existing:
         # Fetch the list of records to skip records that exist and haven't changed.
         existing = fetch_existing(client)
 
@@ -218,7 +199,26 @@ def run():
     loop = asyncio.get_event_loop()
     stdin_generator = stream_as_generator(loop, sys.stdin)
     records_generator = parse_json(stdin_generator)
-    loop.run_until_complete(main(loop, records_generator, *sys.argv[1:]))
+
+    parser = cli_utils.add_parser_options(
+        description="Read records from stdin as JSON and push them to Kinto",
+        default_server=DEFAULT_SERVER,
+        default_bucket=DEFAULT_BUCKET,
+        default_retry=NB_RETRY_REQUEST,
+        default_collection=DEFAULT_COLLECTION)
+    parser.add_argument('--skip', action='store_true',
+                        help='Skip records that exist and are equal.')
+    cli_args = parser.parse_args()
+    cli_utils.setup_logger(logger, cli_args)
+
+    logger.info("Publish at {server}/buckets/{bucket}/collections/{collection}"
+                .format(**cli_args.__dict__))
+
+    client = cli_utils.create_client_from_args(cli_args)
+
+    main_coro = main(loop, records_generator, client, skip_existing=cli_args.skip)
+
+    loop.run_until_complete(main_coro)
     loop.close()
 
 

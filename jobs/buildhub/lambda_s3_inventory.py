@@ -1,11 +1,13 @@
 import asyncio
-import aiobotocore
-import botocore
 import json
 import os.path
 import zlib
 
-from buildhub.inventory_to_records import csv_to_records
+import aiobotocore
+import botocore
+import kinto_http
+
+from buildhub.inventory_to_records import NB_RETRY_REQUEST, csv_to_records
 from buildhub.to_kinto import main as to_kinto
 
 
@@ -55,7 +57,11 @@ async def main(loop, event, inventory):
     server_url = os.getenv("SERVER_URL", "http://localhost:8888/v1")
     bucket = os.getenv("BUCKET", "default")
     collection = os.getenv("COLLECTION", "releases")
-    kinto_auth = os.getenv("AUTH", "user:pass")
+    kinto_auth = tuple(os.getenv("AUTH", "user:pass").split(":"))
+
+    kinto_client = kinto_http.Client(server_url=server_url, auth=kinto_auth,
+                                     bucket=bucket, collection=collection,
+                                     retry=NB_RETRY_REQUEST)
 
     session = aiobotocore.get_session(loop=loop)
     boto_config = botocore.config.Config(signature_version=botocore.UNSIGNED)
@@ -65,10 +71,7 @@ async def main(loop, event, inventory):
         csv_stream = download_csv(loop, client, keys_stream)
         records_stream = csv_to_records(loop, csv_stream)
 
-        await to_kinto(loop, records_stream,
-                       '--skip', '--server', server_url,
-                       '--bucket', bucket, '--collection', collection,
-                       '--auth', kinto_auth)
+        await to_kinto(loop, records_stream, kinto_client, skip_existing=True)
 
 
 def lambda_handler(event, context):
