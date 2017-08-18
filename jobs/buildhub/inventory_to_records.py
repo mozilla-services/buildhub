@@ -26,7 +26,7 @@ TIMEOUT_SECONDS = int(os.getenv("TIMEOUT_SECONDS", 5 * 60))
 PRODUCTS = os.getenv("PRODUCTS", " ".join(ALL_PRODUCTS)).split(" ")
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()  # root logger.
 
 
 async def read_csv(input_generator):

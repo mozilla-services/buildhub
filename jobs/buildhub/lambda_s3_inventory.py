@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import os.path
 import zlib
 
@@ -15,6 +16,9 @@ REGION_NAME = 'us-east-1'
 BUCKET = "net-mozaws-prod-delivery-inventory-us-east-1"
 FOLDER = "public/inventories/net-mozaws-prod-delivery-{inventory}/delivery-{inventory}/"
 CHUNK_SIZE = 1024
+
+
+logger = logging.getLogger()  # root logger.
 
 
 async def list_manifest_entries(loop, client, inventory):
@@ -75,6 +79,10 @@ async def main(loop, event, inventory):
 
 
 def lambda_handler(event, context):
+    # Log everything to stderr.
+    logger.addHandler(logging.StreamHandler())
+    logger.setLevel(logging.DEBUG)
+
     loop = asyncio.get_event_loop()
     for inventory in ("firefox", "archive"):
         loop.run_until_complete(main(loop, event, inventory))
