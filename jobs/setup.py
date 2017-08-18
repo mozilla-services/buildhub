@@ -18,6 +18,7 @@ CONTRIBUTORS = read_file('CONTRIBUTORS.rst')
 
 REQUIREMENTS = [
     "aiohttp",
+    "aiobotocore",
     "backoff",
     "kinto-http",
     "kinto-wizard",
@@ -27,6 +28,7 @@ ENTRY_POINTS = {
     'console_scripts': [
         'to-kinto = buildhub.to_kinto:run',
         'inventory-to-records = buildhub.inventory_to_records:run',
+        'latest-inventory-to-kinto = buildhub.lambda_s3_inventory:lambda_handler',
     ],
 }
 

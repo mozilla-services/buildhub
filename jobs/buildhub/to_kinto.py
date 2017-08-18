@@ -26,6 +26,8 @@ import sys
 
 from kinto_http import cli_utils
 
+from buildhub.utils import stream_as_generator
+
 
 DEFAULT_SERVER = "http://localhost:8888/v1"
 DEFAULT_BUCKET = "default"
@@ -49,8 +51,9 @@ def fetch_existing(client, cache_file=PREVIOUS_DUMP_FILENAME):
 
     if os.path.exists(cache_file):
         previous_run_cache = json.load(open(cache_file))
-        highest_timestamp = max([r['last_modified'] for r in previous_run_cache])
-        previous_run_timestamp = '"%s"' % highest_timestamp
+        if len(previous_run_cache) > 0:
+            highest_timestamp = max([r['last_modified'] for r in previous_run_cache])
+            previous_run_timestamp = '"%s"' % highest_timestamp
 
     new_records = client.get_records(_since=previous_run_timestamp, pages=float("inf"))
 
@@ -97,20 +100,10 @@ def publish_records(client, records):
     return results
 
 
-async def produce(loop, queue):
-    """Reads JSON the stdin asynchronuously where each line is a record.
+async def produce(loop, records, queue):
+    """Reads an asynchronous generator of records and puts them into the queue.
     """
-    reader = asyncio.StreamReader(loop=loop)
-    reader_protocol = asyncio.StreamReaderProtocol(reader)
-    await loop.connect_read_pipe(lambda: reader_protocol, sys.stdin)
-
-    while "stdin receives input":
-        line = await reader.readline()
-        if not line:  # EOF.
-            break
-
-        record = json.loads(line.decode("utf-8"))
-
+    async for record in records:
         if "data" not in record and "permission" not in record:
             raise ValueError("Invalid record (missing 'data' attribute)")
 
@@ -176,28 +169,15 @@ async def consume(loop, queue, executor, client, existing):
             task.add_done_callback(markdone(queue, len(batch)))
 
 
-async def main(loop):
-    parser = cli_utils.add_parser_options(
-        description="Read records from stdin as JSON and push them to Kinto",
-        default_server=DEFAULT_SERVER,
-        default_bucket=DEFAULT_BUCKET,
-        default_retry=NB_RETRY_REQUEST,
-        default_collection=DEFAULT_COLLECTION)
+async def parse_json(lines):
+    async for line in lines:
+        record = json.loads(line.decode("utf-8"))
+        yield record
 
-    parser.add_argument('--skip', action='store_true',
-                        help='Skip records that exist and are equal.')
 
-    args = parser.parse_args(sys.argv[1:])
-
-    cli_utils.setup_logger(logger, args)
-
-    logger.info("Publish at {server}/buckets/{bucket}/collections/{collection}"
-                .format(**args.__dict__))
-
-    client = cli_utils.create_client_from_args(args)
-
+async def main(loop, stdin_generator, client, skip_existing=True):
     existing = {}
-    if args.skip:
+    if skip_existing:
         # Fetch the list of records to skip records that exist and haven't changed.
         existing = fetch_existing(client)
 
@@ -208,7 +188,7 @@ async def main(loop):
     consumer_coro = consume(loop, queue, executor, client, existing)
     consumer = asyncio.ensure_future(consumer_coro)
     # Run the producer and wait for completion
-    await produce(loop, queue)
+    await produce(loop, stdin_generator, queue)
     # Wait until the consumer is done consuming everything.
     await queue.join()
     # The consumer is still awaiting for the producer, cancel it.
@@ -217,7 +197,28 @@ async def main(loop):
 
 def run():
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(loop))
+    stdin_generator = stream_as_generator(loop, sys.stdin)
+    records_generator = parse_json(stdin_generator)
+
+    parser = cli_utils.add_parser_options(
+        description="Read records from stdin as JSON and push them to Kinto",
+        default_server=DEFAULT_SERVER,
+        default_bucket=DEFAULT_BUCKET,
+        default_retry=NB_RETRY_REQUEST,
+        default_collection=DEFAULT_COLLECTION)
+    parser.add_argument('--skip', action='store_true',
+                        help='Skip records that exist and are equal.')
+    cli_args = parser.parse_args()
+    cli_utils.setup_logger(logger, cli_args)
+
+    logger.info("Publish at {server}/buckets/{bucket}/collections/{collection}"
+                .format(**cli_args.__dict__))
+
+    client = cli_utils.create_client_from_args(cli_args)
+
+    main_coro = main(loop, records_generator, client, skip_existing=cli_args.skip)
+
+    loop.run_until_complete(main_coro)
     loop.close()
 
 

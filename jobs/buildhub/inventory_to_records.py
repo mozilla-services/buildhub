@@ -13,10 +13,11 @@ from collections import defaultdict
 import aiohttp
 import backoff
 
-from .utils import (archive_url, chunked, is_release_build_metadata, is_build_url,
-                    record_from_url, localize_nightly_url, merge_metadata, check_record,
-                    localize_release_candidate_url,
-                    ARCHIVE_URL, FILE_EXTENSIONS, DATETIME_FORMAT, ALL_PRODUCTS)
+from buildhub.utils import (
+    archive_url, chunked, is_release_build_metadata, is_build_url,
+    record_from_url, localize_nightly_url, merge_metadata, check_record,
+    localize_release_candidate_url, stream_as_generator, split_lines,
+    ARCHIVE_URL, FILE_EXTENSIONS, DATETIME_FORMAT, ALL_PRODUCTS)
 
 
 NB_PARALLEL_REQUESTS = int(os.getenv("NB_PARALLEL_REQUESTS", 8))
@@ -25,14 +26,18 @@ TIMEOUT_SECONDS = int(os.getenv("TIMEOUT_SECONDS", 5 * 60))
 PRODUCTS = os.getenv("PRODUCTS", " ".join(ALL_PRODUCTS)).split(" ")
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()  # root logger.
 
 
-def read_csv(stream):
+async def read_csv(input_generator):
+    """
+    :param input_generator: async generator of raw bytes
+    """
     fieldnames = ["Bucket", "Key", "Size", "LastModifiedDate", "md5"]
-    reader = csv.DictReader(stream, fieldnames=fieldnames)
-    for row in reader:
-        yield row
+    async for lines in split_lines(input_generator):
+        reader = csv.DictReader(lines, fieldnames=fieldnames)
+        for row in reader:
+            yield row
 
 
 @backoff.on_exception(backoff.expo,
@@ -248,7 +253,7 @@ async def fetch_release_metadata(session, record):
     raise ValueError("Missing metadata for candidate {}".format(url))
 
 
-async def process_batch(session, batch, stdout):
+async def process_batch(session, batch):
     # Parallel fetch of metadata for each item of the batch.
     logger.info("Fetch metadata for {} releases...".format(len(batch)))
     futures = [fetch_metadata(session, record) for record in batch]
@@ -260,16 +265,18 @@ async def process_batch(session, batch, stdout):
             check_record(result)
         except ValueError as e:
             logger.warning(e)
-        stdout.write(json.dumps({"data": result}) + "\n")
-    return results
+        yield {"data": result}
 
 
-async def csv_to_records(loop, stdin, stdout):
+async def csv_to_records(loop, stdin):
+    """
+    :rtype: async generator of records (dict-like)
+    """
 
-    def inventory_by_folder(stdin):
+    async def inventory_by_folder(stdin):
         previous = None
         result = []
-        for entry in read_csv(stdin):
+        async for entry in read_csv(stdin):
             object_key = entry["Key"]
             folder = os.path.dirname(object_key)
 
@@ -302,8 +309,7 @@ async def csv_to_records(loop, stdin, stdout):
     async with aiohttp.ClientSession(loop=loop) as session:
         batch = []
 
-        for entries in inventory_by_folder(stdin):
-
+        async for entries in inventory_by_folder(stdin):
             entries = deduplicate_entries(entries)
 
             for entry in entries:
@@ -338,11 +344,13 @@ async def csv_to_records(loop, stdin, stdout):
                 if len(batch) < NB_PARALLEL_REQUESTS:
                     batch.append(record)
                 else:
-                    await process_batch(session, batch, stdout)
+                    async for result in process_batch(session, batch):
+                        yield result
 
                     batch = []  # Go on.
 
-        await process_batch(session, batch, stdout)  # Last loop iteration.
+        async for result in process_batch(session, batch):  # Last loop iteration.
+            yield result
 
 
 async def main(loop):
@@ -363,7 +371,8 @@ async def main(loop):
     else:
         logger.setLevel(logging.WARNING)
 
-    await csv_to_records(loop, sys.stdin, sys.stdout)
+    async for record in csv_to_records(loop, stream_as_generator(loop, sys.stdin)):
+        sys.stdout.write(json.dumps(record) + "\n")
 
 
 def run():
