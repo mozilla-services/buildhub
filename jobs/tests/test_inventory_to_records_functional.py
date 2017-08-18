@@ -152,4 +152,33 @@ class CsvToRecordsTest(asynctest.TestCase):
                     'version': '55.0b9rc2'
                 }
             }
+        }, {
+            "data": {
+                "id": "devedition_aurora_55-0b1rc5_win64_pt-br",
+                "source": {
+                    "product": "devedition",
+                    "revision": "6872377277a618b2b9e0d2b4c2b9e51765ac199e",
+                    "repository": "https://hg.mozilla.org/releases/mozilla-beta",
+                    "tree": "releases/mozilla-beta"
+                },
+                "target": {
+                    "platform": "win64",
+                    "os": "win",
+                    "locale": "pt-BR",
+                    "version": "55.0b1rc5",
+                    "channel": "aurora"
+                },
+                "download": {
+                    "url": "https://archive.mozilla.org/pub/devedition/candidates/"
+                           "55.0b1-candidates/build5/win64/pt-BR/firefox-55.0b1.zip",
+                    "mimetype": "application/zip",
+                    "size": 53718907,
+                    "date": "2017-06-14T00:41:56Z"
+                },
+                "build": {
+                    "id": "20170612224034",
+                    "date": "2017-06-12T22:40:34Z",
+                    "number": 5
+                }
+            }
         }]

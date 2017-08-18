@@ -4,7 +4,7 @@ import os.path
 import re
 
 
-ALL_PRODUCTS = ("firefox", "thunderbird", "mobile")
+ALL_PRODUCTS = ("firefox", "thunderbird", "mobile", "devedition")
 ARCHIVE_URL = "https://archive.mozilla.org/"
 DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 FILE_EXTENSIONS = "zip|tar.gz|tar.bz2|dmg|apk|exe"
@@ -21,7 +21,8 @@ KNOWN_MIMETYPES = {
 def archive_url(product, version=None, platform=None, locale=None, nightly=None, candidate=None):
     """Returns the related URL on archive.mozilla.org
     """
-    product = product if product != "fennec" else "mobile"
+    if product == "fennec":
+        product = "mobile"
 
     if platform is not None:
         platform = platform.replace('eme', 'EME')
@@ -190,6 +191,7 @@ def is_nightly_build_metadata(product, url):
         return False
     if product == "mobile":
         product = "fennec"
+    # Note: devedition has no nightly.
     re_metadata = re.compile(".+/{}-(.*)\.(.*)\.(.*)\.json$".format(product))
     return bool(re_metadata.match(url))
 
@@ -197,6 +199,8 @@ def is_nightly_build_metadata(product, url):
 def is_rc_build_metadata(product, url):
     if product == "mobile":
         product = "fennec"
+    if product == "devedition":
+        product = "firefox"
     m = re.search("/candidates/(.+)-candidates", url)
     if not m:
         return False
@@ -257,7 +261,9 @@ def record_from_url(url):
     filename = os.path.basename(normalized_url)
     filename_parts = filename.split('.')
 
-    product = filename_parts[0].replace('-setup', '').split('-')[0]
+    product = url_parts[4]
+    if product == "mobile":
+        product = "fennec"
 
     # Nightly URL
     # https://archive.mozilla.org/pub/firefox/nightly/2017/05/

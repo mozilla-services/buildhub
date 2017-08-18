@@ -86,9 +86,9 @@ RECORDS = [
 
     # Firefox DevEdition
     {
-        "id": "firefox_aurora_55-0b3_macosx_en-us",
+        "id": "devedition_aurora_55-0b3_macosx_en-us",
         "source": {
-            "product": "firefox",
+            "product": "devedition",
         },
         "target": {
             "version": "55.0b3",
@@ -629,7 +629,9 @@ RC_METADATA_FILENAMES = [
     ("mobile", "pub/mobile/candidates/56.0b1-candidates/build1/android-api-15/en-US/"
                "fennec-56.0b1.en-US.android-arm.json"),
     ("firefox", "pub/firefox/candidates/56.0b1-candidates/build4/linux-x86_64/en-US/"
-                "firefox-56.0b1.json")
+                "firefox-56.0b1.json"),
+    ("devedition", "pub/devedition/candidates/55.0b7-candidates/build1/linux-x86_64/en-US/"
+                   "firefox-55.0b7.json")
 ]
 
 
