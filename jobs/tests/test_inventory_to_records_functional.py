@@ -3,6 +3,7 @@ import os
 import io
 import json
 import sys
+from unittest import mock
 
 from buildhub import inventory_to_records
 
@@ -20,6 +21,17 @@ class CsvToRecordsTest(asynctest.TestCase):
         sys.stdin = open(filename, "r")
         sys.stdout = io.StringIO()
         sys.argv = ["inventory-to-records"]
+
+        async def fake_stream(loop, stream):
+            # Workaround for "Pipe transport is for pipes/sockets only".
+            # Here stream is just a file descriptor.
+            for line in stream.readlines():
+                yield bytes(line, "utf-8")
+
+        p = mock.patch("buildhub.inventory_to_records.stream_as_generator",
+                       wraps=fake_stream)
+        self.addCleanup(p.stop)
+        p.start()
 
     def tearDown(self):
         sys.stdin.close()

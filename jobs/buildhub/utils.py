@@ -234,21 +234,15 @@ async def split_lines(stream):
 
 
 async def stream_as_generator(loop, stream):
-    if not stream.isatty():
-        # Used in tests only, where stream is just a file descriptor.
-        # Workaround for "Pipe transport is for pipes/sockets only".
-        for line in stream.readlines():
-            yield bytes(line, "utf-8")
-    else:
-        reader = asyncio.StreamReader(loop=loop)
-        reader_protocol = asyncio.StreamReaderProtocol(reader)
-        await loop.connect_read_pipe(lambda: reader_protocol, stream)
+    reader = asyncio.StreamReader(loop=loop)
+    reader_protocol = asyncio.StreamReaderProtocol(reader)
+    await loop.connect_read_pipe(lambda: reader_protocol, stream)
 
-        while "stream receives input":
-            line = await reader.readline()
-            if not line:  # EOF.
-                break
-            yield line
+    while "stream receives input":
+        line = await reader.readline()
+        if not line:  # EOF.
+            break
+        yield line
 
 
 def record_from_url(url):
