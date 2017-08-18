@@ -75,24 +75,18 @@ async def main(loop, inventory):
     session = aiobotocore.get_session(loop=loop)
     boto_config = botocore.config.Config(signature_version=botocore.UNSIGNED)
     async with session.create_client('s3', region_name=REGION_NAME, config=boto_config) as client:
-
         keys_stream = list_manifest_entries(loop, client, inventory)
         csv_stream = download_csv(loop, client, keys_stream)
         records_stream = csv_to_records(loop, csv_stream)
-
         await to_kinto(loop, records_stream, kinto_client, skip_existing=True)
 
 
-def lambda_handler(event, context):
+def lambda_handler(event=None, context=None):
     # Log everything to stderr.
     logger.addHandler(logging.StreamHandler())
     logger.setLevel(logging.DEBUG)
 
     loop = asyncio.get_event_loop()
-    for inventory in ("firefox", "archive"):
-        loop.run_until_complete(main(loop, inventory))
+    futures = [main(loop, inventory) for inventory in ("firefox", "archive")]
+    loop.run_until_complete(asyncio.gather(*futures))
     loop.close()
-
-
-if __name__ == "__main__":
-    lambda_handler(None, None)

@@ -101,7 +101,7 @@ def publish_records(client, records):
 
 
 async def produce(loop, records, queue):
-    """Reads an asynchronuous generator of records and puts them into the queue.
+    """Reads an asynchronous generator of records and puts them into the queue.
     """
     async for record in records:
         if "data" not in record and "permission" not in record:

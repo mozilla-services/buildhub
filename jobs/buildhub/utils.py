@@ -222,12 +222,15 @@ def chunked(iterable, size):
 
 
 async def split_lines(stream):
+    """Split the chunks of bytes on new lines.
+    """
     leftover = ''
     async for chunk in stream:
         chunk_str = chunk.decode("utf-8")
         chunk_str = leftover + chunk_str
         chunk_str = chunk_str.lstrip("\n")
         lines = chunk_str.split("\n")
+        # Everything after \n belongs to the next line.
         leftover = lines.pop()
         if lines:
             yield lines
