@@ -16,7 +16,7 @@ import backoff
 from buildhub.utils import (
     archive_url, chunked, is_release_build_metadata, is_build_url,
     record_from_url, localize_nightly_url, merge_metadata, check_record,
-    localize_release_candidate_url, stream_as_generator,
+    localize_release_candidate_url, stream_as_generator, split_lines,
     ARCHIVE_URL, FILE_EXTENSIONS, DATETIME_FORMAT, ALL_PRODUCTS)
 
 
@@ -34,16 +34,10 @@ async def read_csv(input_generator):
     :param input_generator: async generator of raw bytes
     """
     fieldnames = ["Bucket", "Key", "Size", "LastModifiedDate", "md5"]
-
-    leftover = ''
-    async for csv_chunk in input_generator:
-        chunk_str = csv_chunk.decode("utf-8")
-        lines = (leftover + chunk_str).split("\n")
-        leftover = lines.pop()
-        if lines:
-            reader = csv.DictReader(lines, fieldnames=fieldnames)
-            for row in reader:
-                yield row
+    async for lines in split_lines(input_generator):
+        reader = csv.DictReader(lines, fieldnames=fieldnames)
+        for row in reader:
+            yield row
 
 
 @backoff.on_exception(backoff.expo,
@@ -316,7 +310,6 @@ async def csv_to_records(loop, stdin):
         batch = []
 
         async for entries in inventory_by_folder(stdin):
-
             entries = deduplicate_entries(entries)
 
             for entry in entries:

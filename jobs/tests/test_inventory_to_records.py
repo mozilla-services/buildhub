@@ -1,5 +1,4 @@
 import asyncio
-import io
 import json
 
 import aiohttp
@@ -397,25 +396,32 @@ class CSVToRecords(asynctest.TestCase):
             mocked.get(utils.ARCHIVE_URL + url, payload=payload)
         self.addCleanup(mocked.stop)
 
-        self.stdin = io.StringIO(
-            ("net-mozaws-delivery-firefox,pub/firefox/releases/51.0/win64/fy-NL/"
+        async def async_gen():
+            _csv_input = (
+             "net-mozaws-delivery-firefox,pub/firefox/releases/51.0/win64/fy-NL/"
              "Firefox Setup 51.0.exe,67842,2017-06-11T12:20:10.2Z,"
              "f1aa742ef0973db098947bd6d875f193\n"
              "net-mozaws-delivery-firefox,pub/firefox/nightly/2017/06/"
              "2017-06-16-03-02-07-mozilla-central-l10n/firefox-56.0a1.ach.win32."
-             "installer.exe,45678,2017-06-16T03:02:07.0Z\n"
+             "installer.exe,45678,2017-06-16T03:02:07.0Z,"
+             "f1aa742ef0973db098947bd6d875f193\n"
              "net-mozaws-delivery-firefox,pub/firefox/nightly/2017/06/"
              "2017-06-16-03-02-07-mozilla-central-l10n/firefox-56.0a1.ach.win32."
-             "zip,45678,2017-06-16T03:02:07.0Z\n"))
+             "zip,45678,2017-06-16T03:02:07.0Z,"
+             "f1aa742ef0973db098947bd6d875f193\n")
+            for line in utils.chunked(_csv_input, 32):
+                yield bytes(line, "utf-8")
+
+        self.stdin = async_gen()
 
     def tearDown(self):
         inventory_to_records._candidates_build_folder.clear()
 
     async def test_csv_to_records(self):
-        stdout = io.StringIO()
-        await inventory_to_records.csv_to_records(self.loop, self.stdin, stdout)
-        output = stdout.getvalue()
-        records = [json.loads(o) for o in output.split('\n') if o]
+        output = inventory_to_records.csv_to_records(self.loop, self.stdin)
+        records = []
+        async for r in output:
+            records.append(r)
 
         assert records == [{
             'data': {

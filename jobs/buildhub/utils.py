@@ -221,16 +221,34 @@ def chunked(iterable, size):
         yield iterable[(i * size):((i + 1) * size)]
 
 
-async def stream_as_generator(loop, stream):
-    reader = asyncio.StreamReader(loop=loop)
-    reader_protocol = asyncio.StreamReaderProtocol(reader)
-    await loop.connect_read_pipe(lambda: reader_protocol, stream)
+async def split_lines(stream):
+    leftover = ''
+    async for chunk in stream:
+        chunk_str = chunk.decode("utf-8")
+        chunk_str = leftover + chunk_str
+        chunk_str = chunk_str.lstrip("\n")
+        lines = chunk_str.split("\n")
+        leftover = lines.pop()
+        if lines:
+            yield lines
 
-    while "stream receives input":
-        line = await reader.readline()
-        if not line:  # EOF.
-            break
-        yield line
+
+async def stream_as_generator(loop, stream):
+    if not stream.isatty():
+        # Used in tests only, where stream is just a file descriptor.
+        # Workaround for "Pipe transport is for pipes/sockets only".
+        for line in stream.readlines():
+            yield bytes(line, "utf-8")
+    else:
+        reader = asyncio.StreamReader(loop=loop)
+        reader_protocol = asyncio.StreamReaderProtocol(reader)
+        await loop.connect_read_pipe(lambda: reader_protocol, stream)
+
+        while "stream receives input":
+            line = await reader.readline()
+            if not line:  # EOF.
+                break
+            yield line
 
 
 def record_from_url(url):
