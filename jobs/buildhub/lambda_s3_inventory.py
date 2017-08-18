@@ -24,19 +24,24 @@ logger = logging.getLogger()  # root logger.
 async def list_manifest_entries(loop, client, inventory):
     prefix = FOLDER.format(inventory=inventory)
     paginator = client.get_paginator('list_objects')
+
+    manifest_folders = []
     async for result in paginator.paginate(Bucket=BUCKET, Prefix=prefix, Delimiter='/'):
         # Take latest inventory.
         files = list(result.get('CommonPrefixes', []))
-        last_inventory = os.path.basename(files[-2]['Prefix'].strip('/'))  # -1 is data
-        # Download manifest.json
-        key = '{}{}/manifest.json'.format(prefix, last_inventory)
-        manifest = await client.get_object(Bucket=BUCKET, Key=key)
-        async with manifest['Body'] as stream:
-            body = await stream.read()
-        manifest_content = json.loads(body.decode('utf-8'))
-        # Return keys of csv.gz files
-        for f in manifest_content['files']:
-            yield f['key']
+        manifest_folders += [f['Prefix'].strip('/') for f in files]
+
+    # Download latest manifest.json
+    last_inventory = sorted(manifest_folders)[-2]  # -1 is data
+    logger.info("Latest inventory is {}".format(last_inventory))
+    key = '{}{}/manifest.json'.format(prefix, last_inventory)
+    manifest = await client.get_object(Bucket=BUCKET, Key=key)
+    async with manifest['Body'] as stream:
+        body = await stream.read()
+    manifest_content = json.loads(body.decode('utf-8'))
+    # Return keys of csv.gz files
+    for f in manifest_content['files']:
+        yield f['key']
 
 
 async def download_csv(loop, client, keys_stream, chunk_size=CHUNK_SIZE):
@@ -54,7 +59,7 @@ async def download_csv(loop, client, keys_stream, chunk_size=CHUNK_SIZE):
                 yield csv_chunk
 
 
-async def main(loop, event, inventory):
+async def main(loop, inventory):
     """
     Trigger to populate kinto with the last inventories.
     """
@@ -85,7 +90,7 @@ def lambda_handler(event, context):
 
     loop = asyncio.get_event_loop()
     for inventory in ("firefox", "archive"):
-        loop.run_until_complete(main(loop, event, inventory))
+        loop.run_until_complete(main(loop, inventory))
     loop.close()
 
 
