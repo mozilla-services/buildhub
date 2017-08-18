@@ -370,6 +370,11 @@ def merge_metadata(record, metadata):
         "id": buildid,
         "date": builddate,
     }
+    # Additional compilation stuff.
+    for field in ("as", "cc", "cxx", "ld", "host_alias", "target_alias"):
+        if field in metadata:
+            record['build'][field.replace("_alias", "")] = metadata[field]
+
     # For release builds, we have the build number:
     if "buildnumber" in metadata:
         record['build']['number'] = metadata["buildnumber"]

@@ -195,7 +195,14 @@ class FromArchiveFirefox(BaseTest):
                 'build': {
                     'id': '20170608105825',
                     'date': '2017-06-08T10:58:25Z',
-                    'number': 2
+                    'number': 2,
+                    "as": "ml64.exe",
+                    "cc": "c:/builds/moz2_slave/m-rel-w64-00000000000000000000/build/src/"
+                          "vs2015u3/VC/bin/amd64/cl.exe",
+                    "cxx": "c:/builds/moz2_slave/m-rel-w64-00000000000000000000/build/src/"
+                           "vs2015u3/VC/bin/amd64/cl.exe",
+                    "host": "x86_64-pc-mingw32",
+                    "target": "x86_64-pc-mingw32",
                 },
                 'target': {
                     'platform': 'win64',
@@ -232,7 +239,12 @@ class FromArchiveFirefox(BaseTest):
                 },
                 'build': {
                     'id': '20170805100334',
-                    'date': '2017-08-05T10:03:34Z'
+                    'date': '2017-08-05T10:03:34Z',
+                    "as": "ml.exe",
+                    "cc": "z:/build/build/src/vs2015u3/VC/bin/amd64_x86/cl.exe",
+                    "cxx": "z:/build/build/src/vs2015u3/VC/bin/amd64_x86/cl.exe",
+                    "host": "i686-pc-mingw32",
+                    "target": "i686-pc-mingw32",
                 },
                 'target': {
                     'platform': 'win32',
@@ -270,7 +282,15 @@ class FromArchiveFirefox(BaseTest):
                 'build': {
                     'id': '20170116133120',
                     'date': '2017-01-16T13:31:20Z',
-                    'number': 1
+                    'number': 1,
+                    "as": "$(CC)",
+                    "cc": "/builds/slave/m-rel-l64-00000000000000000000/build/src/"
+                          "gcc/bin/gcc -std=gnu99",
+                    "cxx": "/builds/slave/m-rel-l64-00000000000000000000/"
+                           "build/src/gcc/bin/g++ -std=gnu++11",
+                    "host": "x86_64-pc-linux-gnu",
+                    "target": "x86_64-pc-linux-gnu",
+                    "ld": "ld"
                 },
                 'target': {
                     'platform': 'linux-x86_64-eme-free',
@@ -372,6 +392,13 @@ class FromRCMetadataFirefox(BaseTest):
                     'id': '20170808170225',
                     'date': '2017-08-08T17:02:25Z',
                     'number': 4,
+                    "as": "$(CC)",
+                    "cc": "/usr/bin/ccache /home/worker/workspace/build/src/gcc/"
+                          "bin/gcc -std=gnu99",
+                    "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/gcc/"
+                           "bin/g++ -std=gnu++11",
+                    "host": "x86_64-pc-linux-gnu",
+                    "target": "x86_64-pc-linux-gnu",
                 },
                 'target': {
                     'platform': 'linux-x86_64',
@@ -405,6 +432,13 @@ class FromRCMetadataFirefox(BaseTest):
                     'id': '20170808170225',
                     'date': '2017-08-08T17:02:25Z',
                     'number': 4,
+                    "as": "$(CC)",
+                    "cc": "/usr/bin/ccache /home/worker/workspace/build/src/gcc/"
+                          "bin/gcc -std=gnu99",
+                    "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/gcc/"
+                           "bin/g++ -std=gnu++11",
+                    "host": "x86_64-pc-linux-gnu",
+                    "target": "x86_64-pc-linux-gnu",
                 },
                 'target': {
                     'platform': 'linux-x86_64',
@@ -600,7 +634,14 @@ class FromNightlyMetadataFirefox(BaseTest):
                 },
                 'build': {
                     'id': '20170805100334',
-                    'date': '2017-08-05T10:03:34Z'
+                    'date': '2017-08-05T10:03:34Z',
+                    "cc": "/usr/bin/ccache /home/worker/workspace/build/src/gcc/"
+                          "bin/gcc -std=gnu99",
+                    "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/gcc/"
+                           "bin/g++ -std=gnu++11",
+                    "host": "x86_64-pc-linux-gnu",
+                    "as": "$(CC)",
+                    "target": "x86_64-pc-linux-gnu",
                 },
                 'target': {
                     'platform': 'linux-x86_64',
@@ -633,7 +674,14 @@ class FromNightlyMetadataFirefox(BaseTest):
                 },
                 'build': {
                     'id': '20170805100334',
-                    'date': '2017-08-05T10:03:34Z'
+                    'date': '2017-08-05T10:03:34Z',
+                    "cc": "/usr/bin/ccache /home/worker/workspace/build/src/gcc/"
+                          "bin/gcc -std=gnu99",
+                    "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/gcc/"
+                           "bin/g++ -std=gnu++11",
+                    "host": "x86_64-pc-linux-gnu",
+                    "as": "$(CC)",
+                    "target": "x86_64-pc-linux-gnu",
                 },
                 'target': {
                     'platform': 'linux-x86_64',
@@ -666,7 +714,14 @@ class FromNightlyMetadataFirefox(BaseTest):
                 },
                 'build': {
                     'id': '20170805100334',
-                    'date': '2017-08-05T10:03:34Z'
+                    'date': '2017-08-05T10:03:34Z',
+                    "cc": "/usr/bin/ccache /home/worker/workspace/build/src/gcc/"
+                          "bin/gcc -std=gnu99",
+                    "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/gcc/"
+                           "bin/g++ -std=gnu++11",
+                    "host": "x86_64-pc-linux-gnu",
+                    "as": "$(CC)",
+                    "target": "x86_64-pc-linux-gnu",
                 },
                 'target': {
                     'platform': 'linux-x86_64',
@@ -704,7 +759,12 @@ class FromNightlyMetadataFirefox(BaseTest):
                 },
                 'build': {
                     'id': '20170805100334',
-                    'date': '2017-08-05T10:03:34Z'
+                    'date': '2017-08-05T10:03:34Z',
+                    "as": "ml.exe",
+                    "cc": "z:/build/build/src/vs2015u3/VC/bin/amd64_x86/cl.exe",
+                    "cxx": "z:/build/build/src/vs2015u3/VC/bin/amd64_x86/cl.exe",
+                    "host": "i686-pc-mingw32",
+                    "target": "i686-pc-mingw32",
                 },
                 'target': {
                     'platform': 'win32',
@@ -742,7 +802,22 @@ class FromNightlyMetadataFirefox(BaseTest):
                 },
                 'build': {
                     'id': '20170805100334',
-                    'date': '2017-08-05T10:03:34Z'
+                    'date': '2017-08-05T10:03:34Z',
+                    "cc": "/usr/bin/ccache /home/worker/workspace/build/src/clang/bin/"
+                          "clang -target "
+                          "x86_64-apple-darwin11 -B /home/worker/workspace/build/src/"
+                          "cctools/bin "
+                          "-isysroot /home/worker/workspace/build/src/MacOSX10.7.sdk"
+                          " -std=gnu99",
+                    "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/clang/bin/"
+                           "clang++ "
+                           "-target x86_64-apple-darwin11 -B /home/worker/workspace/build/"
+                           "src/cctools/bin"
+                           " -isysroot /home/worker/workspace/build/src/MacOSX10.7.sdk"
+                           " -std=gnu++11",
+                    "host": "x86_64-pc-linux-gnu",
+                    "target": "x86_64-apple-darwin",
+                    "as": "$(CC)",
                 },
                 'target': {
                     'platform': 'macosx',
@@ -920,6 +995,15 @@ class FromArchiveAndroid(BaseTest):
                     'id': '20170803202939',
                     'date': '2017-08-03T20:29:39Z',
                     'number': 2,
+                    "as": "$(CC)",
+                    "cc": "/usr/bin/ccache /home/worker/workspace/build/src/"
+                          "android-ndk/toolchains/"
+                          "x86-4.9/prebuilt/linux-x86_64/bin/i686-linux-android-gcc -std=gnu99",
+                    "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/"
+                           "android-ndk/toolchains/"
+                           "x86-4.9/prebuilt/linux-x86_64/bin/i686-linux-android-g++ -std=gnu++11",
+                    "host": "x86_64-pc-linux-gnu",
+                    "target": "i386-pc-linux-android",
                 },
                 'target': {
                     'platform': 'android-x86',
@@ -958,6 +1042,15 @@ class FromArchiveAndroid(BaseTest):
                     'id': '20170803202939',
                     'date': '2017-08-03T20:29:39Z',
                     'number': 2,
+                    "as": "$(CC)",
+                    "cc": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                          "toolchains/"
+                          "x86-4.9/prebuilt/linux-x86_64/bin/i686-linux-android-gcc -std=gnu99",
+                    "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                           "toolchains/"
+                           "x86-4.9/prebuilt/linux-x86_64/bin/i686-linux-android-g++ -std=gnu++11",
+                    "host": "x86_64-pc-linux-gnu",
+                    "target": "i386-pc-linux-android",
                 },
                 'target': {
                     'platform': 'android-x86',
@@ -994,7 +1087,16 @@ class FromArchiveAndroid(BaseTest):
                 },
                 'build': {
                     'id': '20170809100339',
-                    'date': '2017-08-09T10:03:39Z'
+                    'date': '2017-08-09T10:03:39Z',
+                    "as": "$(CC)",
+                    "cc": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                          "toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin/"
+                          "aarch64-linux-android-gcc -std=gnu99",
+                    "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                           "toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin/"
+                           "aarch64-linux-android-g++ -std=gnu++11",
+                    "host": "x86_64-pc-linux-gnu",
+                    "target": "aarch64-unknown-linux-android",
                 },
                 'target': {
                     'platform': 'android-aarch64',
@@ -1032,7 +1134,16 @@ class FromArchiveAndroid(BaseTest):
                 },
                 'build': {
                     'id': '20170809100339',
-                    'date': '2017-08-09T10:03:39Z'
+                    'date': '2017-08-09T10:03:39Z',
+                    "as": "$(CC)",
+                    "cc": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                          "toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin/"
+                          "aarch64-linux-android-gcc -std=gnu99",
+                    "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                           "toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin/"
+                           "aarch64-linux-android-g++ -std=gnu++11",
+                    "host": "x86_64-pc-linux-gnu",
+                    "target": "aarch64-unknown-linux-android",
                 },
                 'target': {
                     'platform': 'android-aarch64',
@@ -1070,7 +1181,16 @@ class FromArchiveAndroid(BaseTest):
                 },
                 'build': {
                     'id': '20170809100339',
-                    'date': '2017-08-09T10:03:39Z'
+                    'date': '2017-08-09T10:03:39Z',
+                    "as": "$(CC)",
+                    "cc": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                          "toolchains/"
+                          "x86-4.9/prebuilt/linux-x86_64/bin/i686-linux-android-gcc -std=gnu99",
+                    "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                           "toolchains/"
+                           "x86-4.9/prebuilt/linux-x86_64/bin/i686-linux-android-g++ -std=gnu++11",
+                    "host": "x86_64-pc-linux-gnu",
+                    "target": "i386-pc-linux-android",
                 },
                 'target': {
                     'platform': 'android-i386',
@@ -1170,7 +1290,16 @@ class FromRCMetadataAndroid(BaseTest):
                 'build': {
                     'id': '20170807232150',
                     'date': '2017-08-07T23:21:50Z',
-                    'number': 1
+                    'number': 1,
+                    "as": "$(CC)",
+                    "cc": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                          "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/"
+                          "arm-linux-androideabi-gcc -std=gnu99",
+                    "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                           "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/"
+                           "bin/arm-linux-androideabi-g++ -std=gnu++11",
+                    "host": "x86_64-pc-linux-gnu",
+                    "target": "arm-unknown-linux-androideabi",
                 },
                 'target': {
                     'platform': 'android-api-15',
@@ -1204,7 +1333,16 @@ class FromRCMetadataAndroid(BaseTest):
                 'build': {
                     'id': '20170807232150',
                     'date': '2017-08-07T23:21:50Z',
-                    'number': 1
+                    'number': 1,
+                    "as": "$(CC)",
+                    "cc": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                          "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/"
+                          "arm-linux-androideabi-gcc -std=gnu99",
+                    "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                           "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/"
+                           "bin/arm-linux-androideabi-g++ -std=gnu++11",
+                    "host": "x86_64-pc-linux-gnu",
+                    "target": "arm-unknown-linux-androideabi",
                 },
                 'target': {
                     'platform': 'android-api-15',
@@ -1419,7 +1557,17 @@ class FromNightlyMetadataAndroid(BaseTest):
                 },
                 'build': {
                     'id': '20170801150346',
-                    'date': '2017-08-01T15:03:46Z'
+                    'date': '2017-08-01T15:03:46Z',
+                    "as": "$(CC)",
+                    "cc": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                          "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/"
+                          "arm-linux-androideabi-gcc -std=gnu99",
+                    "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                           "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/"
+                           "arm-linux-androideabi-g++ -std=gnu++11",
+                    "host": "x86_64-pc-linux-gnu",
+                    "target": "arm-unknown-linux-androideabi",
+
                 },
                 'target': {
                     'platform': 'android-api-15',
@@ -1460,7 +1608,16 @@ class FromNightlyMetadataAndroid(BaseTest):
                 },
                 'build': {
                     'id': '20170801150346',
-                    'date': '2017-08-01T15:03:46Z'
+                    'date': '2017-08-01T15:03:46Z',
+                    "as": "$(CC)",
+                    "cc": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                          "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/"
+                          "arm-linux-androideabi-gcc -std=gnu99",
+                    "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                           "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/"
+                           "arm-linux-androideabi-g++ -std=gnu++11",
+                    "host": "x86_64-pc-linux-gnu",
+                    "target": "arm-unknown-linux-androideabi",
                 },
                 'target': {
                     'platform': 'android-api-15',
@@ -1498,7 +1655,16 @@ class FromNightlyMetadataAndroid(BaseTest):
                 },
                 'build': {
                     'id': '20170802100302',
-                    'date': '2017-08-02T10:03:02Z'
+                    'date': '2017-08-02T10:03:02Z',
+                    "as": "$(CC)",
+                    "cc": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                          "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/"
+                          "arm-linux-androideabi-gcc -std=gnu99",
+                    "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                           "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/"
+                           "arm-linux-androideabi-g++ -std=gnu++11",
+                    "host": "x86_64-pc-linux-gnu",
+                    "target": "arm-unknown-linux-androideabi",
                 },
                 'target': {
                     'platform': 'android-api-15',
@@ -1540,7 +1706,16 @@ class FromNightlyMetadataAndroid(BaseTest):
                 },
                 'build': {
                     'id': '20170809100339',
-                    'date': '2017-08-09T10:03:39Z'
+                    'date': '2017-08-09T10:03:39Z',
+                    "as": "$(CC)",
+                    "cc": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                          "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/"
+                          "arm-linux-androideabi-gcc -std=gnu99",
+                    "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                           "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/"
+                           "arm-linux-androideabi-g++ -std=gnu++11",
+                    "host": "x86_64-pc-linux-gnu",
+                    "target": "arm-unknown-linux-androideabi",
                 },
                 'target': {
                     'platform': 'android-api-15',
@@ -1573,7 +1748,16 @@ class FromNightlyMetadataAndroid(BaseTest):
                 },
                 'build': {
                     'id': '20170809100339',
-                    'date': '2017-08-09T10:03:39Z'
+                    'date': '2017-08-09T10:03:39Z',
+                    "as": "$(CC)",
+                    "cc": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                          "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/"
+                          "arm-linux-androideabi-gcc -std=gnu99",
+                    "cxx": "/usr/bin/ccache /home/worker/workspace/build/src/android-ndk/"
+                           "toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/"
+                           "arm-linux-androideabi-g++ -std=gnu++11",
+                    "host": "x86_64-pc-linux-gnu",
+                    "target": "arm-unknown-linux-androideabi",
                 },
                 'target': {
                     'platform': 'android-api-15',

@@ -429,7 +429,17 @@ class CSVToRecords(asynctest.TestCase):
                 'build': {
                     'id': '20170118123726',
                     'date': '2017-01-18T12:37:26Z',
-                    'number': 2
+                    'number': 2,
+                    'as': 'ml64.exe',
+                    'cc': ['c:/builds/moz2_slave/m-rel-w64-00000000000000000000/build/',
+                           'src/vs2015u3/VC/bin/amd64/cl.EXE'],
+                    'cxx': ['c:/builds/moz2_slave/m-rel-w64-00000000000000000000/build/',
+                            'src/vs2015u3/VC/bin/amd64/cl.EXE'],
+                    'date': '2017-01-18T12:37:26Z',
+                    'host': 'x86_64-pc-mingw32',
+                    'ld': ['c:/builds/moz2_slave/m-rel-w64-00000000000000000000/build/',
+                           'src/vs2015u3/VC/bin/amd64/link.exe'],
+                    'target': 'x86_64-pc-mingw32'
                 },
                 'download': {
                     'date': '2017-06-11T12:20:10Z',

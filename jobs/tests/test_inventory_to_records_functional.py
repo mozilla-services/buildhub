@@ -49,7 +49,16 @@ class CsvToRecordsTest(asynctest.TestCase):
                 'id': 'firefox_nightly_2017-05-15-10-02-38_55-0a1_linux-x86_64_en-us',
                 'build': {
                     'id': '20170515100238',
-                    'date': '2017-05-15T10:02:38Z'
+                    'date': '2017-05-15T10:02:38Z',
+                    'as': '$(CC)',
+                    'cc': '/usr/bin/ccache '
+                          '/home/worker/workspace/build/src/gcc/bin/gcc '
+                          '-std=gnu99',
+                    'cxx': '/usr/bin/ccache '
+                           '/home/worker/workspace/build/src/gcc/bin/g++ '
+                           '-std=gnu++11',
+                    'host': 'x86_64-pc-linux-gnu',
+                    'target': 'x86_64-pc-linux-gnu'
                 },
                 'source': {
                     'product': 'firefox',
@@ -79,6 +88,15 @@ class CsvToRecordsTest(asynctest.TestCase):
                 'build': {
                     'id': '20170302120751',
                     'date': '2017-03-02T12:07:51Z',
+                    'number': 2,
+                    'as': '$(CC)',
+                    'cc': '/builds/slave/m-rel-l64-00000000000000000000/build/src/gcc/bin/gcc '
+                          '-std=gnu99',
+                    'cxx': '/builds/slave/m-rel-l64-00000000000000000000/build/src/gcc/bin/g++ '
+                           '-std=gnu++11',
+                    'host': 'x86_64-pc-linux-gnu',
+                    'ld': 'ld',
+                    'target': 'x86_64-pc-linux-gnu',
                     'number': 2
                 },
                 'source': {
@@ -136,7 +154,14 @@ class CsvToRecordsTest(asynctest.TestCase):
                 'build': {
                     'id': '20170713130618',
                     'date': '2017-07-13T13:06:18Z',
-                    'number': 2
+                    'number': 2,
+                    'as': 'ml64.exe',
+                    'cc': 'c:/builds/moz2_slave/m-beta-w64-0000000000000000000/build/'
+                          'src/vs2015u3/VC/bin/amd64/cl.exe',
+                    'cxx': 'c:/builds/moz2_slave/m-beta-w64-0000000000000000000/build/'
+                           'src/vs2015u3/VC/bin/amd64/cl.exe',
+                    'host': 'x86_64-pc-mingw32',
+                    'target': 'x86_64-pc-mingw32'
                 },
                 'source': {
                     'product': 'firefox',
