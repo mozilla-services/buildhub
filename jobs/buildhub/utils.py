@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import os.path
 import re
@@ -218,6 +219,18 @@ def chunked(iterable, size):
     nb_chunks = (len(iterable) // size) + 1
     for i in range(nb_chunks):
         yield iterable[(i * size):((i + 1) * size)]
+
+
+async def stream_as_generator(loop, stream):
+    reader = asyncio.StreamReader(loop=loop)
+    reader_protocol = asyncio.StreamReaderProtocol(reader)
+    await loop.connect_read_pipe(lambda: reader_protocol, stream)
+
+    while "stream receives input":
+        line = await reader.readline()
+        if not line:  # EOF.
+            break
+        yield line
 
 
 def record_from_url(url):

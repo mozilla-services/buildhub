@@ -16,7 +16,7 @@ import backoff
 from buildhub.utils import (
     archive_url, chunked, is_release_build_metadata, is_build_url,
     record_from_url, localize_nightly_url, merge_metadata, check_record,
-    localize_release_candidate_url,
+    localize_release_candidate_url, stream_as_generator,
     ARCHIVE_URL, FILE_EXTENSIONS, DATETIME_FORMAT, ALL_PRODUCTS)
 
 
@@ -358,18 +358,6 @@ async def csv_to_records(loop, stdin):
 
         async for result in process_batch(session, batch):  # Last loop iteration.
             yield result
-
-
-async def stream_as_generator(loop, stream):
-    reader = asyncio.StreamReader(loop=loop)
-    reader_protocol = asyncio.StreamReaderProtocol(reader)
-    await loop.connect_read_pipe(lambda: reader_protocol, stream)
-
-    while "stream receives input":
-        line = await reader.readline()
-        if not line:  # EOF.
-            break
-        yield line
 
 
 async def main(loop):

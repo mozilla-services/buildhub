@@ -26,6 +26,8 @@ import sys
 
 from kinto_http import cli_utils
 
+from buildhub.utils import stream_as_generator
+
 
 DEFAULT_SERVER = "http://localhost:8888/v1"
 DEFAULT_BUCKET = "default"
@@ -167,16 +169,8 @@ async def consume(loop, queue, executor, client, existing):
             task.add_done_callback(markdone(queue, len(batch)))
 
 
-async def stream_as_generator(loop, stream):
-    reader = asyncio.StreamReader(loop=loop)
-    reader_protocol = asyncio.StreamReaderProtocol(reader)
-    await loop.connect_read_pipe(lambda: reader_protocol, stream)
-
-    while "stream receives input":
-        line = await reader.readline()
-        if not line:  # EOF.
-            break
-
+async def parse_json(lines):
+    async for line in lines:
         record = json.loads(line.decode("utf-8"))
         yield record
 
@@ -223,7 +217,8 @@ async def main(loop, stdin_generator, *args):
 def run():
     loop = asyncio.get_event_loop()
     stdin_generator = stream_as_generator(loop, sys.stdin)
-    loop.run_until_complete(main(loop, stdin_generator, *sys.argv[1:]))
+    records_generator = parse_json(stdin_generator)
+    loop.run_until_complete(main(loop, records_generator, *sys.argv[1:]))
     loop.close()
 
 
