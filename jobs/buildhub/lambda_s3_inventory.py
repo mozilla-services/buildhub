@@ -29,12 +29,12 @@ async def list_manifest_entries(loop, client, inventory):
     async for result in paginator.paginate(Bucket=BUCKET, Prefix=prefix, Delimiter='/'):
         # Take latest inventory.
         files = list(result.get('CommonPrefixes', []))
-        manifest_folders += [f['Prefix'].strip('/') for f in files]
+        manifest_folders += [f['Prefix'] for f in files]
 
     # Download latest manifest.json
     last_inventory = sorted(manifest_folders)[-2]  # -1 is data
     logger.info("Latest inventory is {}".format(last_inventory))
-    key = '{}{}/manifest.json'.format(prefix, last_inventory)
+    key = last_inventory + 'manifest.json'
     manifest = await client.get_object(Bucket=BUCKET, Key=key)
     async with manifest['Body'] as stream:
         body = await stream.read()
