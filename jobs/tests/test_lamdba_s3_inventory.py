@@ -9,9 +9,10 @@ class ListManifest(asynctest.TestCase):
     def setUp(self):
         class FakePaginator:
             async def paginate(self, *args, **kwargs):
-                yield {"CommonPrefixes": [{"Prefix": "1/"}]}
-                yield {"CommonPrefixes": [{"Prefix": "2/"}]}
-                yield {"CommonPrefixes": [{"Prefix": "3/"}, {"Prefix": "data"}]}
+                yield {"CommonPrefixes": [{"Prefix": "some-prefix/1/"}]}
+                yield {"CommonPrefixes": [{"Prefix": "some-prefix/2/"}]}
+                yield {"CommonPrefixes": [{"Prefix": "some-prefix/3/"},
+                                          {"Prefix": "some-prefix/data"}]}
 
         class FakeStream:
             async def __aenter__(self):
@@ -28,7 +29,7 @@ class ListManifest(asynctest.TestCase):
                 return FakePaginator()
 
             async def get_object(self, Bucket, Key):
-                if Key.endswith("delivery-firefox/delivery-firefox/3/manifest.json"):
+                if Key.endswith("some-prefix/3/manifest.json"):
                     return {'Body': FakeStream()}
 
         self.client = FakeClient()
