@@ -15,7 +15,7 @@ from buildhub.to_kinto import main as to_kinto
 REGION_NAME = 'us-east-1'
 BUCKET = "net-mozaws-prod-delivery-inventory-us-east-1"
 FOLDER = "public/inventories/net-mozaws-prod-delivery-{inventory}/delivery-{inventory}/"
-CHUNK_SIZE = 1024
+CHUNK_SIZE = 1024 * 256  # 256 KB
 
 
 logger = logging.getLogger()  # root logger.
@@ -49,6 +49,7 @@ async def download_csv(loop, client, keys_stream, chunk_size=CHUNK_SIZE):
 
     async for key in keys_stream:
         key = "public/" + key
+        logger.info("Fetching inventory piece {}".format(key))
         file_csv_gz = await client.get_object(Bucket=BUCKET, Key=key)
         async with file_csv_gz['Body'] as stream:
             while "there are chunks to read":

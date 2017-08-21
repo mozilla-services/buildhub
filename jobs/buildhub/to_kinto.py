@@ -151,6 +151,7 @@ async def consume(loop, queue, executor, client, existing):
                     # Check if known and hasn't changed.
                     rid = record["data"].get("id")
                     if rid in records_by_id and records_equal(record["data"], records_by_id[rid]):
+                        logger.debug("Skip unchanged record {}".format(rid))
                         queue.task_done()
                         continue
                     # Add record to current batch, and wait for more.
