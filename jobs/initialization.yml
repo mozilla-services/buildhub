@@ -95,6 +95,30 @@ build-hub:
                   type: integer
                   title: Version
                   description: Build number
+                as:
+                  type: string
+                  title: Assembler
+                  description: Executable
+                ld:
+                  type: string
+                  title: Linker
+                  description: Executable
+                cc:
+                  type: string
+                  title: C compiler
+                  description: Command-line
+                cxx:
+                  type: string
+                  title: C++ compiler
+                  description: Command-line
+                host:
+                  type: string
+                  title: Compiler host alias
+                  description: (cpu)-(vendor)-(os)
+                target:
+                  type: string
+                  title: Target host alias
+                  description: (cpu)-(vendor)-(os)
             target:
               type: object
               additionalProperties: false
