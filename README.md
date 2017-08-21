@@ -1,5 +1,7 @@
 # Buildhub
 
+[![Build Status](https://travis-ci.org/mozilla-services/buildhub.svg?branch=master)](https://travis-ci.org/mozilla-services/buildhub)
+
 This *experimental* project aims to provide a public database of comprehensive information about
 releases and builds.
 
