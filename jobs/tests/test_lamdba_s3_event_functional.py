@@ -50,8 +50,15 @@ class LambdaTest(unittest.TestCase):
                 'channel': 'release'
             },
             'build': {
-                'id': '20170608105825',
+                'as': 'ml64.exe',
+                'cc': 'c:/builds/moz2_slave/m-rel-w64-00000000000000000000/build/'
+                      'src/vs2015u3/VC/bin/amd64/cl.exe',
+                'cxx': 'c:/builds/moz2_slave/m-rel-w64-00000000000000000000/build/'
+                       'src/vs2015u3/VC/bin/amd64/cl.exe',
                 'date': '2017-06-08T10:58:25Z',
-                'number': 3
+                'host': 'x86_64-pc-mingw32',
+                'id': '20170608105825',
+                'number': 3,
+                'target': 'x86_64-pc-mingw32'
             }
         }
