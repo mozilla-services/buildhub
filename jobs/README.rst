@@ -23,10 +23,18 @@ The JSON schema validation can be enabled on the server with the following setti
     kinto.experimental_collection_schema_validation = true
 
 
+Build for Amazon Lambda
+=======================
+
+In order to build the AWS Lambda Zip archive in an isolated environment, we use Docker:
+
+* ``make get_zip``
+
+
 Load latest S3 inventory
 ========================
 
-A command downloads the latest S3 manifests from Mozilla archives, and create records on a remote Kinto server.
+A command to download the latest S3 manifests from Mozilla archives, and create records on a remote Kinto server.
 
 .. code-block:: bash
 
@@ -41,7 +49,7 @@ Its configuration is read from environment variables:
 * ``NB_RETRY_REQUEST`` (default: ``3``)
 * ``TIMEOUT_SECONDS`` (default: ``300``)
 
-The following entry point can be used as an Amazon Lambda function:
+To use this script as an Amazon Lambda function, use the entry point:
 
 * ``buildhub.lambda_s3_inventory:lambda_handler``
 
@@ -65,10 +73,6 @@ The lambda accepts the following configuration (from environment variables):
 * ``AUTH`` (default: ``user:pass``)
 * ``NB_RETRY_REQUEST`` (default: ``3``)
 * ``TIMEOUT_SECONDS`` (default: ``300``)
-
-In order to build the S3 Lambda Zip archive in an isolated environment, we use Docker:
-
-* ``make get_zip``
 
 
 Load S3 inventory manually
