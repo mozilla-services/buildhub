@@ -12,7 +12,7 @@ class ListManifest(asynctest.TestCase):
                 yield {"CommonPrefixes": [{"Prefix": "some-prefix/1/"}]}
                 yield {"CommonPrefixes": [{"Prefix": "some-prefix/2/"}]}
                 yield {"CommonPrefixes": [{"Prefix": "some-prefix/3/"},
-                                          {"Prefix": "some-prefix/data"}]}
+                                          {"Prefix": "some-prefix/data/"}]}
 
         class FakeStream:
             async def __aenter__(self):

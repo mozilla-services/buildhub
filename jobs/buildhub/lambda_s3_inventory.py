@@ -29,7 +29,7 @@ async def list_manifest_entries(loop, client, inventory):
     async for result in paginator.paginate(Bucket=BUCKET, Prefix=prefix, Delimiter='/'):
         # Take latest inventory.
         files = list(result.get('CommonPrefixes', []))
-        manifest_folders += [f['Prefix'].strip('/') for f in files]
+        manifest_folders += [f['Prefix'] for f in files]
 
     # Download latest manifest.json
     last_inventory = sorted(manifest_folders)[-2]  # -1 is data
