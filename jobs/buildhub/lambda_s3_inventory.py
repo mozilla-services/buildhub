@@ -68,7 +68,7 @@ async def main(loop, inventory):
     Trigger to populate kinto with the last inventories.
     """
     server_url = os.getenv("SERVER_URL", "http://localhost:8888/v1")
-    bucket = os.getenv("BUCKET", "default")
+    bucket = os.getenv("BUCKET", "build-hub")
     collection = os.getenv("COLLECTION", "releases")
     kinto_auth = tuple(os.getenv("AUTH", "user:pass").split(":"))
 
