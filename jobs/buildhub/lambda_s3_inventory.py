@@ -45,18 +45,21 @@ async def list_manifest_entries(loop, client, inventory):
 
 
 async def download_csv(loop, client, keys_stream, chunk_size=CHUNK_SIZE):
-    gzip = zlib.decompressobj(zlib.MAX_WBITS | 16)
 
     async for key in keys_stream:
         key = "public/" + key
         logger.info("Fetching inventory piece {}".format(key))
         file_csv_gz = await client.get_object(Bucket=BUCKET, Key=key)
+        gzip = zlib.decompressobj(zlib.MAX_WBITS | 16)
         async with file_csv_gz['Body'] as stream:
             while "there are chunks to read":
                 gzip_chunk = await stream.read(chunk_size)
                 if not gzip_chunk:
                     break
                 csv_chunk = gzip.decompress(gzip_chunk)
+                if not csv_chunk:
+                    error_msg = "Empty data (deflating {}B)".format(len(gzip_chunk))
+                    raise ValueError(error_msg)
                 yield csv_chunk
 
 
