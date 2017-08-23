@@ -55,12 +55,15 @@ async def download_csv(loop, client, keys_stream, chunk_size=CHUNK_SIZE):
             while "there are chunks to read":
                 gzip_chunk = await stream.read(chunk_size)
                 if not gzip_chunk:
-                    break
+                    break  # End of response.
                 csv_chunk = gzip.decompress(gzip_chunk)
-                if not csv_chunk:
-                    error_msg = "Empty data (deflating {}B)".format(len(gzip_chunk))
-                    raise ValueError(error_msg)
-                yield csv_chunk
+                if csv_chunk:
+                    # If the received doesn't have enough data to complete at least
+                    # one block, the decompressor returns an empty string.
+                    # A later chunk added to the compressor will then complete the block,
+                    # it'll be decompressed and we get data then.
+                    # Thanks Martijn Pieters http://bit.ly/2vbgQ3x
+                    yield csv_chunk
 
 
 async def main(loop, inventory):
