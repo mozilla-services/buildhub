@@ -3,11 +3,9 @@
 Jobs
 ####
 
-A script will aggregate build information from Mozilla archives, and another is in charge of keeping it up to date.
+A script will aggregate all build information from Mozilla archives, and another is in charge of keeping it up to date.
 
-.. note::
-
-    The ``user:pass`` in the command-line examples is the Basic auth for Kinto.
+Everything can be executed from a command-line, but we use `Amazon Lambda <https://aws.amazon.com/lambda/>`_ in production.
 
 .. image:: overview.png
 
@@ -23,15 +21,18 @@ Currently we use `Kinto <http://kinto-storage.org>`_ as a generic database servi
 Initialization
 ==============
 
-We provide an initialization manifest that will define the buckets and collection and their permissions.
+.. note::
 
-Load it with:
+    The ``user:pass`` in the command-line examples is the Basic auth for Kinto.
+
+We provide an initialization manifest that will define the buckets, collection, records schema, and related permissions.
+This command is idempotent, and will only modify existing objects if something was changed.
 
 .. code-block:: bash
 
     kinto-wizard load --server https://kinto/ --auth user:pass initialization.yaml
 
-The JSON schema validation can be enabled on the server with the following setting:
+The following is not mandatory but recommended. Kinto can use the JSON schema to validate the records. The following setting should be set to ``true`` in the server configuration file:
 
 .. code-block:: ini
 
@@ -43,11 +44,11 @@ Load latest S3 inventory
 
 A command to download the latest S3 manifests, containing information about all available files on archive.mozilla.org, and send that information as buildhub records to a remote Kinto server.
 
-The command will go through the list of files, pick release files, and deduce their metadata.
-
 .. code-block:: bash
 
     latest-inventory-to-kinto
+
+The command will go through the list of files, pick release files, and deduce their metadata. It is meant to be executed on an empty server, or periodically to catch up with recent releases in case the other event-based lambda had failed.
 
 Its configuration is read from environment variables:
 
@@ -60,15 +61,19 @@ Its configuration is read from environment variables:
 
 To use this script as an Amazon Lambda function, use the entry point:
 
-* ``buildhub.lambda_s3_inventory:lambda_handler``
+* ``buildhub.lambda_s3_inventory.lambda_handler``
 
 
 S3 Event lambda
 ===============
 
-The Amazon Lambda function that is in charge of keeping the database up-to-date.
+The Amazon Lambda function that is in charge of keeping the database up-to-date. This one cannot be executed from the command-line.
 
 When releases are published on S3, an `S3 Event <http://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html>`_ is triggered and `the lambda is invoked <http://docs.aws.amazon.com/lambda/latest/dg/with-s3.html>`_.
+
+Use the following entry point:
+
+* ``buildhub.lambda_s3_event.lambda_handler``
 
 .. note::
 
