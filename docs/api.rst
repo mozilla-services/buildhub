@@ -76,11 +76,11 @@ Basic API
 
 The list of records is available at:
 
-* `$SERVER/buckets/build-hub/collections/releases/records <https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releases/records?_limit=10>`_
+* `${SERVER}/buckets/build-hub/collections/releases/records <https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releases/records?_limit=10>`_
 
 And a single record at:
 
-* `$SERVER/buckets/build-hub/collections/releases/records/${ID} <https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releases/records/firefox_beta_50-0b11_macosx_el>`_
+* `${SERVER}/buckets/build-hub/collections/releases/records/${ID} <https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releases/records/firefox_beta_50-0b11_macosx_el>`_
 
 A set of filters and pagination options can be used to query the list. The most notable features are:
 
