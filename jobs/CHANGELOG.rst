@@ -3,6 +3,19 @@ Changelog
 
 This document describes changes between each past release.
 
+0.2.0 (2017-08-25)
+------------------
+
+- Add devedition to supported products. (#218)
+- Document S3 inventories lambda configuration. (#217)
+- Increase Gzip chunk size (#221)
+- Fix S3 manifest key (#220)
+- Add more build metadata (#219)
+- Fix Gzip decompressor (#225 / #227)
+- Skip WinCE and WinMo (#226)
+- Handle eabi-arm platform (#230)
+
+
 0.1.0 (2017-08-18)
 ------------------
 
