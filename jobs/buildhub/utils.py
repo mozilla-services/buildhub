@@ -93,6 +93,8 @@ def guess_channel(url, version):
 
 
 def normalized_platform(platform):
+    if "eabi" in platform:
+        return "android"
     for p in ("linux", "win", "mac", "android", "maemo"):
         if p in platform:
             return p
@@ -333,7 +335,7 @@ def check_record(record):
         raise ValueError("Suspicious channel '{}': {}".format(channel, record))
 
     platform = record["target"]["platform"]
-    if not re.match(r"^(win|mac|linux|android).{0,4}", platform):
+    if not re.match(r"^(win|mac|linux|android|maemo|eabi).{0,4}", platform):
         raise ValueError("Suspicious platform '{}': {}".format(platform, record))
 
     locale = record["target"]["locale"]
