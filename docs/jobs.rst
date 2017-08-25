@@ -49,7 +49,9 @@ In order to build the AWS Lambda Zip archive in an isolated environment, we use 
 Load latest S3 inventory
 ========================
 
-A command to download the latest S3 manifests from Mozilla archives, and create records on a remote Kinto server.
+A command to download the latest S3 manifests, containing information about all available files on archive.mozilla.org, and send that information as buildhub records to a remote Kinto server.
+
+The command will go through the list of files, pick release files, and deduce their metadata.
 
 .. code-block:: bash
 
@@ -74,7 +76,7 @@ S3 Event lambda
 
 The Amazon Lambda function that is in charge of keeping the database up-to-date.
 
-When releases are published on S3, a `S3 Event <http://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html>`_ is triggered and `the lambda is invoked <http://docs.aws.amazon.com/lambda/latest/dg/with-s3.html>`_.
+When releases are published on S3, an `S3 Event <http://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html>`_ is triggered and `the lambda is invoked <http://docs.aws.amazon.com/lambda/latest/dg/with-s3.html>`_.
 
 .. note::
 

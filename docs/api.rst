@@ -101,13 +101,13 @@ An ElasticSearch endpoint is also available for more powerful queries. It powers
 `More information in the Elasticsearch documentation <https://www.elastic.co/guide/en/elasticsearch/reference/current/search.html>`_
 
 
-Queries examples
-================
+Example queries
+===============
 
 Is this an official build id?
 -----------------------------
 
-In order to check that a build id exists, we'll just check that it is mentionned in at least one record.
+In order to check that a build id exists, we'll just check that it is mentioned in at least one record.
 
 ::
 
@@ -130,8 +130,8 @@ In order to check that a build id exists, we'll just check that it is mentionned
                                  bucket="build-hub", collection="releases")
     print(len(records) == 1)
 
-What is the revision of a build id?
------------------------------------
+What is the Mercurial commit ID of a build ID?
+----------------------------------------------
 
 .. code-block:: python
 
@@ -145,8 +145,8 @@ What is the revision of a build id?
     except KeyError:
         raise ValueError("Unknown revision")
 
-What are the locales of a specific version?
--------------------------------------------
+What locales are available for a certain version?
+-------------------------------------------------
 
 .. code-block:: javascript
 
