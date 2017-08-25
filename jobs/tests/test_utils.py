@@ -543,6 +543,28 @@ RECORDS = [
             "mimetype": "application/vnd.android.package-archive"
         }
     },
+
+    # Fennec eabi ARM
+    {
+        'id': 'fennec_aurora_7-0a2_eabi-arm_multi',
+        'source': {
+            'product': 'fennec'
+        },
+        'target': {
+            'channel': 'aurora',
+            'locale': 'multi',
+            'os': 'android',
+            'platform': 'eabi-arm',
+            'version': '7.0a2'
+        },
+        "download": {
+            'mimetype': 'application/vnd.android.package-archive',
+            "url": "https://archive.mozilla.org/pub/mobile/nightly/2011/08/2011-08-14-05-53-37"
+                   "-mozilla-aurora-android/fennec-7.0a2.multi.eabi-arm.apk",
+        }
+    },
+
+    # Fennec nightly old-id
     {
         "id": "fennec_nightly-old-id_2017-05-30-10-01-27_55-0a1_android-i386_multi",
         "source": {
