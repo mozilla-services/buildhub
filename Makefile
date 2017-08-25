@@ -18,6 +18,7 @@ virtualenv:
 	virtualenv $(VENV) --python=python3.6
 	$(VENV)/bin/pip install jobs/
 
+lambda.zip: zip
 zip: clean virtualenv
 	cd $(VENV)/lib/python3.6/site-packages/; zip -r ../../../../lambda.zip *
 
@@ -29,6 +30,8 @@ get_zip: build_image
 	docker run --name buildhub buildhub
 	docker cp buildhub:/app/lambda.zip .
 
+upload-to-s3: lambda.zip
+	python upload_to_s3.py
 
 install-docs: $(DOC_STAMP)
 $(DOC_STAMP): $(PYTHON) docs/requirements.txt
