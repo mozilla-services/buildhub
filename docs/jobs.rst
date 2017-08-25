@@ -38,14 +38,6 @@ The JSON schema validation can be enabled on the server with the following setti
     kinto.experimental_collection_schema_validation = true
 
 
-Build for Amazon Lambda
-=======================
-
-In order to build the AWS Lambda Zip archive in an isolated environment, we use Docker:
-
-* ``make get_zip``
-
-
 Load latest S3 inventory
 ========================
 
@@ -90,6 +82,22 @@ The lambda accepts the following configuration (from environment variables):
 * ``AUTH`` (default: ``user:pass``)
 * ``NB_RETRY_REQUEST`` (default: ``3``)
 * ``TIMEOUT_SECONDS`` (default: ``300``)
+
+
+Setup and configure Amazon Lambda
+=================================
+
+In order to build the AWS Lambda Zip archive in an isolated environment, we use Docker:
+
+* ``make get_zip``
+
+This will produce a zip file that has to be uploaded in AWS Lambda configuration panel.
+
+.. image:: lambda-1.png
+.. image:: lambda-2.png
+.. image:: lambda-3.png
+.. image:: lambda-4.png
+
 
 
 Load S3 inventory manually
