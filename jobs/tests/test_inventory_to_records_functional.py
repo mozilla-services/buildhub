@@ -203,7 +203,15 @@ class CsvToRecordsTest(asynctest.TestCase):
                 "build": {
                     "id": "20170612224034",
                     "date": "2017-06-12T22:40:34Z",
-                    "number": 5
+                    "number": 5,
+                    'as': 'ml64.exe',
+                    'cc': 'c:/builds/moz2_slave/m-beta-w64-de-0000000000000000/build/'
+                          'src/vs2015u3/VC/bin/amd64/cl.exe',
+                    'cxx': 'c:/builds/moz2_slave/m-beta-w64-de-0000000000000000/build/'
+                           'src/vs2015u3/VC/bin/amd64/cl.exe',
+                    'date': '2017-06-12T22:40:34Z',
+                    'host': 'x86_64-pc-mingw32',
+                    'target': 'x86_64-pc-mingw32'
                 }
             }
         }]
