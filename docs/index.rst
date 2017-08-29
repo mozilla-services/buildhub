@@ -40,3 +40,4 @@ Table of contents
 
    api
    jobs
+   support
