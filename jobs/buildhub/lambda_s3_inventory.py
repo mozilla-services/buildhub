@@ -2,11 +2,16 @@ import asyncio
 import json
 import logging
 import os.path
+import pkgutil
 import zlib
+from concurrent.futures import ThreadPoolExecutor
 
 import aiobotocore
 import botocore
 import kinto_http
+from ruamel import yaml
+from kinto_wizard.async_kinto import AsyncKintoClient
+from kinto_wizard.yaml2kinto import initialize_server
 
 from buildhub.inventory_to_records import NB_RETRY_REQUEST, csv_to_records
 from buildhub.to_kinto import main as to_kinto
@@ -21,9 +26,33 @@ CHUNK_SIZE = 1024 * 256  # 256 KB
 logger = logging.getLogger()  # root logger.
 
 
-async def list_manifest_entries(loop, client, inventory):
+async def initialize_kinto(loop, kinto_client, bucket, collection):
+    """
+    Initialize the remote server with the initialization.yml file.
+    """
+    # Leverage kinto-wizard async client.
+    thread_pool = ThreadPoolExecutor()
+    async_client = AsyncKintoClient(kinto_client, loop, thread_pool)
+
+    initialization_manifest = pkgutil.get_data('buildhub', 'initialization.yml')
+    config = yaml.safe_load(initialization_manifest)
+    await initialize_server(async_client,
+                            config,
+                            bucket=bucket,
+                            collection=collection,
+                            force=False)
+
+
+async def list_manifest_entries(loop, s3_client, inventory):
+    """Fetch the latest S3 inventory manifest, and the keys of every
+    *.csv.gz file it contains.
+
+    :param loop: asyncio event loop.
+    :param s3_client: Initialized S3 client.
+    :param inventory str: Either "archive" or "firefox".
+    """
     prefix = FOLDER.format(inventory=inventory)
-    paginator = client.get_paginator('list_objects')
+    paginator = s3_client.get_paginator('list_objects')
 
     manifest_folders = []
     async for result in paginator.paginate(Bucket=BUCKET, Prefix=prefix, Delimiter='/'):
@@ -35,7 +64,7 @@ async def list_manifest_entries(loop, client, inventory):
     last_inventory = sorted(manifest_folders)[-2]  # -1 is data
     logger.info('Latest inventory is {}'.format(last_inventory))
     key = last_inventory + 'manifest.json'
-    manifest = await client.get_object(Bucket=BUCKET, Key=key)
+    manifest = await s3_client.get_object(Bucket=BUCKET, Key=key)
     async with manifest['Body'] as stream:
         body = await stream.read()
     manifest_content = json.loads(body.decode('utf-8'))
@@ -44,12 +73,17 @@ async def list_manifest_entries(loop, client, inventory):
         yield f['key']
 
 
-async def download_csv(loop, client, keys_stream, chunk_size=CHUNK_SIZE):
-
+async def download_csv(loop, s3_client, keys_stream, chunk_size=CHUNK_SIZE):
+    """
+    Download the S3 object of each key and return deflated data chunks (CSV).
+    :param loop: asyncio event loop.
+    :param s3_client: Initialized S3 client.
+    :param keys_stream async generator: List of object keys for the csv.gz manifests.
+    """
     async for key in keys_stream:
         key = 'public/' + key
         logger.info('Fetching inventory piece {}'.format(key))
-        file_csv_gz = await client.get_object(Bucket=BUCKET, Key=key)
+        file_csv_gz = await s3_client.get_object(Bucket=BUCKET, Key=key)
         gzip = zlib.decompressobj(zlib.MAX_WBITS | 16)
         async with file_csv_gz['Body'] as stream:
             while 'there are chunks to read':
@@ -79,6 +113,10 @@ async def main(loop, inventory):
                                      bucket=bucket, collection=collection,
                                      retry=NB_RETRY_REQUEST)
 
+    # Create bucket/collection and schemas.
+    await initialize_kinto(loop, kinto_client, bucket, collection)
+
+    # Download CSVs, deduce records and push to Kinto.
     session = aiobotocore.get_session(loop=loop)
     boto_config = botocore.config.Config(signature_version=botocore.UNSIGNED)
     async with session.create_client('s3', region_name=REGION_NAME, config=boto_config) as client:

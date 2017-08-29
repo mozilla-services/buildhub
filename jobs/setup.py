@@ -21,7 +21,7 @@ REQUIREMENTS = [
     "aiobotocore",
     "backoff",
     "kinto-http",
-    "kinto-wizard",
+    "kinto-wizard >= 2.2.0",  # async load.
 ]
 
 ENTRY_POINTS = {
@@ -52,6 +52,8 @@ setup(name='buildhub',
       author_email='storage-team@mozilla.com',
       url='https://github.com/mozilla-services/buildhub',
       packages=find_packages(),
+      package_dir={'buildhub': 'buildhub'},
+      package_data={'buildhub': ['initialization.yml']},
       include_package_data=True,
       zip_safe=False,
       install_requires=REQUIREMENTS,
