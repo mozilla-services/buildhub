@@ -4,10 +4,10 @@ import os.path
 import re
 
 
-ALL_PRODUCTS = ("firefox", "thunderbird", "mobile", "devedition")
-ARCHIVE_URL = "https://archive.mozilla.org/"
-DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
-FILE_EXTENSIONS = "zip|tar.gz|tar.bz2|dmg|apk|exe"
+ALL_PRODUCTS = ('firefox', 'thunderbird', 'mobile', 'devedition')
+ARCHIVE_URL = 'https://archive.mozilla.org/'
+DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+FILE_EXTENSIONS = 'zip|tar.gz|tar.bz2|dmg|apk|exe'
 KNOWN_MIMETYPES = {
     'apk': 'application/vnd.android.package-archive',
     'bz2': 'application/x-bzip2',
@@ -21,32 +21,32 @@ KNOWN_MIMETYPES = {
 def archive_url(product, version=None, platform=None, locale=None, nightly=None, candidate=None):
     """Returns the related URL on archive.mozilla.org
     """
-    if product == "fennec":
-        product = "mobile"
+    if product == 'fennec':
+        product = 'mobile'
 
     if platform is not None:
         platform = platform.replace('eme', 'EME')
 
     url = ARCHIVE_URL + 'pub/' + product
     if nightly:
-        url += "/nightly/" + nightly + "/"
+        url += '/nightly/' + nightly + '/'
     elif candidate:
-        url += "/candidates"
+        url += '/candidates'
         if version:
-            url += "/{}-candidates".format(version)
+            url += '/{}-candidates'.format(version)
         url += candidate
         if platform:
-            url += platform + "/"
+            url += platform + '/'
         if locale:
-            url += locale + "/"
+            url += locale + '/'
     else:
-        url += "/releases/"
+        url += '/releases/'
         if version:
-            url += version + "/"
+            url += version + '/'
         if platform:
-            url += platform + "/"
+            url += platform + '/'
         if locale:
-            url += locale + "/"
+            url += locale + '/'
     return url
 
 
@@ -66,9 +66,9 @@ def localize_nightly_url(nightly_url):
 
 def localize_release_candidate_url(rc_url):
     tokens = rc_url.split('/')
-    tokens[-2] = "en-US"
-    us_url = "/".join(tokens)
-    return us_url.replace("-EME-free", "")
+    tokens[-2] = 'en-US'
+    us_url = '/'.join(tokens)
+    return us_url.replace('-EME-free', '')
 
 
 def guess_channel(url, version):
@@ -88,36 +88,36 @@ def guess_channel(url, version):
 
     # Fennec can have different app store ids.
     if 'old-id' in url:
-        channel += "-old-id"
+        channel += '-old-id'
 
     return channel
 
 
 def normalized_platform(platform):
-    if "eabi" in platform:
-        return "android"
-    for p in ("linux", "win", "mac", "android", "maemo"):
+    if 'eabi' in platform:
+        return 'android'
+    for p in ('linux', 'win', 'mac', 'android', 'maemo'):
         if p in platform:
             return p
-    raise ValueError("Unknown plaform {}".format(platform))
+    raise ValueError('Unknown plaform {}'.format(platform))
 
 
 def build_record_id(record):
-    version = record["target"]["version"]
+    version = record['target']['version']
 
-    if 'nightly' in record["target"]["channel"]:
-        url_parts = record["download"]["url"].split('/')
+    if 'nightly' in record['target']['channel']:
+        url_parts = record['download']['url'].split('/')
         date_parts = url_parts[8].split('-')
         date = '-'.join(date_parts[:6])
         version = '{}_{}'.format(date, version)
 
-    channel = record["target"]["channel"]
-    channel = channel + "_" if channel != "release" else ""
-    values = dict(product=record["source"]["product"],
+    channel = record['target']['channel']
+    channel = channel + '_' if channel != 'release' else ''
+    values = dict(product=record['source']['product'],
                   channel=channel,
                   version=version,
-                  platform=record["target"]["platform"],
-                  locale=record["target"]["locale"])
+                  platform=record['target']['platform'],
+                  locale=record['target']['locale'])
     id_ = '{product}_{channel}{version}_{platform}_{locale}'.format(**values)
     return id_.replace('.', '-').lower()
 
@@ -144,9 +144,9 @@ def is_build_url(product, url):
     if 'nightly' in url and 'mozilla-central' not in url:
         return False
 
-    re_exclude = re.compile(".+(tinderbox|try-builds|partner-repacks|latest|contrib|/0\.|"
-                            "experimental|namoroka|debug|sha1-installers|candidates/archived|"
-                            "stylo-bindings|/1.0rc/|/releases/win../|dominspector|/test/|testing)")
+    re_exclude = re.compile('.+(tinderbox|try-builds|partner-repacks|latest|contrib|/0\.|'
+                            'experimental|namoroka|debug|sha1-installers|candidates/archived|'
+                            'stylo-bindings|/1.0rc/|/releases/win../|dominspector|/test/|testing)')
     if re_exclude.match(url):
         return False
     """
@@ -161,14 +161,14 @@ def is_build_url(product, url):
     - Thunderbird 10.0.12esr.dmg
     - Firefox Setup 17.0b3.exe
     """
-    if product == "devedition":
-        product = "firefox"
-    if product == "mobile":
-        product = "fennec"
+    if product == 'devedition':
+        product = 'firefox'
+    if product == 'mobile':
+        product = 'fennec'
     filename = os.path.basename(url)
     match_filename = filename.replace(' ', '-').lower()
-    re_filename = re.compile("{}-(.+)({})$".format(product, FILE_EXTENSIONS))
-    re_exclude = re.compile(".+(sdk|tests|crashreporter|stub|gtk2.+xft|source|asan)")
+    re_filename = re.compile('{}-(.+)({})$'.format(product, FILE_EXTENSIONS))
+    re_exclude = re.compile('.+(sdk|tests|crashreporter|stub|gtk2.+xft|source|asan)')
     return re_filename.match(match_filename) and not re_exclude.match(match_filename)
 
 
@@ -179,9 +179,9 @@ def is_release_build_metadata(product, version, filename):
     - firefox-52.0b7.json
     - fennec-51.0b2.en-US.android-i386.json
     """
-    if product == "devedition":
-        product = "firefox"
-    re_metadata = re.compile("{}-{}(.*).json".format(product, version))
+    if product == 'devedition':
+        product = 'firefox'
+    re_metadata = re.compile('{}-{}(.*).json'.format(product, version))
     return bool(re_metadata.match(filename))
 
 
@@ -191,26 +191,26 @@ def is_nightly_build_metadata(product, url):
     if 'nightly' in url and 'mozilla-central' not in url:
         # pub/mobile/nightly/2017/08/2017-08-01-15-03-46-date-android-api-15/...
         return False
-    if product == "mobile":
-        product = "fennec"
+    if product == 'mobile':
+        product = 'fennec'
     # Note: devedition has no nightly.
-    re_metadata = re.compile(".+/{}-(.*)\.(.*)\.(.*)\.json$".format(product))
+    re_metadata = re.compile('.+/{}-(.*)\.(.*)\.(.*)\.json$'.format(product))
     return bool(re_metadata.match(url))
 
 
 def is_rc_build_metadata(product, url):
-    if product == "mobile":
-        product = "fennec"
-    if product == "devedition":
-        product = "firefox"
-    m = re.search("/candidates/(.+)-candidates", url)
+    if product == 'mobile':
+        product = 'fennec'
+    if product == 'devedition':
+        product = 'firefox'
+    m = re.search('/candidates/(.+)-candidates', url)
     if not m:
         return False
     version = m.group(1)
-    if product == "fennec":  # fennec-56.0b1.en-US.android-arm.json
-        re_metadata = re.compile(".+/{}-{}\.([^\.]+)\.([^\.]+)\.json$".format(product, version))
+    if product == 'fennec':  # fennec-56.0b1.en-US.android-arm.json
+        re_metadata = re.compile('.+/{}-{}\.([^\.]+)\.([^\.]+)\.json$'.format(product, version))
     else:  # firefox-56.0b1.json
-        re_metadata = re.compile(".+/{}-{}\.json$".format(product, version))
+        re_metadata = re.compile('.+/{}-{}\.json$'.format(product, version))
     return bool(re_metadata.match(url))
 
 
@@ -232,10 +232,10 @@ async def split_lines(stream):
     """
     leftover = ''
     async for chunk in stream:
-        chunk_str = chunk.decode("utf-8")
+        chunk_str = chunk.decode('utf-8')
         chunk_str = leftover + chunk_str
-        chunk_str = chunk_str.lstrip("\n")
-        lines = chunk_str.split("\n")
+        chunk_str = chunk_str.lstrip('\n')
+        lines = chunk_str.split('\n')
         # Everything after \n belongs to the next line.
         leftover = lines.pop()
         if lines:
@@ -247,7 +247,7 @@ async def stream_as_generator(loop, stream):
     reader_protocol = asyncio.StreamReaderProtocol(reader)
     await loop.connect_read_pipe(lambda: reader_protocol, stream)
 
-    while "stream receives input":
+    while 'stream receives input':
         line = await reader.readline()
         if not line:  # EOF.
             break
@@ -264,8 +264,8 @@ def record_from_url(url):
     filename_parts = filename.split('.')
 
     product = url_parts[4]
-    if product == "mobile":
-        product = "fennec"
+    if product == 'mobile':
+        product = 'fennec'
 
     # Nightly URL
     # https://archive.mozilla.org/pub/firefox/nightly/2017/05/
@@ -314,41 +314,41 @@ def record_from_url(url):
         locale = '-'.join(locale_parts)  # fr-FR, ja-JP-mac
 
     record = {
-        "source": {
-            "product": product,
+        'source': {
+            'product': product,
         },
-        "target": {
-            "platform": platform,
-            "os": normalized_platform(platform),
-            "locale": locale,
-            "version": version,
-            "channel": channel,
+        'target': {
+            'platform': platform,
+            'os': normalized_platform(platform),
+            'locale': locale,
+            'version': version,
+            'channel': channel,
         },
-        "download": {
-            "url": url,
-            "mimetype": guess_mimetype(url),
+        'download': {
+            'url': url,
+            'mimetype': guess_mimetype(url),
         }
     }
 
-    record["id"] = build_record_id(record)
+    record['id'] = build_record_id(record)
     return record
 
 
 def check_record(record):
     """Quick sanity check on record."""
-    channel = record["target"]["channel"]
+    channel = record['target']['channel']
     if not re.match(r"^(release|aurora|beta|esr|nightly)(-old-id)?$", channel):
         raise ValueError("Suspicious channel '{}': {}".format(channel, record))
 
-    platform = record["target"]["platform"]
+    platform = record['target']['platform']
     if not re.match(r"^(win|mac|linux|android|maemo|eabi).{0,4}", platform):
         raise ValueError("Suspicious platform '{}': {}".format(platform, record))
 
-    locale = record["target"]["locale"]
+    locale = record['target']['locale']
     if not re.match(r"^([A-Za-z]{2,3}\-?){1,3}$", locale):
         raise ValueError("Suspicious locale '{}': {}".format(locale, record))
 
-    version = record["target"]["version"]
+    version = record['target']['version']
     if not re.match(r"^(\d+|\.|\-|esr|rc|b|a|pre|funnelcake|real|plugin)+$", version):
         raise ValueError("Suspicious version '{}': {}".format(version, record))
 
@@ -363,28 +363,28 @@ def merge_metadata(record, metadata):
     #  https://archive.mozilla.org/pub/thunderbird/candidates \
     #  /50.0b1-candidates/build2/linux-i686/en-US/thunderbird-50.0b1.json
     # If the channel is present in the metadata it is more reliable than our guess.
-    channel = metadata.get("moz_update_channel", record['target']['channel'])
+    channel = metadata.get('moz_update_channel', record['target']['channel'])
     record['target']['channel'] = channel
 
-    repository = metadata["moz_source_repo"].replace("MOZ_SOURCE_REPO=", "")
-    record['source']['revision'] = metadata["moz_source_stamp"]
+    repository = metadata['moz_source_repo'].replace('MOZ_SOURCE_REPO=', '')
+    record['source']['revision'] = metadata['moz_source_stamp']
     record['source']['repository'] = repository
-    record['source']['tree'] = repository.split("hg.mozilla.org/", 1)[-1]
+    record['source']['tree'] = repository.split('hg.mozilla.org/', 1)[-1]
 
-    buildid = metadata["buildid"]
-    builddate = datetime.datetime.strptime(buildid[:14], "%Y%m%d%H%M%S")
+    buildid = metadata['buildid']
+    builddate = datetime.datetime.strptime(buildid[:14], '%Y%m%d%H%M%S')
     builddate = builddate.strftime(DATETIME_FORMAT)
     record['build'] = {
-        "id": buildid,
-        "date": builddate,
+        'id': buildid,
+        'date': builddate,
     }
     # Additional compilation stuff.
-    for field in ("as", "cc", "cxx", "ld", "host_alias", "target_alias"):
+    for field in ('as', 'cc', 'cxx', 'ld', 'host_alias', 'target_alias'):
         if field in metadata:
-            record['build'][field.replace("_alias", "")] = metadata[field]
+            record['build'][field.replace('_alias', '')] = metadata[field]
 
     # For release builds, we have the build number:
-    if "buildnumber" in metadata:
-        record['build']['number'] = metadata["buildnumber"]
+    if 'buildnumber' in metadata:
+        record['build']['number'] = metadata['buildnumber']
 
     return record

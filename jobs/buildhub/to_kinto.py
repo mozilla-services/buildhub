@@ -30,13 +30,13 @@ from kinto_http import cli_utils
 from buildhub.utils import stream_as_generator
 
 
-DEFAULT_SERVER = "http://localhost:8888/v1"
-DEFAULT_BUCKET = "default"
-DEFAULT_COLLECTION = "cid"
+DEFAULT_SERVER = 'http://localhost:8888/v1'
+DEFAULT_BUCKET = 'default'
+DEFAULT_COLLECTION = 'cid'
 NB_THREADS = 3
 NB_RETRY_REQUEST = 3
 WAIT_TIMEOUT = 5
-PREVIOUS_DUMP_FILENAME = ".records-{server}-{bucket}-{collection}.json"
+PREVIOUS_DUMP_FILENAME = '.records-{server}-{bucket}-{collection}.json'
 
 logger = logging.getLogger(__name__)
 
@@ -61,15 +61,15 @@ def fetch_existing(client, cache_file=PREVIOUS_DUMP_FILENAME):
             highest_timestamp = max([r['last_modified'] for r in previous_run_cache])
             previous_run_timestamp = '"%s"' % highest_timestamp
 
-    new_records = client.get_records(_since=previous_run_timestamp, pages=float("inf"))
+    new_records = client.get_records(_since=previous_run_timestamp, pages=float('inf'))
 
-    merge_by_id = {r["id"]: r for r in previous_run_cache + new_records}
+    merge_by_id = {r['id']: r for r in previous_run_cache + new_records}
     records = list(merge_by_id.values())
 
     # Atomic write.
     if len(records) > 0:
-        tmpfilename = cache_file + ".tmp"
-        json.dump(records, open(tmpfilename, "w"))
+        tmpfilename = cache_file + '.tmp'
+        json.dump(records, open(tmpfilename, 'w'))
         os.rename(tmpfilename, cache_file)
 
     return records
@@ -80,7 +80,7 @@ def publish_records(client, records):
     """
     with client.batch() as batch:
         for record in records:
-            if "id" in record["data"]:
+            if 'id' in record['data']:
                 batch.update_record(**record)
             else:
                 batch.create_record(**record)
@@ -90,18 +90,18 @@ def publish_records(client, records):
     # error here when we encounter them.
     error_msgs = []
     for result in results:
-        error_status = result.get("code")
+        error_status = result.get('code')
         if error_status == 412:
             error_msg = ("Record '{details[existing][id]}' already exists: "
-                         "{details[existing]}").format_map(result)
+                         '{details[existing]}').format_map(result)
             error_msgs.append(error_msg)
         elif error_status == 400:
-            error_msg = "Invalid record: {}".format(result)
+            error_msg = 'Invalid record: {}'.format(result)
             error_msgs.append(error_msg)
         elif error_status is not None:
-            error_msgs.append("Error: {}".format(result))
+            error_msgs.append('Error: {}'.format(result))
     if error_msgs:
-        raise ValueError("\n".join(error_msgs))
+        raise ValueError('\n'.join(error_msgs))
 
     return results
 
@@ -110,7 +110,7 @@ async def produce(loop, records, queue):
     """Reads an asynchronous generator of records and puts them into the queue.
     """
     async for record in records:
-        if "data" not in record and "permission" not in record:
+        if 'data' not in record and 'permission' not in record:
             raise ValueError("Invalid record (missing 'data' attribute)")
 
         await queue.put(record)
@@ -127,12 +127,12 @@ async def consume(loop, queue, executor, client, existing):
         def done(future):
             [queue.task_done() for _ in range(n)]
             results = future.result()  # will raise exception if failed.
-            logger.info("Pushed {} records".format(len(results)))
+            logger.info('Pushed {} records'.format(len(results)))
             return results
         return done
 
     def records_equal(r1, r2):
-        omit = ["last_modified", "schema"]
+        omit = ['last_modified', 'schema']
         r1c = {k: v for k, v in r1.items() if k not in omit}
         r2c = {k: v for k, v in r2.items() if k not in omit}
         return r1c == r2c
@@ -140,9 +140,9 @@ async def consume(loop, queue, executor, client, existing):
     records_by_id = {r['id']: r for r in existing}
 
     info = client.server_info()
-    ideal_batch_size = info["settings"]["batch_max_requests"]
+    ideal_batch_size = info['settings']['batch_max_requests']
 
-    while "consumer is not cancelled":
+    while 'consumer is not cancelled':
         # Consume records from queue, and batch operations.
         # But don't wait too much if there's not enough records to fill a batch.
         batch = []
@@ -155,9 +155,9 @@ async def consume(loop, queue, executor, client, existing):
                         queue.task_done()
                         break
                     # Check if known and hasn't changed.
-                    rid = record["data"].get("id")
-                    if rid in records_by_id and records_equal(record["data"], records_by_id[rid]):
-                        logger.debug("Skip unchanged record {}".format(rid))
+                    rid = record['data'].get('id')
+                    if rid in records_by_id and records_equal(record['data'], records_by_id[rid]):
+                        logger.debug('Skip unchanged record {}'.format(rid))
                         queue.task_done()
                         continue
                     # Add record to current batch, and wait for more.
@@ -165,9 +165,9 @@ async def consume(loop, queue, executor, client, existing):
 
         except asyncio.TimeoutError:
             if batch:
-                logger.debug("Stop waiting, proceed with %s records." % len(batch))
+                logger.debug('Stop waiting, proceed with %s records.' % len(batch))
             else:
-                logger.debug("Waiting for records in the queue.")
+                logger.debug('Waiting for records in the queue.')
 
         # We have a batch of records, let's publish them using parallel workers.
         # When done, mark queue items as done.
@@ -178,7 +178,7 @@ async def consume(loop, queue, executor, client, existing):
 
 async def parse_json(lines):
     async for line in lines:
-        record = json.loads(line.decode("utf-8"))
+        record = json.loads(line.decode('utf-8'))
         yield record
 
 
@@ -208,7 +208,7 @@ def run():
     records_generator = parse_json(stdin_generator)
 
     parser = cli_utils.add_parser_options(
-        description="Read records from stdin as JSON and push them to Kinto",
+        description='Read records from stdin as JSON and push them to Kinto',
         default_server=DEFAULT_SERVER,
         default_bucket=DEFAULT_BUCKET,
         default_retry=NB_RETRY_REQUEST,
@@ -218,7 +218,7 @@ def run():
     cli_args = parser.parse_args()
     cli_utils.setup_logger(logger, cli_args)
 
-    logger.info("Publish at {server}/buckets/{bucket}/collections/{collection}"
+    logger.info('Publish at {server}/buckets/{bucket}/collections/{collection}'
                 .format(**cli_args.__dict__))
 
     client = cli_utils.create_client_from_args(cli_args)
@@ -229,5 +229,5 @@ def run():
     loop.close()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     run()

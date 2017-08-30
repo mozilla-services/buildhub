@@ -13,8 +13,8 @@ from buildhub.to_kinto import main as to_kinto
 
 
 REGION_NAME = 'us-east-1'
-BUCKET = "net-mozaws-prod-delivery-inventory-us-east-1"
-FOLDER = "public/inventories/net-mozaws-prod-delivery-{inventory}/delivery-{inventory}/"
+BUCKET = 'net-mozaws-prod-delivery-inventory-us-east-1'
+FOLDER = 'public/inventories/net-mozaws-prod-delivery-{inventory}/delivery-{inventory}/'
 CHUNK_SIZE = 1024 * 256  # 256 KB
 
 
@@ -33,7 +33,7 @@ async def list_manifest_entries(loop, client, inventory):
 
     # Download latest manifest.json
     last_inventory = sorted(manifest_folders)[-2]  # -1 is data
-    logger.info("Latest inventory is {}".format(last_inventory))
+    logger.info('Latest inventory is {}'.format(last_inventory))
     key = last_inventory + 'manifest.json'
     manifest = await client.get_object(Bucket=BUCKET, Key=key)
     async with manifest['Body'] as stream:
@@ -47,12 +47,12 @@ async def list_manifest_entries(loop, client, inventory):
 async def download_csv(loop, client, keys_stream, chunk_size=CHUNK_SIZE):
 
     async for key in keys_stream:
-        key = "public/" + key
-        logger.info("Fetching inventory piece {}".format(key))
+        key = 'public/' + key
+        logger.info('Fetching inventory piece {}'.format(key))
         file_csv_gz = await client.get_object(Bucket=BUCKET, Key=key)
         gzip = zlib.decompressobj(zlib.MAX_WBITS | 16)
         async with file_csv_gz['Body'] as stream:
-            while "there are chunks to read":
+            while 'there are chunks to read':
                 gzip_chunk = await stream.read(chunk_size)
                 if not gzip_chunk:
                     break  # End of response.
@@ -70,10 +70,10 @@ async def main(loop, inventory):
     """
     Trigger to populate kinto with the last inventories.
     """
-    server_url = os.getenv("SERVER_URL", "http://localhost:8888/v1")
-    bucket = os.getenv("BUCKET", "build-hub")
-    collection = os.getenv("COLLECTION", "releases")
-    kinto_auth = tuple(os.getenv("AUTH", "user:pass").split(":"))
+    server_url = os.getenv('SERVER_URL', 'http://localhost:8888/v1')
+    bucket = os.getenv('BUCKET', 'build-hub')
+    collection = os.getenv('COLLECTION', 'releases')
+    kinto_auth = tuple(os.getenv('AUTH', 'user:pass').split(':'))
 
     kinto_client = kinto_http.Client(server_url=server_url, auth=kinto_auth,
                                      bucket=bucket, collection=collection,
@@ -94,6 +94,6 @@ def lambda_handler(event=None, context=None):
     logger.setLevel(logging.DEBUG)
 
     loop = asyncio.get_event_loop()
-    futures = [main(loop, inventory) for inventory in ("firefox", "archive")]
+    futures = [main(loop, inventory) for inventory in ('firefox', 'archive')]
     loop.run_until_complete(asyncio.gather(*futures))
     loop.close()
