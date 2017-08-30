@@ -18,6 +18,7 @@ class CacheValueTest(unittest.TestCase):
 
     def test_records_are_not_duplicated(self):
         mocked = mock.MagicMock()
+        mocked.session.server_url = "http://localhost:8888/v1"
         # First, populate the cache.
         mocked.get_records.return_value = [{"id": "a", "title": "a", "last_modified": 1}]
         fetch_existing(mocked, self.cache_file)
