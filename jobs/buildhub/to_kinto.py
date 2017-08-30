@@ -23,6 +23,7 @@ import json
 import logging
 import os
 import sys
+from urllib.parse import urlparse
 
 from kinto_http import cli_utils
 
@@ -35,7 +36,7 @@ DEFAULT_COLLECTION = "cid"
 NB_THREADS = 3
 NB_RETRY_REQUEST = 3
 WAIT_TIMEOUT = 5
-PREVIOUS_DUMP_FILENAME = ".{server}-{bucket}-{collection}.json"
+PREVIOUS_DUMP_FILENAME = ".records-{server}-{bucket}-{collection}.json"
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +48,7 @@ def fetch_existing(client, cache_file=PREVIOUS_DUMP_FILENAME):
     records from previous run.
     """
     cache_file = cache_file.format(
-        server="".join(c for c in client.session.server_url if c.isalnum()),
+        server=urlparse(client.session.server_url).hostname,
         bucket=client._bucket_name,
         collection=client._collection_name)
 
