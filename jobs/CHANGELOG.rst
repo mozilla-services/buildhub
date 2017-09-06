@@ -6,8 +6,9 @@ This document describes changes between each past release.
 0.3.0 (unreleased)
 ------------------
 
-- No changes yet.
-
+- Load ``initialization.yml`` from the S3 inventory lambda (#236)
+- Distinguish records cache files from a server to another (#235)
+- Major documentation improvements (#228)
 
 0.2.0 (2017-08-25)
 ------------------
