@@ -34,7 +34,7 @@ ENTRY_POINTS = {
 
 
 setup(name='buildhub',
-      version='0.3.0dev0',
+      version='0.3.0',
       description='Buildhub Python libraries.',
       long_description="{}\n\n{}\n\n{}".format(README, CHANGELOG, CONTRIBUTORS),
       license='Apache License (2.0)',
