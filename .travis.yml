@@ -10,7 +10,7 @@ install:
   - kinto init --backend memory
 before_script:
   - kinto start &
-  - sleep 3; kinto-wizard load jobs/initialization.yml --server http://localhost:8888/v1 --auth user:pass
+  - sleep 3; kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
 script:
   - cd jobs; tox -e $TOX_ENV
 after_success:

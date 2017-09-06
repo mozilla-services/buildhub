@@ -1,1 +1,2 @@
 include *.rst LICENSE Makefile tox.ini
+include buildhub/initialization.yml

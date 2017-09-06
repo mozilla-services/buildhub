@@ -30,7 +30,7 @@ This command is idempotent, and will only modify existing objects if something w
 
 .. code-block:: bash
 
-    kinto-wizard load --server https://kinto/ --auth user:pass initialization.yaml
+    kinto-wizard load --server https://kinto/ --auth user:pass buildhub/initialization.yml
 
 The following is not mandatory but recommended. Kinto can use the JSON schema to validate the records. The following setting should be set to ``true`` in the server configuration file:
 
@@ -151,7 +151,7 @@ Load records into Kinto:
 
 .. code-block:: bash
 
-    cat records.data | to-kinto --server https://kinto/ --bucket build-hub --collection release --auth user:pass initialization.yaml
+    cat records.data | to-kinto --server https://kinto/ --bucket build-hub --collection release --auth user:pass
 
 Repeat with ``LISTING=firefox``.
 
