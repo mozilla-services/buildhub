@@ -8,9 +8,9 @@ The BuildHub API is just a Kinto instance with a collection of records. A :ref:`
 Servers
 =======
 
-* **Development**: https://kinto-ota.dev.mozaws.net/v1
-* **Stage**: https://kinto-ota.dev.mozaws.net/v1
-* **Production**: https://kinto-ota.dev.mozaws.net/v1
+* **Development**: https://kinto-ota.dev.mozaws.net/v1/
+* **Stage**: https://buildhub.stage.mozaws.net/v1/
+* **Production**: https://kinto-ota.dev.mozaws.net/v1/
 
 Clients
 =======
@@ -76,11 +76,11 @@ Basic API
 
 The list of records is available at:
 
-* `${SERVER}/buckets/build-hub/collections/releases/records <https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releases/records?_limit=10>`_
+* `${SERVER}/buckets/build-hub/collections/releases/records <https://buildhub.stage.mozaws.net/v1/buckets/build-hub/collections/releases/records?_limit=10>`_
 
 And a single record at:
 
-* `${SERVER}/buckets/build-hub/collections/releases/records/${ID} <https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releases/records/firefox_beta_50-0b11_macosx_el>`_
+* `${SERVER}/buckets/build-hub/collections/releases/records/${ID} <https://buildhub.stage.mozaws.net/v1/buckets/build-hub/collections/releases/records/firefox_beta_50-0b11_macosx_el>`_
 
 A set of filters and pagination options can be used to query the list. The most notable features are:
 
@@ -96,7 +96,7 @@ Elasticsearch API
 
 An ElasticSearch endpoint is also available for more powerful queries. It powers the online catalog.
 
-* `$SERVER/buckets/build-hub/collections/releases/search <https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releases/search>`_
+* `$SERVER/buckets/build-hub/collections/releases/search <https://buildhub.stage.mozaws.net/v1/buckets/build-hub/collections/releases/search>`_
 
 `More information in the Elasticsearch documentation <https://www.elastic.co/guide/en/elasticsearch/reference/current/search.html>`_
 
@@ -125,7 +125,7 @@ In order to check that a build id exists, we'll just check that it is mentioned 
 
     import kinto_http
 
-    client = kinto_http.Client("https://kinto-ota.dev.mozaws.net/v1")
+    client = kinto_http.Client("https://buildhub.stage.mozaws.net/v1")
     records = client.get_records(**{"build.id": "20110110192031", "_limit": 1, "pages": 1},
                                  bucket="build-hub", collection="releases")
     print(len(records) == 1)
@@ -135,7 +135,7 @@ What is the Mercurial commit ID of a build ID?
 
 .. code-block:: python
 
-    client = kinto_http.Client("https://kinto-ota.dev.mozaws.net/v1")
+    client = kinto_http.Client("https://buildhub.stage.mozaws.net/v1")
     records = client.get_records(**{"build.id": "20110110192031", "_limit": 1, "pages": 1},
                                  bucket="build-hub", collection="releases")
     try:
@@ -152,7 +152,7 @@ What locales are available for a certain version?
 
     import KintoClient from "kinto-http";
 
-    const client = new KintoClient("https://kinto-ota.dev.mozaws.net/v1");
+    const client = new KintoClient("https://buildhub.stage.mozaws.net/v1");
     const collection = client.bucket("build-hub").collection("releases");
     const records = await collection.listRecords({filters: {"target.version": "53.0b9"}});
     const locales = new Set(records.map(r => r.target.locale));
@@ -227,7 +227,7 @@ More about the data schema
 
 The complete JSON schema is available in the collection metadata:
 
-* `${SERVER}/buckets/build-hub/collections/releases <https://kinto-ota.dev.mozaws.net/v1/buckets/build-hub/collections/releases>`_
+* `${SERVER}/buckets/build-hub/collections/releases <https://buildhub.stage.mozaws.net/v1/buckets/build-hub/collections/releases>`_
 
 The records added to the collection will be validated against that schema.
 
