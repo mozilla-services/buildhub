@@ -1,7 +1,7 @@
 import asyncio
 import json
 import logging
-import os.path
+import os
 import pkgutil
 import zlib
 from concurrent.futures import ThreadPoolExecutor
@@ -22,6 +22,8 @@ BUCKET = 'net-mozaws-prod-delivery-inventory-us-east-1'
 FOLDER = 'public/inventories/net-mozaws-prod-delivery-{inventory}/delivery-{inventory}/'
 CHUNK_SIZE = 1024 * 256  # 256 KB
 
+INITIALIZE_SERVER = os.getenv("INITIALIZE_SERVER", "true").lower() == "true"
+
 
 logger = logging.getLogger()  # root logger.
 
@@ -36,6 +38,13 @@ async def initialize_kinto(loop, kinto_client, bucket, collection):
 
     initialization_manifest = pkgutil.get_data('buildhub', 'initialization.yml')
     config = yaml.safe_load(initialization_manifest)
+
+    # Check that we push the records at the right place.
+    if bucket not in config:
+        raise ValueError(f"Bucket '{bucket}' not specified in `initialization.yml`.")
+    if collection not in config[bucket]["collections"]:
+        raise ValueError(f"Collection '{collection}' not specified in `initialization.yml`.")
+
     await initialize_server(async_client,
                             config,
                             bucket=bucket,
@@ -114,7 +123,8 @@ async def main(loop, inventory):
                                      retry=NB_RETRY_REQUEST)
 
     # Create bucket/collection and schemas.
-    await initialize_kinto(loop, kinto_client, bucket, collection)
+    if INITIALIZE_SERVER:
+        await initialize_kinto(loop, kinto_client, bucket, collection)
 
     # Download CSVs, deduce records and push to Kinto.
     session = aiobotocore.get_session(loop=loop)

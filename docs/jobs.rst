@@ -58,6 +58,7 @@ Its configuration is read from environment variables:
 * ``AUTH`` (default: ``user:pass``)
 * ``NB_RETRY_REQUEST`` (default: ``3``)
 * ``TIMEOUT_SECONDS`` (default: ``300``)
+* ``INITIALIZE_SERVER`` (default: ``true``): whether to initialize the destination bucket/collection.
 
 To use this script as an Amazon Lambda function, use the entry point:
 
