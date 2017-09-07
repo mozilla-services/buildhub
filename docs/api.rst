@@ -76,11 +76,11 @@ Basic API
 
 The list of records is available at:
 
-* `${SERVER}/buckets/buildhub/collections/releases/records <https://buildhub.stage.mozaws.net/v1/buckets/buildhub/collections/releases/records?_limit=10>`_
+* `${SERVER}/buckets/build-hub/collections/releases/records <https://buildhub.stage.mozaws.net/v1/buckets/build-hub/collections/releases/records?_limit=10>`_
 
 And a single record at:
 
-* `${SERVER}/buckets/buildhub/collections/releases/records/${ID} <https://buildhub.stage.mozaws.net/v1/buckets/buildhub/collections/releases/records/firefox_beta_50-0b11_macosx_el>`_
+* `${SERVER}/buckets/build-hub/collections/releases/records/${ID} <https://buildhub.stage.mozaws.net/v1/buckets/build-hub/collections/releases/records/firefox_beta_50-0b11_macosx_el>`_
 
 A set of filters and pagination options can be used to query the list. The most notable features are:
 
@@ -96,7 +96,7 @@ Elasticsearch API
 
 An ElasticSearch endpoint is also available for more powerful queries. It powers the online catalog.
 
-* `$SERVER/buckets/buildhub/collections/releases/search <https://buildhub.stage.mozaws.net/v1/buckets/buildhub/collections/releases/search>`_
+* `$SERVER/buckets/build-hub/collections/releases/search <https://buildhub.stage.mozaws.net/v1/buckets/build-hub/collections/releases/search>`_
 
 `More information in the Elasticsearch documentation <https://www.elastic.co/guide/en/elasticsearch/reference/current/search.html>`_
 
@@ -111,7 +111,7 @@ In order to check that a build id exists, we'll just check that it is mentioned 
 
 ::
 
-    curl -s -I "${SERVER}/buckets/buildhub/collections/releases/records?build.id=20110110192031&_limit=1" | grep "Total-Records: 1"
+    curl -s -I "${SERVER}/buckets/build-hub/collections/releases/records?build.id=20110110192031&_limit=1" | grep "Total-Records: 1"
 
 .. code-block:: javascript
 
@@ -227,7 +227,7 @@ More about the data schema
 
 The complete JSON schema is available in the collection metadata:
 
-* `${SERVER}/buckets/buildhub/collections/releases <https://buildhub.stage.mozaws.net/v1/buckets/buildhub/collections/releases>`_
+* `${SERVER}/buckets/build-hub/collections/releases <https://buildhub.stage.mozaws.net/v1/buckets/build-hub/collections/releases>`_
 
 The records added to the collection will be validated against that schema.
 

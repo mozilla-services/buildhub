@@ -30,7 +30,7 @@ import {
 } from "searchkit";
 
 const searchkit = new SearchkitManager(
-  "https://buildhub.stage.mozaws.net/v1/buckets/buildhub/collections/releases/",
+  "https://buildhub.stage.mozaws.net/v1/buckets/build-hub/collections/releases/",
   { searchUrlPath: "search" }
 );
 
