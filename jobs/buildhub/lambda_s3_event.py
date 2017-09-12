@@ -1,14 +1,23 @@
 import asyncio
 import datetime
+import logging
 import os
 import re
 
 import aiohttp
 import kinto_http
+import raven
 
 from buildhub import utils
 from buildhub.inventory_to_records import (
     NB_RETRY_REQUEST, fetch_json, fetch_listing, fetch_metadata, scan_candidates)
+
+
+SENTRY_DSN = os.getenv('SENTRY_DSN')
+sentry = raven.Client(SENTRY_DSN,
+                      transport=raven.transport.http.HTTPTransport) if SENTRY_DSN else None
+
+logger = logging.getLogger()  # root logger.
 
 
 async def main(loop, event):
@@ -42,12 +51,12 @@ async def main(loop, event):
                 continue  # e.g. https://archive.mozilla.org/favicon.ico
 
             if product not in utils.ALL_PRODUCTS:
-                print('Skip product {}'.format(product))
+                logger.info('Skip product {}'.format(product))
                 continue
 
             # Release / Nightly / RC archive.
             if utils.is_build_url(product, url):
-                print('Processing {} archive: {}'.format(product, key))
+                logger.info('Processing {} archive: {}'.format(product, key))
 
                 record = utils.record_from_url(url)
                 # Use S3 event infos for the archive.
@@ -60,7 +69,7 @@ async def main(loop, event):
                 # If JSON metadata not available, archive will be handled when JSON
                 # is delivered.
                 if metadata is None:
-                    print('JSON metadata not available {}'.format(record['id']))
+                    logger.info('JSON metadata not available {}'.format(record['id']))
                     continue
 
                 # Merge obtained metadata.
@@ -69,7 +78,7 @@ async def main(loop, event):
 
             # RC metadata
             elif utils.is_rc_build_metadata(product, url):
-                print('Processing {} RC metadata: {}'.format(product, key))
+                logger.info('Processing {} RC metadata: {}'.format(product, key))
 
                 # pub/firefox/candidates/55.0b12-candidates/build1/mac/en-US/
                 # firefox-55.0b12.json
@@ -97,7 +106,7 @@ async def main(loop, event):
             # firefox-57.0a1.en-US.linux-i686.json
             # -l10n/...
             elif utils.is_nightly_build_metadata(product, url):
-                print('Processing {} nightly metadata: {}'.format(product, key))
+                logger.info('Processing {} nightly metadata: {}'.format(product, key))
 
                 metadata = await fetch_json(session, url)
 
@@ -141,7 +150,7 @@ async def main(loop, event):
                         records_to_create.append(record)
 
             else:
-                print('Ignored {}'.format(key))
+                logger.info('Ignored {}'.format(key))
 
             for record in records_to_create:
                 # Check that fields values look OK.
@@ -151,10 +160,24 @@ async def main(loop, event):
                                            bucket=bucket,
                                            collection=collection,
                                            if_not_exists=True)
-                print('Created {}'.format(record['id']))
+                logger.info('Created {}'.format(record['id']))
 
 
 def lambda_handler(event, context):
+    # Log everything to stderr.
+    logger.addHandler(logging.StreamHandler())
+    logger.setLevel(logging.DEBUG)
+
+    if sentry:
+        handler = raven.handlers.logging.SentryHandler(sentry)
+        handler.setLevel(logging.ERROR)
+        logger.addHandler(handler)
+
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(loop, event))
-    loop.close()
+    try:
+        loop.run_until_complete(main(loop, event))
+    except:
+        logger.exception()
+        raise
+    finally:
+        loop.close()
