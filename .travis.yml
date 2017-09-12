@@ -1,24 +1,29 @@
 language: python
 python: 3.6
 cache: pip
-env:
-  - TOX_ENV=py36
-  - TOX_ENV=flake8
-install:
-  - pip install tox
-  - pip install kinto kinto-wizard
-  - kinto init --backend memory
-before_script:
-  - kinto start &
-  - sleep 3; kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
-script:
-  - cd jobs; tox -e $TOX_ENV
-after_success:
-  # Report coverage results to coveralls.io
-  - pip install coveralls
-  - coveralls
 matrix:
   include:
+    - language: python
+      install:
+        - pip install tox
+      script:
+        - cd jobs; tox -e flake8
+
+    - language: python
+      install:
+        - pip install tox
+        - pip install kinto kinto-wizard
+        - kinto init --backend memory
+      before_script:
+        - kinto start &
+        - sleep 3; kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
+      script:
+        - cd jobs; tox -e py36
+      after_success:
+        # Report coverage results to coveralls.io
+        - pip install coveralls
+        - coveralls
+
     - language: node_js
       node_js: 7
       install:
