@@ -156,7 +156,7 @@ def lambda_handler(event=None, context=None):
     try:
         loop.run_until_complete(asyncio.gather(*futures))
     except:
-        logger.exception()
+        logger.exception("Aborted.")
         raise
     finally:
         loop.close()
