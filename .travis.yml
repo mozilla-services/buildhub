@@ -10,6 +10,7 @@ matrix:
         - cd jobs; tox -e flake8
 
     - language: python
+      install:
         - pip install tox
         - pip install kinto kinto-wizard
         - kinto init --backend memory
