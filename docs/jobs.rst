@@ -57,6 +57,7 @@ Its configuration is read from environment variables:
 * ``COLLECTION`` (default: ``releases``)
 * ``AUTH`` (default: ``user:pass``)
 * ``NB_RETRY_REQUEST`` (default: ``3``)
+* ``BATCH_MAX_REQUESTS`` (default: taken from server)
 * ``TIMEOUT_SECONDS`` (default: ``300``)
 * ``INITIALIZE_SERVER`` (default: ``true``): whether to initialize the destination bucket/collection.
 
