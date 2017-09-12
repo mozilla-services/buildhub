@@ -7,15 +7,16 @@ import re
 import aiohttp
 import kinto_http
 import raven
+from raven.handlers.logging import SentryHandler
 
 from buildhub import utils
 from buildhub.inventory_to_records import (
     NB_RETRY_REQUEST, fetch_json, fetch_listing, fetch_metadata, scan_candidates)
 
 
+# Optional Sentry with synchronuous client.
 SENTRY_DSN = os.getenv('SENTRY_DSN')
-sentry = raven.Client(SENTRY_DSN,
-                      transport=raven.transport.http.HTTPTransport) if SENTRY_DSN else None
+sentry = raven.Client(SENTRY_DSN, transport=raven.transport.http.HTTPTransport)
 
 logger = logging.getLogger()  # root logger.
 
@@ -168,10 +169,10 @@ def lambda_handler(event, context):
     logger.addHandler(logging.StreamHandler())
     logger.setLevel(logging.DEBUG)
 
-    if sentry:
-        handler = raven.handlers.logging.SentryHandler(sentry)
-        handler.setLevel(logging.ERROR)
-        logger.addHandler(handler)
+    # Add Sentry (no-op if no configured).
+    handler = SentryHandler(sentry)
+    handler.setLevel(logging.ERROR)
+    logger.addHandler(handler)
 
     loop = asyncio.get_event_loop()
     try:

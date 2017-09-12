@@ -10,6 +10,7 @@ import aiobotocore
 import botocore
 import kinto_http
 import raven
+from raven.handlers.logging import SentryHandler
 from ruamel import yaml
 from kinto_wizard.async_kinto import AsyncKintoClient
 from kinto_wizard.yaml2kinto import initialize_server
@@ -25,9 +26,9 @@ CHUNK_SIZE = 1024 * 256  # 256 KB
 
 INITIALIZE_SERVER = os.getenv("INITIALIZE_SERVER", "true").lower() == "true"
 
+# Optional Sentry with synchronuous client.
 SENTRY_DSN = os.getenv('SENTRY_DSN')
-sentry = raven.Client(SENTRY_DSN,
-                      transport=raven.transport.http.HTTPTransport) if SENTRY_DSN else None
+sentry = raven.Client(SENTRY_DSN, transport=raven.transport.http.HTTPTransport)
 
 logger = logging.getLogger()  # root logger.
 
@@ -145,10 +146,10 @@ def lambda_handler(event=None, context=None):
     logger.addHandler(logging.StreamHandler())
     logger.setLevel(logging.DEBUG)
 
-    if sentry:
-        handler = raven.handlers.logging.SentryHandler(sentry)
-        handler.setLevel(logging.ERROR)
-        logger.addHandler(handler)
+    # Add Sentry (no-op if no configured).
+    handler = SentryHandler(sentry)
+    handler.setLevel(logging.ERROR)
+    logger.addHandler(handler)
 
     loop = asyncio.get_event_loop()
     futures = [main(loop, inventory) for inventory in ('firefox', 'archive')]
