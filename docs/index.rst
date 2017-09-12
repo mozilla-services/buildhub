@@ -2,7 +2,7 @@ Overview
 ########
 
 
-*Buildub* aims to provide a public database of comprehensive information about releases and builds.
+*Buildhub* aims to provide a public database of comprehensive information about `Mozilla products <https://www.mozilla.org>`_ releases and builds.
 
 Concretely, it is a JSON API (`Kinto <https://kinto-storage.org>`_) where you can query a collection of records.
 
