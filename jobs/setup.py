@@ -22,6 +22,7 @@ REQUIREMENTS = [
     "backoff",
     "kinto-http",
     "kinto-wizard >= 2.2.0",  # async load.
+    "raven",
 ]
 
 ENTRY_POINTS = {
