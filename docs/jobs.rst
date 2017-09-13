@@ -117,24 +117,24 @@ The exhaustive list of available commands and description is available using:
 
 ::
 
-    docker run buildhub
+    docker run -t mozilla/buildhub
 
 For example, run a Kinto server:
 
 ::
-    docker run -p 8888:8888 buildhub kinto
+    docker run -p 8888:8888 -t mozilla/buildhub kinto
 
 Initialize it for *buildhub*:
 
 ::
 
-    docker run buildhub initialize-kinto --auth=user:pass
+    docker run -t mozilla/buildhub initialize-kinto --auth=user:pass
 
 Load the latest S3 inventory:
 
 ::
 
-    docker run -e "SERVER_URL=https://kinto.server.com/v1" buildhub latest-inventory-to-kinto
+    docker run -e "SERVER_URL=https://kinto.server.com/v1" -t mozilla/buildhub latest-inventory-to-kinto
 
 
 Load S3 inventory manually
