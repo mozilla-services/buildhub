@@ -5,4 +5,10 @@ WORKDIR /app
 
 RUN apt-get update && apt-get -y install zip && rm -rf /var/lib/apt/lists/*
 RUN pip install virtualenv
-RUN make zip
+
+RUN make virtualenv
+RUN .venv/bin/pip install jobs/
+
+ENTRYPOINT ["/bin/bash", "/app/bin/run.sh"]
+
+CMD ["help"]

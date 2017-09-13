@@ -5,33 +5,29 @@ PYTHON = $(VENV)/bin/python3
 SPHINX_BUILDDIR = docs/_build
 
 help:
-	@echo "  docs                        build the docs"
+	@echo "  clean                       delete local files"
+	@echo "  container                   build the Docker™ image"
+	@echo "  lambda.zip                  build lambda.zip from within the container"
+	@echo "  upload-to-s3                upload lambda.zip to AWS"
+	@echo "  docs                        build the project docs"
 
 virtualenv: $(PYTHON)
 $(PYTHON):
-	$(VIRTUALENV) $(VENV)
+	$(VIRTUALENV) $(VENV) --python=python3.6
 
 clean:
-	rm -fr venv $(VENV) lambda.zip
+	rm -fr $(VENV) lambda.zip
 
-virtualenv:
-	virtualenv $(VENV) --python=python3.6
-	$(VENV)/bin/pip install jobs/
-
-lambda.zip: zip
-zip: clean virtualenv
-	cd $(VENV)/lib/python3.6/site-packages/; zip -r ../../../../lambda.zip *
-
-build_image:
+container:
 	docker build -t buildhub .
 
-get_zip: build_image
+lambda.zip: container
 	docker rm buildhub || true
-	docker run --name buildhub buildhub
+	docker run --name buildhub buildhub lambda.zip
 	docker cp buildhub:/app/lambda.zip .
 
 upload-to-s3: lambda.zip
-	python upload_to_s3.py
+	$(PYTHON) bin/upload_to_s3.py
 
 install-docs: $(DOC_STAMP)
 $(DOC_STAMP): $(PYTHON) docs/requirements.txt

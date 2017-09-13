@@ -96,7 +96,9 @@ Setup and configure Amazon Lambda
 
 In order to build the AWS Lambda Zip archive in an isolated environment, we use Docker:
 
-* ``make get_zip``
+* ``make lambda.zip``
+
+(...or most likely ``sudo make lambda.zip``)
 
 This will produce a zip file that has to be uploaded in AWS Lambda configuration panel.
 
@@ -105,6 +107,34 @@ This will produce a zip file that has to be uploaded in AWS Lambda configuration
 .. image:: lambda-3.png
 .. image:: lambda-4.png
 
+
+Using Docker
+============
+
+Some commands are exposed in the container entry-point command (``docker run``).
+
+The exhaustive list of available commands and description is available using:
+
+::
+
+    docker run buildhub
+
+For example, run a Kinto server:
+
+::
+    docker run -p 8888:8888 buildhub kinto
+
+Initialize it for *buildhub*:
+
+::
+
+    docker run buildhub initialize-kinto --auth=user:pass
+
+Load the latest S3 inventory:
+
+::
+
+    docker run -e "SERVER_URL=https://kinto.server.com/v1" buildhub latest-inventory-to-kinto
 
 
 Load S3 inventory manually
