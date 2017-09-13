@@ -1,2 +1,6 @@
 .git
 lambda.zip
+.tox
+**/__pycache__
+*.pyc
+*.egg-info
