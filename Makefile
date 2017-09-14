@@ -5,33 +5,34 @@ PYTHON = $(VENV)/bin/python3
 SPHINX_BUILDDIR = docs/_build
 
 help:
-	@echo "  docs                        build the docs"
+	@echo "  clean                       delete local files"
+	@echo "  docker-build                build the Docker™ image"
+	@echo "  docker-test                 run the tests from within the container"
+	@echo "  lambda.zip                  build lambda.zip from within the container"
+	@echo "  upload-to-s3                upload lambda.zip to AWS"
+	@echo "  docs                        build the project docs"
 
 virtualenv: $(PYTHON)
 $(PYTHON):
-	$(VIRTUALENV) $(VENV)
+	$(VIRTUALENV) $(VENV) --python=python3.6
 
 clean:
-	rm -fr venv $(VENV) lambda.zip
+	rm -fr $(VENV) lambda.zip
 
-virtualenv:
-	virtualenv $(VENV) --python=python3.6
-	$(VENV)/bin/pip install jobs/
+docker-build:
+	echo "{\"name\":\"buildhub\",\"commit\":`git rev-parse HEAD`\"}" > version.json
+	docker build -t mozilla/buildhub .
 
-lambda.zip: zip
-zip: clean virtualenv
-	cd $(VENV)/lib/python3.6/site-packages/; zip -r ../../../../lambda.zip *
+docker-test:
+	docker run -it mozilla/buildhub test
 
-build_image:
-	docker build -t buildhub .
-
-get_zip: build_image
-	docker rm buildhub || true
-	docker run --name buildhub buildhub
-	docker cp buildhub:/app/lambda.zip .
+lambda.zip: docker-build
+	docker rm mozilla/buildhub || true
+	docker run --name mozilla/buildhub mozilla/buildhub lambda.zip
+	docker cp mozilla/buildhub:/app/lambda.zip .
 
 upload-to-s3: lambda.zip
-	python upload_to_s3.py
+	$(PYTHON) bin/upload_to_s3.py
 
 install-docs: $(DOC_STAMP)
 $(DOC_STAMP): $(PYTHON) docs/requirements.txt

@@ -7,3 +7,4 @@ jobs/.coverage
 docs/_build/
 .venv/
 lambda.zip
+version.json

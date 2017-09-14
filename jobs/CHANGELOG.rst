@@ -7,7 +7,7 @@ This document describes changes between each past release.
 ------------------
 
 - Allow number of requests in batch to be overriden via environment variable ``BATCH_MAX_REQUESTS``.
-
+- Allow to run some commands from the container (fixes #41)
 
 0.3.0 (2017-09-06)
 ------------------
