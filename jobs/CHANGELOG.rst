@@ -3,7 +3,7 @@ Changelog
 
 This document describes changes between each past release.
 
-0.4.0 (unreleased)
+0.4.0 (2017-09-14)
 ------------------
 
 - Allow number of requests in batch to be overriden via environment variable ``BATCH_MAX_REQUESTS``.
