@@ -2,6 +2,8 @@ build-hub:
   permissions:
     read:
       - system.Everyone
+    write:
+      - account:lambda
   collections:
     releases:
       data:
