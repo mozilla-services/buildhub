@@ -2,7 +2,7 @@
 set -eo pipefail
 
 usage() {
-  echo "usage: ./bin/run.sh version|test|lambda.zip|kinto|initialize-kinto|latest-inventory-to-kinto"
+  echo "usage: ./bin/run.sh version|test|lambda.zip|initialize-kinto|latest-inventory-to-kinto"
   echo ""
   echo "    version                     Show current version"
   echo "    test                        Run tests"

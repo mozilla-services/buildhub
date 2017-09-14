@@ -119,12 +119,13 @@ The exhaustive list of available commands and description is available using:
 
     docker run -t mozilla/buildhub
 
-For example, run a Kinto server:
+For example, run tests:
 
 ::
-    docker run -p 8888:8888 -t mozilla/buildhub kinto
 
-Initialize it for *buildhub*:
+    docker run -t mozilla/buildhub test
+
+Or initialize a Kinto server it for *buildhub*:
 
 ::
 
