@@ -157,6 +157,20 @@ What locales are available for a certain version?
     const records = await collection.listRecords({filters: {"target.version": "53.0b9"}});
     const locales = new Set(records.map(r => r.target.locale));
 
+What are the available build ids of a specific version?
+-------------------------------------------------------
+
+Using curl and `jq <https://stedolan.github.io/jq/>`_:
+
+.. code-block:: bash
+
+    $ curl -s "${SERVER}/buckets/build-hub/collections/releases/records?target.version=56.0b12" | \
+        jq -r '.data[] | .build.id' | \
+        sort -u
+
+    20170914024831
+
+
 
 .. _data-schema:
 
