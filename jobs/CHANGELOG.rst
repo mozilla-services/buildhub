@@ -6,7 +6,7 @@ This document describes changes between each past release.
 0.5.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix S3 event ``eventTime`` key error (fixes #253)
 
 
 0.4.0 (2017-09-14)

@@ -8,8 +8,8 @@ from buildhub import utils, inventory_to_records, lambda_s3_event
 
 def fake_event(key):
     return {
-        "eventTime": "2017-08-08T17:06:52.030Z",
         "Records": [{
+            "eventTime": "2017-08-08T17:06:52.030Z",
             "s3": {
                 "bucket": {"name": "abc"},
                 "object": {
