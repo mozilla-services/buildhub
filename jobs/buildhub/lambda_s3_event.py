@@ -34,16 +34,17 @@ async def main(loop, event):
     kinto_client = kinto_http.Client(server_url=server_url, auth=kinto_auth,
                                      retry=NB_RETRY_REQUEST)
 
-    # Use event time as archive publication.
-    event_time = datetime.datetime.strptime(event['eventTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
-    event_time = event_time.strftime(utils.DATETIME_FORMAT)
-
     async with aiohttp.ClientSession(loop=loop) as session:
-        for record in event['Records']:
+        for event_record in event['Records']:
             records_to_create = []
 
-            key = record['s3']['object']['key']
-            filesize = record['s3']['object']['size']
+            # Use event time as archive publication.
+            event_time = datetime.datetime.strptime(event_record['eventTime'],
+                                                    '%Y-%m-%dT%H:%M:%S.%fZ')
+            event_time = event_time.strftime(utils.DATETIME_FORMAT)
+
+            key = event_record['s3']['object']['key']
+            filesize = event_record['s3']['object']['size']
             url = utils.ARCHIVE_URL + key
 
             try:
