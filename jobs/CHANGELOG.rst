@@ -3,7 +3,7 @@ Changelog
 
 This document describes changes between each past release.
 
-0.5.0 (unreleased)
+0.4.1 (2017-09-29)
 ------------------
 
 - Fix S3 event ``eventTime`` key error (fixes #253)
