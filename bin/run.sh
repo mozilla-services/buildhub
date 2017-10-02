@@ -27,7 +27,7 @@ case $1 in
     ;;
   lambda.zip)
     cd .venv/lib/python3.6/site-packages/
-    zip -r ../../../../lambda.zip *
+    zip -r /tmp/lambda.zip *
     ;;
   initialize-kinto)
     source .venv/bin/activate
