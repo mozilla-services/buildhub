@@ -27,9 +27,9 @@ docker-test:
 	docker run -it mozilla/buildhub test
 
 lambda.zip: docker-build
-	docker rm mozilla/buildhub || true
-	docker run --name mozilla/buildhub mozilla/buildhub lambda.zip
-	docker cp mozilla/buildhub:/app/lambda.zip .
+	docker rm mozilla-buildhub || true
+	docker run --name mozilla-buildhub mozilla/buildhub lambda.zip
+	docker cp mozilla-buildhub:/tmp/lambda.zip buildhub-lambda-`git describe`.zip
 
 upload-to-s3: lambda.zip
 	$(PYTHON) bin/upload_to_s3.py

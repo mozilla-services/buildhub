@@ -1,6 +1,8 @@
 .git
-lambda.zip
-.tox
+buildhub-lambda*.zip
 **/__pycache__
 *.pyc
 *.egg-info
+jobs/.cache
+jobs/.venv
+jobs/.tox
