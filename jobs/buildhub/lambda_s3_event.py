@@ -189,7 +189,7 @@ def lambda_handler(event, context):
     handler.setLevel(logging.ERROR)
     logger.addHandler(handler)
 
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_event_loop_policy().new_event_loop()
     print("Loop is", "closed" if loop.is_closed() else "OK")
 
     try:
