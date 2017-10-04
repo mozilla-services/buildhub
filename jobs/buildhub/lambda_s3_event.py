@@ -167,7 +167,7 @@ async def main(loop, event):
 
 def lambda_handler(event, context):
     # Log everything to stderr.
-    logger.addHandler(logging.StreamHandler())
+    logger.addHandler(logging.StreamHandler(stream=sys.stdout))
     logger.setLevel(logging.DEBUG)
 
     # Add Sentry (no-op if no configured).
