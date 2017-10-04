@@ -3,6 +3,7 @@ import datetime
 import logging
 import os
 import re
+import sys
 
 import aiohttp
 import kinto_http
@@ -46,6 +47,7 @@ async def main(loop, event):
             key = event_record['s3']['object']['key']
             filesize = event_record['s3']['object']['size']
             url = utils.ARCHIVE_URL + key
+            print("Event file", url)
 
             try:
                 product = key.split('/')[1]  # /pub/thunderbird/nightly/...
@@ -55,6 +57,11 @@ async def main(loop, event):
             if product not in utils.ALL_PRODUCTS:
                 logger.info('Skip product {}'.format(product))
                 continue
+
+            print("is_build_url={}, is_rc_build_metadata={}, is_nightly_build_metadata={}",
+                  utils.is_build_url(product, url),
+                  utils.is_rc_build_metadata(product, url),
+                  utils.is_nightly_build_metadata(product, url))
 
             # Release / Nightly / RC archive.
             if utils.is_build_url(product, url):
@@ -66,7 +73,9 @@ async def main(loop, event):
                 record['download']['date'] = event_time
 
                 # Fetch release metadata.
+                print("Scan candidates")
                 await scan_candidates(session, product)
+                print("Fetch record metadata")
                 metadata = await fetch_metadata(session, record)
                 # If JSON metadata not available, archive will be handled when JSON
                 # is delivered.
@@ -84,6 +93,7 @@ async def main(loop, event):
 
                 # pub/firefox/candidates/55.0b12-candidates/build1/mac/en-US/
                 # firefox-55.0b12.json
+                print("Fetch new metadata")
                 metadata = await fetch_json(session, url)
                 metadata['buildnumber'] = int(re.search('/build(\d+)/', url).group(1))
 
@@ -110,12 +120,14 @@ async def main(loop, event):
             elif utils.is_nightly_build_metadata(product, url):
                 logger.info('Processing {} nightly metadata: {}'.format(product, key))
 
+                print("Fetch new nightly metadata")
                 metadata = await fetch_json(session, url)
 
                 platform = metadata['moz_pkg_platform']
 
                 # Check if english version is here.
                 parent_url = re.sub('/[^/]+$', '/', url)
+                print("Fetch parent listing", parent_url)
                 _, files = await fetch_listing(session, parent_url)
                 for f in files:
                     if ('.' + platform + '.') not in f['name']:
@@ -134,6 +146,7 @@ async def main(loop, event):
                 l10n_folder_url = re.sub('-mozilla-central([^/]*)/([^/]+)$',
                                          '-mozilla-central\\1-l10n/',
                                          url)
+                print("Fetch l10n listing", l10n_folder_url)
                 try:
                     _, files = await fetch_listing(session, l10n_folder_url)
                 except ValueError:
@@ -154,6 +167,7 @@ async def main(loop, event):
             else:
                 logger.info('Ignored {}'.format(key))
 
+            print(len(records_to_create), "records to create.")
             for record in records_to_create:
                 # Check that fields values look OK.
                 utils.check_record(record)
@@ -176,6 +190,8 @@ def lambda_handler(event, context):
     logger.addHandler(handler)
 
     loop = asyncio.get_event_loop()
+    print("Loop is", "closed" if loop.is_closed() else "OK")
+
     try:
         loop.run_until_complete(main(loop, event))
     except:
