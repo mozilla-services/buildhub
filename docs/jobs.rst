@@ -60,6 +60,7 @@ Its configuration is read from environment variables:
 * ``BATCH_MAX_REQUESTS`` (default: taken from server)
 * ``TIMEOUT_SECONDS`` (default: ``300``)
 * ``INITIALIZE_SERVER`` (default: ``true``): whether to initialize the destination bucket/collection.
+* ``SENTRY_DSN`` (default: empty/disabled. Example: ``https://<key>:<secret>@sentry.io/buildhub``)
 
 To use this script as an Amazon Lambda function, use the entry point:
 
@@ -89,6 +90,7 @@ The lambda accepts the following configuration (from environment variables):
 * ``AUTH`` (default: ``user:pass``)
 * ``NB_RETRY_REQUEST`` (default: ``3``)
 * ``TIMEOUT_SECONDS`` (default: ``300``)
+* ``SENTRY_DSN`` (default: empty/disabled. Example: ``https://<key>:<secret>@sentry.io/buildhub``)
 
 
 Setup and configure Amazon Lambda
