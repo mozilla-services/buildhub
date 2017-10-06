@@ -3,6 +3,7 @@ import datetime
 import logging
 import os
 import re
+import sys
 
 import aiohttp
 import kinto_http
@@ -46,6 +47,7 @@ async def main(loop, event):
             key = event_record['s3']['object']['key']
             filesize = event_record['s3']['object']['size']
             url = utils.ARCHIVE_URL + key
+            logger.debug("Event file {}".format(url))
 
             try:
                 product = key.split('/')[1]  # /pub/thunderbird/nightly/...
@@ -67,6 +69,7 @@ async def main(loop, event):
 
                 # Fetch release metadata.
                 await scan_candidates(session, product)
+                logger.debug("Fetch record metadata")
                 metadata = await fetch_metadata(session, record)
                 # If JSON metadata not available, archive will be handled when JSON
                 # is delivered.
@@ -84,6 +87,7 @@ async def main(loop, event):
 
                 # pub/firefox/candidates/55.0b12-candidates/build1/mac/en-US/
                 # firefox-55.0b12.json
+                logger.debug("Fetch new metadata")
                 metadata = await fetch_json(session, url)
                 metadata['buildnumber'] = int(re.search('/build(\d+)/', url).group(1))
 
@@ -110,12 +114,14 @@ async def main(loop, event):
             elif utils.is_nightly_build_metadata(product, url):
                 logger.info('Processing {} nightly metadata: {}'.format(product, key))
 
+                logger.debug("Fetch new nightly metadata")
                 metadata = await fetch_json(session, url)
 
                 platform = metadata['moz_pkg_platform']
 
                 # Check if english version is here.
                 parent_url = re.sub('/[^/]+$', '/', url)
+                logger.debug("Fetch parent listing {}".format(parent_url))
                 _, files = await fetch_listing(session, parent_url)
                 for f in files:
                     if ('.' + platform + '.') not in f['name']:
@@ -134,6 +140,7 @@ async def main(loop, event):
                 l10n_folder_url = re.sub('-mozilla-central([^/]*)/([^/]+)$',
                                          '-mozilla-central\\1-l10n/',
                                          url)
+                logger.debug("Fetch l10n listing {}".format(l10n_folder_url))
                 try:
                     _, files = await fetch_listing(session, l10n_folder_url)
                 except ValueError:
@@ -154,6 +161,7 @@ async def main(loop, event):
             else:
                 logger.info('Ignored {}'.format(key))
 
+            logger.debug("{} records to create.".format(len(records_to_create)))
             for record in records_to_create:
                 # Check that fields values look OK.
                 utils.check_record(record)
@@ -167,7 +175,7 @@ async def main(loop, event):
 
 def lambda_handler(event, context):
     # Log everything to stderr.
-    logger.addHandler(logging.StreamHandler())
+    logger.addHandler(logging.StreamHandler(stream=sys.stdout))
     logger.setLevel(logging.DEBUG)
 
     # Add Sentry (no-op if no configured).
@@ -175,7 +183,8 @@ def lambda_handler(event, context):
     handler.setLevel(logging.ERROR)
     logger.addHandler(handler)
 
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+
     try:
         loop.run_until_complete(main(loop, event))
     except:
