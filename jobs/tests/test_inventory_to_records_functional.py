@@ -143,6 +143,25 @@ class CsvToRecordsTest(asynctest.TestCase):
             }
         }, {
             'data': {
+                'download': {'date': '2017-07-13T23:37:23Z',
+                    'mimetype': 'application/msdos-windows',
+                    'size': 37219504,
+                    'url': 'https://archive.mozilla.org/pub/firefox/candidates/'
+                           '55.0b9-candidates/build2/win64/zh-TW/Firefox '
+                           'Setup 55.0b9.exe'
+                },
+                'id': 'firefox_beta_55-0b9rc2_win64_zh-tw',
+                'source': {'product': 'firefox'},
+                'target': {
+                    'channel': 'beta',
+                    'locale': 'zh-TW',
+                    'os': 'win',
+                    'platform': 'win64',
+                    'version': '55.0b9rc2'
+                }
+            }
+        }, {
+            'data': {
                 'id': 'firefox_beta_55-0b9rc2_win64_zh-tw',
                 'download': {
                     'date': '2017-07-13T23:37:21Z',
@@ -212,6 +231,45 @@ class CsvToRecordsTest(asynctest.TestCase):
                     'date': '2017-06-12T22:40:34Z',
                     'host': 'x86_64-pc-mingw32',
                     'target': 'x86_64-pc-mingw32'
+                }
+            }
+        }, {
+            'data': {
+                'id': 'firefox_beta_51-0b11_macosx-eme-free_mr',
+                'build': {
+                    'as': '$(CC)',
+                     'cc': '/usr/local/bin/ccache '
+                           '/builds/slave/m-beta-m64-0000000000000000000/build/src/clang/bin/clang '
+                           '-arch x86_64 -std=gnu99',
+                     'cxx': '/usr/local/bin/ccache '
+                            '/builds/slave/m-beta-m64-0000000000000000000/build/src/clang/bin/clang++ '
+                            '-arch x86_64 -std=gnu++11',
+                     'date': '2017-01-03T03:11:19Z',
+                     'host': 'x86_64-apple-darwin11.2.0',
+                     'id': '20170103031119',
+                     'ld': 'ld',
+                     'number': 1,
+                     'target': 'x86_64-apple-darwin11.2.0'
+                },
+                'download': {
+                    'date': '2017-01-04T00:05:18Z',
+                    'mimetype': 'application/x-apple-diskimage',
+                    'size': 85984611,
+                    'url': 'https://archive.mozilla.org/pub/firefox/releases/51.0b11/mac-EME-free/'
+                           'mr/Firefox 51.0b11.dmg'
+                },
+                'source': {
+                    'product': 'firefox',
+                    'repository': 'https://hg.mozilla.org/releases/mozilla-beta',
+                    'revision': '0a17d39220700e742bf37a960967480b2f8159f1',
+                    'tree': 'releases/mozilla-beta'
+                },
+                'target': {
+                    'channel': 'beta',
+                    'locale': 'mr',
+                    'os': 'mac',
+                    'platform': 'macosx-eme-free',
+                    'version': '51.0b11'
                 }
             }
         }]
