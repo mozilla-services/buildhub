@@ -8,7 +8,7 @@ from buildhub.to_kinto import fetch_existing
 
 class CacheValueTest(unittest.TestCase):
     def setUp(self):
-        self.cache_file = os.path.join(tempfile.gettempdir(), "cache.dat")
+        self.cache_file = os.path.join(tempfile.gettempdir(), 'cache.dat')
 
     def tearDown(self):
         try:
@@ -18,13 +18,13 @@ class CacheValueTest(unittest.TestCase):
 
     def test_records_are_not_duplicated(self):
         mocked = mock.MagicMock()
-        mocked.session.server_url = "http://localhost:8888/v1"
+        mocked.session.server_url = 'http://localhost:8888/v1'
         # First, populate the cache.
-        mocked.get_records.return_value = [{"id": "a", "title": "a", "last_modified": 1}]
+        mocked.get_records.return_value = [{'id': 'a', 'title': 'a', 'last_modified': 1}]
         fetch_existing(mocked, self.cache_file)
 
-        mocked.get_records.return_value = [{"id": "a", "title": "b", "last_modified": 2}]
+        mocked.get_records.return_value = [{'id': 'a', 'title': 'b', 'last_modified': 2}]
         second = fetch_existing(mocked, self.cache_file)
 
         assert len(second) == 1
-        assert second[0]["title"] == "b"
+        assert second[0]['title'] == 'b'

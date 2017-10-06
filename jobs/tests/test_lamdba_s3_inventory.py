@@ -9,10 +9,10 @@ class ListManifest(asynctest.TestCase):
     def setUp(self):
         class FakePaginator:
             async def paginate(self, *args, **kwargs):
-                yield {"CommonPrefixes": [{"Prefix": "some-prefix/1/"}]}
-                yield {"CommonPrefixes": [{"Prefix": "some-prefix/2/"}]}
-                yield {"CommonPrefixes": [{"Prefix": "some-prefix/3/"},
-                                          {"Prefix": "some-prefix/data/"}]}
+                yield {'CommonPrefixes': [{'Prefix': 'some-prefix/1/'}]}
+                yield {'CommonPrefixes': [{'Prefix': 'some-prefix/2/'}]}
+                yield {'CommonPrefixes': [{'Prefix': 'some-prefix/3/'},
+                                          {'Prefix': 'some-prefix/data/'}]}
 
         class FakeStream:
             async def __aenter__(self):
@@ -29,16 +29,16 @@ class ListManifest(asynctest.TestCase):
                 return FakePaginator()
 
             async def get_object(self, Bucket, Key):
-                if Key.endswith("some-prefix/3/manifest.json"):
+                if Key.endswith('some-prefix/3/manifest.json'):
                     return {'Body': FakeStream()}
 
         self.client = FakeClient()
 
     async def test_return_keys_of_latest_manifest(self):
         results = []
-        async for r in list_manifest_entries(self.loop, self.client, "firefox"):
+        async for r in list_manifest_entries(self.loop, self.client, 'firefox'):
             results.append(r)
-        assert results == ["a/b", "c/d"]
+        assert results == ['a/b', 'c/d']
 
 
 class DownloadCSV(asynctest.TestCase):
@@ -47,7 +47,7 @@ class DownloadCSV(asynctest.TestCase):
             async def __aenter__(self):
                 self.content = [
                     # echo -n "1;2;3;4\n5;6" | gzip -cf | base64
-                    base64.b64decode("H4sIADPbllkAAzO0NrI2tjbhMrU2AwDZEJLXCwAAAA=="),
+                    base64.b64decode('H4sIADPbllkAAzO0NrI2tjbhMrU2AwDZEJLXCwAAAA=='),
                     None,
                 ]
                 return self
@@ -60,7 +60,7 @@ class DownloadCSV(asynctest.TestCase):
 
         class FakeClient:
             async def get_object(self, Bucket, Key):
-                if Key.endswith("public/key-1"):
+                if Key.endswith('public/key-1'):
                     return {'Body': FakeStream()}
 
         self.client = FakeClient()
@@ -68,7 +68,7 @@ class DownloadCSV(asynctest.TestCase):
     async def test_unzip_chunks(self):
 
         async def keys():
-            yield "key-1"
+            yield 'key-1'
 
         keys = keys()
         results = []

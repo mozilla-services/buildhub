@@ -24,7 +24,7 @@ BUCKET = 'net-mozaws-prod-delivery-inventory-us-east-1'
 FOLDER = 'public/inventories/net-mozaws-prod-delivery-{inventory}/delivery-{inventory}/'
 CHUNK_SIZE = 1024 * 256  # 256 KB
 
-INITIALIZE_SERVER = os.getenv("INITIALIZE_SERVER", "true").lower() == "true"
+INITIALIZE_SERVER = os.getenv('INITIALIZE_SERVER', 'true').lower() == 'true'
 
 # Optional Sentry with synchronuous client.
 SENTRY_DSN = os.getenv('SENTRY_DSN')
@@ -47,7 +47,7 @@ async def initialize_kinto(loop, kinto_client, bucket, collection):
     # Check that we push the records at the right place.
     if bucket not in config:
         raise ValueError(f"Bucket '{bucket}' not specified in `initialization.yml`.")
-    if collection not in config[bucket]["collections"]:
+    if collection not in config[bucket]['collections']:
         raise ValueError(f"Collection '{collection}' not specified in `initialization.yml`.")
 
     await initialize_server(async_client,
@@ -156,7 +156,7 @@ def lambda_handler(event=None, context=None):
     try:
         loop.run_until_complete(asyncio.gather(*futures))
     except:
-        logger.exception("Aborted.")
+        logger.exception('Aborted.')
         raise
     finally:
         loop.close()

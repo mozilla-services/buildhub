@@ -327,7 +327,7 @@ async def csv_to_records(loop, stdin):
                 # Scan the list of candidates metadata (no-op if already initialized).
                 await scan_candidates(session, product)
 
-                url = ARCHIVE_URL + object_key.replace("+", " ")
+                url = ARCHIVE_URL + object_key.replace('+', ' ')
 
                 if not is_build_url(product, url):
                     continue
