@@ -299,7 +299,9 @@ async def csv_to_records(loop, stdin):
         # Some old Linux versions (1.5b2) were published with installer.tar.gz.
         longer_first = sorted(entries, key=lambda e: len(e['Key']), reverse=True)
         deduplicate = {
-            e['Key'].replace('.installer.exe', '')
+            e['Key'].lower()
+                    .replace('+setup+', '-')
+                    .replace('.installer.exe', '')
                     .replace('.exe', '')
                     .replace('.installer.tar.gz', '')
                     .replace('.tar.gz', '')
