@@ -98,8 +98,8 @@ RECORDS = [
             "channel": "aurora"
         },
         "download": {
-            "url": "https://archive.mozilla.org/pub/devedition/releases/55.0b3/macosx/en-US/"
-            "firefox-55.0b3.dmg",
+            "url": "https://archive.mozilla.org/pub/devedition/releases/55.0b3/"
+                   "mac/en-US/Firefox%2055.0b3.dmg",
             "mimetype": "application/x-apple-diskimage"
         }
     },
@@ -240,6 +240,46 @@ RECORDS = [
         "download": {
             "url": "https://archive.mozilla.org/pub/firefox/releases/50.0.1/mac/ko/"
             "Firefox 50.0.1.dmg",
+            "mimetype": "application/x-apple-diskimage"
+        }
+    },
+
+    # Firefox MacOSX beta
+    {
+        "id": "firefox_beta_57-0b6_macosx_fr",
+        "source": {
+            "product": "firefox",
+        },
+        "target": {
+            "version": "57.0b6",
+            "platform": "macosx",
+            "os": "mac",
+            "locale": "fr",
+            "channel": "beta"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/firefox/releases/57.0b6/mac/"
+                   "fr/Firefox 57.0b6.dmg",
+            "mimetype": "application/x-apple-diskimage"
+        }
+    },
+
+    # Firefox MacOSX EME free
+    {
+        "id": "firefox_56-0_macosx-eme-free_br",
+        "source": {
+            "product": "firefox",
+        },
+        "target": {
+            "version": "56.0",
+            "platform": "macosx-eme-free",
+            "os": "mac",
+            "locale": "br",
+            "channel": "release"
+        },
+        "download": {
+            "url": "https://archive.mozilla.org/pub/firefox/releases/56.0/"
+                   "mac-EME-free/br/Firefox 56.0.dmg",
             "mimetype": "application/x-apple-diskimage"
         }
     },

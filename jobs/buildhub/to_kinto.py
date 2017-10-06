@@ -161,6 +161,7 @@ async def consume(loop, queue, executor, client, existing):
                         logger.debug('Skip unchanged record {}'.format(rid))
                         queue.task_done()
                         continue
+
                     # Add record to current batch, and wait for more.
                     batch.append(record)
 

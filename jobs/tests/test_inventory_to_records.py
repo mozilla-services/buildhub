@@ -200,7 +200,10 @@ class FetchReleaseMetadata(asynctest.TestCase):
         self.session = aiohttp.ClientSession(loop=self.loop)
         self.addCleanup(self.session.close)
 
-        inventory_to_records._candidates_build_folder["firefox"] = {"54.0": "build3/"}
+        inventory_to_records._candidates_build_folder["firefox"] = {
+            "54.0": "build3/",
+            "57.0b4": "build1/",
+        }
         self.record = {
             "source": {"product": "firefox"},
             "target": {"version": "54.0", "platform": "win64", "locale": "fr-FR"}
@@ -236,6 +239,32 @@ class FetchReleaseMetadata(asynctest.TestCase):
         assert received == {
             "buildid": "20170512",
             "buildnumber": 3,
+        }
+
+    async def test_fetch_release_metadata_mac(self):
+        record = {
+            "source": {"product": "firefox"},
+            "target": {"version": "57.0b4", "platform": "macosx", "locale": "fr-FR"}
+        }
+        archive_url = utils.ARCHIVE_URL + "pub/firefox/candidates/"
+        with aioresponses() as m:
+            candidate_folder = archive_url + "57.0b4-candidates/build1/mac/en-US/"
+            m.get(candidate_folder, payload={
+                "prefixes": [], "files": [
+                    {"name": "firefox-57.0b4.json"}
+                ]
+            })
+            m.get(candidate_folder + "firefox-57.0b4.json", payload={"buildid": "20170928180207"})
+            received = await inventory_to_records.fetch_release_metadata(self.session, record)
+            assert received == {
+                "buildid": "20170928180207",
+                "buildnumber": 1,
+            }
+        # Now cached, no need to mock HTTP responses.
+        received = await inventory_to_records.fetch_release_metadata(self.session, record)
+        assert received == {
+            "buildid": "20170928180207",
+            "buildnumber": 1,
         }
 
     async def test_fetch_release_metadata_failing(self):
