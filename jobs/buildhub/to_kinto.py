@@ -36,7 +36,7 @@ DEFAULT_COLLECTION = 'cid'
 NB_THREADS = 3
 NB_RETRY_REQUEST = 3
 WAIT_TIMEOUT = 5
-BATCH_MAX_REQUESTS = int(os.getenv("BATCH_MAX_REQUESTS", "9999"))
+BATCH_MAX_REQUESTS = int(os.getenv('BATCH_MAX_REQUESTS', '9999'))
 PREVIOUS_DUMP_FILENAME = '.records-{server}-{bucket}-{collection}.json'
 
 logger = logging.getLogger(__name__)
@@ -161,6 +161,7 @@ async def consume(loop, queue, executor, client, existing):
                         logger.debug('Skip unchanged record {}'.format(rid))
                         queue.task_done()
                         continue
+
                     # Add record to current batch, and wait for more.
                     batch.append(record)
 

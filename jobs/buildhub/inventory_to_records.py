@@ -223,8 +223,6 @@ async def fetch_release_metadata(session, record):
     platform = record['target']['platform']
     locale = 'en-US'
 
-    # Metadata for EME-free and sha1 repacks are the same as original release.
-    platform = re.sub('-(eme-free|sha1)', '', platform, flags=re.I)
     try:
         latest_build_folder = _candidates_build_folder[product][version]
     except KeyError:
@@ -232,6 +230,9 @@ async def fetch_release_metadata(session, record):
         return None
 
     build_number = int(latest_build_folder.strip('/')[-1])  # build3 -> 3
+
+    # Metadata for EME-free and sha1 repacks are the same as original release.
+    platform = re.sub('-(eme-free|sha1)', '', platform, flags=re.I)
 
     url = archive_url(product, version, platform, locale, candidate='/' + latest_build_folder)
 
@@ -298,7 +299,9 @@ async def csv_to_records(loop, stdin):
         # Some old Linux versions (1.5b2) were published with installer.tar.gz.
         longer_first = sorted(entries, key=lambda e: len(e['Key']), reverse=True)
         deduplicate = {
-            e['Key'].replace('.installer.exe', '')
+            e['Key'].lower()
+                    .replace('+setup+', '-')
+                    .replace('.installer.exe', '')
                     .replace('.exe', '')
                     .replace('.installer.tar.gz', '')
                     .replace('.tar.gz', '')
@@ -326,7 +329,7 @@ async def csv_to_records(loop, stdin):
                 # Scan the list of candidates metadata (no-op if already initialized).
                 await scan_candidates(session, product)
 
-                url = ARCHIVE_URL + object_key
+                url = ARCHIVE_URL + object_key.replace('+', ' ')
 
                 if not is_build_url(product, url):
                     continue

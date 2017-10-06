@@ -9,24 +9,24 @@ from buildhub import lambda_s3_event
 
 here = os.path.dirname(__file__)
 
-server = "http://localhost:8888/v1"
-bid = "build-hub"
-cid = "releases"
+server = 'http://localhost:8888/v1'
+bid = 'build-hub'
+cid = 'releases'
 
 
 class LambdaTest(unittest.TestCase):
     def setUp(self):
         filename = os.path.join(here, 'data', 's3-event-simple.json')
-        self.event = json.load(open(filename, "r"))
+        self.event = json.load(open(filename, 'r'))
 
     def test_load_into_kinto(self):
         lambda_s3_event.lambda_handler(self.event, None)
 
-        rid = "firefox_54-0_win64_fr"
+        rid = 'firefox_54-0_win64_fr'
 
         client = kinto_http.Client(server_url=server)
-        record = client.get_record(bucket=bid, collection=cid, id=rid)["data"]
-        record.pop("last_modified")
+        record = client.get_record(bucket=bid, collection=cid, id=rid)['data']
+        record.pop('last_modified')
         assert record == {
             'id': 'firefox_54-0_win64_fr',
             'source': {

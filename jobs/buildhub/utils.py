@@ -27,6 +27,9 @@ def archive_url(product, version=None, platform=None, locale=None, nightly=None,
     if platform is not None:
         platform = platform.replace('eme', 'EME')
 
+        if platform.startswith('macosx'):
+            platform = platform.replace('macosx', 'mac')
+
     url = ARCHIVE_URL + 'pub/' + product
     if nightly:
         url += '/nightly/' + nightly + '/'
@@ -303,8 +306,8 @@ def record_from_url(url):
         locale = url_parts[8]
         platform = url_parts[7]
 
-    if platform == 'mac':
-        platform = 'macosx'
+    if platform.startswith('mac'):
+        platform = platform.replace('mac', 'macosx')
 
     channel = guess_channel(url, version)
 

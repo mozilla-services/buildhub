@@ -179,7 +179,7 @@ def lambda_handler(event, context):
     try:
         loop.run_until_complete(main(loop, event))
     except:
-        logger.exception("Aborted.")
+        logger.exception('Aborted.')
         raise
     finally:
         loop.close()
