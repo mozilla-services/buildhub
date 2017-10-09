@@ -7,6 +7,8 @@ This document describes changes between each past release.
 ------------------
 
 - Fix Mac OS X metadata URLs (fixes #261)
+- Fix Mac and Windows metadata URLs from installers (fixes #269)
+- Fix beta and devedition medata URLs (#269)
 - Skip exe installers where version is missing from URL (fixes #263)
 - Fix Fennec metadata location (fixes #264)
 
