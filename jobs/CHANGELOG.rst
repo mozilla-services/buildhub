@@ -6,6 +6,7 @@ This document describes changes between each past release.
 0.5.0 (unreleased)
 ------------------
 
+- Fix handling of bad server response, like XML (fixes #259)
 - Fix Mac OS X metadata URLs (fixes #261)
 - Skip exe installers where version is missing from URL (fixes #263)
 - Fix Fennec metadata location (fixes #264)

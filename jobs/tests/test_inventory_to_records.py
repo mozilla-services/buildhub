@@ -241,6 +241,21 @@ class FetchReleaseMetadata(asynctest.TestCase):
             'buildnumber': 3,
         }
 
+    async def test_fetch_release_metadata_server_fails(self):
+        archive_url = utils.ARCHIVE_URL + 'pub/firefox/candidates/'
+        with aioresponses() as m:
+            candidate_folder = archive_url + '54.0-candidates/build3/win64/en-US/'
+            m.get(candidate_folder, payload={
+                'prefixes': [], 'files': [
+                    {'name': 'firefox-54.0.json'}
+                ]
+            })
+            headers = {'Content-Type': 'application/xml'}
+            m.get(candidate_folder + 'firefox-54.0.json', body='<pim><pooom/></pim>', headers=headers)
+
+            with self.assertRaises(ValueError):
+                await inventory_to_records.fetch_release_metadata(self.session, self.record)
+
     async def test_fetch_release_metadata_mac(self):
         record = {
             'source': {'product': 'firefox'},
