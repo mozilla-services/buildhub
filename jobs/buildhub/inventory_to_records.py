@@ -157,9 +157,12 @@ async def fetch_release_candidate_metadata(session, record):
     if rc_url in _rc_metadata:
         return _rc_metadata[rc_url]
 
+    product = record['source']['product']
+    if product == 'devedition':
+        product = 'firefox'
+    major_version = record['target']['version'].split('rc')[0]
     parts = rc_url.split('/')
-    parts[-1] = '{}-{}.json'.format(record['source']['product'],
-                                    record['target']['version'].split('rc')[0])
+    parts[-1] = '{}-{}.json'.format(product, major_version)
     metadata_url = '/'.join(parts)
     try:
         metadata = await fetch_json(session, metadata_url)
@@ -170,8 +173,7 @@ async def fetch_release_candidate_metadata(session, record):
         _rc_metadata[rc_url] = None  # Don't try it anymore.
         return None
 
-    # We already have the build number in the version (1.5rc3)
-    m = re.search('rc(\d+)', record['target']['version'])
+    m = re.search('/build(\d+)/', url)
     metadata['buildnumber'] = int(m.group(1))
 
     _rc_metadata[rc_url] = metadata

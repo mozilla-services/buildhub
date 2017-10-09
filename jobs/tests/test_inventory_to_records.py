@@ -218,6 +218,22 @@ class FetchRCMetadata(asynctest.TestCase):
                 })
             assert result == {'buildid': '20170512', 'buildnumber': 2}
 
+    async def test_fetch_rc_metadata_beta(self):
+        with aioresponses() as m:
+            m.get('http://server.org/pub/devedition/candidates/55.0b1-candidates/'
+                  'build5/win64/en-US/firefox-55.0b1.json',
+                  payload={'buildid': '20170512'})
+            result = await inventory_to_records.fetch_release_candidate_metadata(
+                self.session, {
+                    'download': {
+                        'url': 'http://server.org/pub/devedition/candidates/'
+                               '55.0b1-candidates/build5/win64/pt-BR/firefox-55.0b1.zip'
+                    },
+                    'target': {'version': '55.0b1'},
+                    'source': {'product': 'devedition'}
+                })
+            assert result == {'buildid': '20170512', 'buildnumber': 5}
+
     async def test_does_not_hit_server_if_already_known(self):
         url = 'http://server.org/54.0-candidates/build3/win64/en-US/firefox.en-US.win32.zip'
         metadata = {'a': 1, 'b': 2}
