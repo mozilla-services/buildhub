@@ -251,7 +251,8 @@ class FetchReleaseMetadata(asynctest.TestCase):
                 ]
             })
             headers = {'Content-Type': 'application/xml'}
-            m.get(candidate_folder + 'firefox-54.0.json', body='<pim><pooom/></pim>', headers=headers)
+            body = '<pim><pooom/></pim>'
+            m.get(candidate_folder + 'firefox-54.0.json', body=body, headers=headers)
 
             with self.assertRaises(ValueError):
                 await inventory_to_records.fetch_release_metadata(self.session, self.record)
