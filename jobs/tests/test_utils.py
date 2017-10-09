@@ -735,6 +735,8 @@ RELEASE_FILENAMES = [
                  'linux-x86_64/fr/firefox-50.0.tar.bz2')),
     ('mobile', 'pub/mobile/nightly/2017/08/2017-08-09-10-03-39-mozilla-central-'
                'android-api-15-l10n/fennec-57.0a1.hi-IN.android-arm.apk'),
+    ('firefox', 'pub/firefox/nightly/2017/08/2017-08-25-10-01-26-mozilla-central-'
+                'l10n/firefox-57.0a1.an.win32.installer.exe'),
 ]
 
 
@@ -750,8 +752,8 @@ WRONG_RELEASE_FILENAMES = [
     ('fennec', 'fennec-24.0b1.en-US.android-arm.crashreporter-symbols.zip'),
     ('firefox', 'Firefox Setup Stub 49.0.exe'),
     ('firefox', '/releases/sha1-installers/aurora/firefox-45.0a2.ja.win32.installer.exe'),
-    ('firefox', ('/candidates/51.0.1-candidates/build3/funnelcake99-testing/v1/win32/en-US/'
-                 'firefox-51.0.1.en-US.win32.installer.exe')),
+    ('firefox', '/candidates/51.0.1-candidates/build3/funnelcake99-testing/v1/win32/en-US/'
+                'firefox-51.0.1.en-US.win32.installer.exe'),
     ('firefox', 'firefox-56.0a1.en-US.win64.stylo-bindings.zip'),
     ('thunderbird', '/pub/thunderbird/releases/1.0rc/thunderbird-1.0rc-win32.zip'),
     ('thunderbird', '/pub/thunderbird/extensions/inspector/thunderbird-dominspector-0.9%2B.zip'),
@@ -761,6 +763,12 @@ WRONG_RELEASE_FILENAMES = [
     ('firefox', '/pub/firefox/releases/namoroka/alpha2/wince-arm/en-US/firefox-3.6a2.zip'),
     ('mobile', '/pub/mobile/releases/winmo/1.0a3/fennec-1.0a3.en-US.winmo-arm.zip'),
     ('mobile', '/pub/mobile/releases/wince/1.0a3/fennec-1.0a3.en-US.wince-arm.zip'),
+    ('firefox', '/pub/firefox/nightly/2017/08/2017-08-25-10-01-26-mozilla-central-l10n/'
+                'Firefox Installer.zh-TW.exe'),
+    ('firefox', '/pub/firefox/nightly/2017/08/2017-08-25-10-01-26-mozilla-central-l10n/'
+                'Firefox Installer.ast.exe'),
+    ('firefox', '/pub/firefox/nightly/2017/08/2017-08-25-10-01-26-mozilla-central-l10n/'
+                'Firefox Installer.fr.exe'),
 ]
 
 

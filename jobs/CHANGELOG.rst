@@ -7,6 +7,7 @@ This document describes changes between each past release.
 ------------------
 
 - Fix Mac OS X metadata URLs (fixes #261)
+- Skip exe installers where version is missing from URL (fixes #263)
 
 
 0.4.1 (2017-09-29)
