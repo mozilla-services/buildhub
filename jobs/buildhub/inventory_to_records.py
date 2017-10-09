@@ -6,6 +6,7 @@ import datetime
 import json
 import logging
 import os
+import pkg_resources
 import re
 import sys
 from collections import defaultdict
@@ -27,6 +28,9 @@ PRODUCTS = os.getenv('PRODUCTS', ' '.join(ALL_PRODUCTS)).split(' ')
 
 
 logger = logging.getLogger()  # root logger.
+
+# Module version, as defined in PEP-0396.
+__version__ = pkg_resources.get_distribution(__package__).version
 
 
 async def read_csv(input_generator):
@@ -309,6 +313,15 @@ async def csv_to_records(loop, stdin):
             for e in longer_first}
         return deduplicate.values()
 
+    # Read metadata of previous run, and warm up cache.
+    # Will save a lot of hits to archive.mozilla.org.
+    metadata_cache_file = '.metadata-{}.json'.format(__version__)
+    if os.path.exists(metadata_cache_file):
+        metadata = json.load(open(metadata_cache_file))
+        _rc_metadata.update(metadata['rc'])
+        _release_metadata.update(metadata['release'])
+        _nightly_metadata.update(metadata['nightly'])
+
     async with aiohttp.ClientSession(loop=loop) as session:
         batch = []
 
@@ -354,6 +367,16 @@ async def csv_to_records(loop, stdin):
 
         async for result in process_batch(session, batch):  # Last loop iteration.
             yield result
+
+    # Save accumulated metadata for next runs.
+    tmpfilename = metadata_cache_file + '.tmp'
+    metadata = {
+        'rc': _rc_metadata,
+        'release': _release_metadata,
+        'nightly': _nightly_metadata,
+    }
+    json.dump(metadata, open(tmpfilename, 'w'))
+    os.rename(tmpfilename, metadata_cache_file)
 
 
 async def main(loop):
