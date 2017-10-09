@@ -173,17 +173,50 @@ class FetchRCMetadata(asynctest.TestCase):
     async def test_fetch_rc_metadata(self):
         with aioresponses() as m:
             m.get('http://server.org/54.0-candidates/build3/'
-                  'win64/en-US/firefox.en-US.win32.json',
+                  'win64/en-US/firefox-54.0.json',
                   payload={'buildid': '20170512'})
             result = await inventory_to_records.fetch_release_candidate_metadata(
                 self.session, {
                     'download': {
                         'url': 'http://server.org/54.0-candidates/build3/'
-                               'win64/en-US/firefox.en-US.win32.zip'
+                               'win64/en-US/firefox-54.0.zip'
                     },
-                    'target': {'version': '1.0rc3'}
+                    'target': {'version': '54.0rc3'},
+                    'source': {'product': 'firefox'}
                 })
             assert result == {'buildid': '20170512', 'buildnumber': 3}
+
+    async def test_fetch_rc_metadata_mac(self):
+        with aioresponses() as m:
+            m.get('http://server.org/pub/firefox/candidates/54.0-candidates/'
+                  'build2/mac/en-US/firefox-54.0.json',
+                  payload={'buildid': '20170512'})
+            result = await inventory_to_records.fetch_release_candidate_metadata(
+                self.session, {
+                    'download': {
+                        'url': 'http://server.org/pub/firefox/candidates/54.0-'
+                               'candidates/build2/mac/de/Firefox%2054.0.dmg'
+                    },
+                    'target': {'version': '54.0rc2'},
+                    'source': {'product': 'firefox'}
+                })
+            assert result == {'buildid': '20170512', 'buildnumber': 2}
+
+    async def test_fetch_rc_metadata_win(self):
+        with aioresponses() as m:
+            m.get('http://server.org/pub/firefox/candidates/54.0-candidates/'
+                  'build2/win64/en-US/firefox-54.0.json',
+                  payload={'buildid': '20170512'})
+            result = await inventory_to_records.fetch_release_candidate_metadata(
+                self.session, {
+                    'download': {
+                        'url': 'http://server.org/pub/firefox/candidates/54.0-candidates/'
+                               'build2/win64/fr/Firefox%20Setup%2054.0.exe'
+                    },
+                    'target': {'version': '54.0rc2'},
+                    'source': {'product': 'firefox'}
+                })
+            assert result == {'buildid': '20170512', 'buildnumber': 2}
 
     async def test_does_not_hit_server_if_already_known(self):
         url = 'http://server.org/54.0-candidates/build3/win64/en-US/firefox.en-US.win32.zip'
@@ -285,11 +318,11 @@ class FetchReleaseMetadata(asynctest.TestCase):
         # /pub/firefox/candidates/54.0-candidates/build3/mac-EME-free/dsb/Firefox%2054.0.dmg
         record = {
             'source': {'product': 'firefox'},
-            'target': {'version': '54.0', 'platform': 'linux-x86_64-eme-free', 'locale': 'fr-FR'}
+            'target': {'version': '54.0', 'platform': 'mac-eme-free', 'locale': 'dsb'}
         }
         with aioresponses() as m:
             archive_url = utils.ARCHIVE_URL + 'pub/firefox/candidates/'
-            candidate_folder = archive_url + '54.0-candidates/build3/linux-x86_64/en-US/'
+            candidate_folder = archive_url + '54.0-candidates/build3/mac/en-US/'
             m.get(candidate_folder, payload={
                 'prefixes': [], 'files': [
                     {'name': 'firefox-54.0.json'}
