@@ -143,27 +143,18 @@ def is_build_url(product, url):
           firefox-37.0a1.en-US.debug-linux-x86_64-asan.tar.bz2
     - mobile/nightly/2017/08/2017-08-09-10-03-39-mozilla-central-android-api-15-l10n/
           fennec-57.0a1.hi-IN.android-arm.apk
+    - firefox/nightly/2017/08/2017-08-25-10-01-26-mozilla-central-l10n/Firefox Installer.fr.exe
     """
     if 'nightly' in url and 'mozilla-central' not in url:
         return False
 
     re_exclude = re.compile('.+(tinderbox|try-builds|partner-repacks|latest|contrib|/0\.|'
                             'experimental|namoroka|debug|sha1-installers|candidates/archived|'
-                            'stylo-bindings|/1.0rc/|/releases/win../|dominspector|/test/|testing)')
+                            'stylo-bindings|/1.0rc/|/releases/win../|dominspector|/test/|testing|'
+                            '\sInstaller\.(\w{2,3}\-?\w{0,3})\.exe)')
     if re_exclude.match(url):
         return False
-    """
-    Examples of build filenames:
 
-    - firefox-53.0.tar.bz2
-
-    And things we'll want to ignore:
-
-    - firefox-1.5.0.5.tar.gz.asc
-    - firefox-52.0.win32.sdk.zip
-    - Thunderbird 10.0.12esr.dmg
-    - Firefox Setup 17.0b3.exe
-    """
     if product == 'devedition':
         product = 'firefox'
     if product == 'mobile':
