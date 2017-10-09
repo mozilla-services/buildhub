@@ -164,10 +164,13 @@ async def fetch_release_candidate_metadata(session, record):
     product = record['source']['product']
     if product == 'devedition':
         product = 'firefox'
-    major_version = record['target']['version'].split('rc')[0]
-    parts = rc_url.split('/')
-    parts[-1] = '{}-{}.json'.format(product, major_version)
-    metadata_url = '/'.join(parts)
+    if product == 'fennec':
+        metadata_url = re.sub('\.({})$'.format(FILE_EXTENSIONS), '.json', rc_url)
+    else:
+        major_version = record['target']['version'].split('rc')[0]
+        parts = rc_url.split('/')
+        parts[-1] = '{}-{}.json'.format(product, major_version)
+        metadata_url = '/'.join(parts)
     try:
         metadata = await fetch_json(session, metadata_url)
     except aiohttp.ClientError as e:

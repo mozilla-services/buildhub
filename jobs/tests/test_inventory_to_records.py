@@ -218,6 +218,22 @@ class FetchRCMetadata(asynctest.TestCase):
                 })
             assert result == {'buildid': '20170512', 'buildnumber': 2}
 
+    async def test_fetch_rc_metadata_fennec(self):
+        with aioresponses() as m:
+            m.get('http://server.org/pub/mobile/candidates/49.0-candidates/build2/'
+                  'android-api-15/en-US/fennec-49.0.en-US.android-arm.json',
+                  payload={'buildid': '20170512'})
+            result = await inventory_to_records.fetch_release_candidate_metadata(
+                self.session, {
+                    'download': {
+                        'url': 'http://server.org/pub/mobile/candidates/49.0-candidates/'
+                               'build2/android-api-15/en-US/fennec-49.0.en-US.android-arm.apk'
+                    },
+                    'target': {'version': '49.0rc2'},
+                    'source': {'product': 'fennec'}
+                })
+            assert result == {'buildid': '20170512', 'buildnumber': 2}
+
     async def test_fetch_rc_metadata_beta(self):
         with aioresponses() as m:
             m.get('http://server.org/pub/devedition/candidates/55.0b1-candidates/'
