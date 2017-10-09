@@ -833,6 +833,12 @@ NIGHTLY_URLS = [
      'https://archive.mozilla.org/pub/mobile/nightly/2017/06/2017-06-01-10-02-05-'
      'mozilla-central-android-api-15/en-US/fennec-55.0a1.en-US.android-arm.apk'),
 
+    # Mobile nightly en-US iOS (!!)
+    ('https://archive.mozilla.org/pub/mobile/nightly/2011/02/2011-02-08-03-mozilla'
+     '-central-macosx/fennec-4.0b5pre.en-US.mac.dmg',
+     'https://archive.mozilla.org/pub/mobile/nightly/2011/02/2011-02-08-03-mozilla'
+     '-central-macosx/fennec-4.0b5pre.en-US.mac.dmg'),
+
     # Mobile i386 not localized
     ('https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-05-30-10-01-27-'
      'mozilla-central-android-x86/fennec-55.0a1.multi.android-i386.apk',
@@ -885,7 +891,12 @@ RC_URLS = [
     ('https://archive.mozilla.org/pub/firefox/candidates/52.0.2-candidates/build1/'
      'linux-x86_64-EME-free/cak/firefox-52.0.2.tar.bz2',
      'https://archive.mozilla.org/pub/firefox/candidates/52.0.2-candidates/build1/'
-     'linux-x86_64/en-US/firefox-52.0.2.tar.bz2')
+     'linux-x86_64/en-US/firefox-52.0.2.tar.bz2'),
+    # Mobile RC
+    ('https://archive.mozilla.org/pub/mobile/candidates/49.0.2-candidates/build1/'
+     'android-api-15/sk/fennec-49.0.2.sk.android-arm.apk',
+     'https://archive.mozilla.org/pub/mobile/candidates/49.0.2-candidates/build1/'
+     'android-api-15/en-US/fennec-49.0.2.en-US.android-arm.apk'),
 ]
 
 

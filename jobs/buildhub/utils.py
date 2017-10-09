@@ -61,7 +61,9 @@ def localize_nightly_url(nightly_url):
     index = -3
     if 'tar' in nightly_url:
         index = -4
-    if '/mobile/' in nightly_url and '/en-US/' not in nightly_url:
+    if ('/mobile/' in nightly_url
+       and '/en-US/' not in nightly_url
+       and 'macosx' not in nightly_url):
         locale = 'multi'
     parts[index] = locale
     return '.'.join(parts)
@@ -69,8 +71,8 @@ def localize_nightly_url(nightly_url):
 
 def localize_release_candidate_url(rc_url):
     tokens = rc_url.split('/')
-    tokens[-2] = 'en-US'
-    us_url = '/'.join(tokens)
+    lang = tokens[-2]
+    us_url = rc_url.replace(lang, 'en-US')
     return us_url.replace('-EME-free', '')
 
 

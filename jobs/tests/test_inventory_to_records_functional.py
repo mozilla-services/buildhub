@@ -253,4 +253,32 @@ class CsvToRecordsTest(asynctest.TestCase):
                     'version': '51.0b11'
                 }
             }
+        }, {
+            'data': {
+                'download': {
+                    'date': '2015-10-16T23:25:18Z',
+                    'mimetype': 'application/x-apple-diskimage',
+                    'size': 18694173,
+                    'url': 'https://archive.mozilla.org/pub/mobile/nightly/2011/01/'
+                           '2011-01-27-03-mozilla-central-macosx/fennec-4.0b5pre.en-US.mac.dmg'
+                },
+                'id': 'fennec_nightly_2011-01-27-03-mozilla-central_4-0b5pre_macosx_en-us',
+                'source': {
+                    'product': 'fennec',
+                    'repository': 'http://hg.mozilla.org/mozilla-central',
+                    'revision': 'b5314bc1a926',
+                    'tree': 'mozilla-central',
+                },
+                'build': {
+                    'date': '2011-01-27T03:25:41Z',
+                    'id': '20110127032541'
+                },
+                'target': {
+                    'channel': 'nightly',
+                    'locale': 'en-US',
+                    'os': 'mac',
+                    'platform': 'macosx',
+                    'version': '4.0b5pre'
+                }
+            }
         }]
