@@ -897,6 +897,10 @@ RC_URLS = [
      'android-api-15/sk/fennec-49.0.2.sk.android-arm.apk',
      'https://archive.mozilla.org/pub/mobile/candidates/49.0.2-candidates/build1/'
      'android-api-15/en-US/fennec-49.0.2.en-US.android-arm.apk'),
+    ('https://archive.mozilla.org/pub/mobile/candidates/49.0-candidates/build2/'
+     'android-api-15/ar/fennec-49.0.ar.android-arm.apk',
+     'https://archive.mozilla.org/pub/mobile/candidates/49.0-candidates/build2/'
+     'android-api-15/en-US/fennec-49.0.en-US.android-arm.apk'),
 ]
 
 
