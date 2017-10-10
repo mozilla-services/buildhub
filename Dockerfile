@@ -10,6 +10,9 @@ RUN \
 COPY . /app
 WORKDIR /app
 
+RUN mkdir /app/cache
+ENV CACHE_FOLDER /app/cache
+
 RUN \
     make virtualenv && \
     .venv/bin/pip install jobs/ && \

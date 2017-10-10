@@ -7,8 +7,7 @@ This document describes changes between each past release.
 0.7.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Add ability to configure cache folder via environment variable ``CACHE_FOLDER``
 
 0.6.0 (2017-10-10)
 ------------------
