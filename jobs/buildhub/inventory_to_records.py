@@ -256,10 +256,14 @@ async def fetch_release_metadata(session, record):
     for f in files:
         filename = f['name']
         if is_release_build_metadata(product, version, filename):
-            metadata = await fetch_json(session, url + filename)
-            metadata['buildnumber'] = build_number
-            _release_metadata[url] = metadata
-            return metadata
+            try:
+                metadata = await fetch_json(session, url + filename)
+                metadata['buildnumber'] = build_number
+                _release_metadata[url] = metadata
+                return metadata
+            except aiohttp.ClientError as e:
+                # Sometimes, some XML comes out \o/ (see #259)
+                pass
 
     # Version exists in candidates but has no metadata!
     _release_metadata[url] = None  # Don't try it anymore.
