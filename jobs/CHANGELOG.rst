@@ -3,7 +3,7 @@ Changelog
 
 This document describes changes between each past release.
 
-0.5.0 (unreleased)
+0.5.0 (2017-10-10)
 ------------------
 
 - Skip incomplete records ­- ie. without build id
