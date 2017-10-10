@@ -10,9 +10,6 @@ RUN \
 COPY . /app
 WORKDIR /app
 
-RUN mkdir /app/cache
-ENV CACHE_FOLDER /app/cache
-
 RUN \
     make virtualenv && \
     .venv/bin/pip install jobs/ && \
@@ -20,6 +17,13 @@ RUN \
 
 RUN groupadd -g 10001 app && \
     useradd -M -u 10001 -g 10001 -G app -d /app -s /sbin/nologin app
+
+RUN \
+    mkdir /app/cache && \
+    chgrp app /app/cache && \
+    chmod g+w /app/cache
+
+ENV CACHE_FOLDER /app/cache
 
 ENTRYPOINT ["/bin/bash", "/app/bin/run.sh"]
 
