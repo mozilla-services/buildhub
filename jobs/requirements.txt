@@ -1,6 +1,6 @@
 aiobotocore==0.4.5
 aiohttp==2.2.5
-async-timeout==1.4.0
+async-timeout==2.0.0
 backoff==1.4.3
 botocore==1.7.5
 certifi==2017.7.27.1
@@ -9,7 +9,7 @@ docutils==0.14
 idna==2.6
 jmespath==0.9.3
 kinto-http==9.0.1
-kinto-wizard==2.2.0
+kinto-wizard==2.3.0
 multidict==3.2.0
 packaging==16.8
 pyparsing==2.2.0
@@ -21,4 +21,4 @@ six==1.11.0
 Unidecode==0.4.21
 urllib3==1.22
 wrapt==1.10.11
-yarl==0.12.0
+yarl==0.13.0
