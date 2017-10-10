@@ -4,7 +4,7 @@ Changelog
 This document describes changes between each past release.
 
 
-0.6.0 (unreleased)
+0.6.0 (2017-10-10)
 ------------------
 
 - Add support for SNS events (#281)
