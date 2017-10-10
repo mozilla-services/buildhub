@@ -137,7 +137,7 @@ async def main(loop, inventory):
     async with session.create_client('s3', region_name=REGION_NAME, config=boto_config) as client:
         keys_stream = list_manifest_entries(loop, client, inventory)
         csv_stream = download_csv(loop, client, keys_stream)
-        records_stream = csv_to_records(loop, csv_stream)
+        records_stream = csv_to_records(loop, csv_stream, skip_incomplete=True)
         await to_kinto(loop, records_stream, kinto_client, skip_existing=True)
 
 

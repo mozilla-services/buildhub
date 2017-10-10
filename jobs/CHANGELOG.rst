@@ -6,6 +6,7 @@ This document describes changes between each past release.
 0.5.0 (unreleased)
 ------------------
 
+- Skip incomplete records ­- ie. without build id
 - Fix Mac OS X metadata URLs (fixes #261)
 - Fix Mac and Windows metadata URLs from installers (fixes #269)
 - Fix beta and devedition medata URLs (#269)

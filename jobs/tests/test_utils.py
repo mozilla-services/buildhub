@@ -634,9 +634,15 @@ def test_build_record_id(record):
     assert record_id == record['id']
 
 
-@pytest.mark.parametrize('record', RECORDS)
+@pytest.mark.parametrize('record', [r for r in RECORDS if 'build' in r])
 def test_check_record(record):
     check_record(record)  # not raising.
+
+
+@pytest.mark.parametrize('record', [r for r in RECORDS if 'build' not in r])
+def test_check_record_raising(record):
+    with pytest.raises(ValueError):
+        check_record(record)
 
 
 RELEASE_METADATA_FILENAMES = [

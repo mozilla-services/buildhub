@@ -44,7 +44,7 @@ class CsvToRecordsTest(asynctest.TestCase):
 
         output = sys.stdout.getvalue()
         records = [json.loads(o) for o in output.split('\n') if o]
-        assert records == [{
+        expected = [{
             'data': {
                 'id': 'firefox_nightly_2017-05-15-10-02-38_55-0a1_linux-x86_64_en-us',
                 'build': {
@@ -118,27 +118,6 @@ class CsvToRecordsTest(asynctest.TestCase):
                     'mimetype': 'application/x-bzip2',
                     'size': 60000,
                     'date': '2017-06-02T15:20:10Z'
-                }
-            }
-        }, {
-            'data': {
-                'id': 'firefox_beta_1-5b2_linux-i686_en-us',
-                'download': {
-                    'date': '2015-10-09T15:20:10Z',
-                    'mimetype': 'application/x-gzip',
-                    'size': 60000,
-                    'url': ('https://archive.mozilla.org/pub/firefox/releases/1.5b2/'
-                            'linux-i686/en-US/firefox-1.5b2.tar.gz')
-                },
-                'source': {
-                    'product': 'firefox'
-                },
-                'target': {
-                    'channel': 'beta',
-                    'locale': 'en-US',
-                    'platform': 'linux-i686',
-                    'os': 'linux',
-                    'version': '1.5b2'
                 }
             }
         }, {
@@ -282,3 +261,6 @@ class CsvToRecordsTest(asynctest.TestCase):
                 }
             }
         }]
+
+        assert [r['data']['id'] for r in records] == [r['data']['id'] for r in expected]
+        assert records == expected
