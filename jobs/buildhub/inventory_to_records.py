@@ -252,14 +252,24 @@ async def fetch_release_metadata(session, record):
     if url in _release_metadata:
         return _release_metadata[url]
 
-    _, files = await fetch_listing(session, url)
+    try:
+        _, files = await fetch_listing(session, url)
+    except ValueError:
+        # Some partial update don't have metadata. eg. /47.0.1-candidates/
+        _release_metadata[url] = None
+        return None
+
     for f in files:
         filename = f['name']
         if is_release_build_metadata(product, version, filename):
-            metadata = await fetch_json(session, url + filename)
-            metadata['buildnumber'] = build_number
-            _release_metadata[url] = metadata
-            return metadata
+            try:
+                metadata = await fetch_json(session, url + filename)
+                metadata['buildnumber'] = build_number
+                _release_metadata[url] = metadata
+                return metadata
+            except aiohttp.ClientError as e:
+                # Sometimes, some XML comes out \o/ (see #259)
+                pass
 
     # Version exists in candidates but has no metadata!
     _release_metadata[url] = None  # Don't try it anymore.
