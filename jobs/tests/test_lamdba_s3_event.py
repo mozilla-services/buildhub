@@ -1,3 +1,4 @@
+import json
 from unittest import mock
 
 import asynctest
@@ -18,6 +19,28 @@ def fake_event(key):
                 }
             }
         }]
+    }
+
+
+def fake_sns_routed_event(key):
+    return {
+        'Records': [{
+            'EventSource': 'aws:sns',
+            'Sns': {
+                'Message': json.dumps({
+                    'Records': [{
+                        'eventTime': '2017-10-10T15:27:32.300Z',
+                        's3': {
+                            'bucket': {'name': 'abc'},
+                            'object': {
+                                'key': key,
+                                'size': 953
+                            }
+                        }
+                    }]
+                    })
+                }
+            }]
     }
 
 
@@ -308,6 +331,11 @@ class FromArchiveFirefox(BaseTest):
                 },
             },
             if_not_exists=True)
+
+    async def test_from_sns_event(self):
+        event = fake_sns_routed_event('pub/firefox/releases/55.0/mac/ar/Firefox 55.0.dmg')
+        await lambda_s3_event.main(self.loop, event)
+        assert not self.mock_create_record.called
 
 
 class FromRCMetadataFirefox(BaseTest):

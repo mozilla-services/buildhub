@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import json
 import logging
 import os
 import re
@@ -35,8 +36,15 @@ async def main(loop, event):
     kinto_client = kinto_http.Client(server_url=server_url, auth=kinto_auth,
                                      retry=NB_RETRY_REQUEST)
 
+    records = []
+    for record in event['Records']:
+        if record.get('EventSource') == 'aws:sns':
+            records.extend(json.loads(record['Sns']['Message'])['Records'])
+        else:
+            records.append(record)
+
     async with aiohttp.ClientSession(loop=loop) as session:
-        for event_record in event['Records']:
+        for event_record in records:
             records_to_create = []
 
             # Use event time as archive publication.
