@@ -25,7 +25,7 @@ NB_PARALLEL_REQUESTS = int(os.getenv('NB_PARALLEL_REQUESTS', 8))
 NB_RETRY_REQUEST = int(os.getenv('NB_RETRY_REQUEST', 3))
 TIMEOUT_SECONDS = int(os.getenv('TIMEOUT_SECONDS', 5 * 60))
 PRODUCTS = os.getenv('PRODUCTS', ' '.join(ALL_PRODUCTS)).split(' ')
-
+CACHE_FOLDER = os.getenv('CACHE_FOLDER', '.')
 
 logger = logging.getLogger()  # root logger.
 
@@ -336,7 +336,7 @@ async def csv_to_records(loop, stdin, skip_incomplete=True):
 
     # Read metadata of previous run, and warm up cache.
     # Will save a lot of hits to archive.mozilla.org.
-    metadata_cache_file = '.metadata-{}.json'.format(__version__)
+    metadata_cache_file = os.path.join(CACHE_FOLDER, '.metadata-{}.json'.format(__version__))
     if os.path.exists(metadata_cache_file):
         metadata = json.load(open(metadata_cache_file))
         _rc_metadata.update(metadata['rc'])
