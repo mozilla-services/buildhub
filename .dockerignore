@@ -6,3 +6,4 @@ buildhub-lambda*.zip
 jobs/.cache
 jobs/.venv
 jobs/.tox
+ui/

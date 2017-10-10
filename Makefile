@@ -31,7 +31,7 @@ lambda.zip: docker-build
 	docker run --name mozilla-buildhub mozilla/buildhub lambda.zip
 	docker cp mozilla-buildhub:/tmp/lambda.zip buildhub-lambda-`git describe`.zip
 
-upload-to-s3: lambda.zip
+upload-to-s3:
 	$(PYTHON) bin/upload_to_s3.py
 
 install-docs: $(DOC_STAMP)
