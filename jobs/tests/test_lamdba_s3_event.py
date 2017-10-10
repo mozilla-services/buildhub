@@ -28,13 +28,13 @@ def fake_sns_routed_event(key):
             'EventSource': 'aws:sns',
             'Sns': {
                 'Message': json.dumps({
-                    "Records": [{
-                        "eventTime": "2017-10-10T15:27:32.300Z",
-                        "s3": {
-                            "bucket": {"name": "abc"},
-                            "object": {
-                                "key": key,
-                                "size": 953
+                    'Records': [{
+                        'eventTime': '2017-10-10T15:27:32.300Z',
+                        's3': {
+                            'bucket': {'name': 'abc'},
+                            'object': {
+                                'key': key,
+                                'size': 953
                             }
                         }
                     }]
