@@ -601,7 +601,17 @@ class CSVToRecords(asynctest.TestCase):
                     'version': '51.0'
                 }
             }
-        }, {
+        }]
+
+    async def test_csv_to_records_keep_incomplete(self):
+        output = inventory_to_records.csv_to_records(self.loop, self.stdin,
+                                                     skip_incomplete=False)
+        records = []
+        async for r in output:
+            records.append(r)
+
+        assert len(records) == 2
+        assert records[1] == {
             'data': {
                 'id': 'firefox_nightly_2017-06-16-03-02-07_56-0a1_win32_ach',
                 'download': {
@@ -623,4 +633,4 @@ class CSVToRecords(asynctest.TestCase):
                     'version': '56.0a1'
                 }
             }
-        }]
+        }

@@ -6,13 +6,14 @@ This document describes changes between each past release.
 0.5.0 (unreleased)
 ------------------
 
-- Fix handling of bad server response, like XML (fixes #259)
+- Skip incomplete records ­- ie. without build id
 - Fix Mac OS X metadata URLs (fixes #261)
 - Fix Mac and Windows metadata URLs from installers (fixes #269)
 - Fix beta and devedition medata URLs (#269)
 - Skip exe installers where version is missing from URL (fixes #263)
 - Fix Fennec metadata location (fixes #264)
 - Fix caching when partial updates metadata is missing (fixes #276)
+- Fix handling of bad server response, like XML (fixes #259)
 
 
 0.4.1 (2017-09-29)

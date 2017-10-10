@@ -276,7 +276,7 @@ async def fetch_release_metadata(session, record):
     raise ValueError('Missing metadata for candidate {}'.format(url))
 
 
-async def process_batch(session, batch):
+async def process_batch(session, batch, skip_incomplete):
     # Parallel fetch of metadata for each item of the batch.
     logger.info('Fetch metadata for {} releases...'.format(len(batch)))
     futures = [fetch_metadata(session, record) for record in batch]
@@ -287,11 +287,14 @@ async def process_batch(session, batch):
         try:
             check_record(result)
         except ValueError as e:
-            logger.warning(e)
+            # Keep only results where metadata was found.
+            if skip_incomplete:
+                logger.warning(e)
+                continue
         yield {'data': result}
 
 
-async def csv_to_records(loop, stdin):
+async def csv_to_records(loop, stdin, skip_incomplete=True):
     """
     :rtype: async generator of records (dict-like)
     """
@@ -378,12 +381,13 @@ async def csv_to_records(loop, stdin):
                 if len(batch) < NB_PARALLEL_REQUESTS:
                     batch.append(record)
                 else:
-                    async for result in process_batch(session, batch):
+                    async for result in process_batch(session, batch, skip_incomplete):
                         yield result
 
                     batch = []  # Go on.
 
-        async for result in process_batch(session, batch):  # Last loop iteration.
+        # Last loop iteration.
+        async for result in process_batch(session, batch, skip_incomplete):
             yield result
 
     # Save accumulated metadata for next runs.

@@ -334,6 +334,8 @@ def record_from_url(url):
 
 def check_record(record):
     """Quick sanity check on record."""
+    if 'id' not in record.get('build', {}):
+        raise ValueError("Missing build id in {}".format(record))
     channel = record['target']['channel']
     if not re.match(r"^(release|aurora|beta|esr|nightly)(-old-id)?$", channel):
         raise ValueError("Suspicious channel '{}': {}".format(channel, record))
