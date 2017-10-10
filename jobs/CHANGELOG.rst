@@ -11,6 +11,7 @@ This document describes changes between each past release.
 - Fix beta and devedition medata URLs (#269)
 - Skip exe installers where version is missing from URL (fixes #263)
 - Fix Fennec metadata location (fixes #264)
+- Fix caching when partial updates metadata is missing (fixes #276)
 
 
 0.4.1 (2017-09-29)
