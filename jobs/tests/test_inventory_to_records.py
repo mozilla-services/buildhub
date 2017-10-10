@@ -268,6 +268,7 @@ class FetchReleaseMetadata(asynctest.TestCase):
         inventory_to_records._candidates_build_folder['firefox'] = {
             '54.0': 'build3/',
             '57.0b4': 'build1/',
+            '47.0.1': 'build1/',
         }
         self.record = {
             'source': {'product': 'firefox'},
@@ -284,27 +285,34 @@ class FetchReleaseMetadata(asynctest.TestCase):
             'target': {'version': '1.0', 'platform': 'p'}})
         assert result is None
 
-    async def test_fetch_release_metadata(self):
+    async def test_fetch_release_metadata_update_release(self):
+        result = await inventory_to_records.fetch_release_metadata(self.session, {
+            'source': {'product': 'firefox'},
+            'target': {'version': '1.0', 'platform': 'p'}})
+        assert result is None
+
+    async def test_fetch_release_metadata_for_partial_update(self):
+        record = {
+            'source': {'product': 'firefox'},
+            'target': {'version': '47.0.1', 'platform': 'win64'}
+        }
         archive_url = utils.ARCHIVE_URL + 'pub/firefox/candidates/'
         with aioresponses() as m:
-            candidate_folder = archive_url + '54.0-candidates/build3/win64/en-US/'
-            m.get(candidate_folder, payload={
-                'prefixes': [], 'files': [
-                    {'name': 'firefox-54.0.json'}
+            build_folder = archive_url + '47.0.1-candidates/build1/'
+            m.get(build_folder, payload={
+                'prefixes': [
+                    'update/'
+                ],
+                'files': [
+                    {'name': 'KEY'},
+                    {'name': 'SHA512SUMS'},
                 ]
             })
-            m.get(candidate_folder + 'firefox-54.0.json', payload={'buildid': '20170512'})
-            received = await inventory_to_records.fetch_release_metadata(self.session, self.record)
-            assert received == {
-                'buildid': '20170512',
-                'buildnumber': 3,
-            }
+            received = await inventory_to_records.fetch_release_metadata(self.session, record)
+            assert received is None
         # Now cached, no need to mock HTTP responses.
-        received = await inventory_to_records.fetch_release_metadata(self.session, self.record)
-        assert received == {
-            'buildid': '20170512',
-            'buildnumber': 3,
-        }
+        received = await inventory_to_records.fetch_release_metadata(self.session, record)
+        assert received is None
 
     async def test_fetch_release_metadata_server_fails(self):
         archive_url = utils.ARCHIVE_URL + 'pub/firefox/candidates/'

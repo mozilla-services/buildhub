@@ -252,7 +252,13 @@ async def fetch_release_metadata(session, record):
     if url in _release_metadata:
         return _release_metadata[url]
 
-    _, files = await fetch_listing(session, url)
+    try:
+        _, files = await fetch_listing(session, url)
+    except ValueError:
+        # Some partial update don't have metadata. eg. /47.0.1-candidates/
+        _release_metadata[url] = None
+        return None
+
     for f in files:
         filename = f['name']
         if is_release_build_metadata(product, version, filename):
