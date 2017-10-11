@@ -826,6 +826,7 @@ WRONG_RELEASE_FILENAMES = [
                 'Firefox Installer.ast.exe'),
     ('firefox', '/pub/firefox/nightly/2017/08/2017-08-25-10-01-26-mozilla-central-l10n/'
                 'Firefox Installer.fr.exe'),
+    ('firefox', '/pub/firefox/releases/1.0rc1/Firefox%20Setup %281.0rc1, ca-AD%29.exe'),
 ]
 
 
