@@ -285,6 +285,11 @@ def record_from_url(url):
         version = '{}rc{}'.format(version, candidate_number)
         platform = url_parts[8]
         locale = url_parts[9]
+        if 'funnelcake' in platform:
+            # 49.0.1-candidates/build3/funnelcake90/win32/en-US/Firefox Setup 49.0.1.exe
+            version = '{}-{}'.format(version, platform)
+            platform = url_parts[9]
+            locale = url_parts[10]
 
     # Old release url
     elif len(url_parts) < 9:
@@ -292,6 +297,12 @@ def record_from_url(url):
         version = '{}.{}'.format(major_version, filename_parts[1])
         locale = filename_parts[2]
         platform = filename_parts[3]
+
+    # Some funnelcakes
+    elif 'funnelcake' in url and len(url_parts) == 11:
+        version = url_parts[6]
+        locale = url_parts[9]
+        platform = url_parts[8]
 
     # Beta, Release or ESR URL
     # https://archive.mozilla.org/pub/firefox/releases/52.0b6/linux-x86_64/en-US/
