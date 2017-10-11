@@ -8,6 +8,7 @@ This document describes changes between each past release.
 ------------------
 
 - Add ability to configure cache folder via environment variable ``CACHE_FOLDER``
+- Skip very old RC release with parenthesis in filenames (fixes #288)
 
 0.6.0 (2017-10-10)
 ------------------
