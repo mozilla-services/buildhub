@@ -302,6 +302,57 @@ RECORDS = [
                     '22.0-funnelcake23/linux-i686/id/firefox-22.0.tar.bz2'),
             'mimetype': 'application/x-bzip2',
         }
+    }, {
+        'id': 'firefox_56-0-1-funnelcake131_win64_en-us',
+        'source': {
+            'product': 'firefox'
+        },
+        'target': {
+            'locale': 'en-US',
+            'version': '56.0.1-funnelcake131',
+            'platform': 'win64',
+            'os': 'win',
+            'channel': 'release'
+        },
+        'download': {
+            'url': ('https://archive.mozilla.org/pub/firefox/releases/'
+                    '56.0.1-funnelcake131/v1/win64/en-US/Firefox Setup 56.0.1.exe'),
+            'mimetype': 'application/msdos-windows',
+        }
+    }, {
+        'id': 'firefox_46-0-1-funnelcake84_win32_en-us',
+        'source': {
+            'product': 'firefox'
+        },
+        'target': {
+            'locale': 'en-US',
+            'version': '46.0.1-funnelcake84',
+            'platform': 'win32',
+            'os': 'win',
+            'channel': 'release'
+        },
+        'download': {
+            'url': ('https://archive.mozilla.org/pub/firefox/releases/'
+                    '46.0.1-funnelcake84/funnelcake84/win32/en-US/Firefox Setup 46.0.1.exe'),
+            'mimetype': 'application/msdos-windows',
+        }
+    }, {
+        'id': 'firefox_49-0-1rc3-funnelcake90_win32_en-us',
+        'source': {
+            'product': 'firefox'
+        },
+        'target': {
+            'locale': 'en-US',
+            'version': '49.0.1rc3-funnelcake90',
+            'platform': 'win32',
+            'os': 'win',
+            'channel': 'release'
+        },
+        'download': {
+            'url': ('https://archive.mozilla.org/pub/firefox/candidates/'
+                    '49.0.1-candidates/build3/funnelcake90/win32/en-US/Firefox Setup 49.0.1.exe'),
+            'mimetype': 'application/msdos-windows',
+        }
     },
 
     # Firefox real version (?)

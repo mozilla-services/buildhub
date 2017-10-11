@@ -8,6 +8,7 @@ This document describes changes between each past release.
 ------------------
 
 - Add ability to configure cache folder via environment variable ``CACHE_FOLDER``
+- Fix support of some funnelcake archives (fixes #287)
 
 0.6.0 (2017-10-10)
 ------------------
