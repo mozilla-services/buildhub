@@ -636,11 +636,13 @@ class CSVToRecords(asynctest.TestCase):
             }
         }
 
-    @mock.patch('buildhub.utils.guess_mimetype',
-                side_effect=[{}, ValueError, {}])
-    async def test_csv_to_records_continues_on_error(self, mock):
-        output = inventory_to_records.csv_to_records(self.loop, stdin)
-        records = []
-        async for r in output:
-            records.append(r)
-        assert records == [{}, {}]
+    async def test_csv_to_records_continues_on_error(self):
+        with mock.patch('buildhub.utils.guess_mimetype',
+                        side_effect=(ValueError, 'application/zip')):
+            output = inventory_to_records.csv_to_records(self.loop, self.stdin,
+                                                         skip_incomplete=False)
+            records = []
+            async for r in output:
+                records.append(r)
+
+        assert len(records) == 1  # Instead of 2 like the test above.
