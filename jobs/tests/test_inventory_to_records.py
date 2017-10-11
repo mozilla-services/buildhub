@@ -1,5 +1,6 @@
 import asyncio
 import json
+from unittest import mock
 
 import aiohttp
 import asynctest
@@ -634,3 +635,12 @@ class CSVToRecords(asynctest.TestCase):
                 }
             }
         }
+
+    @mock.patch('buildhub.utils.guess_mimetype',
+                side_effect=[{}, ValueError, {}])
+    async def test_csv_to_records_continues_on_error(self, mock):
+        output = inventory_to_records.csv_to_records(self.loop, stdin)
+        records = []
+        async for r in output:
+            records.append(r)
+        assert records == [{}, {}]
