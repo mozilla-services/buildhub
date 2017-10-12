@@ -3,6 +3,11 @@ Changelog
 
 This document describes changes between each past release.
 
+1.0.0 (2017-10-12)
+------------------
+
+- No changes yet.
+
 
 1.0.0 (2017-10-12)
 ------------------
