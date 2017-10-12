@@ -367,8 +367,11 @@ async def csv_to_records(loop, stdin, skip_incomplete=True):
 
                 if not is_build_url(product, url):
                     continue
-
-                record = record_from_url(url)
+                try:
+                    record = record_from_url(url)
+                except Exception as e:
+                    logger.exception(e)
+                    continue
 
                 # Complete with info that can't be obtained from the URL.
                 filesize = int(float(entry['Size']))  # e.g. 2E+10

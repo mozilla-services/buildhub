@@ -8,6 +8,7 @@ This document describes changes between each past release.
 ------------------
 
 - Add ability to configure cache folder via environment variable ``CACHE_FOLDER``
+- Keep trace but skip build urls that have unsupported formats
 
 - Fix support of some funnelcake archives (fixes #287)
 - Skip very old RC release with parenthesis in filenames (fixes #288)
