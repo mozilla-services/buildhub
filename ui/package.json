@@ -17,7 +17,7 @@
   },
   "homepage": "https://mozilla-services.github.io/buildhub",
   "scripts": {
-    "deploy": "npm run build && rimraf tmp && mkdir tmp && cp -R build/* tmp/ && gh-pages -d tmp --add && rimraf tmp",
+    "deploy": "npm run build && rimraf tmp && mkdir tmp && ls build/static/js/main* build/index.html | xargs sed -i 's|/buildhub/|/buildhub/stage/|g' && cp -R build/ tmp/stage/ && ls build/static/js/main* | xargs sed -i 's/buildhub.stage.mozaws.net/kinto-ota.dev.mozaws.net/' && ls build/static/js/main* build/index.html | xargs sed -i 's|/buildhub/stage/|/buildhub/dev/|g' && cp -R build/ tmp/dev/ && ls build/static/js/main* | xargs sed -i 's/kinto-ota.dev.mozaws.net/buildhub.prod.mozaws.net/' && ls build/static/js/main* build/index.html | xargs sed -i 's|/buildhub/dev/|/buildhub/|g' && cp -R build/* tmp/ && gh-pages -d tmp --add && rimraf tmp",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
