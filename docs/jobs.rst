@@ -11,12 +11,6 @@ Everything can be executed from a command-line, but we use `Amazon Lambda <https
 
 Currently we use `Kinto <http://kinto-storage.org>`_ as a generic database service. It allows us to leverage its simple API for storing and querying records. It also comes with a set of client libraries for JavaScript, Python etc.
 
-.. note::
-
-    More specific solutions may replace it when the product scope evolves. Like for example fetching information from:
-
-    * `Automatic Update Service (AUS, a.k.a Balrog) <https://wiki.mozilla.org/Balrog>`_
-
 
 Initialization
 ==============
@@ -24,13 +18,6 @@ Initialization
 .. note::
 
     The ``user:pass`` in the command-line examples is the Basic auth for Kinto.
-
-We provide an initialization manifest that will define the buckets, collection, records schema, and related permissions.
-This command is idempotent, and will only modify existing objects if something was changed.
-
-.. code-block:: bash
-
-    kinto-wizard load --server https://kinto/ --auth user:pass buildhub/initialization.yml
 
 The following is not mandatory but recommended. Kinto can use the JSON schema to validate the records. The following setting should be set to ``true`` in the server configuration file:
 
@@ -42,7 +29,7 @@ The following is not mandatory but recommended. Kinto can use the JSON schema to
 Load latest S3 inventory
 ========================
 
-A command to download the latest S3 manifests, containing information about all available files on archive.mozilla.org, and send that information as buildhub records to a remote Kinto server.
+A command to initialize the remote Kinto server, download the latest S3 manifests, containing information about all available files on archive.mozilla.org, and send that information as buildhub records to the remote Kinto server.
 
 .. code-block:: bash
 
@@ -129,17 +116,11 @@ For example, run tests:
 
     docker run -t mozilla/buildhub test
 
-Or initialize a Kinto server it for *buildhub*:
+Or load the latest S3 inventory:
 
 ::
 
-    docker run -t mozilla/buildhub initialize-kinto --auth=user:pass
-
-Load the latest S3 inventory:
-
-::
-
-    docker run -e "SERVER_URL=https://kinto.server.com/v1" -t mozilla/buildhub latest-inventory-to-kinto
+    docker run -e "SERVER_URL=https://buildhub.prod.mozaws.net/v1" -e "AUTH=user:pass" -t mozilla/buildhub latest-inventory-to-kinto
 
 
 Load S3 inventory manually
@@ -177,6 +158,12 @@ Download the associated files (using `jq <https://stedolan.github.io/jq/download
     for file in $files; do
         aws --no-sign-request --region us-east-1 s3 cp "s3://net-mozaws-prod-delivery-inventory-us-east-1/public/$file" .
     done
+
+Initialize the remote server from a manifest that will define the buckets, collection, records schema, and related permissions. This command is idempotent, and will only modify existing objects if something was changed.
+
+.. code-block:: bash
+
+    kinto-wizard load --server https://kinto/ --auth user:pass jobs/buildhub/initialization.yml
 
 Parse S3 inventory, fetch metadata, and print records as JSON in stdout:
 
