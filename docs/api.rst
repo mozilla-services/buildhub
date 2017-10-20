@@ -3,7 +3,7 @@
 API
 ###
 
-The BuildHub API is just a Kinto instance with a collection of records. A :ref:`series of jobs <jobs>` is charge of keeping those records up to date when new releases are published.
+The BuildHub API is just a Kinto instance with a collection of records, coupled with ElasticSearch. A :ref:`series of jobs <jobs>` is charge of keeping those records up to date when new releases are published.
 
 Servers
 =======
@@ -19,7 +19,7 @@ Servers
 Clients
 =======
 
-Since it is an HTTP API and the records are public, you can simply use any HTTP client, like `curl <http://curl.haxx.se>`_ or `httpie <https://httpie.org>`_.
+Since it is an HTTP API and the records are public, you can simply use any HTTP client, like `curl <http://curl.haxx.se>`_ or `HTTPie <https://httpie.org>`_.
 
 But for more convenience, especially regarding pagination and error handling, some dedicated libraries are also available:
 
@@ -80,11 +80,65 @@ Basic API
 
 The list of records is available at:
 
-* `${SERVER}/buckets/build-hub/collections/releases/records <https://buildhub.stage.mozaws.net/v1/buckets/build-hub/collections/releases/records?_limit=10>`_
+* `${SERVER}/buckets/build-hub/collections/releases/records <https://buildhub.prod.mozaws.net/v1/buckets/build-hub/collections/releases/records?_limit=10>`_
 
 And a single record at:
 
-* `${SERVER}/buckets/build-hub/collections/releases/records/${ID} <https://buildhub.stage.mozaws.net/v1/buckets/build-hub/collections/releases/records/firefox_beta_50-0b11_macosx_el>`_
+* `${SERVER}/buckets/build-hub/collections/releases/records/${ID} <https://buildhub.prod.mozaws.net/v1/buckets/build-hub/collections/releases/records/firefox_beta_50-0b11_macosx_el>`_
+
+
+Elasticsearch API
+-----------------
+
+An ElasticSearch endpoint is available for faster and more powerful queries. It powers the online catalog.
+
+* `$SERVER/buckets/build-hub/collections/releases/search <https://buildhub.prod.mozaws.net/v1/buckets/build-hub/collections/releases/search>`_
+
+Simple queries can be done with the QueryString:
+
+* `$SERVER/buckets/build-hub/collections/releases/search?q=target.channel=nightly <https://buildhub.prod.mozaws.net/v1/buckets/build-hub/collections/releases/search?q=target.channel=nightly>`_
+
+Or via a ``POST`` request:
+
+.. code-block:: bash
+
+    echo '{
+      "query": {
+        "bool": {
+          "filter": [{
+            "term": {
+              "source.product": "devedition"
+            }
+          }]
+        }
+      },
+      "size": 100
+    }' | http POST $SERVER/buckets/build-hub/collections/releases/search
+
+.. note::
+
+    For aggregations (ie. distinct values) there is no need to retrieve the whole set of results. For example:
+
+    .. code-block:: bash
+
+        echo '{
+          "aggs": {
+            "platforms": {
+              "terms": {
+                "field": "target.platform",
+                "size": 100
+              }
+            }
+          },
+          "size": 0
+        }' | http POST $SERVER/buckets/build-hub/collections/releases/search
+
+
+`More information in the Elasticsearch documentation <https://www.elastic.co/guide/en/elasticsearch/reference/current/search.html>`_
+
+
+Basic Kinto search API
+----------------------
 
 A set of filters and pagination options can be used to query the list. The most notable features are:
 
@@ -95,15 +149,6 @@ A set of filters and pagination options can be used to query the list. The most 
 
 `More information in the Kinto documentation <https://kinto.readthedocs.io/en/stable/api/1.x/filtering.html>`_.
 
-Elasticsearch API
------------------
-
-An ElasticSearch endpoint is also available for more powerful queries. It powers the online catalog.
-
-* `$SERVER/buckets/build-hub/collections/releases/search <https://buildhub.stage.mozaws.net/v1/buckets/build-hub/collections/releases/search>`_
-
-`More information in the Elasticsearch documentation <https://www.elastic.co/guide/en/elasticsearch/reference/current/search.html>`_
-
 
 Example queries
 ===============
@@ -113,9 +158,13 @@ Is this an official build id?
 
 In order to check that a build id exists, we'll just check that it is mentioned in at least one record.
 
-::
+.. code-block:: bash
 
-    curl -s -I "${SERVER}/buckets/build-hub/collections/releases/records?build.id=20110110192031&_limit=1" | grep "Total-Records: 1"
+    curl -s $SERVER/buckets/build-hub/collections/releases/search?q=build.id=20170713200529 | \
+        jq -r '.hits.total'
+
+
+Or using the Kinto records endpoint, with the JavaScript client:
 
 .. code-block:: javascript
 
@@ -123,23 +172,25 @@ In order to check that a build id exists, we'll just check that it is mentioned 
     const client = new KintoClient(SERVER);
     const collection = client.bucket("build-hub").collection("releases");
     records = await collection.listRecords({limit: 1, filters: {"build.id": "20110110192031"}});
-    console.log(records.length == 1);
+    console.log(records.length >= 1);
+
+Or the Python client:
 
 .. code-block:: python
 
     import kinto_http
 
-    client = kinto_http.Client("https://buildhub.stage.mozaws.net/v1")
+    client = kinto_http.Client("https://buildhub.prod.mozaws.net/v1")
     records = client.get_records(**{"build.id": "20110110192031", "_limit": 1, "pages": 1},
                                  bucket="build-hub", collection="releases")
-    print(len(records) == 1)
+    print(len(records) >= 1)
 
 What is the Mercurial commit ID of a build ID?
 ----------------------------------------------
 
 .. code-block:: python
 
-    client = kinto_http.Client("https://buildhub.stage.mozaws.net/v1")
+    client = kinto_http.Client("https://buildhub.prod.mozaws.net/v1")
     records = client.get_records(**{"build.id": "20110110192031", "_limit": 1, "pages": 1},
                                  bucket="build-hub", collection="releases")
     try:
@@ -152,19 +203,104 @@ What is the Mercurial commit ID of a build ID?
 What locales are available for a certain version?
 -------------------------------------------------
 
+Using the ElasticSearch endpoint, with `HTTPie <https://httpie.org/>`_ and `jq <https://stedolan.github.io/jq/>`_:
+
+.. code-block:: bash
+
+    $ echo '{
+      "aggs": {
+        "locales": {
+          "terms": {
+            "field": "target.locale",
+            "size": 1000,
+            "order": {
+              "_term": "asc"
+            }
+          }
+        }
+      },
+      "query": {
+        "bool": {
+          "filter": [{
+            "term": {
+              "target.version": "57.0b9"
+            }
+          }, {
+            "term": {
+              "source.product": "firefox"
+            }
+          }]
+        }
+      },
+      "size": 0
+    }' | http POST $SERVER/buckets/build-hub/collections/releases/search | \
+    jq -r '.aggregations.locales.buckets[] | .key'
+
+    ach
+    af
+    an
+    ar
+    bn-BD
+    bn-IN
+    ...
+
+
+Using the Kinto records endpoint, with the Kinto JavaScript client:
+
 .. code-block:: javascript
 
     import KintoClient from "kinto-http";
 
-    const client = new KintoClient("https://buildhub.stage.mozaws.net/v1");
+    const client = new KintoClient("https://buildhub.prod.mozaws.net/v1");
     const collection = client.bucket("build-hub").collection("releases");
     const records = await collection.listRecords({filters: {"target.version": "53.0b9"}});
     const locales = new Set(records.map(r => r.target.locale));
 
+
 What are the available build ids of a specific version?
 -------------------------------------------------------
 
-Using curl and `jq <https://stedolan.github.io/jq/>`_:
+Using the ElasticSearch endpoint, with Python aiohttp:
+
+.. code-block:: python
+
+    async def fetch_build_ids(session, product, version):
+        query = {
+          "aggs": {
+            "build_ids": {
+              "terms": {
+                "field": "build.id",
+                "size": 100000,
+                "order": {
+                  "_term": "desc"
+                }
+              }
+            }
+          },
+          "query": {
+            "bool": {
+              "filter": [{
+                "term": {
+                  "target.version": version
+                }
+              }, {
+                "term": {
+                  "source.product": product
+                }
+              }]
+            }
+          },
+          "size": 0,
+        }
+        async with session.post(SERVER_URL, data=json.dumps(query)) as response:
+            data = await response.json()
+
+        aggs = data['aggregations']['build_ids']['buckets']
+        buildids = [r['key'] for r in aggs]
+        return buildids
+
+
+Using the Kinto records endpoint, with curl and `jq <https://stedolan.github.io/jq/>`_:
 
 .. code-block:: bash
 
@@ -245,7 +381,7 @@ More about the data schema
 
 The complete JSON schema is available in the collection metadata:
 
-* `${SERVER}/buckets/build-hub/collections/releases <https://buildhub.stage.mozaws.net/v1/buckets/build-hub/collections/releases>`_
+* `${SERVER}/buckets/build-hub/collections/releases <https://buildhub.prod.mozaws.net/v1/buckets/build-hub/collections/releases>`_
 
 The records added to the collection will be validated against that schema.
 
