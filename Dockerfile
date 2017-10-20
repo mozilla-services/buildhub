@@ -18,12 +18,11 @@ RUN \
 RUN groupadd -g 10001 app && \
     useradd -M -u 10001 -g 10001 -G app -d /app -s /sbin/nologin app
 
-RUN \
-    mkdir /app/cache && \
-    chgrp app /app/cache && \
-    chmod g+w /app/cache
-
 ENV CACHE_FOLDER /app/cache
+RUN \
+    mkdir $CACHE_FOLDER && \
+    chown app $CACHE_FOLDER && \
+    chmod u+w $CACHE_FOLDER
 
 ENTRYPOINT ["/bin/bash", "/app/bin/run.sh"]
 
