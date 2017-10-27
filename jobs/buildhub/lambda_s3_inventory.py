@@ -155,7 +155,7 @@ def lambda_handler(event=None, context=None):
     futures = [main(loop, inventory) for inventory in ('firefox', 'archive')]
     try:
         loop.run_until_complete(asyncio.gather(*futures))
-    except:
+    except Exception:
         logger.exception('Aborted.')
         raise
     finally:

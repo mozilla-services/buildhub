@@ -13,7 +13,7 @@ class CacheValueTest(unittest.TestCase):
     def tearDown(self):
         try:
             os.path.remove(self.cache_file)
-        except:
+        except Exception:
             pass
 
     def test_records_are_not_duplicated(self):
