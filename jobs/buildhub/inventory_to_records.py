@@ -140,7 +140,7 @@ async def fetch_nightly_metadata(session, record):
         except aiohttp.ClientError as e:
             pass
 
-        logger.error("Could not fetch metadata for '%s' from '%s'" % (record['id'], metadata_url))
+        logger.warning("Could not fetch metadata for '%s' from '%s'" % (record['id'], metadata_url))
         _nightly_metadata[url] = None  # Don't try it anymore.
         return None
 
@@ -176,7 +176,7 @@ async def fetch_release_candidate_metadata(session, record):
     except aiohttp.ClientError as e:
         # Old RC like https://archive.mozilla.org/pub/firefox/releases/1.0rc1/
         # don't have metadata.
-        logger.error("Could not fetch metadata for '%s' from '%s'" % (record['id'], metadata_url))
+        logger.warning("Could not fetch metadata for '%s' from '%s'" % (record['id'], metadata_url))
         _rc_metadata[rc_url] = None  # Don't try it anymore.
         return None
 
