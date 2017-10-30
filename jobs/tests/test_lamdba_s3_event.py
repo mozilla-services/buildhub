@@ -1829,3 +1829,29 @@ class FromNightlyMetadataAndroid(BaseTest):
                 },
             },
             if_not_exists=True)
+
+
+class FromNightlyArchiveFennec(BaseTest):
+    remote_content = {
+        'pub/mobile/candidates/': {
+            'prefixes': [
+                'archived/'
+            ], 'files': []
+        },
+    }
+
+    def setUp(self):
+        super().setUp()
+        self.mockresponses.get(utils.ARCHIVE_URL +
+                               "pub/mobile/nightly/2017/10/2017-10-29-10-22-14-"
+                               "mozilla-central-android-api-16/"
+                               "fennec-58.0a1.multi.android-arm.json",
+                               status=404, headers={"Content-Type": "text/html"},
+                               body="<html></html>")
+
+    async def test_from_nightly_archive_linux_metadata_missing(self):
+        event = fake_event('pub/mobile/nightly/2017/10/2017-10-29-10-22-14-mozilla-'
+                           'central-android-api-16-l10n/fennec-58.0a1.ka.android-arm.apk')
+        await lambda_s3_event.main(self.loop, event)
+
+        assert not self.mock_create_record.called
