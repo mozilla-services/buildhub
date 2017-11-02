@@ -6,7 +6,7 @@ This document describes changes between each past release.
 1.0.0 (2017-10-12)
 ------------------
 
-- No changes yet.
+- Prevent test_packages metadata from being recognized as release metadata (fixes #295)
 
 
 1.0.0 (2017-10-12)
