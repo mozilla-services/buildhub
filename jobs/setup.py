@@ -17,7 +17,7 @@ CHANGELOG = read_file('CHANGELOG.rst')
 CONTRIBUTORS = read_file('CONTRIBUTORS.rst')
 
 REQUIREMENTS = [
-    "aiohttp",
+    "aiohttp<=2.3.0",  # Because of aiobotocore
     "aiobotocore",
     "backoff",
     "kinto-http",
