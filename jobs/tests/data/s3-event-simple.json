@@ -8,5 +8,14 @@
                 "size": 51001024
             }
         }
+    }, {
+        "eventTime": "2017-10-29T17:06:52.030Z",
+        "s3": {
+            "bucket": {"name": "archive-firefox"},
+            "object": {
+                "key": "pub/firefox/nightly/2017/10/2017-10-29-22-01-12-mozilla-central/firefox-58.0a1.en-US.linux-i686.tar.bz2",
+                "size": 51001024
+            }
+        }
     }]
 }

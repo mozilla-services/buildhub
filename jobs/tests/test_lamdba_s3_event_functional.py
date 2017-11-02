@@ -62,3 +62,35 @@ class LambdaTest(unittest.TestCase):
                 'target': 'x86_64-pc-mingw32'
             }
         }
+
+        rid = 'firefox_nightly_2017-10-29-22-01-12_58-0a1_linux-i686_en-us'
+        record = client.get_record(bucket=bid, collection=cid, id=rid)['data']
+        record.pop('last_modified')
+        assert record == {
+          'build': {'as': '$(CC)',
+                    'cc': '/usr/bin/ccache '
+                          '/builds/worker/workspace/build/src/gcc/bin/gcc -m32 '
+                          '-march=pentium-m -std=gnu99',
+                    'cxx': '/usr/bin/ccache '
+                           '/builds/worker/workspace/build/src/gcc/bin/g++ -m32 '
+                           '-march=pentium-m -std=gnu++11',
+                    'date': '2017-10-29T22:01:12Z',
+                    'host': 'i686-pc-linux-gnu',
+                    'id': '20171029220112',
+                    'target': 'i686-pc-linux-gnu'},
+          'download': {'date': '2017-10-29T17:06:52Z',
+                       'mimetype': 'application/x-bzip2',
+                       'size': 51001024,
+                       'url': 'https://archive.mozilla.org/pub/firefox/nightly/2017/10/2017-10-29'
+                              '-22-01-12-mozilla-central/firefox-58.0a1.en-US.linux-i686.tar.bz2'},
+          'id': 'firefox_nightly_2017-10-29-22-01-12_58-0a1_linux-i686_en-us',
+          'source': {'product': 'firefox',
+                     'repository': 'https://hg.mozilla.org/mozilla-central',
+                     'revision': 'd3910b7628b8066d3f30d58b17b5824b05768854',
+                     'tree': 'mozilla-central'},
+          'target': {'channel': 'nightly',
+                     'locale': 'en-US',
+                     'os': 'linux',
+                     'platform': 'linux-i686',
+                     'version': '58.0a1'}
+        }
