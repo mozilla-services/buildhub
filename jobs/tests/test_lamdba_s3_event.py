@@ -53,11 +53,11 @@ class BaseTest(asynctest.TestCase):
         self.addCleanup(patch.stop)
         self.mock_create_record = patch.start()
 
-        mocked = aioresponses()
-        mocked.start()
+        self.mockresponses = aioresponses()
+        self.mockresponses.start()
         for url, payload in self.remote_content.items():
-            mocked.get(utils.ARCHIVE_URL + url, payload=payload)
-        self.addCleanup(mocked.stop)
+            self.mockresponses.get(utils.ARCHIVE_URL + url, payload=payload)
+        self.addCleanup(self.mockresponses.stop)
 
     def tearDown(self):
         inventory_to_records._candidates_build_folder.clear()
@@ -484,6 +484,31 @@ class FromRCMetadataFirefox(BaseTest):
                 },
             },
             if_not_exists=True)
+
+
+class FromNightlyArchiveFirefox(BaseTest):
+    remote_content = {
+        'pub/firefox/candidates/': {
+            'prefixes': [
+                'archived/'
+            ], 'files': []
+        },
+    }
+
+    def setUp(self):
+        super().setUp()
+        self.mockresponses.get(utils.ARCHIVE_URL +
+                               "pub/firefox/nightly/2017/08/2017-08-05-10-03-34-mozilla-central/"
+                               "firefox-57.0a1.en-US.linux-x86_64.json",
+                               status=404, headers={"Content-Type": "text/html"},
+                               body="<html></html>")
+
+    async def test_from_nightly_archive_linux_metadata_missing(self):
+        event = fake_event('pub/firefox/nightly/2017/08/2017-08-05-10-03-34-mozilla-central-l10n/'
+                           'firefox-57.0a1.ru.linux-x86_64.tar.bz2')
+        await lambda_s3_event.main(self.loop, event)
+
+        assert not self.mock_create_record.called
 
 
 class FromNightlyMetadataFirefox(BaseTest):
@@ -1804,3 +1829,29 @@ class FromNightlyMetadataAndroid(BaseTest):
                 },
             },
             if_not_exists=True)
+
+
+class FromNightlyArchiveFennec(BaseTest):
+    remote_content = {
+        'pub/mobile/candidates/': {
+            'prefixes': [
+                'archived/'
+            ], 'files': []
+        },
+    }
+
+    def setUp(self):
+        super().setUp()
+        self.mockresponses.get(utils.ARCHIVE_URL +
+                               "pub/mobile/nightly/2017/10/2017-10-29-10-22-14-"
+                               "mozilla-central-android-api-16/"
+                               "fennec-58.0a1.multi.android-arm.json",
+                               status=404, headers={"Content-Type": "text/html"},
+                               body="<html></html>")
+
+    async def test_from_nightly_archive_linux_metadata_missing(self):
+        event = fake_event('pub/mobile/nightly/2017/10/2017-10-29-10-22-14-mozilla-'
+                           'central-android-api-16-l10n/fennec-58.0a1.ka.android-arm.apk')
+        await lambda_s3_event.main(self.loop, event)
+
+        assert not self.mock_create_record.called
