@@ -3,6 +3,9 @@ buildhub-lambda*.zip
 **/__pycache__
 *.pyc
 *.egg-info
+.venv
+*.zip
+
 jobs/.cache
 jobs/.venv
 jobs/.tox

@@ -6,7 +6,7 @@ This document describes changes between each past release.
 1.0.0 (2017-10-12)
 ------------------
 
-- No changes yet.
+- Use ``requirements.txt`` versions when building the container (fixes #299)
 
 
 1.0.0 (2017-10-12)

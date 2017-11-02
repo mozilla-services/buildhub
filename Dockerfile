@@ -12,7 +12,7 @@ WORKDIR /app
 
 RUN \
     make virtualenv && \
-    .venv/bin/pip install jobs/ && \
+    .venv/bin/pip install --constraint jobs/requirements.txt jobs/ && \
     .venv/bin/pip freeze | grep -v -- 'buildhub' > dependencies.txt
 
 RUN groupadd -g 10001 app && \
