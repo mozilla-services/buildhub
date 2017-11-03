@@ -735,7 +735,9 @@ WRONG_NIGHTLY_METADATA_FILENAMES = [
     ('mobile', 'pub/mobile/nightly/2017/08/2017-08-01-15-03-46-date-android-api-15/'
                'fennec-56.0a1.multi.android-arm.json'),
     ('firefox', 'pub/firefox/candidates/56.0b1-candidates/build4/linux-x86_64/en-US/'
-                'firefox-56.0b1.json')
+                'firefox-56.0b1.json'),
+    ('firefox', 'pub/firefox/nightly/latest-mozilla-central/firefox-58.0a1.en-US.'
+                'win64.test_packages.json')
 ]
 
 
