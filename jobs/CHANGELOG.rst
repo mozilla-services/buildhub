@@ -3,9 +3,10 @@ Changelog
 
 This document describes changes between each past release.
 
-1.0.0 (2017-10-12)
+1.1.0 (unreleased)
 ------------------
 
+- Use ``requirements.txt`` versions when building the container (fixes #299)
 - Prevent test_packages metadata from being recognized as release metadata (fixes #295)
 
 
