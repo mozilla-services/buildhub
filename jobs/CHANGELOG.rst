@@ -3,8 +3,14 @@ Changelog
 
 This document describes changes between each past release.
 
-1.1.0 (unreleased)
+1.1.0 (2017-11-03)
 ------------------
+
+- Changed log level from error to warning when metadata could not be found (#297, #298)
+- Updated docs with prod URLs (#293)
+- Added ElasticSearch queries examples (#294)
+
+**Bug fixes**
 
 - Use ``requirements.txt`` versions when building the container (fixes #299)
 - Prevent test_packages metadata from being recognized as release metadata (fixes #295)
