@@ -39,8 +39,8 @@ class CsvToRecordsTest(asynctest.TestCase):
         sys.stdout = self.stdout
         sys.stdin = self.stdin
 
-    def test_load_simple_file(self):
-        inventory_to_records.run()
+    async def test_load_simple_file(self):
+        await inventory_to_records.main(self.loop)
 
         output = sys.stdout.getvalue()
         records = [json.loads(o) for o in output.split('\n') if o]
