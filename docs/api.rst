@@ -10,11 +10,9 @@ Servers
 
 * **Production**: https://buildhub.prod.mozaws.net/v1/ (`catalog-prod`_)
 * **Stage**: https://buildhub.stage.mozaws.net/v1/ (`catalog-stage`_)
-* **Development**: https://kinto-ota.dev.mozaws.net/v1/ (`catalog-dev`_)
 
 .. _catalog-prod: https://mozilla-services.github.io/buildhub/
 .. _catalog-stage: https://mozilla-services.github.io/buildhub/stage/
-.. _catalog-dev: https://mozilla-services.github.io/buildhub/dev/
 
 Clients
 =======
