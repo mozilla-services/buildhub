@@ -3,7 +3,6 @@ asynctest
 flake8
 pytest
 pytest-cache
-pytest-capturelog
 pytest-cover
 pytest-sugar
 tox
