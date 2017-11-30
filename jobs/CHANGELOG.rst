@@ -6,7 +6,7 @@ This document describes changes between each past release.
 1.2.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix test_packages regexp to avoid confusion with build metadata (fixes #295, #309)
 
 1.1.0 (2017-11-03)
 ------------------

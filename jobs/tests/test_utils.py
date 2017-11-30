@@ -737,7 +737,9 @@ WRONG_NIGHTLY_METADATA_FILENAMES = [
     ('firefox', 'pub/firefox/candidates/56.0b1-candidates/build4/linux-x86_64/en-US/'
                 'firefox-56.0b1.json'),
     ('firefox', 'pub/firefox/nightly/latest-mozilla-central/firefox-58.0a1.en-US.'
-                'win64.test_packages.json')
+                'win64.test_packages.json'),
+    ('firefox', 'pub/firefox/nightly/2017/11/2017-11-29-11-10-30-mozilla-central/'
+                'firefox-59.0a1.en-US.win32.test_packages.json')
 ]
 
 
