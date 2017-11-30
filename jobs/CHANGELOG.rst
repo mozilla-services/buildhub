@@ -3,7 +3,7 @@ Changelog
 
 This document describes changes between each past release.
 
-1.2.0 (unreleased)
+1.1.1 (2017-11-30)
 ------------------
 
 - Fix test_packages regexp to avoid confusion with build metadata (fixes #295, #309)
