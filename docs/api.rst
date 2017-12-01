@@ -158,7 +158,7 @@ In order to check that a build id exists, we'll just check that it is mentioned 
 
 .. code-block:: bash
 
-    curl -s $SERVER/buckets/build-hub/collections/releases/search?q=build.id=20170713200529 | \
+    curl -s $SERVER/buckets/build-hub/collections/releases/search?q=build.id="20170713200529" | \
         jq -r '.hits.total'
 
 
