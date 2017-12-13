@@ -149,7 +149,7 @@ def is_build_url(product, url):
           fennec-57.0a1.hi-IN.android-arm.apk
     - firefox/nightly/2017/08/2017-08-25-10-01-26-mozilla-central-l10n/Firefox Installer.fr.exe
     """
-    if 'nightly' in url and 'mozilla-central' not in url:
+    if 'nightly' in url and 'mozilla-central' not in url and 'comm-central' not in url:
         return False
 
     re_exclude = re.compile('.+(tinderbox|try-builds|partner-repacks|latest|contrib|/0\.|'

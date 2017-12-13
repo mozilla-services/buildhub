@@ -3,6 +3,11 @@ Changelog
 
 This document describes changes between each past release.
 
+1.1.2 (unreleased)
+------------------
+
+- Fix exclusion of thunderbird nightly releases (fixes #312)
+
 1.1.1 (2017-11-30)
 ------------------
 
