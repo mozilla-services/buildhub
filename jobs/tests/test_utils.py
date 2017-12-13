@@ -798,6 +798,10 @@ RELEASE_FILENAMES = [
                'android-api-15-l10n/fennec-57.0a1.hi-IN.android-arm.apk'),
     ('firefox', 'pub/firefox/nightly/2017/08/2017-08-25-10-01-26-mozilla-central-'
                 'l10n/firefox-57.0a1.an.win32.installer.exe'),
+    ('thunderbird', 'pub/thunderbird/nightly/2017/12/2017-12-13-04-12-17-comm-central/'
+                    'thunderbird-59.0a1.en-US.mac.dmg'),
+    ('thunderbird', 'pub/thunderbird/nightly/2017/12/2017-12-13-04-12-17-comm-central/'
+                    'thunderbird-59.0a1.en-US.linux-x86_64.tar.bz2'),
 ]
 
 
@@ -831,6 +835,8 @@ WRONG_RELEASE_FILENAMES = [
     ('firefox', '/pub/firefox/nightly/2017/08/2017-08-25-10-01-26-mozilla-central-l10n/'
                 'Firefox Installer.fr.exe'),
     ('firefox', '/pub/firefox/releases/1.0rc1/Firefox%20Setup %281.0rc1, ca-AD%29.exe'),
+    ('thunderbird', 'pub/thunderbird/nightly/2017/12/2017-12-11-03-02-03-comm-esr52/'
+                    'thunderbird-52.0.en-US.win32.zip'),
 ]
 
 
