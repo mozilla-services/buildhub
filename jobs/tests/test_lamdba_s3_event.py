@@ -1319,7 +1319,41 @@ class FromRCMetadataAndroid(BaseTest):
             'target_cpu': 'arm',
             'target_os': 'linux-androideabi',
             'target_vendor': 'unknown'
-        }
+        },
+        'pub/mobile/candidates/56.0b1-candidates/build1/android-api-15/multi/': {
+            'prefixes': [], 'files': [
+                {'name': 'fennec-56.0b1.multi.android-arm.apk',
+                 'last_modified': '2017-08-03T20:55:11Z',
+                 'size': 34138800},
+                {'name': 'fennec-56.0b1.multi.android-arm_info.txt'},
+            ]
+        },
+        'pub/mobile/candidates/56.0b1-candidates/build1/android-api-15/multi/'
+        'fennec-56.0b1.multi.android-arm.json': {
+            "as": "$(CC)",
+            "buildid": "20171218174357",
+            "cc": "/bin/ccache /builds/worker/workspace/build/src/android-ndk/toolchains/llvm/"
+                  "prebuilt/linux-x86_64/bin/clang -std=gnu99 --target=i386-linux-android",
+            "cxx": "/bin/ccache /builds/worker/workspace/build/src/android-ndk/toolchains/llvm/"
+                   "prebuilt/linux-x86_64/bin/clang++ -std=gnu++11 --target=i386-linux-android",
+            "host_alias": "x86_64-pc-linux-gnu",
+            "host_cpu": "x86_64",
+            "host_os": "linux-gnu",
+            "host_vendor": "pc",
+            "moz_app_id": "{aa3c5121-dab2-40e2-81ca-7ea25febc110}",
+            "moz_app_maxversion": "58.*",
+            "moz_app_name": "fennec",
+            "moz_app_vendor": "Mozilla",
+            "moz_app_version": "58.0",
+            "moz_pkg_platform": "android-i386",
+            "moz_source_repo": "MOZ_SOURCE_REPO=https://hg.mozilla.org/releases/mozilla-beta",
+            "moz_source_stamp": "a59d9203232dce3e42ba3aba74cf52915fb9ce61",
+            "moz_update_channel": "beta",
+            "target_alias": "i386-pc-linux-android",
+            "target_cpu": "i386",
+            "target_os": "linux-android",
+            "target_vendor": "pc",
+        },
     }
 
     async def test_pick_rc_and_locales(self):
@@ -1412,6 +1446,55 @@ class FromRCMetadataAndroid(BaseTest):
                     'size': 34138800,
                     'date': '2017-08-03T20:55:11Z'
                 },
+            },
+            if_not_exists=True)
+
+    async def test_from_rc_multi(self):
+        event = fake_event('pub/mobile/candidates/56.0b1-candidates/build1/android-api-15/'
+                           'multi/fennec-56.0b1.multi.android-arm.json')
+        await lambda_s3_event.main(self.loop, event)
+
+        assert self.mock_create_record.call_count == 1
+        print(self.mock_create_record.call_args_list)
+        self.mock_create_record.assert_any_call(
+            bucket='build-hub',
+            collection='releases',
+            data={
+                'source': {
+                    'product': 'fennec',
+                    'revision': 'a59d9203232dce3e42ba3aba74cf52915fb9ce61',
+                    'repository': 'https://hg.mozilla.org/releases/mozilla-beta',
+                    'tree': 'releases/mozilla-beta'
+                },
+                'target': {
+                    'platform': 'android-api-15',
+                    'os': 'android',
+                    'locale': 'multi',
+                    'version': '56.0b1rc1',
+                    'channel': 'beta'
+                },
+                'download': {
+                    'url': 'https://archive.mozilla.org/pub/mobile/candidates/56.0b1-candidates/'
+                           'build1/android-api-15/multi/fennec-56.0b1.multi.android-arm.apk',
+                    'mimetype': 'application/vnd.android.package-archive',
+                    'size': 34138800,
+                    'date': '2017-08-03T20:55:11Z'
+                },
+                'id': 'fennec_beta_56-0b1rc1_android-api-15_multi',
+                'build': {
+                    'id': '20171218174357',
+                    'date': '2017-12-18T17:43:57Z',
+                    'as': '$(CC)',
+                    'cc': '/bin/ccache /builds/worker/workspace/build/src/android-ndk/toolchains/'
+                          'llvm/prebuilt/linux-x86_64/bin/clang -std=gnu99 '
+                          '--target=i386-linux-android',
+                    'cxx': '/bin/ccache /builds/worker/workspace/build/src/android-ndk/toolchains/'
+                           'llvm/prebuilt/linux-x86_64/bin/clang++ -std=gnu++11 '
+                           '--target=i386-linux-android',
+                    'host': 'x86_64-pc-linux-gnu',
+                    'target': 'i386-pc-linux-android',
+                    'number': 1
+                }
             },
             if_not_exists=True)
 
