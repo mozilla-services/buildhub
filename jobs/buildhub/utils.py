@@ -192,7 +192,7 @@ def is_nightly_build_metadata(product, url):
     if product == 'mobile':
         product = 'fennec'
     # Exlude alias folder, and other metadata.
-    re_exclude = re.compile('.+(latest-mozilla-central|test_packages)')
+    re_exclude = re.compile('.+(latest-mozilla-central|test_packages|mozinfo)')
     if re_exclude.match(url):
         return False
     # Note: devedition has no nightly.
