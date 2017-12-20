@@ -99,19 +99,36 @@ async def main(loop, event):
                 metadata = await fetch_json(session, url)
                 metadata['buildnumber'] = int(re.search('/build(\d+)/', url).group(1))
 
-                # Check if localized languages are here (including en-US archive).
-                l10n_parent_url = re.sub('en-US/.+$', '', url)
-                l10n_folders, _ = await fetch_listing(session, l10n_parent_url)
-                for locale in l10n_folders:
-                    _, files = await fetch_listing(session, l10n_parent_url + locale)
+                # We just received the metadata file. Lookup if the associated
+                # archives are here too.
+                archives = []
+                if 'multi' in url:
+                    # For multi we just check the associated archive is here already.
+                    parent_folder = re.sub('multi/.+$', 'multi/', url)
+                    _, files = await fetch_listing(session, parent_folder)
                     for f in files:
-                        rc_url = l10n_parent_url + locale + f['name']
+                        rc_url = parent_folder + f['name']
                         if utils.is_build_url(product, rc_url):
-                            record = utils.record_from_url(rc_url)
-                            record['download']['size'] = f['size']
-                            record['download']['date'] = f['last_modified']
-                            record = utils.merge_metadata(record, metadata)
-                            records_to_create.append(record)
+                            archives.append((rc_url, f['size'], f['last_modified']))
+                else:
+                    # For en-US it's different, it applies to every localized archives.
+                    # Check if they are here by listing the parent folder
+                    # (including en-US archive).
+                    l10n_parent_url = re.sub('en-US/.+$', '', url)
+                    l10n_folders, _ = await fetch_listing(session, l10n_parent_url)
+                    for locale in l10n_folders:
+                        _, files = await fetch_listing(session, l10n_parent_url + locale)
+                        for f in files:
+                            rc_url = l10n_parent_url + locale + f['name']
+                            if utils.is_build_url(product, rc_url):
+                                archives.append((rc_url, f['size'], f['last_modified']))
+
+                for rc_url, size, last_modified in archives:
+                    record = utils.record_from_url(rc_url)
+                    record['download']['size'] = size
+                    record['download']['date'] = last_modified
+                    record = utils.merge_metadata(record, metadata)
+                    records_to_create.append(record)
                 # Theorically release should never be there yet :)
                 # And repacks like EME-free/sha1 don't seem to be published in RC.
 
