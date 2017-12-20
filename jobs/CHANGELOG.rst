@@ -3,7 +3,7 @@ Changelog
 
 This document describes changes between each past release.
 
-1.1.2 (unreleased)
+1.1.2 (2017-12-20)
 ------------------
 
 - Fix event handling of RC metadata (fixes #314)
