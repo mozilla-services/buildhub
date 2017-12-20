@@ -8,6 +8,7 @@ This document describes changes between each past release.
 
 - Fix event handling of RC metadata (fixes #314)
 - Fix exclusion of thunderbird nightly releases (fixes #312)
+- Prevent mozinfo JSON files to be mistaken as Nightly metadata (fixes #315)
 
 1.1.1 (2017-11-30)
 ------------------
