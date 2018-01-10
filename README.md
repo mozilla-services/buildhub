@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/mozilla-services/buildhub.svg?branch=master)](https://travis-ci.org/mozilla-services/buildhub)
 
-*Buildub* aims to provide a public database of comprehensive information about releases and builds.
+*Builhub* aims to provide a public database of comprehensive information about releases and builds.
 
 * [Online catalog](https://mozilla-services.github.io/buildhub/)
 * [Web API documentation](https://buildhub.readthedocs.io)
