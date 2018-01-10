@@ -29,10 +29,11 @@ import {
   SideBar,
 } from "searchkit";
 
-const searchkit = new SearchkitManager(
-  "https://buildhub.prod.mozaws.net/v1/buckets/build-hub/collections/releases/",
-  { searchUrlPath: "search" }
-);
+const KINTO_COLLECTION_URL = "https://buildhub.prod.mozaws.net/v1/buckets/build-hub/collections/releases/";
+
+const searchkit = new SearchkitManager(KINTO_COLLECTION_URL, {
+  searchUrlPath: "search"
+});
 
 const HitsTable = ({ hits }) => {
   return (
@@ -62,6 +63,7 @@ const HitsTable = ({ hits }) => {
               _id,
               highlight,
             }) => {
+              const recordUrl = `${KINTO_COLLECTION_URL}records/${_id}`;
               const revisionUrl = source.revision
                 ? <a href={`${source.repository}/rev/${source.revision}`}>
                     {source.revision.substring(0, 6)}
@@ -109,7 +111,9 @@ const HitsTable = ({ hits }) => {
                   <td>{source.tree}</td>
                   <td>{filesize(download.size)}</td>
                   <td title={download.date}>
-                    <time dateTime={download.date}>{download.date}</time>
+                    <a target="_blank" rel="noopener noreferrer" href={recordUrl}>
+                      <time dateTime={download.date}>{download.date}</time>
+                    </a>
                   </td>
                   <td
                     dangerouslySetInnerHTML={getHighlight(
