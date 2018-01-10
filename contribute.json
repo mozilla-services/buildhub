@@ -1,0 +1,20 @@
+{
+    "name": "buildhub",
+    "description": "Firefox Build Metadata Service",
+    "participate": {
+        "irc": "irc://irc.mozilla.org/#storage-team",
+        "irc-contacts": ["leplatrem", "magopian", "mostlygeek"],
+        "docs": "https://buildhub.readthedocs.io/en/latest/"
+    },
+    "repository": {
+        "url": "https://github.com/mozilla-services/buildhub",
+        "license": "Apache License 2.0"
+    },
+    "bugs": {
+        "list": "https://github.com/mozilla-services/buildhub/issues",
+        "report": "https://github.com/mozilla-services/buildhub/issues/new"
+    },
+    "urls": {
+        "prod": "https://mozilla-services.github.io/buildhub/"
+    }
+}
