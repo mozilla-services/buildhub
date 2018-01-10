@@ -194,7 +194,7 @@ class App extends Component {
               <SearchBox
                 autofocus={true}
                 searchOnChange={true}
-                placeholder="firefox 54 linux"
+                placeholder="e.g. firefox 54 linux"
                 queryBuilder={fullText}
                 queryOptions={{
                   analyzer: "standard",
