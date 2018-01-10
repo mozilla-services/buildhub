@@ -109,9 +109,7 @@ const HitsTable = ({ hits }) => {
                   <td>{source.tree}</td>
                   <td>{filesize(download.size)}</td>
                   <td title={download.date}>
-                    <time dateTime={download.date}>
-                      {new Date(download.date).toLocaleDateString()}
-                    </time>
+                    <time dateTime={download.date}>{download.date}</time>
                   </td>
                   <td
                     dangerouslySetInnerHTML={getHighlight(
