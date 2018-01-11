@@ -1,6 +1,6 @@
 {
     "name": "buildhub",
-    "description": "Firefox Build Metadata Service",
+    "description": "Mozilla Build Metadata Service",
     "participate": {
         "irc": "irc://irc.mozilla.org/#storage-team",
         "irc-contacts": ["leplatrem", "magopian", "mostlygeek"],
