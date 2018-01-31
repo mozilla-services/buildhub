@@ -221,7 +221,8 @@ async def scan_candidates(session, product):
         listings = await asyncio.gather(*futures)
 
         for version, (build_folders, _) in zip(versions, listings):
-            latest_build_folder = sorted(build_folders)[-1]
+            latest_build_folder = sorted(
+                build_folders, key=lambda x: x.strip('/').split('build')[1].zfill(3))[-1]
             _candidates_build_folder[product][version] = latest_build_folder
 
 
