@@ -10,6 +10,9 @@ from buildhub import inventory_to_records, utils
 
 
 class LongResponse:
+    def raise_for_status(self):
+        pass
+
     def __init__(*args, **kwargs):
         pass
 
@@ -51,6 +54,25 @@ class FetchJsonTest(asynctest.TestCase):
         with asynctest.patch.object(self.session, 'get', LongResponse):
             with self.assertRaises(asyncio.TimeoutError):
                 await inventory_to_records.fetch_json(self.session, self.url, 0.1)
+
+    async def test_retries_when_status_is_not_ok(self):
+        with aioresponses() as m:
+            headers = {'Content-Type': 'text/html'}
+            m.get(self.url, body="<html><body></body></html>", status=404, headers=headers)
+            m.get(self.url, payload=self.data)
+            received = await inventory_to_records.fetch_json(self.session, self.url)
+        assert received == self.data
+
+    async def test_fails_when_status_is_never_ok(self):
+        with aioresponses() as m:
+            headers = {'Content-Type': 'text/html'}
+            # Since it retries 3 times, sends 4 bad responses.
+            m.get(self.url, body="<html><body></body></html>", status=404, headers=headers)
+            m.get(self.url, body="<html><body></body></html>", status=404, headers=headers)
+            m.get(self.url, body="<html><body></body></html>", status=404, headers=headers)
+            m.get(self.url, body="<html><body></body></html>", status=404, headers=headers)
+            with self.assertRaises(aiohttp.ClientError):
+                await inventory_to_records.fetch_json(self.session, self.url)
 
 
 class FetchListingTest(asynctest.TestCase):

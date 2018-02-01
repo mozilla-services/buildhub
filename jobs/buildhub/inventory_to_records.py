@@ -45,7 +45,7 @@ async def read_csv(input_generator):
 
 
 @backoff.on_exception(backoff.expo,
-                      asyncio.TimeoutError,
+                      (aiohttp.ClientResponseError, asyncio.TimeoutError),
                       max_tries=NB_RETRY_REQUEST)
 async def fetch_json(session, url, timeout=TIMEOUT_SECONDS):
     headers = {
@@ -57,6 +57,7 @@ async def fetch_json(session, url, timeout=TIMEOUT_SECONDS):
         with async_timeout.timeout(timeout):
             logger.debug("GET '{}'".format(url))
             async with session.get(url, headers=headers, timeout=None) as response:
+                response.raise_for_status()
                 try:
                     return await response.json()
                 except aiohttp.ClientResponseError as e:
