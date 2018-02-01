@@ -6,9 +6,12 @@ This document describes changes between each past release.
 1.1.3 (unreleased)
 ------------------
 
+- Retry fetch JSON when status is not 200 (ref #327)
+
 **Bug fixes**
 
 - Fix ordering of release candidates build folders (fixes #328)
+
 
 1.1.2 (2017-12-20)
 ------------------
