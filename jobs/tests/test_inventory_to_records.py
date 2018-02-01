@@ -491,6 +491,7 @@ class ScanCandidates(asynctest.TestCase):
                     'build11/',
                     'build9/',
                     'build3/',
+                    'pop/',
                 ], 'files': []
             })
             await inventory_to_records.scan_candidates(self.session, 'firefox')
