@@ -488,14 +488,17 @@ class ScanCandidates(asynctest.TestCase):
             })
             m.get(candidates_listing + '54.0-candidates/', payload={
                 'prefixes': [
-                    'build1/',
+                    'build11/',
+                    'build9/',
+                    'build3/',
+                    'pop/',
                 ], 'files': []
             })
             await inventory_to_records.scan_candidates(self.session, 'firefox')
 
             assert inventory_to_records._candidates_build_folder == {
                 'firefox': {
-                    '54.0': 'build1/',
+                    '54.0': 'build11/',
                     '52.0.2esr': 'build3/',
                 }
             }
