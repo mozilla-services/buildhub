@@ -12,6 +12,14 @@ This document describes changes between each past release.
 
 - Fix ordering of release candidates build folders (fixes #328)
 
+**UI**
+
+- Use classic ISO format for publication date (fixes #320)
+- Improve search placeholder (fixes #305)
+- Better favicon (fixes #306)
+- Add contribute.json endpoint (fixes #324)
+- Add link to Kinto record (fixes #286)
+
 
 1.1.2 (2017-12-20)
 ------------------
