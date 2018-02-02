@@ -3,7 +3,7 @@ Changelog
 
 This document describes changes between each past release.
 
-1.1.3 (unreleased)
+1.1.3 (2018-02-02)
 ------------------
 
 - Retry fetch JSON when status is not 200 (ref #327)
@@ -11,6 +11,14 @@ This document describes changes between each past release.
 **Bug fixes**
 
 - Fix ordering of release candidates build folders (fixes #328)
+
+**UI**
+
+- Use classic ISO format for publication date (fixes #320)
+- Improve search placeholder (fixes #305)
+- Better favicon (fixes #306)
+- Add contribute.json endpoint (fixes #324)
+- Add link to Kinto record (fixes #286)
 
 
 1.1.2 (2017-12-20)
