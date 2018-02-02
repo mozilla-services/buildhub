@@ -3,7 +3,7 @@ Changelog
 
 This document describes changes between each past release.
 
-1.1.3 (unreleased)
+1.1.3 (2018-02-02)
 ------------------
 
 - Retry fetch JSON when status is not 200 (ref #327)
