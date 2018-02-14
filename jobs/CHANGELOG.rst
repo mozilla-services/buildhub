@@ -3,6 +3,14 @@ Changelog
 
 This document describes changes between each past release.
 
+1.1.4 (unreleased)
+------------------
+
+**Bug fixes**
+
+- Be more robust about skipping non-date folders when looking for
+  manifests (ref https://bugzilla.mozilla.org/show_bug.cgi?id=1437931)
+
 1.1.3 (2018-02-02)
 ------------------
 
