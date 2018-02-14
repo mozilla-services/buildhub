@@ -1,3 +1,4 @@
+import re
 import asyncio
 import json
 import logging
@@ -57,6 +58,24 @@ async def initialize_kinto(loop, kinto_client, bucket, collection):
                             force=False)
 
 
+# A regular expression corresponding to the date format in use in
+# delivery-firefox paths.
+DATE_RE = re.compile(r'\d{4}-\d{2}-\d{2}T\d{2}-\d{2}Z')
+
+
+def ends_with_date(prefix):
+    """Predicate to let us inspect prefixes such as:
+
+    public/inventories/net-mozaws-prod-delivery-firefox/delivery-firefox/2017-07-01T03-09Z/
+
+    while excluding those such as:
+
+    public/inventories/net-mozaws-prod-delivery-firefox/delivery-firefox/hive/
+    """
+    parts = prefix.strip('/').split('/')
+    return DATE_RE.match(parts[-1])
+
+
 async def list_manifest_entries(loop, s3_client, inventory):
     """Fetch the latest S3 inventory manifest, and the keys of every
     *.csv.gz file it contains.
@@ -72,10 +91,11 @@ async def list_manifest_entries(loop, s3_client, inventory):
     async for result in paginator.paginate(Bucket=BUCKET, Prefix=prefix, Delimiter='/'):
         # Take latest inventory.
         files = list(result.get('CommonPrefixes', []))
-        manifest_folders += [f['Prefix'] for f in files]
+        prefixes = [f['Prefix'] for f in files]
+        manifest_folders += [prefix for prefix in prefixes if ends_with_date(prefix)]
 
     # Download latest manifest.json
-    last_inventory = sorted(manifest_folders)[-2]  # -1 is data
+    last_inventory = sorted(manifest_folders)[-1]
     logger.info('Latest inventory is {}'.format(last_inventory))
     key = last_inventory + 'manifest.json'
     manifest = await s3_client.get_object(Bucket=BUCKET, Key=key)

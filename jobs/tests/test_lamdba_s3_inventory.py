@@ -9,10 +9,11 @@ class ListManifest(asynctest.TestCase):
     def setUp(self):
         class FakePaginator:
             async def paginate(self, *args, **kwargs):
-                yield {'CommonPrefixes': [{'Prefix': 'some-prefix/1/'}]}
-                yield {'CommonPrefixes': [{'Prefix': 'some-prefix/2/'}]}
-                yield {'CommonPrefixes': [{'Prefix': 'some-prefix/3/'},
+                yield {'CommonPrefixes': [{'Prefix': 'some-prefix/2017-01-02T03-05Z/'}]}
+                yield {'CommonPrefixes': [{'Prefix': 'some-prefix/2017-01-02T03-04Z/'}]}
+                yield {'CommonPrefixes': [{'Prefix': 'some-prefix/2017-01-02T03-06Z/'},
                                           {'Prefix': 'some-prefix/data/'}]}
+                yield {'CommonPrefixes': [{'Prefix': 'some-prefix/hive/'}]}
 
         class FakeStream:
             async def __aenter__(self):
@@ -29,7 +30,7 @@ class ListManifest(asynctest.TestCase):
                 return FakePaginator()
 
             async def get_object(self, Bucket, Key):
-                if Key.endswith('some-prefix/3/manifest.json'):
+                if Key.endswith('some-prefix/2017-01-02T03-06Z/manifest.json'):
                     return {'Body': FakeStream()}
 
         self.client = FakeClient()
