@@ -29,6 +29,7 @@ import {
   SideBar,
 } from "searchkit";
 
+import contribute_json from "./contribute.json";
 const KINTO_COLLECTION_URL = "https://buildhub.prod.mozaws.net/v1/buckets/build-hub/collections/releases/";
 
 const searchkit = new SearchkitManager(KINTO_COLLECTION_URL, {
@@ -184,6 +185,34 @@ const fullText = (query, options) => {
   };
 };
 
+
+class ProjectInfo extends React.PureComponent {
+
+  render() {
+    const {
+      repository: {
+        url: source,
+        license,
+      },
+      participate: {
+        docs: documentation,
+      },
+      bugs: {
+        report,
+      }
+    } = contribute_json;
+
+    return (
+      <div className="project-info">
+        <div><a href={documentation}>Documentation</a></div>
+        <div><a href={report}>Report a bug</a></div>
+        <div><a href={source} title={license}>Source</a></div>
+      </div>
+    )
+  }
+}
+
+
 class App extends Component {
   render() {
     return (
@@ -222,6 +251,7 @@ class App extends Component {
                   ?
                 </a>
               </div>
+              <ProjectInfo/>
             </TopBar>
 
             <LayoutBody>
