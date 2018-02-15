@@ -81,15 +81,12 @@ const HitsTable = ({ hits }) => {
                       source.product
                     )}
                   />
-                  <td>
-                    <a
-                      href={download.url}
-                      dangerouslySetInnerHTML={getHighlight(
-                        "target.version",
-                        target.version
-                      )}
-                    />
-                  </td>
+                  <td
+                    dangerouslySetInnerHTML={getHighlight(
+                      "target.version",
+                      target.version
+                    )}
+                  />
                   <td
                     dangerouslySetInnerHTML={getHighlight(
                       "target.platform",
@@ -109,7 +106,9 @@ const HitsTable = ({ hits }) => {
                     )}
                   />
                   <td>{source.tree}</td>
-                  <td>{filesize(download.size)}</td>
+                  <td>
+                    <a href={download.url}>{filesize(download.size)}</a>
+                  </td>
                   <td title={download.date}>
                     <a target="_blank" rel="noopener noreferrer" href={recordUrl}>
                       <time dateTime={download.date}>{download.date}</time>
