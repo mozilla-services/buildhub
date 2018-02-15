@@ -219,9 +219,9 @@ class ProjectInfo extends Component {
 
     return (
       <div className="project-info">
-        <div><a target="_blank" href={documentation}>Documentation</a></div>
-        <div><a target="_blank" href={report}>Report a bug</a></div>
-        <div><a target="_blank" href={source} title={license}>Source</a></div>
+        <div><a href={documentation}>Documentation</a></div>
+        <div><a href={report}>Report a bug</a></div>
+        <div><a href={source} title={license}>Source</a></div>
       </div>
     )
   }
