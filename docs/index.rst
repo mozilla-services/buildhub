@@ -32,6 +32,12 @@ An ElasticSearch endpoint is also available for more powerful queries:
 
 `More information in the Elasticsearch documentation <https://www.elastic.co/guide/en/elasticsearch/reference/current/search.html>`_
 
+Data License
+------------
+
+Since the information published on *Buildhub* is compiled from publicly available sources, the data is published in the `Public Domain <https://en.wikipedia.org/wiki/Public-domain_software>`_.
+
+
 Table of contents
 =================
 
