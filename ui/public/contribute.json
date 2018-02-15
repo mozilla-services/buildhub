@@ -15,6 +15,7 @@
         "report": "https://github.com/mozilla-services/buildhub/issues/new"
     },
     "urls": {
-        "prod": "https://mozilla-services.github.io/buildhub/"
+        "prod": "https://mozilla-services.github.io/buildhub/",
+        "stage": "https://mozilla-services.github.io/buildhub/stage/"
     }
 }
