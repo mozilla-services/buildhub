@@ -11,7 +11,19 @@ body {
 
 .elasticsearch-query-doc a {
   color: #fff;
-  padding: 20px 0 20px 15px;
+  padding: 20px 15px 20px 15px;
+}
+
+.project-info {
+  color: #fff;
+}
+.project-info > div {
+  display: inline-block;
+  margin-right: 20px;
+  margin-top: 7px;
+}
+.project-info a {
+  color: #fff;
 }
 
 .sk-panel__content {

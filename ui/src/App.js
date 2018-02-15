@@ -185,6 +185,49 @@ const fullText = (query, options) => {
   };
 };
 
+
+class ProjectInfo extends Component {
+  state = { loading: true };
+
+  async componentDidMount() {
+    const resp = await fetch("contribute.json")
+    const contrib = await resp.json();
+    this.setState({ loading: false, contrib });
+  }
+
+  render() {
+    const { loading, contrib } = this.state;
+    if (loading) {
+      return null;
+    }
+    const {
+      name,
+      description,
+      repository: {
+        url: source,
+        license,
+      },
+      participate: {
+        docs: documentation,
+      },
+      bugs: {
+        report,
+      }
+    } = contrib;
+
+    document.title = `${name} - ${description}`;
+
+    return (
+      <div className="project-info">
+        <div><a target="_blank" href={documentation}>Documentation</a></div>
+        <div><a target="_blank" href={report}>Report a bug</a></div>
+        <div><a target="_blank" href={source} title={license}>Source</a></div>
+      </div>
+    )
+  }
+}
+
+
 class App extends Component {
   render() {
     return (
@@ -223,6 +266,7 @@ class App extends Component {
                   ?
                 </a>
               </div>
+              <ProjectInfo/>
             </TopBar>
 
             <LayoutBody>
