@@ -22,4 +22,6 @@ The current procedure is:
 * Bump version in `jobs/setup.py`
 * `git tag x.y.z`
 * `git push --tags origin`
+* `make lambda.zip`
+* Add a release on Github with the lambda.zip attached
 * Open a ticket like https://bugzilla.mozilla.org/show_bug.cgi?id=1426340 to get it deployed
