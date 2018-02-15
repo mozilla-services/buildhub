@@ -18,7 +18,7 @@ Builds XYZ are missing, is it normal?
 
 It's never normal. Every missing data should be considered as bug and reported.
 
-We have a cron jobs that back fills the data when a bug is fixed.
+We have a cron job that backfills the data when a bug is fixed.
 
 
 How can I help you triage/debug?
