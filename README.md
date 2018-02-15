@@ -14,7 +14,8 @@ Apache 2
 ## Releasing
 
 We don't use `zest.releaser` right now because of some problems with
-releasing a package that is not at the root of the repo (`jobs/`), but
+releasing a package that is not at the root of the repo (`jobs/`), and
+because we have no interest in uploading this project to PyPI, but
 this could change if we figure out how.
 
 The current procedure is:
