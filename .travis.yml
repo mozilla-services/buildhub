@@ -16,7 +16,7 @@ matrix:
         - kinto init --backend memory
       before_script:
         - kinto start &
-        - sleep 3; kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
+        - ./bin/wait-for-it.sh localhost:8888 && kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
       script:
         - cd jobs; tox -e py36
       after_success:
