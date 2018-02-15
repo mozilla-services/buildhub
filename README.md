@@ -30,4 +30,6 @@ The current procedure is:
 * `git push --tags origin`
 * `make lambda.zip`
 * Add a release on Github with the lambda.zip attached
-* Open a ticket like https://bugzilla.mozilla.org/show_bug.cgi?id=1426340 to get it deployed
+* [Click here][bugzilla-link] to open a ticket to get it deployed
+
+[bugzilla-link]: https://bugzilla.mozilla.org/enter_bug.cgi?comment=Could%20you%20please%20update%20the%20lambda%20function%20for%20Buildhub%20with%20the%20following%20one%3F%0D%0A%0D%0A%5BInsert%20a%20short%20description%20of%20the%20changes%20here.%5D%0D%0A%0D%0Ahttps%3A%2F%2Fgithub.com%2Fmozilla-services%2Fbuildhub%2Freleases%2Ftag%2FX.Y.Z%0D%0A%0D%0Ahttps%3A%2F%2Fgithub.com%2Fmozilla-services%2Fbuildhub%2Freleases%2Fdownload%2FX.Y.Z%2Fbuildhub-lambda-X.Y.Z.zip%0D%0A%0D%0AThanks%21&component=Operations%3A%20Storage&product=Cloud%20Services&qa_contact=chartjes%40mozilla.com&short_desc=Please%20deploy%20buildhub%20lambda%20function%20X.Y.Z
