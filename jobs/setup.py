@@ -20,7 +20,7 @@ REQUIREMENTS = [
     "aiohttp<=2.3.0",  # Because of aiobotocore
     "aiobotocore",
     "backoff",
-    "kinto-http",
+    "kinto-http>=9.1.1",  # Retry 409
     "kinto-wizard >= 2.2.0",  # async load.
     "raven",
 ]
