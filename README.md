@@ -21,6 +21,11 @@ this could change if we figure out how.
 The current procedure is:
 
 * Bump version in `jobs/setup.py`
+* Update the release date in `jobs/CHANGELOG.rst`
+* `make build-dependencies`
+* `git commit -am "Bump x.y.z"`
+* Open PR, wait for it to become green
+* Merge PR
 * `git tag x.y.z`
 * `git push --tags origin`
 * `make lambda.zip`
