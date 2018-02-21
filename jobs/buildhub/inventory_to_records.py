@@ -104,8 +104,10 @@ async def fetch_nightly_metadata(session, record):
     if nightly_url in _nightly_metadata:
         return _nightly_metadata[nightly_url]
 
+    extensions = '|'.join(FILE_EXTENSIONS)
+
     try:
-        metadata_url = re.sub('\.({})$'.format(FILE_EXTENSIONS), '.json', nightly_url)
+        metadata_url = re.sub('\.({})$'.format(extensions), '.json', nightly_url)
         metadata = await fetch_json(session, metadata_url)
         _nightly_metadata[nightly_url] = metadata
         return metadata
@@ -115,7 +117,7 @@ async def fetch_nightly_metadata(session, record):
         try:
             # e.g. https://archive.mozilla.org/pub/firefox/nightly/2011/05/
             #      2011-05-05-03-mozilla-central/firefox-6.0a1.en-US.mac.txt
-            old_metadata_url = re.sub('\.({})$'.format(FILE_EXTENSIONS), '.txt', nightly_url)
+            old_metadata_url = re.sub('\.({})$'.format(extensions), '.txt', nightly_url)
             async with session.get(old_metadata_url) as response:
                 old_metadata = await response.text()
                 m = re.search('^(\d+)\n(http.+)/rev/(.+)$', old_metadata)
@@ -167,7 +169,7 @@ async def fetch_release_candidate_metadata(session, record):
     if product == 'devedition':
         product = 'firefox'
     if product == 'fennec':
-        metadata_url = re.sub('\.({})$'.format(FILE_EXTENSIONS), '.json', rc_url)
+        metadata_url = re.sub('\.({})$'.format('|'.join(FILE_EXTENSIONS)), '.json', rc_url)
     else:
         major_version = record['target']['version'].split('rc')[0]
         parts = rc_url.split('/')
@@ -324,8 +326,11 @@ async def csv_to_records(loop, stdin, skip_incomplete=True):
 
     def deduplicate_entries(entries):
         # Windows releases are published as both .zip and .exe files.
-        # Deduplicate these (keep .zip if .exe is present, else .exe only).
+        # Deduplicate these (keep .exe only).
         # Some old Linux versions (1.5b2) were published with installer.tar.gz.
+        filtered = [e for e in entries if e['Key'].endswith('.exe')]
+        if len(filtered) > 0:
+            entries = filtered
         longer_first = sorted(entries, key=lambda e: len(e['Key']), reverse=True)
         deduplicate = {
             e['Key'].lower()

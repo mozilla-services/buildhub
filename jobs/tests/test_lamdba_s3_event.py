@@ -79,7 +79,7 @@ class FromArchiveFirefox(BaseTest):
         },
         'pub/firefox/candidates/54.0-candidates/build2/win64/en-US/': {
             'prefixes': [], 'files': [
-                {'name': 'firefox-54.0.zip'},
+                {'name': 'Firefox Setup 54.0.exe'},
                 {'name': 'firefox-54.0.json'},
             ]
         },
@@ -246,7 +246,7 @@ class FromArchiveFirefox(BaseTest):
 
     async def test_from_nightly_archive(self):
         event = fake_event('pub/firefox/nightly/2017/08/2017-08-05-10-03-34-'
-                           'mozilla-central-l10n/firefox-57.0a1.ru.win32.zip')
+                           'mozilla-central-l10n/firefox-57.0a1.ru.win32.installer.exe')
         await lambda_s3_event.main(self.loop, event)
 
         self.mock_create_record.assert_called_with(
@@ -278,8 +278,9 @@ class FromArchiveFirefox(BaseTest):
                 },
                 'download': {
                     'url': 'https://archive.mozilla.org/pub/firefox/nightly/2017/08/'
-                           '2017-08-05-10-03-34-mozilla-central-l10n/firefox-57.0a1.ru.win32.zip',
-                    'mimetype': 'application/zip',
+                           '2017-08-05-10-03-34-mozilla-central-l10n/firefox-57.0a1.ru'
+                           '.win32.installer.exe',
+                    'mimetype': 'application/msdos-windows',
                     'size': 51001024,
                     'date': '2017-08-08T17:06:52Z'
                 },
@@ -541,9 +542,13 @@ class FromNightlyMetadataFirefox(BaseTest):
                 'last_modified': '2017-08-03T20:55:11Z',
                 'size': 34138800
             }, {
-                'name': 'firefox-57.0a1.en-US.win32.zip',
+                'name': 'firefox-57.0a1.en-US.win32.installer.exe',
                 'last_modified': '2017-08-03T20:55:11Z',
                 'size': 34138800
+            }, {
+                'name': 'firefox-57.0a1.en-US.win32.zip',
+                'last_modified': '2017-08-03T20:55:08Z',
+                'size': 50138800
             }, {
                 'name': 'firefox-57.0a1.en-US.mac.dmg',
                 'last_modified': '2017-08-03T20:55:11Z',
@@ -829,8 +834,8 @@ class FromNightlyMetadataFirefox(BaseTest):
                 'download': {
                     'url': 'https://archive.mozilla.org/pub/firefox/nightly/2017/08/'
                            '2017-08-05-10-03-34-mozilla-central/'
-                           'firefox-57.0a1.en-US.win32.zip',
-                    'mimetype': 'application/zip',
+                           'firefox-57.0a1.en-US.win32.installer.exe',
+                    'mimetype': 'application/msdos-windows',
                     'size': 34138800,
                     'date': '2017-08-03T20:55:11Z'
                 },

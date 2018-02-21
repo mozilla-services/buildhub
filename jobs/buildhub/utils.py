@@ -7,7 +7,7 @@ import re
 ALL_PRODUCTS = ('firefox', 'thunderbird', 'mobile', 'devedition')
 ARCHIVE_URL = 'https://archive.mozilla.org/'
 DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
-FILE_EXTENSIONS = 'zip|tar.gz|tar.bz2|dmg|apk|exe'
+FILE_EXTENSIONS = ('zip', 'tar.gz', 'tar.bz2', 'dmg', 'apk', 'exe')
 KNOWN_MIMETYPES = {
     'apk': 'application/vnd.android.package-archive',
     'bz2': 'application/x-bzip2',
@@ -159,13 +159,18 @@ def is_build_url(product, url):
     if re_exclude.match(url):
         return False
 
+    # Only .exe for Windows.
+    extensions = list(FILE_EXTENSIONS)
+    if 'win' in url:
+        extensions.remove('zip')
+
     if product == 'devedition':
         product = 'firefox'
     if product == 'mobile':
         product = 'fennec'
     filename = os.path.basename(url)
     match_filename = filename.replace(' ', '-').lower()
-    re_filename = re.compile('{}-(.+)({})$'.format(product, FILE_EXTENSIONS))
+    re_filename = re.compile('{}-(.+)({})$'.format(product, '|'.join(extensions)))
     re_exclude = re.compile('.+(sdk|tests|crashreporter|stub|gtk2.+xft|source|asan)')
     return re_filename.match(match_filename) and not re_exclude.match(match_filename)
 

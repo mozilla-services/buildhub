@@ -202,7 +202,7 @@ class FetchRCMetadata(asynctest.TestCase):
                 self.session, {
                     'download': {
                         'url': 'http://server.org/54.0-candidates/build3/'
-                               'win64/en-US/firefox-54.0.zip'
+                               'win64/en-US/Firefox%20Setup%2054.0.exe'
                     },
                     'target': {'version': '54.0rc3'},
                     'source': {'product': 'firefox'}
@@ -266,7 +266,7 @@ class FetchRCMetadata(asynctest.TestCase):
                 self.session, {
                     'download': {
                         'url': 'http://server.org/pub/devedition/candidates/'
-                               '55.0b1-candidates/build5/win64/pt-BR/firefox-55.0b1.zip'
+                               '55.0b1-candidates/build5/win64/pt-BR/Firefox%20Setup%2055.0b1.exe'
                     },
                     'target': {'version': '55.0b1'},
                     'source': {'product': 'devedition'}
@@ -642,11 +642,11 @@ class CSVToRecords(asynctest.TestCase):
                 'id': 'firefox_nightly_2017-06-16-03-02-07_56-0a1_win32_ach',
                 'download': {
                     'date': '2017-06-16T03:02:07Z',
-                    'mimetype': 'application/zip',
+                    'mimetype': 'application/msdos-windows',
                     'size': 45678,
                     'url': ('https://archive.mozilla.org/pub/firefox/nightly/'
                             '2017/06/2017-06-16-03-02-07-mozilla-central-l10n/'
-                            'firefox-56.0a1.ach.win32.zip')
+                            'firefox-56.0a1.ach.win32.installer.exe')
                 },
                 'source': {
                     'product': 'firefox'
