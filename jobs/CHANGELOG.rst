@@ -6,7 +6,9 @@ This document describes changes between each past release.
 1.1.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+**Bug fixes**
+
+- Now pick Windows .exe archives only (fixes #338)
 
 
 1.1.4 (2018-02-15)

@@ -124,11 +124,11 @@ class CsvToRecordsTest(asynctest.TestCase):
             'data': {
                 'id': 'firefox_beta_55-0b9rc2_win64_zh-tw',
                 'download': {
-                    'date': '2017-07-13T23:37:21Z',
-                    'mimetype': 'application/zip',
-                    'size': 53251778,
+                    'date': '2017-07-13T23:37:23Z',
+                    'mimetype': 'application/msdos-windows',
+                    'size': 37219504,
                     'url': 'https://archive.mozilla.org/pub/firefox/candidates/'
-                           '55.0b9-candidates/build2/win64/zh-TW/firefox-55.0b9.zip'
+                           '55.0b9-candidates/build2/win64/zh-TW/Firefox Setup 55.0b9.exe'
                 },
                 'build': {
                     'id': '20170713130618',
@@ -174,8 +174,8 @@ class CsvToRecordsTest(asynctest.TestCase):
                 },
                 'download': {
                     'url': 'https://archive.mozilla.org/pub/devedition/candidates/'
-                           '55.0b1-candidates/build5/win64/pt-BR/firefox-55.0b1.zip',
-                    'mimetype': 'application/zip',
+                           '55.0b1-candidates/build5/win64/pt-BR/Firefox Setup 55.0b1.exe',
+                    'mimetype': 'application/msdos-windows',
                     'size': 53718907,
                     'date': '2017-06-14T00:41:56Z'
                 },

@@ -839,6 +839,12 @@ WRONG_RELEASE_FILENAMES = [
     ('firefox', '/pub/firefox/releases/1.0rc1/Firefox%20Setup %281.0rc1, ca-AD%29.exe'),
     ('thunderbird', 'pub/thunderbird/nightly/2017/12/2017-12-11-03-02-03-comm-esr52/'
                     'thunderbird-52.0.en-US.win32.zip'),
+    ('firefox', 'pub/firefox/nightly/2017/06/2017-06-16-03-02-07-mozilla-central-l10n/'
+                'firefox-56.0a1.ach.win32.installer-stub.exe'),
+    # Only .exe for Windows
+    ('firefox', 'pub/firefox/nightly/2017/06/2017-06-16-03-02-07-mozilla-central-l10n/'
+                'firefox-56.0a1.ach.win32.zip'),
+    ('firefox', 'pub/firefox/candidates/55.0b9-candidates/build2/win64/zh-TW/firefox-55.0b9.zip'),
 ]
 
 
