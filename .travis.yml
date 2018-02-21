@@ -1,22 +1,30 @@
+dist: trusty
 language: python
 python: 3.6
 cache: pip
 matrix:
   include:
     - language: python
+      env: UNIT_TESTS
       install:
         - pip install tox
       script:
         - cd jobs; tox -e flake8
 
     - language: python
+      env: FUNCTIONAL_TESTS
+      before_install:
+        - sudo add-apt-repository ppa:jonathonf/curl -y
+        - sudo apt-get update -q
+        - sudo apt-get install curl -y
       install:
         - pip install tox
         - pip install kinto kinto-wizard
         - kinto init --backend memory
       before_script:
         - kinto start &
-        - sleep 3; kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
+        - curl --version
+        - curl --retry 3 --retry-connrefused http://localhost:8888/v1/  && kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
       script:
         - cd jobs; tox -e py36
       after_success:
@@ -25,6 +33,7 @@ matrix:
         - coveralls
 
     - language: node_js
+      env: FRONTEND
       node_js: 7
       install:
         - cd ui
