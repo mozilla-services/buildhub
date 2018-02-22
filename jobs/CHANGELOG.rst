@@ -3,7 +3,7 @@ Changelog
 
 This document describes changes between each past release.
 
-1.1.5 (unreleased)
+1.1.5 (2018-02-22)
 ------------------
 
 **Bug fixes**
@@ -19,6 +19,7 @@ This document describes changes between each past release.
 - Be more robust about skipping non-date folders when looking for
   manifests (ref https://bugzilla.mozilla.org/show_bug.cgi?id=1437931)
 - Retry requests on ``409 Conflict``
+
 
 1.1.3 (2018-02-02)
 ------------------
