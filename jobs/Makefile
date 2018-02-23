@@ -6,3 +6,4 @@ build-requirements:
 	$(TEMPDIR)/bin/pip install -U pip
 	$(TEMPDIR)/bin/pip install -Ue .
 	$(TEMPDIR)/bin/pip freeze | grep -v -- '-e' > requirements.txt
+	hashin $(shell cat requirements.txt | tr '\n' ' ')

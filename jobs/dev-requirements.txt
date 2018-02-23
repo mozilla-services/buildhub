@@ -1,6 +1,7 @@
 aioresponses
 asynctest
 flake8
+hashin
 pytest==3.3.2
 pytest-cache
 pytest-cover
