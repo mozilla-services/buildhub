@@ -1,8 +1,8 @@
-aioresponses
-asynctest
-flake8
+aioresponses==0.4.0
+asynctest==0.11.1
+flake8==3.5.0
 pytest==3.3.2
-pytest-cache
-pytest-cover
-pytest-sugar
-tox
+pytest-cache==1.0
+pytest-cover==3.0.0
+pytest-sugar==0.9.1
+tox==2.9.1
