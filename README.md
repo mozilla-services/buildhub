@@ -17,7 +17,7 @@ Apache 2
 2. Install all the dependencies:
 
 ```sh
-pip install -r jobs/requirements/default.txt -c jobs/requirements/constraints.txt -r jobs/requirements/dev.txt
+pip install -r jobs/requirements/default.txt -r jobs/requirements/dev.txt -c jobs/requirements/constraints.txt
 ```
 
 To run tests, install `tox` first: `pip install tox`. Now you can run tests:
