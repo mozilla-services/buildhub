@@ -42,7 +42,6 @@ The current procedure is:
 
 * Bump version in `jobs/setup.py`
 * Update the release date in `jobs/CHANGELOG.rst`
-* `cd jobs && make build-requirements`
 * `git commit -am "Bump x.y.z"`
 * Open PR, wait for it to become green
 * Merge PR
