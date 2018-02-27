@@ -75,7 +75,7 @@ jobs:
             docker info
             # cp .env-dist .env
             # build jobs containers
-            make docker-build
+            make build
 
       - run:
           name: Run tests

@@ -20,7 +20,7 @@ help:
 # 	$(VIRTUALENV) $(VENV) --python=python3.6
 
 .docker-build:
-	make docker-build
+	make build
 
 clean:
 	rm -fr lambda.zip
