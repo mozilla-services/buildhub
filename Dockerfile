@@ -12,8 +12,7 @@ WORKDIR /app
 
 RUN \
     make virtualenv && \
-    .venv/bin/pip install --constraint jobs/requirements.txt jobs/ && \
-    .venv/bin/pip freeze | grep -v -- 'buildhub' > dependencies.txt
+    .venv/bin/pip install -r jobs/requirements/default.txt -c jobs/requirements/constraints.txt
 
 RUN groupadd -g 10001 app && \
     useradd -M -u 10001 -g 10001 -G app -d /app -s /sbin/nologin app

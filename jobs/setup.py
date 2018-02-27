@@ -16,15 +16,6 @@ README = read_file('README.rst')
 CHANGELOG = read_file('CHANGELOG.rst')
 CONTRIBUTORS = read_file('CONTRIBUTORS.rst')
 
-REQUIREMENTS = [
-    "aiohttp<=2.3.0",  # Because of aiobotocore
-    "aiobotocore",
-    "backoff",
-    "kinto-http>=9.1.1",  # Retry 409
-    "kinto-wizard >= 2.2.0",  # async load.
-    "raven",
-]
-
 ENTRY_POINTS = {
     'console_scripts': [
         'to-kinto = buildhub.to_kinto:run',
@@ -57,5 +48,8 @@ setup(name='buildhub',
       package_data={'buildhub': ['initialization.yml']},
       include_package_data=True,
       zip_safe=False,
-      install_requires=REQUIREMENTS,
+      # Use
+      #  `pip -r requirements/default.txt -c requirements/constraints.txt`
+      # instead.
+      install_requires=[],
       entry_points=ENTRY_POINTS)

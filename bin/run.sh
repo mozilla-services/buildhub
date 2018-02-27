@@ -21,8 +21,8 @@ case $1 in
     ;;
   test)
     python3 -m venv /tmp/tests
-    /tmp/tests/bin/pip install --constraint dependencies.txt jobs/
-    /tmp/tests/bin/pip install -r jobs/dev-requirements.txt
+    /tmp/tests/bin/pip install -e jobs/
+    /tmp/tests/bin/pip install -r jobs/requirements/default.txt -r jobs/requirements/dev.txt -c jobs/requirements/constraints.txt
     /tmp/tests/bin/py.test --ignore=jobs/tests/test_lamdba_s3_event_functional.py --override-ini="cache_dir=/tmp/tests" jobs/tests
     ;;
   lambda.zip)
@@ -38,6 +38,6 @@ case $1 in
     latest-inventory-to-kinto ${@:2}
     ;;
   *)
-    usage
+    exec "$@"
     ;;
 esac

@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/mozilla-services/buildhub.svg?branch=master)](https://travis-ci.org/mozilla-services/buildhub)
 
-*Buildhub* aims to provide a public database of comprehensive information about releases and builds.
+_Buildhub_ aims to provide a public database of comprehensive information about releases and builds.
 
 * [Online catalog](https://mozilla-services.github.io/buildhub/)
 * [Web API documentation](https://buildhub.readthedocs.io)
@@ -10,6 +10,26 @@
 ## Licence
 
 Apache 2
+
+## Development
+
+1. Create a `virtualenv` based on Python 3.6
+2. Install all the dependencies:
+
+```sh
+pip install -r jobs/requirements/default.txt -r jobs/requirements/dev.txt -c jobs/requirements/constraints.txt
+```
+
+To run tests, install `tox` first: `pip install tox`. Now you can run tests:
+
+```sh
+# To run the functiona unit tests
+tox -e py36
+# To check for linting
+tox -e flake8
+```
+
+TODO: Wanna mention how to run the unit tests without the functional part.
 
 ## Releasing
 
@@ -22,7 +42,6 @@ The current procedure is:
 
 * Bump version in `jobs/setup.py`
 * Update the release date in `jobs/CHANGELOG.rst`
-* `cd jobs && make build-requirements`
 * `git commit -am "Bump x.y.z"`
 * Open PR, wait for it to become green
 * Merge PR
