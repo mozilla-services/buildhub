@@ -9,3 +9,4 @@ docs/_build/
 lambda.zip
 version.json
 .bash_history
+buildhub-lambda-*.zip

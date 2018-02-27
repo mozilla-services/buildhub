@@ -20,15 +20,19 @@ case $1 in
     cat version.json
     ;;
   test)
-    # python jobs/setup.py develop
-    # python3 -m venv /tmp/tests
-    # pip install -e jobs/
-    # /tmp/tests/bin/pip install -r jobs/requirements/default.txt -r jobs/requirements/dev.txt -c jobs/requirements/constraints.txt
     py.test --ignore=jobs/tests/test_lamdba_s3_event_functional.py --override-ini="cache_dir=/tmp/tests" jobs/tests
     ;;
   lambda.zip)
-    cd .venv/lib/python3.6/site-packages/
+    pip install virtualenv
+    rm -fr .venv
+    virtualenv .venv
+    source .venv/bin/activate
+    pip install -e jobs
+    pip install -r jobs/requirements/default.txt -c jobs/requirements/constraints.txt
+    pushd .venv/lib/python3.6/site-packages/
     zip -r /tmp/lambda.zip *
+    popd
+    cp /tmp/lambda.zip .
     ;;
   initialize-kinto)
     source .venv/bin/activate
