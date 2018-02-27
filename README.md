@@ -31,6 +31,11 @@ tox -e flake8
 
 TODO: Wanna mention how to run the unit tests without the functional part.
 
+## Continuous Integration
+
+We use [CircleCI](https://circleci.com/gh/mozilla-services/buildhub)
+for all continous integration.
+
 ## Releasing
 
 We don't use `zest.releaser` right now because of some problems with
