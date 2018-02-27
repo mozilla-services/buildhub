@@ -135,20 +135,20 @@ jobs:
       # - setup_remote_docker XXX will this enable caching?
 
       - run:
-        name: "Checking Versions"
-        command: |
-          node --version
-          npm --version
+          name: "Checking Versions"
+          command: |
+            node --version
+            npm --version
 
       - run:
-        name: Install frontend dependencies
-        command: |
-          npm install
+          name: Install frontend dependencies
+          command: |
+            npm install
 
       - run:
-        name: Build frontend
-        command: |
-          npm run build
+          name: Build frontend
+          command: |
+            npm run build
 
 workflows:
   version: 2
