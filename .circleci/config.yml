@@ -173,3 +173,7 @@ workflows:
       - run_lintcheck:
           requires:
             - checkout_code
+      - frontend:
+          filters:
+            tags:
+              only: /.*/
