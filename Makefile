@@ -6,8 +6,8 @@ SPHINX_BUILDDIR = docs/_build
 
 help:
 	@echo "  clean                       delete local files"
-	@echo "  docker-build                build the Docker™ image"
-	@echo "  docker-test                 run the tests from within the container"
+	@echo "  build                       build the Docker™ image"
+	@echo "  test                        run the tests from within the container"
 	@echo "  lambda.zip                  build lambda.zip from within the container"
 	@echo "  lintcheck                   run lint checking (i.e. flake8)"
 	@echo "  upload-to-s3                upload lambda.zip to AWS"
@@ -26,16 +26,16 @@ clean:
 	rm -fr lambda.zip
 	rm -fr .docker-build
 
-docker-build:
+build:
 	echo "{\"name\":\"buildhub\",\"commit\":`git rev-parse HEAD`\"}" > version.json
 	docker build -t mozilla/buildhub .
 	touch .docker-build
 
-docker-test:
+test:
 	# docker run -it mozilla/buildhub test
 	docker run -v `pwd`:/app -it app test
 
-lambda.zip: docker-build
+lambda.zip: .docker-build
 	docker run -v `pwd`:/app --user 0 -it app lambda.zip
 	cp lambda.zip buildhub-lambda-`git describe`.zip
 
