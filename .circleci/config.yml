@@ -78,7 +78,7 @@ jobs:
             make build
 
       - run:
-          name: Run tests
+          name: Run unit tests
           working_directory: ~/jobs
           command: |
             # cp .env-dist .env
@@ -125,6 +125,27 @@ jobs:
           working_directory: ~/jobs
           command: |
             make lintcheck
+
+frontend:
+  docker:
+    - image: node:8.0
+  working_directory: ~/ui
+  steps:
+    - run:
+      name: "Checking Versions"
+      command: |
+        node --version
+        npm --version
+
+    - run:
+      name: Install frontend dependencies
+      command: |
+        npm install
+
+    - run:
+      name: Build frontend
+      command: |
+        npm run build
 
 workflows:
   version: 2
