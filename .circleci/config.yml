@@ -143,13 +143,13 @@ jobs:
       - run:
           name: Install frontend dependencies
           command: |
-            cd ui
+            ls -l
             npm install
 
       - run:
           name: Build frontend
           command: |
-            cd ui
+            ls -l
             npm run build
 
 workflows:
