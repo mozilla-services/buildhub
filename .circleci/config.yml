@@ -178,4 +178,6 @@ workflows:
       - run_lintcheck:
           requires:
             - checkout_code
-      - frontend
+      - frontend:
+          requires:
+            - checkout_code
