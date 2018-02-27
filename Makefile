@@ -9,22 +9,31 @@ help:
 	@echo "  docker-build                build the Docker™ image"
 	@echo "  docker-test                 run the tests from within the container"
 	@echo "  lambda.zip                  build lambda.zip from within the container"
+	@echo "  lintcheck                   run lint checking (i.e. flake8)"
 	@echo "  upload-to-s3                upload lambda.zip to AWS"
 	@echo "  docs                        build the project docs"
+	@echo "  shell                       enter a bash shell with volume mount"
 
-virtualenv: $(PYTHON)
-$(PYTHON):
-	$(VIRTUALENV) $(VENV) --python=python3.6
+#
+# virtualenv: $(PYTHON)
+# $(PYTHON):
+# 	$(VIRTUALENV) $(VENV) --python=python3.6
+
+.docker-build:
+	make docker-build
 
 clean:
-	rm -fr $(VENV) lambda.zip
+	rm -fr lambda.zip
+	rm -fr .docker-build
 
 docker-build:
 	echo "{\"name\":\"buildhub\",\"commit\":`git rev-parse HEAD`\"}" > version.json
 	docker build -t mozilla/buildhub .
+	touch .docker-build
 
 docker-test:
-	docker run -it mozilla/buildhub test
+	# docker run -it mozilla/buildhub test
+	docker run -v `pwd`:/app -it app test
 
 lambda.zip: docker-build
 	docker run -v `pwd`:/app --user 0 -it app lambda.zip
@@ -42,3 +51,9 @@ docs: install-docs
 	$(VENV)/bin/sphinx-build -a -W -n -b html -d $(SPHINX_BUILDDIR)/doctrees docs $(SPHINX_BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(SPHINX_BUILDDIR)/html/index.html"
+
+lintcheck: .docker-build
+	docker run -v `pwd`:/app -it app lintcheck
+
+shell: .docker-build
+	docker run -v `pwd`:/app -it app bash

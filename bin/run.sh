@@ -2,10 +2,11 @@
 set -eo pipefail
 
 usage() {
-  echo "usage: ./bin/run.sh version|test|lambda.zip|initialize-kinto|latest-inventory-to-kinto"
+  echo "usage: ./bin/run.sh version|test|lintcheck|lambda.zip|initialize-kinto|latest-inventory-to-kinto"
   echo ""
   echo "    version                     Show current version"
   echo "    test                        Run tests"
+  echo "    lintcheck                   Run flake8 on all code"
   echo "    lambda.zip                  Build Zip archive from buildhub package"
   echo "    initialize-kinto            Initialize a Kinto server for buildhub"
   echo "    latest-inventory-to-kinto   Load latest S3 inventory to a Kinto server"
@@ -41,6 +42,9 @@ case $1 in
   latest-inventory-to-kinto)
     source .venv/bin/activate
     latest-inventory-to-kinto ${@:2}
+    ;;
+  lintcheck)
+    flake8 jobs/buildhub jobs/tests
     ;;
   *)
     exec "$@"

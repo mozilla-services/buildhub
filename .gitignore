@@ -10,3 +10,4 @@ lambda.zip
 version.json
 .bash_history
 buildhub-lambda-*.zip
+.docker-build
