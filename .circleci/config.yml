@@ -126,26 +126,29 @@ jobs:
           command: |
             make lintcheck
 
-frontend:
-  docker:
-    - image: node:8.0
-  working_directory: ~/ui
-  steps:
-    - run:
-      name: "Checking Versions"
-      command: |
-        node --version
-        npm --version
+  frontend:
+    docker:
+      - image: node:8.0
+    working_directory: ~/ui
+    steps:
 
-    - run:
-      name: Install frontend dependencies
-      command: |
-        npm install
+      # - setup_remote_docker XXX will this enable caching?
 
-    - run:
-      name: Build frontend
-      command: |
-        npm run build
+      - run:
+        name: "Checking Versions"
+        command: |
+          node --version
+          npm --version
+
+      - run:
+        name: Install frontend dependencies
+        command: |
+          npm install
+
+      - run:
+        name: Build frontend
+        command: |
+          npm run build
 
 workflows:
   version: 2
