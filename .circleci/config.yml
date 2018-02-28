@@ -105,7 +105,7 @@ jobs:
       - run:
           name: Install essential packages
           command: |
-            apt-get update && apt-get install -y ca-certificates curl make
+            apt-get update && apt-get install -y ca-certificates make git
 
       - restore_cache:
           keys:
