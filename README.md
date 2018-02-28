@@ -13,23 +13,9 @@ Apache 2
 
 ## Development
 
-1. Create a `virtualenv` based on Python 3.6
-2. Install all the dependencies:
-
-```sh
-pip install -r jobs/requirements/default.txt -r jobs/requirements/dev.txt -c jobs/requirements/constraints.txt
-```
-
-To run tests, install `tox` first: `pip install tox`. Now you can run tests:
-
-```sh
-# To run the functiona unit tests
-tox -e py36
-# To check for linting
-tox -e flake8
-```
-
-TODO: Wanna mention how to run the unit tests without the functional part.
+1. Install Docker
+2. To run tests: `make test`
+3. To lint check Python code: `make lintcheck`
 
 ## Continuous Integration
 
