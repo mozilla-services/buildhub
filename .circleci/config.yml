@@ -131,8 +131,9 @@ jobs:
       - image: node:8.0
     # working_directory: ~
     steps:
+      - checkout
 
-      - setup_remote_docker
+      # - setup_remote_docker
 
       - run:
           name: "Checking Versions"
@@ -178,6 +179,4 @@ workflows:
       - run_lintcheck:
           requires:
             - checkout_code
-      - frontend:
-          requires:
-            - checkout_code
+      - frontend
