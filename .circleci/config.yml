@@ -129,7 +129,6 @@ jobs:
   frontend:
     docker:
       - image: node:8.0
-    working_directory: ~/ui
     steps:
       - checkout
 
@@ -142,6 +141,7 @@ jobs:
       - run:
           name: Install frontend dependencies
           command: |
+            pwd
             ls -l
             cd ui
             ls -l
