@@ -143,12 +143,16 @@ jobs:
           name: Install frontend dependencies
           command: |
             ls -l
+            cd ui
+            ls -l
             npm install
 
       - run:
           name: Build frontend
           command: |
-            ls -l
+            pwd
+            cd ui
+            pwd
             npm run build
 
 workflows:
