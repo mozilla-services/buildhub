@@ -17,7 +17,7 @@ ARCHIVE_URL_INFOS = [
      'https://archive.mozilla.org/pub/firefox/candidates/55.0-candidates/win64/fr/'),
 ]
 
-#NOT PEP8
+
 @pytest.mark.parametrize('info,expected_record', ARCHIVE_URL_INFOS)
 def test_archive_url(info, expected_record):
     assert archive_url(*info) == expected_record
