@@ -129,11 +129,9 @@ jobs:
   frontend:
     docker:
       - image: node:8.0
-    # working_directory: ~
+    working_directory: ~/ui
     steps:
       - checkout
-
-      # - setup_remote_docker
 
       - run:
           name: "Checking Versions"
