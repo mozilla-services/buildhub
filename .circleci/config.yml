@@ -46,13 +46,6 @@ jobs:
             tar -xz -C /tmp -f /tmp/docker-$VER.tgz
             mv /tmp/docker/* /usr/bin
 
-      # - run:
-      #     name: Install Docker Compose
-      #     command: |
-      #       set -x
-      #       curl -L https://github.com/docker/compose/releases/download/1.16.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
-      #       chmod +x /usr/local/bin/docker-compose
-
       - setup_remote_docker:
           version: 17.09.0-ce
 
@@ -68,18 +61,22 @@ jobs:
             "$CIRCLE_BUILD_URL" > version.json
 
       - run:
-          name: Build Docker images
+          name: Build Docker image
           command: |
             docker info
-            # cp .env-dist .env
-            # build jobs containers
-            make build
+            pwd
+            ls -l
+            pwd
+            docker build -t mozilla/buildhub .
 
       - run:
           name: Run unit tests
           command: |
-            # cp .env-dist .env
-            make test
+            docker info
+            pwd
+            ls -l
+            pwd
+            docker run -it mozilla/buildhub test
 
 
       # XXX This is likely to be wrong. Check with old circle.yml file

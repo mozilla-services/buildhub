@@ -33,7 +33,7 @@ build:
 
 test:
 	# docker run -it mozilla/buildhub test
-	docker run -v `pwd`:/app -it app test
+	docker run -v `pwd`:/app -it mozilla/buildhub test
 
 lambda.zip: .docker-build
 	docker run -v `pwd`:/app --user 0 -it app lambda.zip
