@@ -129,10 +129,10 @@ jobs:
   frontend:
     docker:
       - image: node:8.0
-    working_directory: ~/ui
+    # working_directory: ~
     steps:
 
-      # - setup_remote_docker XXX will this enable caching?
+      - setup_remote_docker
 
       - run:
           name: "Checking Versions"
