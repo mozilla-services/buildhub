@@ -53,7 +53,7 @@ docs: install-docs
 	@echo "Build finished. The HTML pages are in $(SPHINX_BUILDDIR)/html/index.html"
 
 lintcheck: .docker-build
-	docker run -v `pwd`:/app -it app lintcheck
+	docker run -v `pwd`:/app -it mozilla/buildhub lintcheck
 
 shell: .docker-build
-	docker run -v `pwd`:/app -it app bash
+	docker run -v `pwd`:/app -it mozilla/buildhub bash

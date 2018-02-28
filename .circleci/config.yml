@@ -100,7 +100,7 @@ jobs:
       - run:
           name: Install essential packages
           command: |
-            apt-get update && apt-get install -y ca-certificates make git curl
+            apt-get update && apt-get install -y ca-certificates curl
 
       - restore_cache:
           keys:
@@ -121,7 +121,7 @@ jobs:
       - run:
           name: Linting check for frontend
           command: |
-            make lintcheck
+            docker run -it mozilla/buildhub lintcheck
 
   frontend:
     docker:
