@@ -11,7 +11,7 @@ jobs:
   checkout_code:
     docker:
       - image: ubuntu:16.04
-    working_directory: ~/jobs
+    working_directory: ~/buildhub
     steps:
       - run:
           name: Install essential packages
@@ -21,12 +21,12 @@ jobs:
       - save_cache:
           key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
           paths:
-            - ~/jobs
+            - ~/buildhub
 
   build_test_and_deploy:
     docker:
       - image: ubuntu:16.04
-    working_directory: ~/jobs
+    working_directory: ~/buildhub
     steps:
       - run:
           name: Install essential packages
@@ -58,7 +58,7 @@ jobs:
 
       - run:
           name: Create version.json
-          working_directory: ~/jobs
+          working_directory: ~/buildhub
           command: |
             # create a version.json per https://github.com/mozilla-services/Dockerflow/blob/master/docs/version_object.md
             printf '{"commit":"%s","version":"%s","source":"https://github.com/%s/%s","build":"%s"}\n' \
@@ -70,7 +70,7 @@ jobs:
 
       - run:
           name: Build Docker images
-          working_directory: ~/jobs
+          working_directory: ~/buildhub
           command: |
             docker info
             # cp .env-dist .env
@@ -79,14 +79,14 @@ jobs:
 
       - run:
           name: Run unit tests
-          working_directory: ~/jobs
+          working_directory: ~/buildhub
           command: |
             # cp .env-dist .env
             make test
 
       - run:
           name: Push to Dockerhub
-          working_directory: ~/jobs
+          working_directory: ~/buildhub
           command: |
             # set DOCKER_DEPLOY=true in Circle UI to push to Dockerhub
             DOCKER_DEPLOY="${DOCKER_DEPLOY:-false}"
@@ -100,7 +100,7 @@ jobs:
   run_lintcheck:
     docker:
       - image: ubuntu:16.04
-    working_directory: ~/jobs
+    working_directory: ~/buildhub
     steps:
       - run:
           name: Install essential packages
@@ -122,13 +122,14 @@ jobs:
 
       - run:
           name: Linting check for frontend
-          working_directory: ~/jobs
+          working_directory: ~/buildhub
           command: |
             make lintcheck
 
   frontend:
     docker:
-      - image: node:8.0
+      - image: node:9
+    working_directory: ~/buildhub
     steps:
       - checkout
 
@@ -142,9 +143,7 @@ jobs:
           name: Install frontend dependencies
           command: |
             pwd
-            ls -l
             cd ui
-            ls -l
             npm install
 
       - run:
@@ -152,7 +151,6 @@ jobs:
           command: |
             pwd
             cd ui
-            pwd
             npm run build
 
 workflows:
