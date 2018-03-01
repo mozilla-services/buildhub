@@ -61,12 +61,21 @@ jobs:
             "$CIRCLE_BUILD_URL" > version.json
 
       - run:
-          name: Start kinto and kinto-wizard
+          name: Start kinto
+          background: true
+          sleep: 5
           command: |
-            pip3 install kinto kinto-wizard
+            pip3 install kinto kinto
             kinto init --backend memory
-            kinto start:
-              - background
+            kinto start
+
+      - run:
+          name: Start kinto-wizard
+          command: |
+            pip3 install kinto-wizard
+            #kinto init --backend memory
+            #kinto start
+            kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
             # curl --retry 3 --retry-connrefused http://localhost:8888/v1/  && kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
 
       - run:
@@ -79,12 +88,10 @@ jobs:
           command: |
             docker run -it mozilla/buildhub test
 
-
-      - run:
-          name: DEBUG ping kinto wizard
-          command: |
-            curl --retry 3 --retry-connrefused http://localhost:8888
-
+      # - run:
+      #     name: DEBUG ping kinto
+      #     command: |
+      #       curl --retry 3 --retry-connrefused http://localhost:8888
 
       # XXX This is likely to be wrong. Check with old circle.yml file
       - run:
