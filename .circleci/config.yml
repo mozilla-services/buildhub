@@ -63,9 +63,10 @@ jobs:
       - run:
           name: Start kinto and kinto-wizard
           command: |
-            pip install kinto kinto-wizard
+            pip3 install kinto kinto-wizard
             kinto init --backend memory
-            kinto start
+            kinto start:
+              - background
             # curl --retry 3 --retry-connrefused http://localhost:8888/v1/  && kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
 
       - run:
