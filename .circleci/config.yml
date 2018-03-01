@@ -63,11 +63,11 @@ jobs:
       - run:
           name: Start kinto
           background: true
-          sleep: 5
           command: |
             pip3 install kinto kinto
             kinto init --backend memory
             kinto start
+          sleep: 5
 
       - run:
           name: Start kinto-wizard
@@ -76,7 +76,7 @@ jobs:
             #kinto init --backend memory
             #kinto start
             #kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
-            curl --retry 5 --retry-delay 1 http://localhost:8888/v1/  && kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
+            sleep 5 && kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
 
       - run:
           name: Build Docker image
