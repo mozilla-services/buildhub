@@ -75,8 +75,8 @@ jobs:
             pip3 install kinto-wizard
             #kinto init --backend memory
             #kinto start
-            kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
-            # curl --retry 3 --retry-connrefused http://localhost:8888/v1/  && kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
+            #kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
+            curl --retry 3 --retry-connrefused http://localhost:8888/v1/  && kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
 
       - run:
           name: Build Docker image
