@@ -21,7 +21,8 @@ case $1 in
     cat version.json
     ;;
   test)
-    py.test --ignore=jobs/tests/test_lamdba_s3_event_functional.py --override-ini="cache_dir=/tmp/tests" jobs/tests
+    # py.test --ignore=jobs/tests/test_lamdba_s3_event_functional.py --override-ini="cache_dir=/tmp/tests" jobs/tests
+    py.test --override-ini="cache_dir=/tmp/tests" jobs/tests
     ;;
   lambda.zip)
     pip install virtualenv

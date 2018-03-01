@@ -67,7 +67,6 @@ jobs:
             pip3 install kinto kinto
             kinto init --backend memory
             kinto start
-          sleep: 5
 
       - run:
           name: Start kinto-wizard
