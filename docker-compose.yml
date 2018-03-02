@@ -45,8 +45,6 @@ services:
       dockerfile: kinto/Dockerfile
     ports:
       - "8888:8888"
-    volumes:
-      - $PWD:/app
     # command: start-kinto
 
   # Container for local development with volume mount.
