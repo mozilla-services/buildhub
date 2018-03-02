@@ -93,7 +93,7 @@ jobs:
 
       - run:
           name: Start kinto
-          background: true
+          # background: true
           command: |
             # XXX We could use something like:
             # `docker-compose run --service-ports kinto ci-specific-start-cmd`
@@ -107,6 +107,7 @@ jobs:
             # This shouldn't need to first build, because `docker-compose run ...`
             # will do that automatically if it needs to.
             # docker-compose build kinto
+            curl kinto:8888
             docker-compose run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
 
       - run:
