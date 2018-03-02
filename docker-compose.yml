@@ -1,0 +1,82 @@
+version: '2'
+
+services:
+  # db:
+  #   image: postgres:9.6
+
+  # ------------------------------------------------------------------
+  # After this point is dev-related services.
+  # ------------------------------------------------------------------
+
+  # Base container is used for development tasks like tests, linting, coverage
+  # and building docs.
+  base:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - CI
+    image: mozilla/buildhub
+
+  # Container specifically for running tests in CI
+  # where you don't have a volume mount.
+  # You can't use volume mounts in Circle so we need a compose directive
+  # without mounts.
+  test-ci:
+    extends:
+      service: base
+    environment:
+      - SERVER_URL=http://kinto:8888/v1
+    command: functional-tests
+
+  # Container specifically for running tests.
+  test:
+    extends:
+      service: test-ci
+    # environment:
+    #   - SERVER_URL=http://kinto:8888/v1
+    volumes:
+      - $PWD:/app
+
+  kinto:
+    build:
+      # So it can read files from within 'jobs/'
+      context: .
+      dockerfile: kinto/Dockerfile
+    # environment:
+    #   - NODE_ENV=development
+    ports:
+      - "8888:8888"
+    volumes:
+      - $PWD:/app
+    command: start-kinto
+
+  ui:
+    build:
+      context: ui
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "3000:3000"
+      - "35729:35729"
+    volumes:
+      - $PWD/ui:/app
+    command: start
+
+  # Same as 'ui' but no volumes or command
+  ui-ci:
+    build:
+      context: ui
+      dockerfile: Dockerfile
+
+  # minio:
+  #   image: minio/minio
+  #   environment:
+  #     - MINIO_ACCESS_KEY=minio
+  #     - MINIO_SECRET_KEY=miniostorage
+  #   ports:
+  #     - "9000:9000"
+  #   volumes:
+  #     - $PWD/miniodata:/export
+  #   command: server /export

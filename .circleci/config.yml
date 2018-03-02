@@ -46,6 +46,13 @@ jobs:
             tar -xz -C /tmp -f /tmp/docker-$VER.tgz
             mv /tmp/docker/* /usr/bin
 
+      - run:
+          name: Install Docker Compose
+          command: |
+            set -x
+            curl -L https://github.com/docker/compose/releases/download/1.16.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+            chmod +x /usr/local/bin/docker-compose
+
       - setup_remote_docker:
           version: 17.09.0-ce
 
@@ -60,38 +67,53 @@ jobs:
             "$CIRCLE_PROJECT_REPONAME" \
             "$CIRCLE_BUILD_URL" > version.json
 
-      - run:
-          name: Start kinto
-          background: true
-          command: |
-            pip3 install kinto kinto
-            kinto init --backend memory
-            kinto start
+      # - run:
+      #     name: Start kinto
+      #     background: true
+      #     command: |
+      #       pip3 install kinto kinto
+      #       kinto init --backend memory
+      #       kinto start
 
-      - run:
-          name: Start kinto-wizard
-          command: |
-            pip3 install kinto-wizard
-            #kinto init --backend memory
-            #kinto start
-            #kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
-            # curl --retry-connrefused doesn't work in ubuntu 16.04.
-            sleep 15 && kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
+      # - run:
+      #     name: Start kinto-wizard
+      #     command: |
+      #       pip3 install kinto-wizard
+      #       #kinto init --backend memory
+      #       #kinto start
+      #       #kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
+      #       # curl --retry-connrefused doesn't work in ubuntu 16.04.
+      #       sleep 15 && kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
 
       - run:
           name: Build Docker image
           command: |
-            docker build -t mozilla/buildhub .
+            # docker build -t mozilla/buildhub .
+            docker-compose build kinto
 
       - run:
-          name: Run unit tests
+          name: Start kinto
+          # background: true
           command: |
-            docker run -it mozilla/buildhub test
+            # XXX We could use something like:
+            # `docker-compose run --service-ports kinto ci-specific-start-cmd`
+            docker-compose up kinto
 
-      # - run:
-      #     name: DEBUG ping kinto
-      #     command: |
-      #       curl --retry 3 --retry-connrefused http://localhost:8888
+      - run:
+          name: Initialize the kinto-wizard
+          command: |
+            echo "DOES THIS NEED TO WAIT?"
+            docker-compose run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
+
+      - run:
+          name: Run functional tests
+          command: |
+            docker-compose run test-ci
+
+      - run:
+          name: Lint check
+          command: |
+            docker-compose run test-ci lintcheck
 
       # XXX This is likely to be wrong. Check with old circle.yml file
       - run:
@@ -105,46 +127,6 @@ jobs:
             if [ -n "${CIRCLE_TAG}" ]; then
               bin/ci/deploy-dockerhub.sh "$CIRCLE_TAG"
             fi
-
-  run_lintcheck:
-    docker:
-      - image: ubuntu:16.04
-    working_directory: ~/buildhub
-    steps:
-      - run:
-          name: Install essential packages
-          command: |
-            apt-get update && apt-get install -y ca-certificates curl
-
-      - restore_cache:
-          keys:
-            - v1-repo-{{ .Environment.CIRCLE_SHA1 }}
-
-      - run:
-          name: Install Docker
-          command: |
-            set -x
-            VER="17.09.0-ce"
-            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
-            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
-            mv /tmp/docker/* /usr/bin
-
-      - setup_remote_docker:
-          version: 17.09.0-ce
-
-      - run:
-          name: Build Docker image
-          command: |
-            docker info
-            pwd
-            ls -l
-            pwd
-            docker build -t mozilla/buildhub .
-
-      - run:
-          name: Linting check for Python
-          command: |
-            docker run -it mozilla/buildhub lintcheck
 
   frontend:
     docker:
@@ -164,7 +146,7 @@ jobs:
           command: |
             pwd
             cd ui
-            npm install
+            npm install --production
 
       - run:
           name: Build frontend
@@ -196,7 +178,4 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - run_lintcheck:
-          requires:
-            - checkout_code
       - frontend
