@@ -38,18 +38,23 @@ services:
     volumes:
       - $PWD:/app
 
-  kinto:
+  kinto-ci:
     build:
       # So it can read files from within 'jobs/'
       context: .
       dockerfile: kinto/Dockerfile
-    # environment:
-    #   - NODE_ENV=development
     ports:
       - "8888:8888"
     volumes:
       - $PWD:/app
     command: start-kinto
+
+  # Container for local development with volume mount.
+  kinto:
+    extends:
+      service: kinto-ci
+    volumes:
+      - $PWD:/app
 
   ui:
     build:

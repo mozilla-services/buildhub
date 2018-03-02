@@ -89,7 +89,7 @@ jobs:
           name: Build Docker image
           command: |
             # docker build -t mozilla/buildhub .
-            docker-compose build kinto
+            docker-compose build kinto-ci
 
       - run:
           name: Start kinto
@@ -97,13 +97,13 @@ jobs:
           command: |
             # XXX We could use something like:
             # `docker-compose run --service-ports kinto ci-specific-start-cmd`
-            docker-compose up kinto
+            docker-compose up kinto-ci
 
       - run:
           name: Initialize the kinto-wizard
           command: |
             echo "DOES THIS NEED TO WAIT?"
-            docker-compose run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
+            docker-compose run kinto-ci initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
 
       - run:
           name: Run functional tests
