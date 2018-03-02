@@ -97,25 +97,24 @@ jobs:
           command: |
             # XXX We could use something like:
             # `docker-compose run --service-ports kinto ci-specific-start-cmd`
-            docker-compose build kinto-ci
-            docker-compose up kinto-ci
+            # docker-compose build kinto-ci
+            docker-compose up kinto
 
       - run:
           name: Initialize the kinto-wizard
           command: |
             echo "DOES THIS NEED TO WAIT?"
-            docker-compose run kinto-ci initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
+            docker-compose run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
 
       - run:
           name: Run functional tests
           command: |
-            docker-compose build kinto-ci
-            docker-compose run test-ci
+            docker-compose run test functional-tests
 
       - run:
           name: Lint check
           command: |
-            docker-compose run test-ci lintcheck
+            docker-compose run test lintcheck
 
       # XXX This is likely to be wrong. Check with old circle.yml file
       - run:

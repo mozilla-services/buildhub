@@ -22,7 +22,7 @@ services:
   # where you don't have a volume mount.
   # You can't use volume mounts in Circle so we need a compose directive
   # without mounts.
-  test-ci:
+  test:
     extends:
       service: base
     environment:
@@ -30,15 +30,15 @@ services:
     command: functional-tests
 
   # Container specifically for running tests.
-  test:
+  test-local:
     extends:
-      service: test-ci
+      service: test
     # environment:
     #   - SERVER_URL=http://kinto:8888/v1
     volumes:
       - $PWD:/app
 
-  kinto-ci:
+  kinto:
     build:
       # So it can read files from within 'jobs/'
       context: .
@@ -47,19 +47,25 @@ services:
       - "8888:8888"
     volumes:
       - $PWD:/app
-    command: start-kinto
+    # command: start-kinto
 
   # Container for local development with volume mount.
-  kinto:
+  kinto-local:
     extends:
-      service: kinto-ci
+      service: kinto
     volumes:
       - $PWD:/app
 
+  # Same as 'ui' but no volumes or command
   ui:
     build:
       context: ui
       dockerfile: Dockerfile
+
+  # Same as 'ui' but no volumes or command
+  ui-local:
+    extends:
+      service: ui
     environment:
       - NODE_ENV=development
     ports:
@@ -69,11 +75,6 @@ services:
       - $PWD/ui:/app
     command: start
 
-  # Same as 'ui' but no volumes or command
-  ui-ci:
-    build:
-      context: ui
-      dockerfile: Dockerfile
 
   # minio:
   #   image: minio/minio
