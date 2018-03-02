@@ -106,6 +106,7 @@ jobs:
             echo "DOES THIS NEED TO WAIT?"
             # This shouldn't need to first build, because `docker-compose run ...`
             # will do that automatically if it needs to.
+            docker-compose build kinto
             docker-compose run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
 
       - run:
