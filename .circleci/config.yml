@@ -85,11 +85,11 @@ jobs:
       #       # curl --retry-connrefused doesn't work in ubuntu 16.04.
       #       sleep 15 && kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
 
-      - run:
-          name: Build Docker image
-          command: |
-            # docker build -t mozilla/buildhub .
-            docker-compose build kinto-ci
+      # - run:
+      #     name: Build Docker image
+      #     command: |
+      #       # docker build -t mozilla/buildhub .
+      #       docker-compose build kinto-ci
 
       - run:
           name: Start kinto
@@ -97,6 +97,7 @@ jobs:
           command: |
             # XXX We could use something like:
             # `docker-compose run --service-ports kinto ci-specific-start-cmd`
+            docker-compose build kinto-ci
             docker-compose up kinto-ci
 
       - run:
@@ -108,6 +109,7 @@ jobs:
       - run:
           name: Run functional tests
           command: |
+            docker-compose build kinto-ci
             docker-compose run test-ci
 
       - run:
