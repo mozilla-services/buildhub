@@ -148,9 +148,10 @@ jobs:
       - run:
           name: Install frontend dependencies
           command: |
-            pwd
             cd ui
-            npm install --production
+            # Note, we can't use --production because the `npm run build`
+            # command depends on react-scripts.
+            npm install
 
       - run:
           name: Build frontend

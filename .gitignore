@@ -13,3 +13,4 @@ buildhub-lambda-*.zip
 .docker-build
 .metadata-*.json
 config/kinto.ini
+kinto/config/kinto.ini
