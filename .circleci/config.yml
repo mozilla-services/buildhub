@@ -100,20 +100,21 @@ jobs:
             # docker-compose build kinto-ci
             docker-compose up -d kinto
 
-      # - run:
-      #     name: Initialize the kinto-wizard
-      #     command: |
-      #       echo "DOES THIS NEED TO WAIT?"
-      #       # This shouldn't need to first build, because `docker-compose run ...`
-      #       # will do that automatically if it needs to.
-      #       # docker-compose build kinto
-      #       # curl kinto:8888
-      #       docker-compose run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
+      - run:
+          name: Initialize the kinto-wizard
+          command: |
+            echo "DOES THIS NEED TO WAIT?"
+            sleep 5
+            # This shouldn't need to first build, because `docker-compose run ...`
+            # will do that automatically if it needs to.
+            # docker-compose build kinto
+            # curl kinto:8888
+            docker-compose run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
 
       - run:
           name: Run functional tests
           command: |
-            docker-compose run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
+            # docker-compose run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
             docker-compose run test functional-tests
 
       - run:
