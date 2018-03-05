@@ -25,18 +25,20 @@ services:
   test:
     extends:
       service: base
+    depends_on:
+      - "kinto"
     environment:
       - SERVER_URL=http://kinto:8888/v1
     command: functional-tests
 
   # Container specifically for running tests.
-  test-local:
-    extends:
-      service: test
-    # environment:
-    #   - SERVER_URL=http://kinto:8888/v1
-    volumes:
-      - $PWD:/app
+  # test-local:
+  #   extends:
+  #     service: test
+  #   # environment:
+  #   #   - SERVER_URL=http://kinto:8888/v1
+  #   volumes:
+  #     - $PWD:/app
 
   kinto:
     build:
@@ -48,11 +50,11 @@ services:
     # command: start-kinto
 
   # Container for local development with volume mount.
-  kinto-local:
-    extends:
-      service: kinto
-    volumes:
-      - $PWD:/app
+  # kinto-local:
+  #   extends:
+  #     service: kinto
+  #   volumes:
+  #     - $PWD:/app
 
   # Deliberately commented out because we are not going to run the
   # frontend ui code in Docker yet. Too many changes at once.
