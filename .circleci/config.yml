@@ -91,14 +91,14 @@ jobs:
       #       # docker build -t mozilla/buildhub .
       #       docker-compose build kinto-ci
 
-      # - run:
-      #     name: Start kinto
-      #     background: true
-      #     command: |
-      #       # XXX We could use something like:
-      #       # `docker-compose run --service-ports kinto ci-specific-start-cmd`
-      #       # docker-compose build kinto-ci
-      #       docker-compose up kinto
+      - run:
+          name: Start kinto
+          # background: true
+          command: |
+            # XXX We could use something like:
+            # `docker-compose run --service-ports kinto ci-specific-start-cmd`
+            # docker-compose build kinto-ci
+            docker-compose up -d kinto
 
       # - run:
       #     name: Initialize the kinto-wizard
