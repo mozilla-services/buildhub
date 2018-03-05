@@ -93,7 +93,7 @@ jobs:
 
       - run:
           name: Start kinto
-          # background: true
+          background: true
           command: |
             # XXX We could use something like:
             # `docker-compose run --service-ports kinto ci-specific-start-cmd`
