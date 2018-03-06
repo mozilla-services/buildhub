@@ -9,8 +9,6 @@ usage() {
   echo "    unit-tests                  Run all tests except the functional ones"
   echo "    lintcheck                   Run flake8 on all code"
   echo "    lambda.zip                  Build Zip archive from buildhub package"
-  # echo "    start-kinto                 Start Kinto server with memory backend"
-  # echo "    initialize-kinto            Initialize a Kinto server for buildhub"
   echo "    latest-inventory-to-kinto   Load latest S3 inventory to a Kinto server"
   echo ""
   exit 1
@@ -30,9 +28,16 @@ case $1 in
     ;;
   lambda.zip)
     rm -fr .venv
+    which python
+    which pip
     python -m venv .venv
     source .venv/bin/activate
-    pip install -e jobs
+    which python
+    which pip
+    pip install -I ./jobs
+    python -c 'import buildhub; print(buildhub.__file__)'
+    sleep 10
+    # python jobs/setup.py install
     pip install -r jobs/requirements/default.txt -c jobs/requirements/constraints.txt
     pushd .venv/lib/python3.6/site-packages/
     zip -r /app/lambda.zip *

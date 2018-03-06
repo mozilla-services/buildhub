@@ -58,3 +58,16 @@ To ``flake8`` check all the tests and jobs code run:
 .. code-block:: shell
 
     $ docker-compose run test lintcheck
+
+
+Generating ``lambda.zip`` file
+==============================
+
+The ``lambda.zip`` is a zip file for the ``site-packages`` of a Python 3.6
+that has ``buildhub`` and all its dependencies including the ``.pyc`` files.
+
+To generate the file use:
+
+.. code-block:: shell
+
+    $ docker-compose run test lambda.zip

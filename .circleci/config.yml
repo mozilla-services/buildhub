@@ -31,7 +31,7 @@ jobs:
       - run:
           name: Install essential packages
           command: |
-            apt-get update && apt-get install -y ca-certificates curl python3-pip
+            apt-get update && apt-get install -y ca-certificates curl python3-pip zip unzip
 
       - restore_cache:
           keys:
@@ -87,6 +87,13 @@ jobs:
           name: Lint check
           command: |
             docker-compose -f docker-compose.ci.yml run test lintcheck
+
+      - run:
+          name: Mock run building lambda.zip
+          command: |
+            docker-compose -f docker-compose.ci.yml run test lambda.zip
+            ls -l lambda.zip
+            unzip -l lambda.zip
 
       # XXX This is likely to be wrong. Check with old circle.yml file
       - run:
