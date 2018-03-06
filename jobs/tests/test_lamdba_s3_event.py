@@ -1460,7 +1460,7 @@ class FromRCMetadataAndroid(BaseTest):
         await lambda_s3_event.main(self.loop, event)
 
         assert self.mock_create_record.call_count == 1
-        print(self.mock_create_record.call_args_list)
+        # print(self.mock_create_record.call_args_list)
         self.mock_create_record.assert_any_call(
             bucket='build-hub',
             collection='releases',

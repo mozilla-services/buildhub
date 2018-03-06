@@ -5,7 +5,7 @@ Developer Documentation
 
 To do development locally all you need is ``docker`` and ``docker-compose``.
 
-Functional Tests
+Functional tests
 ================
 
 The functional tests require that you have a ``kinto`` server up and running.
@@ -22,6 +22,12 @@ From the host you can test that it's running with ``curl``:
 
     $ curl localhost:8888
 
+At least once, prime the ``kinto`` server like this:
+
+.. code-block:: shell
+
+    $ docker-compose run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
+
 To start the functional tests now, run:
 
 .. code-block:: shell
@@ -32,7 +38,7 @@ Note that the default ``docker-compose.yml`` sets up a volume mount. So
 if you change any of the files in the current directory, it's immediately
 used in the next ``docker-compose run ...`` run.
 
-Unit Tests
+Unit tests
 ==========
 
 The unit tests is basically the functional tests except those tests
@@ -76,3 +82,32 @@ To generate the file use:
 
     You might want to assert that the ``buildhub`` ``.pyc`` files really
     are there. ``unzip -l lambda.zip | grep buildhub``.
+
+Running pytests like a pro
+==========================
+
+If you're hacking on something and find that typing
+``docker-compose run buildhub functional-tests`` is too slow, there is a
+better way to run ``pytest`` more iteratively and more rapidly. To do
+so enter a ``bash`` shell as ``root``:
+
+.. code-block:: shell
+
+    $ docker-compose run --user 0 buildhub bash
+
+From here you can run ``pytest`` with all its possible options.
+For example:
+
+.. code-block:: shell
+
+    $ pytest jobs/tests/ -x --ff --showlocals --tb=native
+
+And you can now install ``pytest-watch`` to have the tests run as soon
+as you save any of the relevant files:
+
+
+.. code-block:: shell
+
+    $ pip install pytest-watch
+    # Now replace `pytest` with `ptw -- `
+    $ ptw -- jobs/tests/ -x --ff --showlocals --tb=native

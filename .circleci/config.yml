@@ -81,13 +81,9 @@ jobs:
             docker-compose -f docker-compose.ci.yml up -d kinto
 
       - run:
-          name: Initialize the kinto-wizard
-          command: |
-            docker-compose -f docker-compose.ci.yml run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
-
-      - run:
           name: Run functional tests
           command: |
+            docker-compose -f docker-compose.ci.yml run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
             docker-compose -f docker-compose.ci.yml run buildhub functional-tests
 
       - run:
