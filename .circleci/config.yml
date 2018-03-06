@@ -70,6 +70,13 @@ jobs:
       - run:
           name: Start kinto
           command: |
+            # This assures that the `docker-compose up`, later, isn't
+            # put to do the build in the background if it needs to be built.
+            # Basically, by being explicit about it here and now we can
+            # we certain the image is ready by the time we start it ("up")
+            # in the background ("-d").
+            docker-compose -f docker-compose.ci.yml build kinto
+
             # Use -d to put it in the background "docker style".
             docker-compose -f docker-compose.ci.yml up -d kinto
 
