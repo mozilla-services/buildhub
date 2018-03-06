@@ -1,25 +1,6 @@
 version: '2'
 
 services:
-  base:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - CI
-    image: mozilla/buildhub
-
-  test:
-    extends:
-      service: base
-    depends_on:
-      - "kinto"
-    environment:
-      - SERVER_URL=http://kinto:8888/v1
-    volumes:
-      - $PWD:/app
-    command: functional-tests
-
   kinto:
     build:
       # So it can read files from within 'jobs/'
@@ -29,6 +10,22 @@ services:
       - "8888:8888"
     volumes:
       - $PWD:/app
+
+  buildhub:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - CI
+    image: mozilla/buildhub
+    depends_on:
+      - "kinto"
+    environment:
+      - SERVER_URL=http://kinto:8888/v1
+    volumes:
+      - $PWD:/app
+    command: functional-tests
+
 
   # Deliberately commented out because we are not going to run the
   # frontend ui code in Docker yet. Too many changes at once.

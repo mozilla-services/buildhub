@@ -28,16 +28,9 @@ case $1 in
     ;;
   lambda.zip)
     rm -fr .venv
-    which python
-    which pip
     python -m venv .venv
     source .venv/bin/activate
-    which python
-    which pip
     pip install -I ./jobs
-    python -c 'import buildhub; print(buildhub.__file__)'
-    sleep 10
-    # python jobs/setup.py install
     pip install -r jobs/requirements/default.txt -c jobs/requirements/constraints.txt
     pushd .venv/lib/python3.6/site-packages/
     zip -r /app/lambda.zip *

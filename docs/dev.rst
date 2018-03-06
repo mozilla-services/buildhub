@@ -26,7 +26,7 @@ To start the functional tests now, run:
 
 .. code-block:: shell
 
-    $ docker-compose run test functional-tests
+    $ docker-compose run buildhub functional-tests
 
 Note that the default ``docker-compose.yml`` sets up a volume mount. So
 if you change any of the files in the current directory, it's immediately
@@ -44,7 +44,7 @@ Simple run:
 
 .. code-block:: shell
 
-    $ docker-compose run test unit-tests
+    $ docker-compose run buildhub unit-tests
 
 Unlike the functional tests, this does not require first running
 ``docker-compose up kinto``.
@@ -57,7 +57,7 @@ To ``flake8`` check all the tests and jobs code run:
 
 .. code-block:: shell
 
-    $ docker-compose run test lintcheck
+    $ docker-compose run buildhub lintcheck
 
 
 Generating ``lambda.zip`` file
@@ -70,4 +70,9 @@ To generate the file use:
 
 .. code-block:: shell
 
-    $ docker-compose run test lambda.zip
+    $ docker-compose run buildhub lambda.zip
+
+.. note::
+
+    You might want to assert that the ``buildhub`` ``.pyc`` files really
+    are there. ``unzip -l lambda.zip | grep buildhub``.
