@@ -81,7 +81,6 @@ jobs:
       - run:
           name: Run functional tests
           command: |
-            # docker-compose run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
             docker-compose -f docker-compose.ci.yml run test functional-tests
 
       - run:
