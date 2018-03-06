@@ -67,60 +67,27 @@ jobs:
             "$CIRCLE_PROJECT_REPONAME" \
             "$CIRCLE_BUILD_URL" > version.json
 
-      # - run:
-      #     name: Start kinto
-      #     background: true
-      #     command: |
-      #       pip3 install kinto kinto
-      #       kinto init --backend memory
-      #       kinto start
-
-      # - run:
-      #     name: Start kinto-wizard
-      #     command: |
-      #       pip3 install kinto-wizard
-      #       #kinto init --backend memory
-      #       #kinto start
-      #       #kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
-      #       # curl --retry-connrefused doesn't work in ubuntu 16.04.
-      #       sleep 15 && kinto-wizard load jobs/buildhub/initialization.yml --server http://localhost:8888/v1 --auth user:pass
-
-      # - run:
-      #     name: Build Docker image
-      #     command: |
-      #       # docker build -t mozilla/buildhub .
-      #       docker-compose build kinto-ci
-
       - run:
           name: Start kinto
-          # background: true
           command: |
-            # XXX We could use something like:
-            # `docker-compose run --service-ports kinto ci-specific-start-cmd`
-            # docker-compose build kinto-ci
-            docker-compose up -d kinto
+            # Use -d to put it in the background "docker style".
+            docker-compose -f docker-compose.ci.yml up -d kinto
 
       - run:
           name: Initialize the kinto-wizard
           command: |
-            echo "DOES THIS NEED TO WAIT?"
-            sleep 5
-            # This shouldn't need to first build, because `docker-compose run ...`
-            # will do that automatically if it needs to.
-            # docker-compose build kinto
-            # curl kinto:8888
-            docker-compose run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
+            docker-compose -f docker-compose.ci.yml run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
 
       - run:
           name: Run functional tests
           command: |
             # docker-compose run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
-            docker-compose run test functional-tests
+            docker-compose -f docker-compose.ci.yml run test functional-tests
 
       - run:
           name: Lint check
           command: |
-            docker-compose run test lintcheck
+            docker-compose -f docker-compose.ci.yml run test lintcheck
 
       # XXX This is likely to be wrong. Check with old circle.yml file
       - run:
@@ -159,7 +126,6 @@ jobs:
       - run:
           name: Build frontend
           command: |
-            pwd
             cd ui
             npm run build
 

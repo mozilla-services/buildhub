@@ -40,17 +40,7 @@ case $1 in
     popd
     cp /tmp/lambda.zip .
     ;;
-  # start-kinto)
-  #   # The --host 0.0.0.0 is important, otherwise it defaults to 127.0.0.1
-  #   # and that doesn't work with docker-compose.
-  #   [ -f config/kinto.ini ] || kinto init --backend memory --host 0.0.0.0
-  #   kinto start ${@:2}
-  #   ;;
-  # initialize-kinto-wizard)
-  #   kinto-wizard load ${@:2}
-  #   ;;
   latest-inventory-to-kinto)
-    # source .venv/bin/activate
     latest-inventory-to-kinto ${@:2}
     ;;
   lintcheck)

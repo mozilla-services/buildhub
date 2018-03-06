@@ -1,0 +1,30 @@
+# This file is specifically only to be used in CircleCI for docker-compose
+# commads.
+
+version: '2'
+
+services:
+  base:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - CI
+    image: mozilla/buildhub
+
+  test:
+    extends:
+      service: base
+    depends_on:
+      - "kinto"
+    environment:
+      - SERVER_URL=http://kinto:8888/v1
+    command: functional-tests
+
+  kinto:
+    build:
+      # So it can read files from within 'jobs/'
+      context: .
+      dockerfile: kinto/Dockerfile
+    ports:
+      - "8888:8888"
