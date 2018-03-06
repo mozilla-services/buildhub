@@ -29,16 +29,15 @@ case $1 in
     py.test --override-ini="cache_dir=/tmp/tests" jobs/tests ${@:2}
     ;;
   lambda.zip)
-    pip install virtualenv
     rm -fr .venv
-    virtualenv .venv
+    python -m venv .venv
     source .venv/bin/activate
     pip install -e jobs
     pip install -r jobs/requirements/default.txt -c jobs/requirements/constraints.txt
     pushd .venv/lib/python3.6/site-packages/
-    zip -r /tmp/lambda.zip *
+    zip -r /app/lambda.zip *
     popd
-    cp /tmp/lambda.zip .
+    rm -fr .venv
     ;;
   latest-inventory-to-kinto)
     latest-inventory-to-kinto ${@:2}

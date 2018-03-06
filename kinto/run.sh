@@ -12,9 +12,6 @@ usage() {
 
 [ $# -lt 1 ] && usage
 
-# Temp debugging
-echo "COMMAND (in kinto/run-kinto.sh): $1"
-
 case $1 in
   start)
     # The --host 0.0.0.0 is important, otherwise it defaults to 127.0.0.1
