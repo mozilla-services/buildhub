@@ -96,17 +96,16 @@ jobs:
           command: |
             docker-compose -f docker-compose.ci.yml run buildhub lambda.zip
 
-      # XXX This is likely to be wrong. Check with old circle.yml file
       - run:
           name: Push to Dockerhub
           command: |
             # set DOCKER_DEPLOY=true in Circle UI to push to Dockerhub
             DOCKER_DEPLOY="${DOCKER_DEPLOY:-false}"
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              bin/ci/deploy-dockerhub.sh latest
+              bin/deploy-dockerhub.sh latest
             fi
             if [ -n "${CIRCLE_TAG}" ]; then
-              bin/ci/deploy-dockerhub.sh "$CIRCLE_TAG"
+              bin/deploy-dockerhub.sh "$CIRCLE_TAG"
             fi
 
   frontend:
