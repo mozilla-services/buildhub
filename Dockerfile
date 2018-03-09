@@ -14,7 +14,7 @@ RUN mkdir /app && \
 # install a few essentials and clean apt caches afterwards
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        apt-transport-https build-essential curl git zip
+        apt-transport-https build-essential curl git zip netcat
 
 # Clean up apt
 RUN apt-get autoremove -y && \

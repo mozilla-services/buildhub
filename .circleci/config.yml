@@ -80,9 +80,13 @@ jobs:
             # Use -d to put it in the background "docker style".
             docker-compose -f docker-compose.ci.yml up -d kinto
 
+            # Give the 'up -d kinto' a fair chance to get started
+            sleep 5
+
       - run:
           name: Run functional tests
           command: |
+            docker-compose -f docker-compose.ci.yml run buildhub waitfor kinto:8888 -t 30
             docker-compose -f docker-compose.ci.yml run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
             docker-compose -f docker-compose.ci.yml run buildhub functional-tests
 
