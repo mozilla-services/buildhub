@@ -38,6 +38,16 @@ Note that the default ``docker-compose.yml`` sets up a volume mount. So
 if you change any of the files in the current directory, it's immediately
 used in the next ``docker-compose run ...`` run.
 
+.. note::
+
+    In the instructions above, you had to have two terminals open. One for the
+    ``kinto`` server and one for the running of the tests. Alternatively
+    you can use ``docker-compose up -d kinto`` to put it in the background.
+    Use ``docker-compose ps`` to see that it's running.
+    And when you no longer need it, instead of ``Ctrl-C`` in that terminal,
+    run ``docker-compose stop``. Again, use ``docker-compose ps`` to see that
+    it's *not* running.
+
 Unit tests
 ==========
 

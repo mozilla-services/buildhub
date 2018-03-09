@@ -1,6 +1,7 @@
 # Buildhub
 
-[![Build Status](https://travis-ci.org/mozilla-services/buildhub.svg?branch=master)](https://travis-ci.org/mozilla-services/buildhub)
+[![CircleCI](https://circleci.com/gh/mozilla-services/buildhub.svg?style=svg)](https://circleci.com/gh/mozilla-services/buildhub)
+
 
 _Buildhub_ aims to provide a public database of comprehensive information about releases and builds.
 
