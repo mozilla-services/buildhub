@@ -68,7 +68,7 @@ jobs:
             "$CIRCLE_BUILD_URL" > version.json
 
       - run:
-          name: Start kinto
+          name: Start testkinto (an in-memory only kinto server)
           command: |
             # This assures that the `docker-compose up`, later, isn't
             # put to do the build in the background if it needs to be built.
@@ -80,14 +80,14 @@ jobs:
             # Use -d to put it in the background "docker style".
             docker-compose -f docker-compose.ci.yml up -d kinto
 
-            # Give the 'up -d kinto' a fair chance to get started
+            # Give the 'up -d testkinto' a fair chance to get started
             sleep 5
 
       - run:
           name: Run functional tests
           command: |
-            docker-compose -f docker-compose.ci.yml run buildhub waitfor kinto:8888 -t 30
-            docker-compose -f docker-compose.ci.yml run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
+            docker-compose -f docker-compose.ci.yml run buildhub waitfor testkinto:8888 -t 30
+            docker-compose -f docker-compose.ci.yml run testkinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://testkinto:9999/v1 --auth user:pass
             docker-compose -f docker-compose.ci.yml run buildhub functional-tests
 
       - run:

@@ -16,7 +16,9 @@ case $1 in
   start)
     # The --host 0.0.0.0 is important, otherwise it defaults to 127.0.0.1
     # and that doesn't work with docker-compose.
-    [ -f config/kinto.ini ] || kinto init --backend memory --host 0.0.0.0
+    THISSHOULDNTRUN
+    exit
+    [ -f config/kinto.ini ] || kinto init --backend postgresql --host 0.0.0.0
     kinto start ${@:2}
     ;;
   initialize-kinto-wizard)

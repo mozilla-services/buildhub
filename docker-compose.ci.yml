@@ -4,13 +4,13 @@
 version: '2'
 
 services:
-  kinto:
+  testkinto:
     build:
       # So it can read files from within 'jobs/'
       context: .
-      dockerfile: kinto/Dockerfile
+      dockerfile: testkinto/Dockerfile
     ports:
-      - "8888:8888"
+      - "9999:9999"
 
   buildhub:
     build:
@@ -20,7 +20,7 @@ services:
         - CI
     image: mozilla/buildhub
     depends_on:
-      - "kinto"
+      - "testkinto"
     environment:
-      - SERVER_URL=http://kinto:8888/v1
+      - SERVER_URL=http://testkinto:9999/v1
     command: functional-tests

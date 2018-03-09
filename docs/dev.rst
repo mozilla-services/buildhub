@@ -5,28 +5,29 @@ Developer Documentation
 
 To do development locally all you need is ``docker`` and ``docker-compose``.
 
+
 Functional tests
 ================
 
 The functional tests require that you have a ``kinto`` server up and running.
 By default, the functional tests assumes that the ``kinto`` server is running
-at ``http://kinto:8888``. To start that server, run:
+at ``http://testkinto:9999``. To start that server, run:
 
 .. code-block:: shell
 
-    $ docker-compose up kinto
+    $ docker-compose up testkinto
 
 From the host you can test that it's running with ``curl``:
 
 .. code-block:: shell
 
-    $ curl localhost:8888
+    $ curl localhost:9999
 
 At least once, prime the ``kinto`` server like this:
 
 .. code-block:: shell
 
-    $ docker-compose run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
+    $ docker-compose run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://testkinto:9999/v1 --auth user:pass
 
 To start the functional tests now, run:
 
@@ -42,7 +43,7 @@ used in the next ``docker-compose run ...`` run.
 
     In the instructions above, you had to have two terminals open. One for the
     ``kinto`` server and one for the running of the tests. Alternatively
-    you can use ``docker-compose up -d kinto`` to put it in the background.
+    you can use ``docker-compose up -d testkinto`` to put it in the background.
     Use ``docker-compose ps`` to see that it's running.
     And when you no longer need it, instead of ``Ctrl-C`` in that terminal,
     run ``docker-compose stop``. Again, use ``docker-compose ps`` to see that

@@ -28,7 +28,7 @@ case $1 in
     py.test --ignore=jobs/tests/test_lamdba_s3_event_functional.py --override-ini="cache_dir=/tmp/tests" jobs/tests ${@:2}
     ;;
   functional-tests)
-    py.test --override-ini="cache_dir=/tmp/tests" jobs/tests ${@:2}
+    SERVER_URL=http://testkinto:9999/v1 py.test --override-ini="cache_dir=/tmp/tests" jobs/tests ${@:2}
     ;;
   lambda.zip)
     rm -fr .venv

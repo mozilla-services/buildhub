@@ -17,10 +17,9 @@ RUN apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-#COPY . /app
-
-# Install Python dependencies
-RUN pip install kinto kinto-wizard
+COPY kinto/requirements.txt /tmp/
+WORKDIR /tmp
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /app
 

@@ -1,6 +1,10 @@
 version: '2'
 
 services:
+  db:
+    # As of Mar 8 2017, we run 9.6.6 in Buildhub production.
+    image: postgres:9.6
+
   kinto:
     build:
       # So it can read files from within 'jobs/'
@@ -8,6 +12,17 @@ services:
       dockerfile: kinto/Dockerfile
     ports:
       - "8888:8888"
+    volumes:
+      - $PWD:/app
+
+  testkinto:
+    build:
+      # So it can read files from within 'jobs/'
+      context: .
+      dockerfile: testkinto/Dockerfile
+    ports:
+      - "9999:9999"
+    # XXX Not sure we need this. What business do you have in there?!
     volumes:
       - $PWD:/app
 
@@ -24,7 +39,9 @@ services:
       - SERVER_URL=http://kinto:8888/v1
     volumes:
       - $PWD:/app
-    command: functional-tests
+    command: "true"
+    # command: functional-tests
+
 
 
   # Deliberately commented out because we are not going to run the
