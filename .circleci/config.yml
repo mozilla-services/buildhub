@@ -75,10 +75,10 @@ jobs:
             # Basically, by being explicit about it here and now we can
             # we certain the image is ready by the time we start it ("up")
             # in the background ("-d").
-            docker-compose -f docker-compose.ci.yml build kinto
+            docker-compose -f docker-compose.ci.yml build testkinto
 
             # Use -d to put it in the background "docker style".
-            docker-compose -f docker-compose.ci.yml up -d kinto
+            docker-compose -f docker-compose.ci.yml up -d testkinto
 
             # Give the 'up -d testkinto' a fair chance to get started
             sleep 5

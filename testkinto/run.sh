@@ -14,12 +14,8 @@ usage() {
 
 case $1 in
   start)
-    # The --host 0.0.0.0 is important, otherwise it defaults to 127.0.0.1
-    # and that doesn't work with docker-compose.
-    # rm -fr config/kinto.ini
-    # kinto init --backend memory --host 0.0.0.0 --port 9999
+    # Note that this kinto.ini is part of the code.
     kinto start --ini testkinto/kinto.ini --port 9999 ${@:2}
-    # echo "WHAT?!"
     ;;
   initialize-kinto-wizard)
     kinto-wizard load ${@:2}

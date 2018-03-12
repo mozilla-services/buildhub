@@ -1,4 +1,3 @@
-kinto
-kinto-wizard
 kinto[postgresql]
+kinto-wizard
 kinto-elasticsearch

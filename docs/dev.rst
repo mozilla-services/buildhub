@@ -5,6 +5,51 @@ Developer Documentation
 
 To do development locally all you need is ``docker`` and ``docker-compose``.
 
+Local development server
+========================
+
+First start the ``kinto`` server:
+
+.. code-block:: shell
+
+    $ docker-compose up kinto
+
+This will start a ``kinto`` server you can reach via ``localhost:8888``.
+It needs to be bootstrapped once. To that run (in another terminal):
+
+.. code-block:: shell
+
+    $ docker-compose run kinto migrate
+    $ docker-compose run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://kinto:8888/v1 --auth user:pass
+
+You should now have a running PostgreSQL and Elasticsearch that you can
+populate with buildhub data and inspect. To see what's inside the PostgreSQL
+server you can run:
+
+.. code-block:: shell
+
+    $ docker-compose run db psql -h db -U postgres
+
+To see what's in the Elasticsearch you can simply open
+``http://localhost:9200`` in your browser.
+
+
+Initial data
+============
+
+The above steps will set up a working but blank ``kinto`` database. I.e.
+no actual records in PostgreSQL and no documents indexed in Elasticsearch.
+
+To boostrap the data, you can run ``latest-inventory-to-kinto``. You do that
+like this:
+
+
+.. code-block:: shell
+
+    $ docker-compose run buildhub bash
+    app@b95573edb130:~$ latest-inventory-to-kinto
+
+That'll take a while.
 
 Functional tests
 ================
