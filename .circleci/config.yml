@@ -81,7 +81,7 @@ jobs:
             docker-compose -f docker-compose.ci.yml up -d testkinto
 
             # Give the 'up -d testkinto' a fair chance to get started
-            sleep 5
+            sleep 10
 
       - run:
           name: Run functional tests
