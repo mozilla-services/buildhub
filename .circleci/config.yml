@@ -86,7 +86,7 @@ jobs:
       - run:
           name: Run functional tests
           command: |
-            docker-compose -f docker-compose.ci.yml run buildhub waitfor testkinto:8888 -t 30
+            docker-compose -f docker-compose.ci.yml run buildhub waitfor testkinto:9999 -t 30
             docker-compose -f docker-compose.ci.yml run testkinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://testkinto:9999/v1 --auth user:pass
             docker-compose -f docker-compose.ci.yml run buildhub functional-tests
 

@@ -5,6 +5,30 @@ Developer Documentation
 
 To do development locally all you need is ``docker`` and ``docker-compose``.
 
+Quickstart
+==========
+
+To start everything just run:
+
+.. code-block:: shell
+
+    $ docker-compose up
+
+This will start:
+
+* A ``kinto`` server backed by PostgreSQL that syncs everything to
+  Elasticsearch (accessible via ``localhost:8888``)
+* A PostgreSQL server
+* An Elasticsearch server (accessible via ``localhost:9200``)
+* A ``kinto`` memory-storage server for running functional tests against
+  (accessible via ``localhost:9999``)
+* A (``create-react-app``) React server (accessible via ``localhost:3000``)
+
+The very first time you run it, the database will be empty. You need to
+populate it with an initial "scrape". More about that in the following
+section.
+
+
 Local development server
 ========================
 

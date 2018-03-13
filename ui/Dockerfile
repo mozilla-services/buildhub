@@ -4,25 +4,16 @@
 
 FROM node:9
 
-# Create app directory
-#WORKDIR /usr/src/app
-
-#ADD frontend/yarn.lock /yarn.lock
-#ADD ui/package.json /package.json
-
-#COPY ./ui/package*.json .
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
-#COPY ./upackage.json ./
-COPY package*.json ./
-
+ADD ui/package.json /package.json
+ADD ui/package-lock.json /package.json
 RUN npm install
 
-# Bundle app source
-#COPY ui .
+WORKDIR /app
+ADD ui /app
 
 EXPOSE 3000
 EXPOSE 35729
 
-CMD [ "npm", "start" ]
+ENTRYPOINT ["/bin/bash", "/app/run.sh"]
+
+CMD ["start"]

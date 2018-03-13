@@ -25,5 +25,6 @@
     "cs-check": "prettier -l $npm_package_prettierOptions 'src/*.js'",
     "cs-format": "prettier $npm_package_prettierOptions 'src/*.js' --write"
   },
-  "prettierOptions": "--jsx-bracket-same-line --trailing-comma es5 --semi"
+  "prettierOptions": "--jsx-bracket-same-line --trailing-comma es5 --semi",
+  "proxy": "http://kinto:8888"
 }

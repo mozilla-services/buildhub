@@ -58,29 +58,24 @@ services:
       - SERVER_URL=http://kinto:8888/v1
     volumes:
       - $PWD:/app
+    # All things within the 'buildhub' directive are meant to be executed
+    # with 'docker-compose run buildhub ...'
+    # By setting this to "true", it means we can run `docker-compose up`
+    # and this one won't start anything.
     command: "true"
-    # command: functional-tests
 
-
-
-  # Deliberately commented out because we are not going to run the
-  # frontend ui code in Docker yet. Too many changes at once.
-  # # Same as 'ui' but no volumes or command
-  # ui:
-  #   build:
-  #     context: ui
-  #     dockerfile: Dockerfile
-  #
-  # # Same as 'ui' but no volumes or command
-  # ui:
-  #   build:
-  #      context: ui
-  #   dockerfile: Dockerfile
-  #   environment:
-  #     - NODE_ENV=development
-  #   ports:
-  #     - "3000:3000"
-  #     - "35729:35729"
-  #   volumes:
-  #     - $PWD/ui:/app
-  #   command: start
+  ui:
+    build:
+       context: .
+       dockerfile: ui/Dockerfile
+    depends_on:
+      - "kinto"
+    environment:
+      - REACT_APP_KINTO_COLLECTION_URL=/v1/buckets/build-hub/collections/releases/
+      - NODE_ENV=development
+    ports:
+      - "3000:3000"
+      - "35729:35729"
+    volumes:
+      - $PWD/ui:/app
+    command: start
