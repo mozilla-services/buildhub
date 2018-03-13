@@ -191,3 +191,24 @@ as you save any of the relevant files:
     $ pip install pytest-watch
     # Now replace `pytest` with `ptw -- `
     $ ptw -- jobs/tests/ -x --ff --showlocals --tb=native
+
+Writing documentation
+=====================
+
+To work on the documentation, edit the ``docs/**/*.rst`` files. To build
+and see the result of your work run:
+
+.. code-block:: shell
+
+    $ docker-compose run docs build
+
+That will generate the ``docs/_build/html/`` directory (unless there were
+errors) and you can open the ``index.html`` in your browser:
+
+.. code-block:: shell
+
+    $ open docs/_build/html/index.html
+
+.. note::
+
+    Our ``sphinx-build`` command transforms any warnings into errors.

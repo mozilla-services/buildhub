@@ -101,6 +101,11 @@ jobs:
             docker-compose -f docker-compose.ci.yml run buildhub lambda.zip
 
       - run:
+          name: Docs should build without error
+          command: |
+            docker-compose -f docker-compose.ci.yml run docs build
+
+      - run:
           name: Push to Dockerhub
           command: |
             # set DOCKER_DEPLOY=true in Circle UI to push to Dockerhub

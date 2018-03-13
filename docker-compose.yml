@@ -49,8 +49,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        - CI
     image: mozilla/buildhub
     depends_on:
       - "kinto"
@@ -79,3 +77,12 @@ services:
     volumes:
       - $PWD/ui:/app
     command: start
+
+  docs:
+    build:
+      context: .
+      dockerfile: docs/Dockerfile
+    volumes:
+      - $PWD:/app
+    # Do nothing when 'docker-compose up'
+    command: "true"
