@@ -1,23 +1,16 @@
-VIRTUALENV = virtualenv --python=python3.6
-VENV := $(shell echo $${VIRTUAL_ENV-.venv})
-DOC_STAMP = $(VENV)/.doc_env_installed.stamp
-PYTHON = $(VENV)/bin/python3
-SPHINX_BUILDDIR = docs/_build
-
 help:
+	@echo "Welcome to Buildhub\n"
 	@echo "  clean                       delete local files"
-	@echo "  build                       build the Docker™ image"
-	@echo "  test                        run the tests from within the container"
+	@echo "  stop                        stop any docker containers"
+	@echo "  functional-tests            run the functional tests"
+	@echo "  unit-tests                  run the pure python unit tests"
 	@echo "  lambda.zip                  build lambda.zip from within the container"
 	@echo "  lintcheck                   run lint checking (i.e. flake8)"
 	@echo "  upload-to-s3                upload lambda.zip to AWS"
-	@echo "  docs                        build the project docs"
 	@echo "  shell                       enter a bash shell with volume mount"
+	@echo "  sudo-shell                  enter a bash shell, as root, with volume mount"
+	@echo "\n"
 
-#
-# virtualenv: $(PYTHON)
-# $(PYTHON):
-# 	$(VIRTUALENV) $(VENV) --python=python3.6
 
 .docker-build:
 	make build
@@ -25,35 +18,41 @@ help:
 clean:
 	rm -fr lambda.zip
 	rm -fr .docker-build
+	rm -fr .metadata*.json
+
+stop:
+	docker-compose stop
 
 build:
-	echo "{\"name\":\"buildhub\",\"commit\":`git rev-parse HEAD`\"}" > version.json
-	docker build -t mozilla/buildhub .
+	docker-compose build buildhub
 	touch .docker-build
 
-test:
-	# docker run -it mozilla/buildhub test
-	docker run -v `pwd`:/app -it mozilla/buildhub test
+functional-tests:
+	docker-compose up -d testkinto
+	./bin/wait-for localhost:9999
+	docker-compose run kinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://testkinto:9999/v1 --auth user:pass
+	docker-compose run buildhub functional-tests
+	docker-compose stop
+
+unit-tests: .docker-build
+	docker-compose run buildhub unit-tests
 
 lambda.zip: .docker-build
-	docker run -v `pwd`:/app --user 0 -it app lambda.zip
-	cp lambda.zip buildhub-lambda-`git describe`.zip
+	docker-compose run buildhub lambda.zip
 
 upload-to-s3:
-	$(PYTHON) bin/upload_to_s3.py
+	echo "NotImplemented" && exit 1
+	# $(PYTHON) bin/upload_to_s3.py
 
-install-docs: $(DOC_STAMP)
-$(DOC_STAMP): $(PYTHON) docs/requirements.txt
-	$(VENV)/bin/pip install -Ur docs/requirements.txt
-	touch $(DOC_STAMP)
-
-docs: install-docs
-	$(VENV)/bin/sphinx-build -a -W -n -b html -d $(SPHINX_BUILDDIR)/doctrees docs $(SPHINX_BUILDDIR)/html
-	@echo
-	@echo "Build finished. The HTML pages are in $(SPHINX_BUILDDIR)/html/index.html"
+docs:
+	docker-compose run docs build
 
 lintcheck: .docker-build
-	docker run -v `pwd`:/app -it mozilla/buildhub lintcheck
+	docker-compose run buildhub lintcheck
+	docker-compose run ui lintcheck
 
-shell: .docker-build
-	docker run -v `pwd`:/app -it mozilla/buildhub bash
+shell:
+	docker-compose run buildhub bash
+
+sudo-shell:
+	docker-compose run --user 0 buildhub bash
