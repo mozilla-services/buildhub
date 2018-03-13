@@ -49,7 +49,7 @@ docs:
 
 lintcheck: .docker-build
 	docker-compose run buildhub lintcheck
-	docker-compose run ui lintcheck
+	# docker-compose run ui lintcheck
 
 shell:
 	docker-compose run buildhub bash
