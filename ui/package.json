@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@searchkit/refinement-autosuggest": "0.0.1-6",
     "css-animation": "<1.4.0",
     "filesize": "^3.5.10",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
     "rimraf": "^2.6.1",
-    "searchkit": "^2.1.0"
+    "searchkit": "^2.3.0-9"
   },
   "devDependencies": {
     "gh-pages": "^1.0.0",

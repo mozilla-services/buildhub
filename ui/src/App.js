@@ -7,17 +7,19 @@ import {
   NoHits,
   Hits,
   HitsStats,
-  ItemCheckboxList,
   SortingSelector,
   SelectedFilters,
   MenuFilter,
   Pagination,
-  RefinementListFilter,
   ResetFilters,
   SearchkitManager,
   SearchkitProvider,
   Tabs,
 } from "searchkit";
+
+import {
+  RefinementAutosuggest
+} from "@searchkit/refinement-autosuggest"
 
 import {
   Layout,
@@ -70,8 +72,8 @@ const HitsTable = ({ hits }) => {
               const recordUrl = `${KINTO_COLLECTION_URL}records/${_id}`;
               const revisionUrl = source.revision
                 ? <a href={`${source.repository}/rev/${source.revision}`}>
-                    {source.revision.substring(0, 6)}
-                  </a>
+                  {source.revision.substring(0, 6)}
+                </a>
                 : "";
               const getHighlight = (title, value) => {
                 return { __html: (highlight && highlight[title]) || value };
@@ -135,43 +137,6 @@ const HitsTable = ({ hits }) => {
   );
 };
 
-const sortVersions = filters => {
-  return filters.sort((a, b) => {
-    const partsA = a.key.split(".")
-    const partsB = b.key.split(".")
-    if (partsA.length < 2 || partsB.length < 2) {
-      // Bogus version, list is last.
-      return 1;
-    }
-    let i = 0;
-    while ((partsA[i] === partsB[i]) && (i <= partsA.length)) { // Skip all the parts that are equal.
-      i++
-    }
-    if (!partsA[i] || !partsB[i]) {
-      // Both versions have the same parts, but one has more parts, eg 56.0 and 56.0.1.
-      return partsB.length - partsA.length
-    }
-    const subPartRegex = /^(\d+)([a-zA-Z]+)?(\d+)?([a-zA-Z]+)?/ // Eg: 0b12pre
-    const subPartA = partsA[i].match(subPartRegex) // Eg: ["0b1pre", "0", "b", "12", "pre"]
-    const subPartB = partsB[i].match(subPartRegex)
-    if (subPartA[1] !== subPartB[1]) {
-      return parseInt(subPartB[1], 10) - parseInt(subPartA[1], 10)
-    }
-    if (subPartA[2] !== subPartB[2]) {
-      if (subPartA[2] && !subPartB[2]) {
-        return 1
-      }
-      if (subPartB[2] && !subPartA[2]) {
-        return -1
-      }
-      return subPartB[2].localeCompare(subPartA[2])
-    }
-    if (subPartA[3] !== subPartB[3]) {
-      return parseInt(subPartB[3], 10) - parseInt(subPartA[3], 10)
-    }
-    return parseInt(partsB[2], 10) - parseInt(partsA[2], 10)
-  })
-}
 
 const fullText = (query, options) => {
   if (!query) {
@@ -259,47 +224,34 @@ class App extends Component {
 
             <LayoutBody>
               <SideBar>
-                <RefinementListFilter
+                <RefinementAutosuggest
                   field="target.version"
                   title="Version"
-                  id="versions"
-                  size={1000}
+                  git id="versions"
+                  size={20}
                   operator="OR"
-                  orderKey="_term"
-                  orderDirection="desc"
-                  listComponent={ItemCheckboxList}
-                  bucketsTransform={sortVersions}
-                  translations={{ All: "All versions" }}
+                  multi={true}
                 />
-                <RefinementListFilter
+                <RefinementAutosuggest
                   field="target.platform"
                   title="Platform"
                   id="platform"
-                  size={1000}
-                  operator="OR"
-                  orderKey="_term"
-                  listComponent={ItemCheckboxList}
-                  translations={{ All: "All platforms" }}
+                  size={20}
+                  multi={true}
                 />
-                <RefinementListFilter
+                <RefinementAutosuggest
                   field="target.channel"
                   title="Channel"
                   id="channel"
-                  size={1000}
-                  operator="OR"
-                  orderKey="_term"
-                  listComponent={ItemCheckboxList}
-                  translations={{ All: "All channels" }}
+                  size={20}
+                  multi={true}
                 />
-                <RefinementListFilter
+                <RefinementAutosuggest
                   field="target.locale"
                   title="Locale"
                   id="locale"
-                  size={1000}
-                  operator="OR"
-                  orderKey="_term"
-                  listComponent={ItemCheckboxList}
-                  translations={{ All: "All locales" }}
+                  size={20}
+                  multi={true}
                 />
               </SideBar>
 
@@ -354,10 +306,10 @@ class App extends Component {
                 <NoHits
                   translations={{
                     "NoHits.NoResultsFound":
-                      "No release found were found for {query}",
+                    "No release found were found for {query}",
                     "NoHits.DidYouMean": "Search for {suggestion}",
                     "NoHits.SearchWithoutFilters":
-                      "Search for {query} without filters",
+                    "Search for {query} without filters",
                   }}
                   suggestionsField="target.version"
                 />
