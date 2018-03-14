@@ -5,8 +5,8 @@
 FROM node:9
 
 ADD ui/package.json /package.json
-ADD ui/package-lock.json /package.json
-RUN npm install
+ADD ui/yarn.lock /yarn.lock
+RUN yarn
 
 WORKDIR /app
 ADD ui /app

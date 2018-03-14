@@ -4,15 +4,15 @@ A SearchKit-powered [Web UI](https://mozilla-services.github.io/buildhub/searchk
 
 ## Install
 
-    $ npm i
-    $ npm start
+    $ yarn
+    $ yarn start
 
 ## Build
 
-    $ npm run build
+    $ yarn run build
 
 ## Deploy
 
-    $ npm run deploy
+    $ yarn run deploy
 
 App should be available at https://mozilla-services.github.io/buildhub.

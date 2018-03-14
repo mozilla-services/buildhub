@@ -16,16 +16,16 @@ usage() {
 
 case $1 in
   start)
-    npm run start | cat
+    yarn run start | cat
     ;;
   outdated)
-    npm outdated
+    yarn outdated
     ;;
   lintcheck)
-    # When we switch to yarn, replace this (and consider that lint_problem.sh)
+    # Replace this (and consider that lint_problem.sh)
     # because if this errors it's really ugly and hard to read since you
     # get a bunch of "npm errors".
-    npm run cs-check
+    yarn run cs-check
     ;;
   *)
     exec "$@"
