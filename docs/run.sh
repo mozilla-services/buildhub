@@ -4,9 +4,7 @@ set -eo pipefail
 usage() {
   echo "usage: ./run.sh build"
   echo ""
-  echo "    start                         Start Kinto server with memory backend"
-  echo "    migrate                       Create the kinto database tables"
-  echo "    initialize-kinto-wizard       Initialize a Kinto server for buildhub"
+  echo "    build                         Generate the docs/_build/html/ files"
   echo ""
   exit 1
 }

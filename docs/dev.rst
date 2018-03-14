@@ -86,6 +86,16 @@ at ``http://testkinto:9999``. To start that server, run:
 
     $ docker-compose up testkinto
 
+
+.. note::
+
+    The reason there are **two** ``kinto`` servers (one for functional tests
+    and one for a local dev instance) is because the functional tests have
+    fixture expectations and can't guarantee that it leaves the database in
+    the same state as *before* the tests.
+    It would be annoying if you local instance changes weirdly (potentially
+    unrealistic names) every you run the funtional tests.
+
 From the host you can test that it's running with ``curl``:
 
 .. code-block:: shell
@@ -121,10 +131,10 @@ used in the next ``docker-compose run ...`` run.
 Unit tests
 ==========
 
-The unit tests is basically the functional tests except those tests
-that depend on the presence of an actual server available on
-``localhost:8888``. These tests are faster to run when iterating rapidly
-when you know the functional test isn't immediately important or relevant.
+The unit tests are basically the functional tests except the tests
+that depend on the presence of an actual server available. These tests
+are faster to run when iterating rapidly when you know the
+functional test isn't immediately important or relevant.
 
 Simple run:
 
