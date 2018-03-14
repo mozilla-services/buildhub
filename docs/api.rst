@@ -17,7 +17,7 @@ Servers
 Clients
 =======
 
-Since it is an HTTP API and the records are public, you can simply use any HTTP client, like `curl <http://curl.haxx.se>`_ or `HTTPie <https://httpie.org>`__.
+Since it is an HTTP API and the records are public, you can simply use any HTTP client, like `curl <http://curl.haxx.se>`_ or `HTTPie <https://httpie.org>`_.
 
 But for more convenience, especially regarding pagination and error handling, some dedicated libraries are also available:
 
@@ -201,7 +201,7 @@ What is the Mercurial commit ID of a build ID?
 What locales are available for a certain version?
 -------------------------------------------------
 
-Using the ElasticSearch endpoint, with `HTTPie <https://httpie.org/>`__ and `jq <https://stedolan.github.io/jq/>`_:
+Using the ElasticSearch endpoint, with `HTTPie <https://httpie.org>`_ and `jq <https://stedolan.github.io/jq/>`_:
 
 .. code-block:: bash
 
