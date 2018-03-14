@@ -146,6 +146,9 @@ jobs:
             cd ui
             npm run build
 
+      - store_artifacts:
+          path: build
+
 workflows:
   version: 2
 
