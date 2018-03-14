@@ -14,12 +14,10 @@ import {
   ResetFilters,
   SearchkitManager,
   SearchkitProvider,
-  Tabs,
+  Tabs
 } from "searchkit";
 
-import {
-  RefinementAutosuggest
-} from "@searchkit/refinement-autosuggest"
+import { RefinementAutosuggest } from "@searchkit/refinement-autosuggest";
 
 import {
   Layout,
@@ -28,13 +26,15 @@ import {
   LayoutResults,
   ActionBar,
   ActionBarRow,
-  SideBar,
+  SideBar
 } from "searchkit";
 
 import "searchkit/release/theme.css";
 
 import contribute_json from "./contribute.json";
-const KINTO_COLLECTION_URL = process.env.REACT_APP_KINTO_COLLECTION_URL || "https://buildhub.prod.mozaws.net/v1/buckets/build-hub/collections/releases/";
+const KINTO_COLLECTION_URL =
+  process.env.REACT_APP_KINTO_COLLECTION_URL ||
+  "https://buildhub.prod.mozaws.net/v1/buckets/build-hub/collections/releases/";
 
 // (peterbe) TEMPORARY console warn during docker-compose hacking
 console.warn(`KINTO_COLLECTION_URL=${KINTO_COLLECTION_URL}`);
@@ -48,7 +48,8 @@ const HitsTable = ({ hits }) => {
     <div style={{ width: "100%", boxSizing: "border-box", padding: 8 }}>
       <table
         className="sk-table sk-table-striped"
-        style={{ width: "100%", boxSizing: "border-box" }}>
+        style={{ width: "100%", boxSizing: "border-box" }}
+      >
         <thead>
           <tr>
             <th />
@@ -69,20 +70,24 @@ const HitsTable = ({ hits }) => {
             ({
               _source: { build, download, source, target },
               _id,
-              highlight,
+              highlight
             }) => {
               const recordUrl = `${KINTO_COLLECTION_URL}records/${_id}`;
-              const revisionUrl = source.revision
-                ? <a href={`${source.repository}/rev/${source.revision}`}>
+              const revisionUrl = source.revision ? (
+                <a href={`${source.repository}/rev/${source.revision}`}>
                   {source.revision.substring(0, 6)}
                 </a>
-                : "";
+              ) : (
+                ""
+              );
               const getHighlight = (title, value) => {
                 return { __html: (highlight && highlight[title]) || value };
               };
               return (
                 <tr key={_id} id={_id}>
-                  <td><a href={`#${_id}`}>#</a></td>
+                  <td>
+                    <a href={`#${_id}`}>#</a>
+                  </td>
                   <td
                     dangerouslySetInnerHTML={getHighlight(
                       "source.product",
@@ -118,7 +123,11 @@ const HitsTable = ({ hits }) => {
                     <a href={download.url}>{filesize(download.size)}</a>
                   </td>
                   <td title={download.date}>
-                    <a target="_blank" rel="noopener noreferrer" href={recordUrl}>
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={recordUrl}
+                    >
                       <time dateTime={download.date}>{download.date}</time>
                     </a>
                   </td>
@@ -139,49 +148,48 @@ const HitsTable = ({ hits }) => {
   );
 };
 
-
 const fullText = (query, options) => {
   if (!query) {
     return;
   }
-  const fulltextQuery = query.startsWith("'") ? query.slice(1) : query
-    .split(" ")
-    .map(term => {
-      return `${term}*`;
-    })
-    .join(" ");
+  const fulltextQuery = query.startsWith("'")
+    ? query.slice(1)
+    : query
+        .split(" ")
+        .map(term => {
+          return `${term}*`;
+        })
+        .join(" ");
   return {
-    query_string: Object.assign({ query: fulltextQuery }, options),
+    query_string: Object.assign({ query: fulltextQuery }, options)
   };
 };
 
-
 class ProjectInfo extends React.PureComponent {
-
   render() {
     const {
-      repository: {
-        url: source,
-        license,
-      },
-      participate: {
-        docs: documentation,
-      },
-      bugs: {
-        report,
-      }
+      repository: { url: source, license },
+      participate: { docs: documentation },
+      bugs: { report }
     } = contribute_json;
 
     return (
       <div className="project-info">
-        <div><a href={documentation}>Documentation</a></div>
-        <div><a href={report}>Report a bug</a></div>
-        <div><a href={source} title={license}>Source</a></div>
+        <div>
+          <a href={documentation}>Documentation</a>
+        </div>
+        <div>
+          <a href={report}>Report a bug</a>
+        </div>
+        <div>
+          <a href={source} title={license}>
+            Source
+          </a>
+        </div>
       </div>
-    )
+    );
   }
 }
-
 
 class App extends Component {
   render() {
@@ -189,7 +197,6 @@ class App extends Component {
       <div className="App">
         <SearchkitProvider searchkit={searchkit}>
           <Layout>
-
             <TopBar>
               <SearchBox
                 autofocus={true}
@@ -203,7 +210,7 @@ class App extends Component {
                   auto_generate_phrase_queries: true,
                   analyze_wildcard: true,
                   lenient: true,
-                  split_on_whitespace: true,
+                  split_on_whitespace: true
                 }}
                 queryFields={[
                   "source.product",
@@ -211,17 +218,18 @@ class App extends Component {
                   "target.version^10",
                   "target.locale^3",
                   "target.platform^2",
-                  "build.id",
+                  "build.id"
                 ]}
               />
               <div className="elasticsearch-query-doc">
                 <a
                   href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax"
-                  title="You may use Elasticsearch query string syntax by prefixing it with a single quote">
+                  title="You may use Elasticsearch query string syntax by prefixing it with a single quote"
+                >
                   ?
                 </a>
               </div>
-              <ProjectInfo/>
+              <ProjectInfo />
             </TopBar>
 
             <LayoutBody>
@@ -229,7 +237,8 @@ class App extends Component {
                 <RefinementAutosuggest
                   field="target.version"
                   title="Version"
-                  git id="versions"
+                  git
+                  id="versions"
                   size={20}
                   operator="OR"
                   multi={true}
@@ -258,7 +267,6 @@ class App extends Component {
               </SideBar>
 
               <LayoutResults>
-
                 <ActionBar>
                   <ActionBarRow>
                     <HitsStats />
@@ -268,13 +276,13 @@ class App extends Component {
                           label: "Published on",
                           field: "download.date",
                           order: "desc",
-                          defaultOption: true,
+                          defaultOption: true
                         },
                         {
                           label: "Build date",
                           field: "build.date",
-                          order: "desc",
-                        },
+                          order: "desc"
+                        }
                       ]}
                     />
                   </ActionBarRow>
@@ -302,22 +310,21 @@ class App extends Component {
                     "target.version",
                     "target.locale",
                     "target.platform",
-                    "build.id",
+                    "build.id"
                   ]}
                 />
                 <NoHits
                   translations={{
                     "NoHits.NoResultsFound":
-                    "No release found were found for {query}",
+                      "No release found were found for {query}",
                     "NoHits.DidYouMean": "Search for {suggestion}",
                     "NoHits.SearchWithoutFilters":
-                    "Search for {query} without filters",
+                      "Search for {query} without filters"
                   }}
                   suggestionsField="target.version"
                 />
 
                 <Pagination showNumbers={true} />
-
               </LayoutResults>
             </LayoutBody>
           </Layout>
