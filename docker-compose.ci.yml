@@ -32,3 +32,11 @@ services:
       args:
         - CI
     command: build
+
+  ui:
+    build:
+       context: .
+       dockerfile: ui/Dockerfile
+    environment:
+      - NODE_ENV=development
+    command: start
