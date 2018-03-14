@@ -31,6 +31,8 @@ import {
   SideBar,
 } from "searchkit";
 
+import "searchkit/release/theme.css";
+
 import contribute_json from "./contribute.json";
 const KINTO_COLLECTION_URL = process.env.REACT_APP_KINTO_COLLECTION_URL || "https://buildhub.prod.mozaws.net/v1/buckets/build-hub/collections/releases/";
 
