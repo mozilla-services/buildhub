@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "gh-pages": "1.0.0",
-    "prettier": "1.4.4",
+    "prettier": "1.11.1",
     "react-scripts": "1.0.7"
   },
   "homepage": "https://mozilla-services.github.io/buildhub",
@@ -23,9 +23,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "cs-check": "prettier -l $npm_package_prettierOptions 'src/*.js'",
-    "cs-format": "prettier $npm_package_prettierOptions 'src/*.js' --write"
+    "lint:prettier": "prettier --list-different src/**/*.js | ./lint_problems.sh",
+    "lint:prettierfix": "prettier src/**/*.js --write"
   },
-  "prettierOptions": "--jsx-bracket-same-line --trailing-comma es5 --semi",
   "proxy": "http://kinto:8888"
 }

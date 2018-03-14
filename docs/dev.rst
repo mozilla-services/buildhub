@@ -222,3 +222,18 @@ errors) and you can open the ``index.html`` in your browser:
 .. note::
 
     Our ``sphinx-build`` command transforms any warnings into errors.
+
+Upgrading UI packages
+=====================
+
+To update any of the packages that the UI uses, follow these steps
+(as an example):
+
+.. code-block:: shell
+
+    $ docker-compose run ui bash
+    root@be2dda49e5ef:/app# yarn outdated
+    root@be2dda49e5ef:/app# yarn upgrade prettier --latest
+    root@be2dda49e5ef:/app# exit
+
+Check that the ``ui/package.json`` and ``ui/yarn.lock`` changed accordingly.

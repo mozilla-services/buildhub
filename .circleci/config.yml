@@ -94,8 +94,7 @@ jobs:
           name: Lint check
           command: |
             docker-compose -f docker-compose.ci.yml run buildhub lintcheck
-            # Commented out whilst waiting for https://github.com/mozilla-services/buildhub/issues/362
-            #docker-compose -f docker-compose.ci.yml run ui lintcheck
+            docker-compose -f docker-compose.ci.yml run ui lintcheck
 
       - run:
           name: Mock run building lambda.zip.
