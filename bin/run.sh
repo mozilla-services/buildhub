@@ -2,12 +2,14 @@
 set -eo pipefail
 
 usage() {
-  echo "usage: ./bin/run.sh version|test|lambda.zip|initialize-kinto|latest-inventory-to-kinto"
+  echo "usage: ./bin/run.sh version|waitfor|functional-tests|unit-tests|lintcheck|lambda.zip|initialize-kinto|latest-inventory-to-kinto"
   echo ""
   echo "    version                     Show current version"
-  echo "    test                        Run tests"
+  echo "    waitfor                     Run ./bin/wait-for"
+  echo "    functional-tests            Run all tests"
+  echo "    unit-tests                  Run all tests except the functional ones"
+  echo "    lintcheck                   Run flake8 on all code"
   echo "    lambda.zip                  Build Zip archive from buildhub package"
-  echo "    initialize-kinto            Initialize a Kinto server for buildhub"
   echo "    latest-inventory-to-kinto   Load latest S3 inventory to a Kinto server"
   echo ""
   exit 1
@@ -19,23 +21,31 @@ case $1 in
   version)
     cat version.json
     ;;
-  test)
-    python3 -m venv /tmp/tests
-    /tmp/tests/bin/pip install -e jobs/
-    /tmp/tests/bin/pip install -r jobs/requirements/default.txt -r jobs/requirements/dev.txt -c jobs/requirements/constraints.txt
-    /tmp/tests/bin/py.test --ignore=jobs/tests/test_lamdba_s3_event_functional.py --override-ini="cache_dir=/tmp/tests" jobs/tests
+  waitfor)
+    ./bin/wait-for ${@:2}
+    ;;
+  unit-tests)
+    py.test --ignore=jobs/tests/test_lamdba_s3_event_functional.py --override-ini="cache_dir=/tmp/tests" jobs/tests ${@:2}
+    ;;
+  functional-tests)
+    SERVER_URL=http://testkinto:9999/v1 py.test --override-ini="cache_dir=/tmp/tests" jobs/tests ${@:2}
     ;;
   lambda.zip)
-    cd .venv/lib/python3.6/site-packages/
-    zip -r /tmp/lambda.zip *
-    ;;
-  initialize-kinto)
+    rm -fr .venv
+    python -m venv .venv
     source .venv/bin/activate
-    kinto-wizard load jobs/buildhub/initialization.yml ${@:2}
+    pip install -I ./jobs
+    pip install -r jobs/requirements/default.txt -c jobs/requirements/constraints.txt
+    pushd .venv/lib/python3.6/site-packages/
+    zip -r /app/lambda.zip *
+    popd
+    rm -fr .venv
     ;;
   latest-inventory-to-kinto)
-    source .venv/bin/activate
     latest-inventory-to-kinto ${@:2}
+    ;;
+  lintcheck)
+    flake8 jobs/buildhub jobs/tests
     ;;
   *)
     exec "$@"

@@ -30,7 +30,10 @@ import {
 } from "searchkit";
 
 import contribute_json from "./contribute.json";
-const KINTO_COLLECTION_URL = "https://buildhub.prod.mozaws.net/v1/buckets/build-hub/collections/releases/";
+const KINTO_COLLECTION_URL = process.env.REACT_APP_KINTO_COLLECTION_URL || "https://buildhub.prod.mozaws.net/v1/buckets/build-hub/collections/releases/";
+
+// (peterbe) TEMPORARY console warn during docker-compose hacking
+console.warn(`KINTO_COLLECTION_URL=${KINTO_COLLECTION_URL}`);
 
 const searchkit = new SearchkitManager(KINTO_COLLECTION_URL, {
   searchUrlPath: "search"

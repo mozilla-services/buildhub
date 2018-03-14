@@ -1,6 +1,7 @@
 # Buildhub
 
-[![Build Status](https://travis-ci.org/mozilla-services/buildhub.svg?branch=master)](https://travis-ci.org/mozilla-services/buildhub)
+[![CircleCI](https://circleci.com/gh/mozilla-services/buildhub.svg?style=svg)](https://circleci.com/gh/mozilla-services/buildhub)
+
 
 _Buildhub_ aims to provide a public database of comprehensive information about releases and builds.
 
@@ -13,23 +14,14 @@ Apache 2
 
 ## Development
 
-1. Create a `virtualenv` based on Python 3.6
-2. Install all the dependencies:
+1. Install Docker
+2. To run tests: `make test`
+3. To lint check Python code: `make lintcheck`
 
-```sh
-pip install -r jobs/requirements/default.txt -r jobs/requirements/dev.txt -c jobs/requirements/constraints.txt
-```
+## Continuous Integration
 
-To run tests, install `tox` first: `pip install tox`. Now you can run tests:
-
-```sh
-# To run the functiona unit tests
-tox -e py36
-# To check for linting
-tox -e flake8
-```
-
-TODO: Wanna mention how to run the unit tests without the functional part.
+We use [CircleCI](https://circleci.com/gh/mozilla-services/buildhub)
+for all continous integration.
 
 ## Releasing
 

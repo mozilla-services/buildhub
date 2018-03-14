@@ -7,6 +7,4 @@ buildhub-lambda*.zip
 *.zip
 
 jobs/.cache
-jobs/.venv
-jobs/.tox
-ui/
+ui/node_modules/

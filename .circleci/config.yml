@@ -1,0 +1,175 @@
+# These environment variables must be set in CircleCI UI
+#
+# DOCKERHUB_REPO - docker hub repo, format: <username>/<repo>
+# DOCKER_EMAIL   - login info for docker hub
+# DOCKER_USER
+# DOCKER_PASS
+#
+
+version: 2
+jobs:
+  checkout_code:
+    docker:
+      - image: ubuntu:16.04
+    working_directory: ~/buildhub
+    steps:
+      - run:
+          name: Install essential packages
+          command: |
+            apt-get update && apt-get install -y ca-certificates git
+      - checkout
+      - save_cache:
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - ~/buildhub
+
+  build_test_and_deploy:
+    docker:
+      - image: ubuntu:16.04
+    working_directory: ~/buildhub
+    steps:
+      - run:
+          name: Install essential packages
+          command: |
+            apt-get update && apt-get install -y ca-certificates curl python3-pip zip
+
+      - restore_cache:
+          keys:
+            - v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+
+      - run:
+          name: Install Docker
+          command: |
+            set -x
+            VER="17.09.0-ce"
+            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+            mv /tmp/docker/* /usr/bin
+
+      - run:
+          name: Install Docker Compose
+          command: |
+            set -x
+            curl -L https://github.com/docker/compose/releases/download/1.16.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+            chmod +x /usr/local/bin/docker-compose
+
+      - setup_remote_docker:
+          version: 17.09.0-ce
+
+      - run:
+          name: Create version.json
+          command: |
+            # create a version.json per https://github.com/mozilla-services/Dockerflow/blob/master/docs/version_object.md
+            printf '{"commit":"%s","version":"%s","source":"https://github.com/%s/%s","build":"%s"}\n' \
+            "$CIRCLE_SHA1" \
+            "$CIRCLE_TAG" \
+            "$CIRCLE_PROJECT_USERNAME" \
+            "$CIRCLE_PROJECT_REPONAME" \
+            "$CIRCLE_BUILD_URL" > version.json
+
+      - run:
+          name: Start testkinto (an in-memory only kinto server)
+          command: |
+            # This assures that the `docker-compose up`, later, isn't
+            # put to do the build in the background if it needs to be built.
+            # Basically, by being explicit about it here and now we can
+            # we certain the image is ready by the time we start it ("up")
+            # in the background ("-d").
+            docker-compose -f docker-compose.ci.yml build testkinto
+
+            # Use -d to put it in the background "docker style".
+            docker-compose -f docker-compose.ci.yml up -d testkinto
+
+            # Give the 'up -d testkinto' a fair chance to get started
+            sleep 10
+
+      - run:
+          name: Run functional tests
+          command: |
+            docker-compose -f docker-compose.ci.yml run buildhub waitfor testkinto:9999 -t 30
+            docker-compose -f docker-compose.ci.yml run testkinto initialize-kinto-wizard jobs/buildhub/initialization.yml  --server http://testkinto:9999/v1 --auth user:pass
+            docker-compose -f docker-compose.ci.yml run buildhub functional-tests
+
+      - run:
+          name: Lint check
+          command: |
+            docker-compose -f docker-compose.ci.yml run buildhub lintcheck
+            # Commented out whilst waiting for https://github.com/mozilla-services/buildhub/issues/362
+            #docker-compose -f docker-compose.ci.yml run ui lintcheck
+
+      - run:
+          name: Mock run building lambda.zip.
+          command: |
+            docker-compose -f docker-compose.ci.yml run buildhub lambda.zip
+
+      - run:
+          name: Docs should build without error
+          command: |
+            docker-compose -f docker-compose.ci.yml run docs build
+
+      - run:
+          name: Push to Dockerhub
+          command: |
+            # set DOCKER_DEPLOY=true in Circle UI to push to Dockerhub
+            DOCKER_DEPLOY="${DOCKER_DEPLOY:-false}"
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              bin/deploy-dockerhub.sh latest
+            fi
+            if [ -n "${CIRCLE_TAG}" ]; then
+              bin/deploy-dockerhub.sh "$CIRCLE_TAG"
+            fi
+
+  frontend:
+    docker:
+      - image: node:9
+    working_directory: ~/buildhub
+    steps:
+      - checkout
+
+      - run:
+          name: "Checking Versions"
+          command: |
+            node --version
+            npm --version
+
+      - run:
+          name: Install frontend dependencies
+          command: |
+            cd ui
+            # Note, we can't use --production because the `npm run build`
+            # command depends on react-scripts.
+            npm install
+
+      - run:
+          name: Build frontend
+          command: |
+            cd ui
+            npm run build
+
+      - store_artifacts:
+          path: ui/build
+
+workflows:
+  version: 2
+
+  # workflow jobs are _not_ run in tag builds by default
+  # we use filters to whitelist jobs that should be run for tags
+
+  # workflow jobs are run in _all_ branch builds by default
+  # we use filters to blacklist jobs that shouldn't be run for a branch
+
+  # see: https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
+
+  build-test-deploy:
+    jobs:
+      - checkout_code:
+          filters:
+            tags:
+              only: /.*/
+      - build_test_and_deploy:
+          requires:
+            - checkout_code
+          filters:
+            tags:
+              only: /.*/
+      - frontend

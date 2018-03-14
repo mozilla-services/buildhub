@@ -9,7 +9,7 @@ from buildhub import lambda_s3_event
 
 here = os.path.dirname(__file__)
 
-server = 'http://localhost:8888/v1'
+server = os.environ.get('SERVER_URL', 'http://localhost:8888/v1')
 bid = 'build-hub'
 cid = 'releases'
 

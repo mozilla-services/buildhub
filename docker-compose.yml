@@ -1,0 +1,88 @@
+version: '2'
+
+services:
+  db:
+    # As of Mar 8 2017, we run 9.6.6 in Buildhub production.
+    image: postgres:9.6
+
+  elasticsearch:
+    # As of Mar 8 2017, we run es 5.4.0 in Buildhub production.
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.4.0
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 1g
+    ports:
+      - 9200:9200
+
+  kinto:
+    build:
+      # So it can read files from within 'jobs/'
+      context: .
+      dockerfile: kinto/Dockerfile
+    depends_on:
+      - "db"
+      - "elasticsearch"
+    ports:
+      - "8888:8888"
+    volumes:
+      - $PWD:/app
+
+  testkinto:
+    build:
+      # So it can read files from within 'jobs/'
+      context: .
+      dockerfile: testkinto/Dockerfile
+    ports:
+      - "9999:9999"
+    # XXX Not sure we need this. What business do you have in there?!
+    volumes:
+      - $PWD:/app
+
+  buildhub:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mozilla/buildhub
+    depends_on:
+      - "kinto"
+    environment:
+      - SERVER_URL=http://kinto:8888/v1
+    volumes:
+      - $PWD:/app
+    # All things within the 'buildhub' directive are meant to be executed
+    # with 'docker-compose run buildhub ...'
+    # By setting this to "true", it means we can run `docker-compose up`
+    # and this one won't start anything.
+    command: "true"
+
+  ui:
+    build:
+       context: .
+       dockerfile: ui/Dockerfile
+    depends_on:
+      - "kinto"
+    environment:
+      - REACT_APP_KINTO_COLLECTION_URL=/v1/buckets/build-hub/collections/releases/
+      - NODE_ENV=development
+    ports:
+      - "3000:3000"
+      - "35729:35729"
+    volumes:
+      - $PWD/ui:/app
+    command: start
+
+  docs:
+    build:
+      context: .
+      dockerfile: docs/Dockerfile
+    volumes:
+      - $PWD:/app
+    # Do nothing when 'docker-compose up'
+    command: "true"

@@ -1,0 +1,3 @@
+kinto[postgresql]
+kinto-wizard
+kinto-elasticsearch
