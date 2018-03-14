@@ -130,21 +130,19 @@ jobs:
           name: "Checking Versions"
           command: |
             node --version
-            npm --version
+            yarn --version
 
       - run:
           name: Install frontend dependencies
           command: |
             cd ui
-            # Note, we can't use --production because the `npm run build`
-            # command depends on react-scripts.
-            npm install
+            yarn
 
       - run:
           name: Build frontend
           command: |
             cd ui
-            npm run build
+            yarn run build
 
       - store_artifacts:
           path: ui/build
