@@ -2,11 +2,12 @@
 set -eo pipefail
 
 usage() {
-  echo "usage: ./bin/run.sh start|outdated|lintcheck"
+  echo "usage: ./run.sh start|outdated|lintcheck|lintfix"
   echo ""
   echo "    start                         Start React dev server"
   echo "    outdated                      List npm packages that are outdated"
   echo "    lintcheck                     Prettier check all the source files"
+  echo "    lintfix                       Let Prettier fix all source files"
   echo ""
   exit 1
 }
@@ -22,10 +23,10 @@ case $1 in
     yarn outdated
     ;;
   lintcheck)
-    # Replace this (and consider that lint_problem.sh)
-    # because if this errors it's really ugly and hard to read since you
-    # get a bunch of "npm errors".
-    yarn run cs-check
+    yarn run lint:prettier
+    ;;
+  lintfix)
+    yarn run lint:prettierfix
     ;;
   *)
     exec "$@"

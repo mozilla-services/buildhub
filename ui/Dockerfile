@@ -8,6 +8,9 @@ ADD ui/package.json /package.json
 ADD ui/yarn.lock /yarn.lock
 RUN yarn
 
+ENV NODE_PATH=/node_modules
+ENV PATH=$PATH:/node_modules/.bin
+
 WORKDIR /app
 ADD ui /app
 
