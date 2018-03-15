@@ -6,7 +6,7 @@ set -e
 
 # Usage: retry MAX CMD...
 # Retry CMD up to MAX times. If it fails MAX times, returns failure.
-# Example: retry 3 docker push "mozilla/tecken:$TAG"
+# Example: retry 3 docker push "mozilla/buildhub:$TAG"
 function retry() {
     max=$1
     shift
@@ -27,9 +27,9 @@ retry 3  echo "$DOCKER_PASS" | docker login -u="$DOCKER_USER" --password-stdin
 # docker tag and push git branch to dockerhub
 if [ -n "$1" ]; then
     [ "$1" == master ] && TAG=latest || TAG="$1"
-    docker tag buildhub:build "mozilla/buildhub:$TAG" ||
-        (echo "Couldn't tag buildhub:build as mozilla/buildhub:$TAG" && false)
-    retry 3 docker push "mozilla/buildhub:$TAG" ||
-        (echo "Couldn't push mozilla/buildhub:$TAG" && false)
-    echo "Pushed mozilla/buildhub:$TAG"
+    docker tag "$DOCKERHUB_REPO" "$DOCKERHUB_REPO:$TAG" ||
+        (echo "Couldn't tag $DOCKERHUB_REPO as $DOCKERHUB_REPO:$TAG" && false)
+    retry 3 docker push "$DOCKERHUB_REPO:$TAG" ||
+        (echo "Couldn't $DOCKERHUB_REPO:$TAG" && false)
+    echo "Pushed $DOCKERHUB_REPO:$TAG"
 fi
