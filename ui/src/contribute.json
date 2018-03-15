@@ -8,7 +8,7 @@
     },
     "repository": {
         "url": "https://github.com/mozilla-services/buildhub",
-        "license": "Apache License 2.0"
+        "license": "MPL 2.0"
     },
     "bugs": {
         "list": "https://github.com/mozilla-services/buildhub/issues",

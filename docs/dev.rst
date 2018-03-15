@@ -237,3 +237,16 @@ To update any of the packages that the UI uses, follow these steps
     root@be2dda49e5ef:/app# exit
 
 Check that the ``ui/package.json`` and ``ui/yarn.lock`` changed accordingly.
+
+Licensing preamble
+==================
+
+Every file of code we write, since we use Mozilla Public License 2.0, has to
+have a preamble. The best way to describe is to look at existing code.
+There's a script to check if any files have been missed:
+
+.. code-block:: shell
+
+    $ ./bin/sanspreamble.py
+
+Run it to check which files you might have missed.
