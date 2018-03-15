@@ -2,7 +2,6 @@
 
 [![CircleCI](https://circleci.com/gh/mozilla-services/buildhub.svg?style=svg)](https://circleci.com/gh/mozilla-services/buildhub)
 
-
 _Buildhub_ aims to provide a public database of comprehensive information about releases and builds.
 
 * [Online catalog](https://mozilla-services.github.io/buildhub/)
@@ -10,7 +9,7 @@ _Buildhub_ aims to provide a public database of comprehensive information about 
 
 ## Licence
 
-Apache 2
+[MPL 2.0](http://www.mozilla.org/MPL/2.0/)
 
 ## Development
 
