@@ -4,7 +4,6 @@
   "private": true,
   "dependencies": {
     "@searchkit/refinement-autosuggest": "0.0.1-6",
-    "css-animation": "<1.4.0",
     "filesize": "3.5.10",
     "react": "15.5.4",
     "react-dom": "15.5.4",
