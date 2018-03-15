@@ -27,8 +27,8 @@ retry 3  echo "$DOCKER_PASS" | docker login -u="$DOCKER_USER" --password-stdin
 # docker tag and push git branch to dockerhub
 if [ -n "$1" ]; then
     [ "$1" == master ] && TAG=latest || TAG="$1"
-    docker tag buildhub:build "$DOCKERHUB_REPO:$TAG" ||
-        (echo "Couldn't tag buildhub:build as $DOCKERHUB_REPO:$TAG" && false)
+    docker tag "$DOCKERHUB_REPO" "$DOCKERHUB_REPO:$TAG" ||
+        (echo "Couldn't tag $DOCKERHUB_REPO as $DOCKERHUB_REPO:$TAG" && false)
     retry 3 docker push "$DOCKERHUB_REPO:$TAG" ||
         (echo "Couldn't $DOCKERHUB_REPO:$TAG" && false)
     echo "Pushed $DOCKERHUB_REPO:$TAG"
