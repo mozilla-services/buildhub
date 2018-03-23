@@ -304,7 +304,7 @@ async def process_batch(session, batch, skip_incomplete):
         yield {'data': result}
 
 
-async def csv_to_records(loop, stdin, skip_incomplete=True):
+async def csv_to_records(loop, stdin, skip_incomplete=True, min_last_modified=None):
     """
     :rtype: async generator of records (dict-like)
     """
@@ -390,6 +390,10 @@ async def csv_to_records(loop, stdin, skip_incomplete=True):
                 filesize = int(float(entry['Size']))  # e.g. 2E+10
                 lastmodified = datetime.datetime.strptime(entry['LastModifiedDate'],
                                                           '%Y-%m-%dT%H:%M:%S.%fZ')
+
+                if min_last_modified and lastmodified < min_last_modified:
+                    continue
+
                 lastmodified = lastmodified.strftime(DATETIME_FORMAT)
                 record['download']['size'] = filesize
                 record['download']['date'] = lastmodified
