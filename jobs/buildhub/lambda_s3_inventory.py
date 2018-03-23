@@ -161,7 +161,7 @@ async def main(loop, inventory):
         await initialize_kinto(loop, kinto_client, bucket, collection)
 
     min_last_modified = None
-    # Convert the simple env var to a
+    # Convert the simple env var integer to a datetime.datetime instance.
     if MIN_AGE_LAST_MODIFIED_HOURS:
         assert MIN_AGE_LAST_MODIFIED_HOURS > 0, MIN_AGE_LAST_MODIFIED_HOURS
         min_last_modified = datetime.datetime.utcnow() - datetime.timedelta(
