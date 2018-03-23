@@ -4,7 +4,6 @@
 
 import asyncio
 import datetime
-import hashlib
 import json
 from unittest import mock
 
