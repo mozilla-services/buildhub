@@ -24,7 +24,7 @@ ENTRY_POINTS = {
     'console_scripts': [
         'to-kinto = buildhub.to_kinto:run',
         'inventory-to-records = buildhub.inventory_to_records:run',
-        'latest-inventory-to-kinto = buildhub.lambda_s3_inventory:lambda_handler',
+        'latest-inventory-to-kinto = buildhub.s3_inventory_to_kinto:run',
     ],
 }
 
