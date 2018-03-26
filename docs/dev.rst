@@ -73,7 +73,34 @@ like this:
     $ docker-compose run buildhub bash
     app@b95573edb130:~$ latest-inventory-to-kinto
 
-That'll take a while.
+That'll take a while. A really long while. Be prepared to go for lunch and
+leave your computer on.
+
+.. note::
+
+    Don't worry about it being called "LATEST-inventory-to-kinto". It just
+    means it uses the latest *manifest* (generated once a day) but it
+    still iterates over every single build in S3.
+
+
+Incremental data
+================
+
+When you've run ``latest-inventory-to-kinto`` at least once, the second time
+it will be faster because, before sending data to ``kinto`` the
+``to_kinto.py`` script will generate a massive dictionary of all previously
+inserted IDs. However, all the "scraping" still needs to be processed again.
+If you want to you can set an environment variable first that will
+quickly ignore any S3 objects that are "too old". For example:
+
+.. code-block:: shell
+
+    $ docker-compose run buildhub bash
+    app@b95573edb130:~$ MIN_AGE_LAST_MODIFIED_HOURS=48 latest-inventory-to-kinto
+
+With ``MIN_AGE_LAST_MODIFIED_HOURS=48`` it means that any build that is found
+to be older than 2 days from today (in UTC) will immediately bit skipped.
+This will drastically reduce the time it takes to run the whole job.
 
 Functional tests
 ================

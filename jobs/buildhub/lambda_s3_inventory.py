@@ -4,6 +4,7 @@
 
 import re
 import asyncio
+import datetime
 import json
 import logging
 import os
@@ -30,6 +31,10 @@ FOLDER = 'public/inventories/net-mozaws-prod-delivery-{inventory}/delivery-{inve
 CHUNK_SIZE = 1024 * 256  # 256 KB
 
 INITIALIZE_SERVER = os.getenv('INITIALIZE_SERVER', 'true').lower() == 'true'
+
+# Minimum number of hours old an entry in the CSV files need to be
+# to NOT be skipped.
+MIN_AGE_LAST_MODIFIED_HOURS = int(os.getenv('MIN_AGE_LAST_MODIFIED_HOURS', 0))
 
 # Optional Sentry with synchronuous client.
 SENTRY_DSN = os.getenv('SENTRY_DSN')
@@ -155,13 +160,26 @@ async def main(loop, inventory):
     if INITIALIZE_SERVER:
         await initialize_kinto(loop, kinto_client, bucket, collection)
 
+    min_last_modified = None
+    # Convert the simple env var integer to a datetime.datetime instance.
+    if MIN_AGE_LAST_MODIFIED_HOURS:
+        assert MIN_AGE_LAST_MODIFIED_HOURS > 0, MIN_AGE_LAST_MODIFIED_HOURS
+        min_last_modified = datetime.datetime.utcnow() - datetime.timedelta(
+            hours=MIN_AGE_LAST_MODIFIED_HOURS
+        )
+
     # Download CSVs, deduce records and push to Kinto.
     session = aiobotocore.get_session(loop=loop)
     boto_config = botocore.config.Config(signature_version=botocore.UNSIGNED)
     async with session.create_client('s3', region_name=REGION_NAME, config=boto_config) as client:
         keys_stream = list_manifest_entries(loop, client, inventory)
         csv_stream = download_csv(loop, client, keys_stream)
-        records_stream = csv_to_records(loop, csv_stream, skip_incomplete=True)
+        records_stream = csv_to_records(
+            loop,
+            csv_stream,
+            skip_incomplete=True,
+            min_last_modified=min_last_modified,
+        )
         await to_kinto(loop, records_stream, kinto_client, skip_existing=True)
 
 

@@ -3,6 +3,7 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 
 import asyncio
+import datetime
 import json
 from unittest import mock
 
@@ -632,6 +633,22 @@ class CSVToRecords(asynctest.TestCase):
                 }
             }
         }]
+
+    async def test_csv_to_records_ancient_entries_skipped(self):
+
+        today = datetime.datetime.utcnow()
+        recently = today - datetime.timedelta(hours=1)
+
+        output = inventory_to_records.csv_to_records(
+            self.loop,
+            self.stdin,
+            min_last_modified=recently,
+        )
+        records = []
+        async for r in output:
+            records.append(r)
+
+        assert len(records) == 0
 
     async def test_csv_to_records_keep_incomplete(self):
         output = inventory_to_records.csv_to_records(self.loop, self.stdin,
