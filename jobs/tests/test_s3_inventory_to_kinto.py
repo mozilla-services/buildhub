@@ -6,7 +6,7 @@ import base64
 
 import asynctest
 
-from buildhub.lambda_s3_inventory import list_manifest_entries, download_csv
+from buildhub.s3_inventory_to_kinto import list_manifest_entries, download_csv
 
 
 class ListManifest(asynctest.TestCase):

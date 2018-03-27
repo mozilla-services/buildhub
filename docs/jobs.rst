@@ -51,11 +51,6 @@ Its configuration is read from environment variables:
 * ``SENTRY_DSN`` (default: empty/disabled. Example: ``https://<key>:<secret>@sentry.io/buildhub``)
 * ``MIN_AGE_LAST_MODIFIED_HOURS`` (default: ``0`` which disables it): number of days of age to consider analyzing and comparing against database.
 
-To use this script as an Amazon Lambda function, use the entry point:
-
-* ``buildhub.lambda_s3_inventory.lambda_handler``
-
-
 S3 Event lambda
 ===============
 

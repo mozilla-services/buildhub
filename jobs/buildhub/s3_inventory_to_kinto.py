@@ -183,7 +183,7 @@ async def main(loop, inventory):
         await to_kinto(loop, records_stream, kinto_client, skip_existing=True)
 
 
-def lambda_handler(event=None, context=None):
+def run():
     # Log everything to stderr.
     logger.addHandler(logging.StreamHandler())
     logger.setLevel(logging.DEBUG)
