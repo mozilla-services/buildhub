@@ -22,7 +22,14 @@ KNOWN_MIMETYPES = {
     }
 
 
-def archive_url(product, version=None, platform=None, locale=None, nightly=None, candidate=None):
+def archive_url(
+    product,
+    version=None,
+    platform=None,
+    locale=None,
+    nightly=None,
+    candidate=None
+):
     """Returns the related URL on archive.mozilla.org
     """
     if product == 'fennec':
@@ -152,14 +159,20 @@ def is_build_url(product, url):
     - mobile/nightly/2017/08/2017-08-09-10-03-39-mozilla-central-android-api-15-l10n/
           fennec-57.0a1.hi-IN.android-arm.apk
     - firefox/nightly/2017/08/2017-08-25-10-01-26-mozilla-central-l10n/Firefox Installer.fr.exe
-    """
-    if 'nightly' in url and 'mozilla-central' not in url and 'comm-central' not in url:
+    """  # noqa
+    if (
+        'nightly' in url and
+        'mozilla-central' not in url and
+        'comm-central' not in url
+    ):
         return False
 
-    re_exclude = re.compile('.+(tinderbox|try-builds|partner-repacks|latest|contrib|/0\.|'
-                            'experimental|namoroka|debug|sha1-installers|candidates/archived|'
-                            'stylo-bindings|/1.0rc/|/releases/win../|dominspector|/test/|testing|'
-                            '%28.+%29|\sInstaller\.(\w{2,3}\-?\w{0,3})\.exe)')
+    re_exclude = re.compile(
+        '.+(tinderbox|try-builds|partner-repacks|latest|contrib|/0\.|'
+        'experimental|namoroka|debug|sha1-installers|candidates/archived|'
+        'stylo-bindings|/1.0rc/|/releases/win../|dominspector|/test/|testing|'
+        '%28.+%29|\sInstaller\.(\w{2,3}\-?\w{0,3})\.exe)'
+    )
     if re_exclude.match(url):
         return False
 
@@ -174,9 +187,16 @@ def is_build_url(product, url):
         product = 'fennec'
     filename = os.path.basename(url)
     match_filename = filename.replace(' ', '-').lower()
-    re_filename = re.compile('{}-(.+)({})$'.format(product, '|'.join(extensions)))
-    re_exclude = re.compile('.+(sdk|tests|crashreporter|stub|gtk2.+xft|source|asan)')
-    return re_filename.match(match_filename) and not re_exclude.match(match_filename)
+    re_filename = re.compile(
+        '{}-(.+)({})$'.format(product, '|'.join(extensions))
+    )
+    re_exclude = re.compile(
+        '.+(sdk|tests|crashreporter|stub|gtk2.+xft|source|asan)'
+    )
+    return (
+        re_filename.match(match_filename) and
+        not re_exclude.match(match_filename)
+    )
 
 
 def is_release_build_metadata(product, version, filename):
@@ -219,7 +239,9 @@ def is_rc_build_metadata(product, url):
         return False
     version = m.group(1)
     if product == 'fennec':  # fennec-56.0b1.en-US.android-arm.json
-        re_metadata = re.compile('.+/{}-{}\.([^\.]+)\.([^\.]+)\.json$'.format(product, version))
+        re_metadata = re.compile(
+            '.+/{}-{}\.([^\.]+)\.([^\.]+)\.json$'.format(product, version)
+        )
     else:  # firefox-56.0b1.json
         re_metadata = re.compile('.+/{}-{}\.json$'.format(product, version))
     return bool(re_metadata.match(url))
@@ -299,7 +321,8 @@ def record_from_url(url):
         platform = url_parts[8]
         locale = url_parts[9]
         if 'funnelcake' in platform:
-            # 49.0.1-candidates/build3/funnelcake90/win32/en-US/Firefox Setup 49.0.1.exe
+            # 49.0.1-candidates/build3/funnelcake90/win32/en-US/\
+            # Firefox Setup 49.0.1.exe
             version = '{}-{}'.format(version, platform)
             platform = url_parts[9]
             locale = url_parts[10]
@@ -366,15 +389,18 @@ def check_record(record):
 
     platform = record['target']['platform']
     if not re.match(r"^(win|mac|linux|android|maemo|eabi).{0,4}", platform):
-        raise ValueError("Suspicious platform '{}': {}".format(platform, record))
+        raise ValueError("Suspicious platform '{platform}': {record}")
 
     locale = record['target']['locale']
     if not re.match(r"^([A-Za-z]{2,3}\-?){1,3}$", locale):
-        raise ValueError("Suspicious locale '{}': {}".format(locale, record))
+        raise ValueError(f"Suspicious locale '{locale}': {record}")
 
     version = record['target']['version']
-    if not re.match(r"^(\d+|\.|\-|esr|rc|b|a|pre|funnelcake|real|plugin)+$", version):
-        raise ValueError("Suspicious version '{}': {}".format(version, record))
+    if not re.match(
+        r"^(\d+|\.|\-|esr|rc|b|a|pre|funnelcake|real|plugin)+$",
+        version
+    ):
+        raise ValueError(f"Suspicious version '{version}': {record}")
 
 
 def merge_metadata(record, metadata):
@@ -386,7 +412,8 @@ def merge_metadata(record, metadata):
     # Example of metadata:
     #  https://archive.mozilla.org/pub/thunderbird/candidates \
     #  /50.0b1-candidates/build2/linux-i686/en-US/thunderbird-50.0b1.json
-    # If the channel is present in the metadata it is more reliable than our guess.
+    # If the channel is present in the metadata it is more reliable
+    # than our guess.
     channel = metadata.get('moz_update_channel', record['target']['channel'])
     record['target']['channel'] = channel
 

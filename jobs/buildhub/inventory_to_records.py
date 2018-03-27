@@ -60,13 +60,19 @@ async def fetch_json(session, url, timeout=TIMEOUT_SECONDS):
     try:
         with async_timeout.timeout(timeout):
             logger.debug("GET '{}'".format(url))
-            async with session.get(url, headers=headers, timeout=None) as response:
+            async with session.get(
+                url,
+                headers=headers,
+                timeout=None
+            ) as response:
                 response.raise_for_status()
                 try:
                     return await response.json()
                 except aiohttp.ClientResponseError as e:
                     # Some JSON files are served with wrong content-type.
-                    return await response.json(content_type='application/octet-stream')
+                    return await response.json(
+                        content_type='application/octet-stream'
+                    )
     except asyncio.TimeoutError:
         logger.error("Timeout on GET '{}'".format(url))
         raise
@@ -96,7 +102,8 @@ _nightly_metadata = {}
 
 
 async def fetch_nightly_metadata(session, record):
-    """A JSON file containing build info is published along the nightly build archive.
+    """A JSON file containing build info is published along the
+    nightly build archive.
     """
     global _nightly_metadata
 
@@ -111,7 +118,11 @@ async def fetch_nightly_metadata(session, record):
     extensions = '|'.join(FILE_EXTENSIONS)
 
     try:
-        metadata_url = re.sub('\.({})$'.format(extensions), '.json', nightly_url)
+        metadata_url = re.sub(
+            '\.({})$'.format(extensions),
+            '.json',
+            nightly_url
+        )
         metadata = await fetch_json(session, metadata_url)
         _nightly_metadata[nightly_url] = metadata
         return metadata
@@ -121,7 +132,11 @@ async def fetch_nightly_metadata(session, record):
         try:
             # e.g. https://archive.mozilla.org/pub/firefox/nightly/2011/05/
             #      2011-05-05-03-mozilla-central/firefox-6.0a1.en-US.mac.txt
-            old_metadata_url = re.sub('\.({})$'.format(extensions), '.txt', nightly_url)
+            old_metadata_url = re.sub(
+                '\.({})$'.format(extensions),
+                '.txt',
+                nightly_url
+            )
             async with session.get(old_metadata_url) as response:
                 old_metadata = await response.text()
                 m = re.search('^(\d+)\n(http.+)/rev/(.+)$', old_metadata)
@@ -133,22 +148,26 @@ async def fetch_nightly_metadata(session, record):
                     }
                     _nightly_metadata[nightly_url] = metadata
                     return metadata
-                # e.g. https://archive.mozilla.org/pub/firefox/nightly/2010/07/2010-07-04-05
-                #      -mozilla-central/firefox-4.0b2pre.en-US.win64-x86_64.txt
+                # e.g.
+                # https://archive.mozilla.org/pub/firefox/nightly/2010/07/2010-07-04-05-mozilla-central/firefox-4.0b2pre.en-US.win64-x86_64.txt
                 m = re.search('^(\d+) (.+)$', old_metadata)
                 if m:
                     metadata = {
                         'buildid': m.group(1),
                         'moz_source_stamp': m.group(2),
-                        'moz_source_repo': 'http://hg.mozilla.org/mozilla-central',
+                        'moz_source_repo': (
+                            'http://hg.mozilla.org/mozilla-central'
+                        ),
                     }
                     _nightly_metadata[nightly_url] = metadata
                     return metadata
         except aiohttp.ClientError as e:
             pass
 
-        logger.warning("Could not fetch metadata for '%s' from '%s'" % (record['id'],
-                                                                        metadata_url))
+        logger.warning(
+            f"Could not fetch metadata for '{record['id']}' "
+            f"from '{metadata_url}'"
+        )
         _nightly_metadata[url] = None  # Don't try it anymore.
         return None
 
@@ -157,7 +176,8 @@ _rc_metadata = {}
 
 
 async def fetch_release_candidate_metadata(session, record):
-    """A JSON file containing build info is published along the nightly build archive.
+    """A JSON file containing build info is published along the
+    nightly build archive.
     """
     global _rc_metadata
 
@@ -173,7 +193,11 @@ async def fetch_release_candidate_metadata(session, record):
     if product == 'devedition':
         product = 'firefox'
     if product == 'fennec':
-        metadata_url = re.sub('\.({})$'.format('|'.join(FILE_EXTENSIONS)), '.json', rc_url)
+        metadata_url = re.sub(
+            '\.({})$'.format('|'.join(FILE_EXTENSIONS)),
+            '.json',
+            rc_url
+        )
     else:
         major_version = record['target']['version'].split('rc')[0]
         parts = rc_url.split('/')
@@ -184,8 +208,10 @@ async def fetch_release_candidate_metadata(session, record):
     except aiohttp.ClientError as e:
         # Old RC like https://archive.mozilla.org/pub/firefox/releases/1.0rc1/
         # don't have metadata.
-        logger.warning("Could not fetch metadata for '%s' from '%s'" % (record['id'],
-                                                                        metadata_url))
+        logger.warning(
+            f"Could not fetch metadata for '{record['id']}' "
+            f"from '{metadata_url}'"
+        )
         _rc_metadata[rc_url] = None  # Don't try it anymore.
         return None
 
@@ -209,7 +235,9 @@ async def scan_candidates(session, product):
     if product in _candidates_build_folder:
         return
 
-    logger.info("Scan '{}' candidates to get their latest build folder...".format(product))
+    logger.info(
+        f"Scan '{product}' candidates to get their latest build folder..."
+    )
     candidates_url = archive_url(product, candidate='/')
     candidates_folders, _ = await fetch_listing(session, candidates_url)
 
@@ -228,7 +256,9 @@ async def scan_candidates(session, product):
 
         for version, (build_folders, _) in zip(versions, listings):
             latest_build_folder = sorted(
-                build_folders, key=lambda x: re.sub("[^0-9]", "", x).zfill(3))[-1]
+                build_folders,
+                key=lambda x: re.sub("[^0-9]", "", x).zfill(3)
+            )[-1]
             _candidates_build_folder[product][version] = latest_build_folder
 
 
@@ -236,7 +266,8 @@ _release_metadata = {}
 
 
 async def fetch_release_metadata(session, record):
-    """The `candidates` folder contains build info about recent released versions.
+    """The `candidates` folder contains build info about recent
+    released versions.
     """
     global _candidates_build_folder
 
@@ -256,7 +287,9 @@ async def fetch_release_metadata(session, record):
     # Metadata for EME-free and sha1 repacks are the same as original release.
     platform = re.sub('-(eme-free|sha1)', '', platform, flags=re.I)
 
-    url = archive_url(product, version, platform, locale, candidate='/' + latest_build_folder)
+    url = archive_url(
+        product, version, platform, locale, candidate='/' + latest_build_folder
+    )
 
     # We already have the metadata for this platform and version.
     if url in _release_metadata:
@@ -304,7 +337,12 @@ async def process_batch(session, batch, skip_incomplete):
         yield {'data': result}
 
 
-async def csv_to_records(loop, stdin, skip_incomplete=True, min_last_modified=None):
+async def csv_to_records(
+    loop,
+    stdin,
+    skip_incomplete=True,
+    min_last_modified=None
+):
     """
     :rtype: async generator of records (dict-like)
     """
@@ -335,7 +373,11 @@ async def csv_to_records(loop, stdin, skip_incomplete=True, min_last_modified=No
         filtered = [e for e in entries if e['Key'].endswith('.exe')]
         if len(filtered) > 0:
             entries = filtered
-        longer_first = sorted(entries, key=lambda e: len(e['Key']), reverse=True)
+        longer_first = sorted(
+            entries,
+            key=lambda e: len(e['Key']),
+            reverse=True
+        )
         deduplicate = {
             e['Key'].lower()
                     .replace('+setup+', '-')
@@ -349,7 +391,10 @@ async def csv_to_records(loop, stdin, skip_incomplete=True, min_last_modified=No
 
     # Read metadata of previous run, and warm up cache.
     # Will save a lot of hits to archive.mozilla.org.
-    metadata_cache_file = os.path.join(CACHE_FOLDER, '.metadata-{}.json'.format(__version__))
+    metadata_cache_file = os.path.join(
+        CACHE_FOLDER,
+        '.metadata-{}.json'.format(__version__)
+    )
     if os.path.exists(metadata_cache_file):
         metadata = json.load(open(metadata_cache_file))
         _rc_metadata.update(metadata['rc'])
@@ -366,14 +411,16 @@ async def csv_to_records(loop, stdin, skip_incomplete=True, min_last_modified=No
                 object_key = entry['Key']
 
                 try:
-                    product = object_key.split('/')[1]  # /pub/thunderbird/nightly/...
+                    # /pub/thunderbird/nightly/...
+                    product = object_key.split('/')[1]
                 except IndexError:
                     continue  # e.g. https://archive.mozilla.org/favicon.ico
 
                 if product not in PRODUCTS:
                     continue
 
-                # Scan the list of candidates metadata (no-op if already initialized).
+                # Scan the list of candidates metadata (no-op if
+                # already initialized).
                 await scan_candidates(session, product)
 
                 url = ARCHIVE_URL + object_key.replace('+', ' ')
@@ -388,8 +435,10 @@ async def csv_to_records(loop, stdin, skip_incomplete=True, min_last_modified=No
 
                 # Complete with info that can't be obtained from the URL.
                 filesize = int(float(entry['Size']))  # e.g. 2E+10
-                lastmodified = datetime.datetime.strptime(entry['LastModifiedDate'],
-                                                          '%Y-%m-%dT%H:%M:%S.%fZ')
+                lastmodified = datetime.datetime.strptime(
+                    entry['LastModifiedDate'],
+                    '%Y-%m-%dT%H:%M:%S.%fZ'
+                )
 
                 if min_last_modified and lastmodified < min_last_modified:
                     continue
@@ -401,7 +450,11 @@ async def csv_to_records(loop, stdin, skip_incomplete=True, min_last_modified=No
                 if len(batch) < NB_PARALLEL_REQUESTS:
                     batch.append(record)
                 else:
-                    async for result in process_batch(session, batch, skip_incomplete):
+                    async for result in process_batch(
+                        session,
+                        batch,
+                        skip_incomplete
+                    ):
                         yield result
 
                     batch = []  # Go on.
@@ -422,15 +475,29 @@ async def csv_to_records(loop, stdin, skip_incomplete=True, min_last_modified=No
 
 
 async def main(loop):
-    parser = argparse.ArgumentParser(description=('Read S3 CSV inventory from stdin '
-                                                  'and print out Kinto records.'))
-    parser.add_argument('-v', '--verbose', action='store_const',
-                        const=logging.INFO, dest='verbosity',
-                        help='Show all messages.')
+    parser = argparse.ArgumentParser(
+        description=(
+            'Read S3 CSV inventory from stdin '
+            'and print out Kinto records.'
+        ),
+    )
+    parser.add_argument(
+        '-v',
+        '--verbose',
+        action='store_const',
+        const=logging.INFO,
+        dest='verbosity',
+        help='Show all messages.'
+    )
 
-    parser.add_argument('-D', '--debug', action='store_const',
-                        const=logging.DEBUG, dest='verbosity',
-                        help='Show all messages, including debug messages.')
+    parser.add_argument(
+        '-D',
+        '--debug',
+        action='store_const',
+        const=logging.DEBUG,
+        dest='verbosity',
+        help='Show all messages, including debug messages.'
+    )
     args = parser.parse_args()
 
     logger.addHandler(logging.StreamHandler())
@@ -439,7 +506,9 @@ async def main(loop):
     else:
         logger.setLevel(logging.WARNING)
 
-    async for record in csv_to_records(loop, stream_as_generator(loop, sys.stdin)):
+    async for record in csv_to_records(loop, stream_as_generator(
+        loop, sys.stdin
+    )):
         sys.stdout.write(json.dumps(record) + '\n')
 
 

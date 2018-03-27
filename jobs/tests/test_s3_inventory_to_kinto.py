@@ -13,10 +13,16 @@ class ListManifest(asynctest.TestCase):
     def setUp(self):
         class FakePaginator:
             async def paginate(self, *args, **kwargs):
-                yield {'CommonPrefixes': [{'Prefix': 'some-prefix/2017-01-02T03-05Z/'}]}
-                yield {'CommonPrefixes': [{'Prefix': 'some-prefix/2017-01-02T03-04Z/'}]}
-                yield {'CommonPrefixes': [{'Prefix': 'some-prefix/2017-01-02T03-06Z/'},
-                                          {'Prefix': 'some-prefix/data/'}]}
+                yield {'CommonPrefixes': [
+                    {'Prefix': 'some-prefix/2017-01-02T03-05Z/'}
+                ]}
+                yield {'CommonPrefixes': [
+                    {'Prefix': 'some-prefix/2017-01-02T03-04Z/'}
+                ]}
+                yield {'CommonPrefixes': [
+                    {'Prefix': 'some-prefix/2017-01-02T03-06Z/'},
+                    {'Prefix': 'some-prefix/data/'}
+                ]}
                 yield {'CommonPrefixes': [{'Prefix': 'some-prefix/hive/'}]}
 
         class FakeStream:
@@ -41,7 +47,11 @@ class ListManifest(asynctest.TestCase):
 
     async def test_return_keys_of_latest_manifest(self):
         results = []
-        async for r in list_manifest_entries(self.loop, self.client, 'firefox'):
+        async for r in list_manifest_entries(
+            self.loop,
+            self.client,
+            'firefox'
+        ):
             results.append(r)
         assert results == ['a/b', 'c/d']
 
@@ -52,7 +62,9 @@ class DownloadCSV(asynctest.TestCase):
             async def __aenter__(self):
                 self.content = [
                     # echo -n "1;2;3;4\n5;6" | gzip -cf | base64
-                    base64.b64decode('H4sIADPbllkAAzO0NrI2tjbhMrU2AwDZEJLXCwAAAA=='),
+                    base64.b64decode(
+                        'H4sIADPbllkAAzO0NrI2tjbhMrU2AwDZEJLXCwAAAA=='
+                    ),
                     None,
                 ]
                 return self
