@@ -29,31 +29,33 @@ ENTRY_POINTS = {
 }
 
 
-setup(name='buildhub',
-      version='1.1.5',
-      description='Buildhub Python libraries.',
-      long_description="{}\n\n{}\n\n{}".format(README, CHANGELOG, CONTRIBUTORS),
-      license='MPL 2.0',
-      classifiers=[
-          "Programming Language :: Python",
-          "Programming Language :: Python :: 3",
-          "Programming Language :: Python :: 3.5",
-          "Programming Language :: Python :: 3.6",
-          "Programming Language :: Python :: Implementation :: CPython",
-          "Topic :: Internet :: WWW/HTTP",
-          "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
-          "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
-      ],
-      author='Mozilla Services',
-      author_email='storage-team@mozilla.com',
-      url='https://github.com/mozilla-services/buildhub',
-      packages=find_packages(),
-      package_dir={'buildhub': 'buildhub'},
-      package_data={'buildhub': ['initialization.yml']},
-      include_package_data=True,
-      zip_safe=False,
-      # Use
-      #  `pip -r requirements/default.txt -c requirements/constraints.txt`
-      # instead.
-      install_requires=[],
-      entry_points=ENTRY_POINTS)
+setup(
+    name='buildhub',
+    version='1.1.5',
+    description='Buildhub Python libraries.',
+    long_description="{}\n\n{}\n\n{}".format(README, CHANGELOG, CONTRIBUTORS),
+    license='MPL 2.0',
+    classifiers=[
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Topic :: Internet :: WWW/HTTP",
+        "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+        "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
+    ],
+    author='Mozilla Services',
+    author_email='storage-team@mozilla.com',
+    url='https://github.com/mozilla-services/buildhub',
+    packages=find_packages(),
+    package_dir={'buildhub': 'buildhub'},
+    package_data={'buildhub': ['initialization.yml']},
+    include_package_data=True,
+    zip_safe=False,
+    # Use
+    #  `pip -r requirements/default.txt -c requirements/constraints.txt`
+    # instead.
+    install_requires=[],
+    entry_points=ENTRY_POINTS
+)

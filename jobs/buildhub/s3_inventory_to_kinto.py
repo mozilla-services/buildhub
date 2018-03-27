@@ -27,7 +27,10 @@ from buildhub.to_kinto import main as to_kinto
 
 REGION_NAME = 'us-east-1'
 BUCKET = 'net-mozaws-prod-delivery-inventory-us-east-1'
-FOLDER = 'public/inventories/net-mozaws-prod-delivery-{inventory}/delivery-{inventory}/'
+FOLDER = (
+    'public/inventories/net-mozaws-prod-delivery-{inventory}/'
+    'delivery-{inventory}/'
+)
 CHUNK_SIZE = 1024 * 256  # 256 KB
 
 INITIALIZE_SERVER = os.getenv('INITIALIZE_SERVER', 'true').lower() == 'true'
@@ -51,14 +54,21 @@ async def initialize_kinto(loop, kinto_client, bucket, collection):
     thread_pool = ThreadPoolExecutor()
     async_client = AsyncKintoClient(kinto_client, loop, thread_pool)
 
-    initialization_manifest = pkgutil.get_data('buildhub', 'initialization.yml')
+    initialization_manifest = pkgutil.get_data(
+        'buildhub',
+        'initialization.yml'
+    )
     config = yaml.safe_load(initialization_manifest)
 
     # Check that we push the records at the right place.
     if bucket not in config:
-        raise ValueError(f"Bucket '{bucket}' not specified in `initialization.yml`.")
+        raise ValueError(
+            f"Bucket '{bucket}' not specified in `initialization.yml`."
+        )
     if collection not in config[bucket]['collections']:
-        raise ValueError(f"Collection '{collection}' not specified in `initialization.yml`.")
+        raise ValueError(
+            f"Collection '{collection}' not specified in `initialization.yml`."
+        )
 
     await initialize_server(async_client,
                             config,
@@ -97,11 +107,17 @@ async def list_manifest_entries(loop, s3_client, inventory):
     paginator = s3_client.get_paginator('list_objects')
 
     manifest_folders = []
-    async for result in paginator.paginate(Bucket=BUCKET, Prefix=prefix, Delimiter='/'):
+    async for result in paginator.paginate(
+        Bucket=BUCKET,
+        Prefix=prefix,
+        Delimiter='/'
+    ):
         # Take latest inventory.
         files = list(result.get('CommonPrefixes', []))
         prefixes = [f['Prefix'] for f in files]
-        manifest_folders += [prefix for prefix in prefixes if ends_with_date(prefix)]
+        manifest_folders += [
+            prefix for prefix in prefixes if ends_with_date(prefix)
+        ]
 
     # Download latest manifest.json
     last_inventory = sorted(manifest_folders)[-1]
@@ -121,7 +137,8 @@ async def download_csv(loop, s3_client, keys_stream, chunk_size=CHUNK_SIZE):
     Download the S3 object of each key and return deflated data chunks (CSV).
     :param loop: asyncio event loop.
     :param s3_client: Initialized S3 client.
-    :param keys_stream async generator: List of object keys for the csv.gz manifests.
+    :param keys_stream async generator: List of object keys for
+    the csv.gz manifests.
     """
     async for key in keys_stream:
         key = 'public/' + key
@@ -135,10 +152,12 @@ async def download_csv(loop, s3_client, keys_stream, chunk_size=CHUNK_SIZE):
                     break  # End of response.
                 csv_chunk = gzip.decompress(gzip_chunk)
                 if csv_chunk:
-                    # If the received doesn't have enough data to complete at least
-                    # one block, the decompressor returns an empty string.
-                    # A later chunk added to the compressor will then complete the block,
-                    # it'll be decompressed and we get data then.
+                    # If the received doesn't have enough data to complete
+                    # at least one block, the decompressor returns an
+                    # empty string.
+                    # A later chunk added to the compressor will then
+                    # complete the block, it'll be decompressed and we
+                    # get data then.
                     # Thanks Martijn Pieters http://bit.ly/2vbgQ3x
                     yield csv_chunk
 
@@ -171,7 +190,9 @@ async def main(loop, inventory):
     # Download CSVs, deduce records and push to Kinto.
     session = aiobotocore.get_session(loop=loop)
     boto_config = botocore.config.Config(signature_version=botocore.UNSIGNED)
-    async with session.create_client('s3', region_name=REGION_NAME, config=boto_config) as client:
+    async with session.create_client(
+        's3', region_name=REGION_NAME, config=boto_config
+    ) as client:
         keys_stream = list_manifest_entries(loop, client, inventory)
         csv_stream = download_csv(loop, client, keys_stream)
         records_stream = csv_to_records(

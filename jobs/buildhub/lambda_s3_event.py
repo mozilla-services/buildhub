@@ -17,7 +17,12 @@ from raven.handlers.logging import SentryHandler
 
 from buildhub import utils
 from buildhub.inventory_to_records import (
-    NB_RETRY_REQUEST, fetch_json, fetch_listing, fetch_metadata, scan_candidates)
+    NB_RETRY_REQUEST,
+    fetch_json,
+    fetch_listing,
+    fetch_metadata,
+    scan_candidates
+)
 
 
 # Optional Sentry with synchronuous client.
@@ -52,8 +57,10 @@ async def main(loop, event):
             records_to_create = []
 
             # Use event time as archive publication.
-            event_time = datetime.datetime.strptime(event_record['eventTime'],
-                                                    '%Y-%m-%dT%H:%M:%S.%fZ')
+            event_time = datetime.datetime.strptime(
+                event_record['eventTime'],
+                '%Y-%m-%dT%H:%M:%S.%fZ'
+            )
             event_time = event_time.strftime(utils.DATETIME_FORMAT)
 
             key = event_record['s3']['object']['key']
@@ -83,10 +90,12 @@ async def main(loop, event):
                 await scan_candidates(session, product)
                 logger.debug("Fetch record metadata")
                 metadata = await fetch_metadata(session, record)
-                # If JSON metadata not available, archive will be handled when JSON
-                # is delivered.
+                # If JSON metadata not available, archive will be
+                # handled when JSON is delivered.
                 if metadata is None:
-                    logger.info('JSON metadata not available {}'.format(record['id']))
+                    logger.info(
+                        f"JSON metadata not available {record['id']}"
+                    )
                     continue
 
                 # Merge obtained metadata.
@@ -95,37 +104,55 @@ async def main(loop, event):
 
             # RC metadata
             elif utils.is_rc_build_metadata(product, url):
-                logger.info('Processing {} RC metadata: {}'.format(product, key))
+                logger.info(f'Processing {product} RC metadata: {key}')
 
                 # pub/firefox/candidates/55.0b12-candidates/build1/mac/en-US/
                 # firefox-55.0b12.json
                 logger.debug("Fetch new metadata")
                 metadata = await fetch_json(session, url)
-                metadata['buildnumber'] = int(re.search('/build(\d+)/', url).group(1))
+                metadata['buildnumber'] = int(
+                    re.search('/build(\d+)/', url).group(1)
+                )
 
                 # We just received the metadata file. Lookup if the associated
                 # archives are here too.
                 archives = []
                 if 'multi' in url:
-                    # For multi we just check the associated archive is here already.
+                    # For multi we just check the associated archive
+                    # is here already.
                     parent_folder = re.sub('multi/.+$', 'multi/', url)
                     _, files = await fetch_listing(session, parent_folder)
                     for f in files:
                         rc_url = parent_folder + f['name']
                         if utils.is_build_url(product, rc_url):
-                            archives.append((rc_url, f['size'], f['last_modified']))
+                            archives.append((
+                                rc_url,
+                                f['size'],
+                                f['last_modified']
+                            ))
                 else:
-                    # For en-US it's different, it applies to every localized archives.
+                    # For en-US it's different, it applies to every
+                    # localized archives.
                     # Check if they are here by listing the parent folder
                     # (including en-US archive).
                     l10n_parent_url = re.sub('en-US/.+$', '', url)
-                    l10n_folders, _ = await fetch_listing(session, l10n_parent_url)
+                    l10n_folders, _ = await fetch_listing(
+                        session,
+                        l10n_parent_url
+                    )
                     for locale in l10n_folders:
-                        _, files = await fetch_listing(session, l10n_parent_url + locale)
+                        _, files = await fetch_listing(
+                            session,
+                            l10n_parent_url + locale
+                        )
                         for f in files:
                             rc_url = l10n_parent_url + locale + f['name']
                             if utils.is_build_url(product, rc_url):
-                                archives.append((rc_url, f['size'], f['last_modified']))
+                                archives.append((
+                                    rc_url,
+                                    f['size'],
+                                    f['last_modified'],
+                                ))
 
                 for rc_url, size, last_modified in archives:
                     record = utils.record_from_url(rc_url)
@@ -134,14 +161,17 @@ async def main(loop, event):
                     record = utils.merge_metadata(record, metadata)
                     records_to_create.append(record)
                 # Theorically release should never be there yet :)
-                # And repacks like EME-free/sha1 don't seem to be published in RC.
+                # And repacks like EME-free/sha1 don't seem to be
+                # published in RC.
 
             # Nightly metadata
             # pub/firefox/nightly/2017/08/2017-08-08-11-40-32-mozilla-central/
             # firefox-57.0a1.en-US.linux-i686.json
             # -l10n/...
             elif utils.is_nightly_build_metadata(product, url):
-                logger.info('Processing {} nightly metadata: {}'.format(product, key))
+                logger.info(
+                    f'Processing {product} nightly metadata: {key}'
+                )
 
                 logger.debug("Fetch new nightly metadata")
                 metadata = await fetch_json(session, url)
@@ -175,7 +205,10 @@ async def main(loop, event):
                 except ValueError:
                     files = []  # No -l10/ folder published yet.
                 for f in files:
-                    if ('.' + platform + '.') not in f['name'] and product != 'mobile':
+                    if (
+                        ('.' + platform + '.') not in f['name'] and
+                        product != 'mobile'
+                    ):
                         # metadata are by platform.
                         # (mobile platforms are contained by folder)
                         continue
@@ -190,7 +223,9 @@ async def main(loop, event):
             else:
                 logger.info('Ignored {}'.format(key))
 
-            logger.debug("{} records to create.".format(len(records_to_create)))
+            logger.debug(
+                f"{len(records_to_create)} records to create."
+            )
             for record in records_to_create:
                 # Check that fields values look OK.
                 utils.check_record(record)

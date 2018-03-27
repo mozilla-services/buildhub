@@ -3,7 +3,8 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 
 """
-Read records as JSON from stdin, and pushes them on a Kinto server concurrently.
+Read records as JSON from stdin, and pushes them on a Kinto server
+concurrently.
 
 Usage:
 
@@ -64,10 +65,15 @@ def fetch_existing(client, cache_file=PREVIOUS_DUMP_FILENAME):
     if os.path.exists(cache_file):
         previous_run_cache = json.load(open(cache_file))
         if len(previous_run_cache) > 0:
-            highest_timestamp = max([r['last_modified'] for r in previous_run_cache])
+            highest_timestamp = max(
+                [r['last_modified'] for r in previous_run_cache]
+            )
             previous_run_timestamp = '"%s"' % highest_timestamp
 
-    new_records = client.get_records(_since=previous_run_timestamp, pages=float('inf'))
+    new_records = client.get_records(
+        _since=previous_run_timestamp,
+        pages=float('inf')
+    )
 
     merge_by_id = {r['id']: r for r in previous_run_cache + new_records}
     records = list(merge_by_id.values())
@@ -146,11 +152,15 @@ async def consume(loop, queue, executor, client, existing):
     records_by_id = {r['id']: r for r in existing}
 
     info = client.server_info()
-    ideal_batch_size = min(BATCH_MAX_REQUESTS, info['settings']['batch_max_requests'])
+    ideal_batch_size = min(
+        BATCH_MAX_REQUESTS,
+        info['settings']['batch_max_requests']
+    )
 
     while 'consumer is not cancelled':
         # Consume records from queue, and batch operations.
-        # But don't wait too much if there's not enough records to fill a batch.
+        # But don't wait too much if there's not enough records
+        # to fill a batch.
         batch = []
         try:
             with async_timeout.timeout(WAIT_TIMEOUT):
@@ -162,7 +172,10 @@ async def consume(loop, queue, executor, client, existing):
                         break
                     # Check if known and hasn't changed.
                     rid = record['data'].get('id')
-                    if rid in records_by_id and records_equal(record['data'], records_by_id[rid]):
+                    if rid in records_by_id and records_equal(
+                        record['data'],
+                        records_by_id[rid]
+                    ):
                         logger.debug('Skip unchanged record {}'.format(rid))
                         queue.task_done()
                         continue
@@ -172,14 +185,19 @@ async def consume(loop, queue, executor, client, existing):
 
         except asyncio.TimeoutError:
             if batch:
-                logger.debug('Stop waiting, proceed with %s records.' % len(batch))
+                logger.debug(
+                    f'Stop waiting, proceed with {len(batch)} records.'
+                )
             else:
                 logger.debug('Waiting for records in the queue.')
 
-        # We have a batch of records, let's publish them using parallel workers.
+        # We have a batch of records, let's publish them using
+        # parallel workers.
         # When done, mark queue items as done.
         if batch:
-            task = loop.run_in_executor(executor, publish_records, client, batch)
+            task = loop.run_in_executor(
+                executor, publish_records, client, batch
+            )
             task.add_done_callback(markdone(queue, len(batch)))
 
 
@@ -192,7 +210,8 @@ async def parse_json(lines):
 async def main(loop, stdin_generator, client, skip_existing=True):
     existing = {}
     if skip_existing:
-        # Fetch the list of records to skip records that exist and haven't changed.
+        # Fetch the list of records to skip records that exist
+        # and haven't changed.
         existing = fetch_existing(client)
 
     # Start a producer and a consumer with threaded kinto requests.
@@ -230,7 +249,12 @@ def run():
 
     client = cli_utils.create_client_from_args(cli_args)
 
-    main_coro = main(loop, records_generator, client, skip_existing=cli_args.skip)
+    main_coro = main(
+        loop,
+        records_generator,
+        client,
+        skip_existing=cli_args.skip
+    )
 
     loop.run_until_complete(main_coro)
     loop.close()
