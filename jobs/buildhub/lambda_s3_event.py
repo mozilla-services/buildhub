@@ -23,6 +23,7 @@ from buildhub.inventory_to_records import (
     fetch_metadata,
     scan_candidates
 )
+from buildhub.configure_markus import get_metrics
 
 
 # Optional Sentry with synchronuous client.
@@ -30,6 +31,7 @@ SENTRY_DSN = os.getenv('SENTRY_DSN')
 sentry = raven.Client(SENTRY_DSN, transport=raven.transport.http.HTTPTransport)
 
 logger = logging.getLogger()  # root logger.
+metrics = get_metrics('buildhub')
 
 
 async def main(loop, event):
@@ -54,6 +56,7 @@ async def main(loop, event):
 
     async with aiohttp.ClientSession(loop=loop) as session:
         for event_record in records:
+            metrics.incr('s3_event_event')
             records_to_create = []
 
             # Use event time as archive publication.
@@ -226,15 +229,17 @@ async def main(loop, event):
             logger.debug(
                 f"{len(records_to_create)} records to create."
             )
-            for record in records_to_create:
-                # Check that fields values look OK.
-                utils.check_record(record)
-                # Push result to Kinto.
-                kinto_client.create_record(data=record,
-                                           bucket=bucket,
-                                           collection=collection,
-                                           if_not_exists=True)
-                logger.info('Created {}'.format(record['id']))
+            with metrics.timer('s3_event_records_to_create'):
+                for record in records_to_create:
+                    # Check that fields values look OK.
+                    utils.check_record(record)
+                    # Push result to Kinto.
+                    kinto_client.create_record(data=record,
+                                               bucket=bucket,
+                                               collection=collection,
+                                               if_not_exists=True)
+                    logger.info('Created {}'.format(record['id']))
+                    metrics.incr('s3_event_record_created')
 
 
 def lambda_handler(event, context):

@@ -306,7 +306,7 @@ If it fails because an extra constraint package is required add it like this:
 
 .. code-block:: shell
 
-    root@2ec530633121:/app# hashin some-extra-package -r requirements/constraints.txt
+    root@2ec530633121:/app/jobs# hashin some-extra-package -r requirements/constraints.txt
 
 Finally, exit the interactive Docker shell and try to rebuild:
 

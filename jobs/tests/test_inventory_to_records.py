@@ -208,11 +208,19 @@ class FetchNightlyMetadata(asynctest.TestCase):
         assert received == {'buildid': '20170512'}
 
     async def test_returns_none_if_not_available(self):
-        record = {'id': 'a', 'download': {'url': 'http://archive.org/firefox.fr.win32.exe'}}
+        record = {
+            'id': 'a',
+            'download': {'url': 'http://archive.org/firefox.fr.win32.exe'}
+        }
         with aioresponses() as m:
-            m.get('http://archive.org/firefox.en-US.win32.json', exception=aiohttp.ClientError)
-            received = await inventory_to_records.fetch_nightly_metadata(self.session, record)
-        # received = await inventory_to_records.fetch_nightly_metadata(self.session, record)
+            m.get(
+                'http://archive.org/firefox.en-US.win32.json',
+                exception=aiohttp.ClientError
+            )
+            received = await inventory_to_records.fetch_nightly_metadata(
+                self.session,
+                record
+            )
         assert received is None
 
     async def test_fetch_nightly_metadata_from_installer_url(self):

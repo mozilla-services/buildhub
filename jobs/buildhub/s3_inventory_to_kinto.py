@@ -207,7 +207,7 @@ async def main(loop, inventory):
 def run():
     # Log everything to stderr.
     logger.addHandler(logging.StreamHandler())
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
     # Add Sentry (no-op if no configured).
     handler = SentryHandler(sentry)
