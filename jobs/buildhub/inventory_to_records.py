@@ -37,6 +37,10 @@ logger = logging.getLogger()  # root logger.
 __version__ = pkg_resources.get_distribution(__package__).version
 
 
+class JSONFileNotFound(Exception):
+    """Happens when we try to fetch a JSON URL and the response is a 404"""
+
+
 async def read_csv(input_generator):
     """
     :param input_generator: async generator of raw bytes
@@ -51,7 +55,12 @@ async def read_csv(input_generator):
 @backoff.on_exception(backoff.expo,
                       (aiohttp.ClientResponseError, asyncio.TimeoutError),
                       max_tries=NB_RETRY_REQUEST)
-async def fetch_json(session, url, timeout=TIMEOUT_SECONDS):
+async def fetch_json(
+    session,
+    url,
+    timeout=TIMEOUT_SECONDS,
+    retry_on_notfound=False
+):
     headers = {
         'Accept': 'application/json',
         'Cache': 'no-cache',
@@ -65,6 +74,16 @@ async def fetch_json(session, url, timeout=TIMEOUT_SECONDS):
                 headers=headers,
                 timeout=None
             ) as response:
+                # Calling 'response.raise_for_status()' when the response
+                # status code is 404 will trigger a ClientResponseError
+                # which is part of the backoff (see decorator).
+                # *Sometimes* a 404 response is actually something that can
+                # happen due to the latency of a slow update in
+                # archive.mozilla.org so if you just back off and try again
+                # in a couple of minutes it will work.
+                if response.status == 404 and not retry_on_notfound:
+                    raise JSONFileNotFound(url)
+
                 response.raise_for_status()
                 try:
                     return await response.json()
@@ -95,6 +114,8 @@ async def fetch_metadata(session, record):
         return await fetch_release_metadata(session, record)
     except ValueError as e:
         logger.warning(e)
+    except JSONFileNotFound as e:
+        logger.warning(f'Failed to download metadata file {e}')
     return None
 
 

@@ -18,8 +18,8 @@ class LongResponse:
     def raise_for_status(self):
         pass
 
-    def __init__(*args, **kwargs):
-        pass
+    def __init__(self, *args, **kwargs):
+        self.status = kwargs.get('status', 200)
 
     async def __call__(self, *args, **kwargs):
         return self
@@ -70,7 +70,7 @@ class FetchJsonTest(asynctest.TestCase):
                     0.1
                 )
 
-    async def test_retries_when_status_is_not_ok(self):
+    async def test_retries_when_status_is_not_found(self):
         with aioresponses() as m:
             headers = {'Content-Type': 'text/html'}
             m.get(
@@ -82,11 +82,12 @@ class FetchJsonTest(asynctest.TestCase):
             m.get(self.url, payload=self.data)
             received = await inventory_to_records.fetch_json(
                 self.session,
-                self.url
+                self.url,
+                retry_on_notfound=True
             )
         assert received == self.data
 
-    async def test_fails_when_status_is_never_ok(self):
+    async def test_fails_when_status_is_never_found(self):
         with aioresponses() as m:
             headers = {'Content-Type': 'text/html'}
             # Since it retries 3 times, sends 4 bad responses.
@@ -112,6 +113,74 @@ class FetchJsonTest(asynctest.TestCase):
                 self.url,
                 body="<html><body></body></html>",
                 status=404,
+                headers=headers
+            )
+            with self.assertRaises(inventory_to_records.JSONFileNotFound):
+                await inventory_to_records.fetch_json(self.session, self.url)
+
+    async def test_fails_when_status_is_never_found_with_retry(self):
+        with aioresponses() as m:
+            headers = {'Content-Type': 'text/html'}
+            # Since it retries 3 times, sends 4 bad responses.
+            m.get(
+                self.url,
+                body="<html><body></body></html>",
+                status=404,
+                headers=headers
+            )
+            m.get(
+                self.url,
+                body="<html><body></body></html>",
+                status=404,
+                headers=headers
+            )
+            m.get(
+                self.url,
+                body="<html><body></body></html>",
+                status=404,
+                headers=headers
+            )
+            m.get(
+                self.url,
+                body="<html><body></body></html>",
+                status=404,
+                headers=headers
+            )
+            # If you force it to retry on 404s and never succeeds it
+            # will eventually raise a ClientError
+            with self.assertRaises(aiohttp.ClientError):
+                await inventory_to_records.fetch_json(
+                    self.session,
+                    self.url,
+                    retry_on_notfound=True,
+                )
+
+    async def test_fails_when_status_is_never_ok(self):
+        with aioresponses() as m:
+            headers = {'Content-Type': 'text/html'}
+            # Since it retries 3 times, sends 4 bad responses.
+            m.get(
+                self.url,
+                body="<html><body></body></html>",
+                status=503,
+                headers=headers
+            )
+            m.get(
+                self.url,
+                body="<html><body></body></html>",
+                status=503,
+                headers=headers
+            )
+            m.get(
+                self.url,
+                body="<html><body></body></html>",
+                status=503,
+                headers=headers
+            )
+            m.get(
+                self.url,
+                body="<html><body></body></html>",
+                status=503,
                 headers=headers
             )
             with self.assertRaises(aiohttp.ClientError):

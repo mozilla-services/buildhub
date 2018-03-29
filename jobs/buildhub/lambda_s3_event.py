@@ -91,6 +91,7 @@ async def main(loop, event):
                 # Fetch release metadata.
                 await scan_candidates(session, product)
                 logger.debug("Fetch record metadata")
+                # metadata = await fetch_metadata(session, record)
                 metadata = await fetch_metadata(session, record)
                 # If JSON metadata not available, archive will be
                 # handled when JSON is delivered.
@@ -111,7 +112,16 @@ async def main(loop, event):
                 # pub/firefox/candidates/55.0b12-candidates/build1/mac/en-US/
                 # firefox-55.0b12.json
                 logger.debug("Fetch new metadata")
-                metadata = await fetch_json(session, url)
+                # It has been known to happen that right after an S3 Event
+                # there's a slight delay to the metadata json file being
+                # available. If that's the case we want to retry in a couple
+                # of seconds to see if it's available on the next backoff
+                # attempt.
+                metadata = await fetch_json(
+                    session,
+                    url,
+                    retry_on_notfound=True
+                )
                 metadata['buildnumber'] = int(
                     re.search('/build(\d+)/', url).group(1)
                 )
@@ -176,7 +186,13 @@ async def main(loop, event):
                 )
 
                 logger.debug("Fetch new nightly metadata")
-                metadata = await fetch_json(session, url)
+                # See comment above about the exceptional need of
+                # setting retry_on_notfound here.
+                metadata = await fetch_json(
+                    session,
+                    url,
+                    retry_on_notfound=True
+                )
 
                 platform = metadata['moz_pkg_platform']
 
