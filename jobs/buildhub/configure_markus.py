@@ -19,14 +19,6 @@ def get_metrics(namespace):
         # For more options see
         # http://markus.readthedocs.io/en/latest/usage.html#markus-configure
         markus.configure([
-            # Deliberately commented out. Uncomment if you want to see
-            # what's sent to markus in local development.
-            # {
-            #     'class': 'markus.backends.logging.LoggingMetrics',
-            #     'options': {
-            #         'logger_name': 'metrics'
-            #     }
-            # },
             {
                 'class': 'markus.backends.datadog.DatadogMetrics',
                 'options': {
