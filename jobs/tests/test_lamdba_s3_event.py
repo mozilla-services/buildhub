@@ -7,6 +7,8 @@ from unittest import mock
 
 import asynctest
 from aioresponses import aioresponses
+from markus.testing import MetricsMock
+from markus import INCR, TIMING
 
 from buildhub import utils, inventory_to_records, lambda_s3_event
 
@@ -65,8 +67,12 @@ class BaseTest(asynctest.TestCase):
             self.mockresponses.get(utils.ARCHIVE_URL + url, payload=payload)
         self.addCleanup(self.mockresponses.stop)
 
+        mm = MetricsMock()
+        self.mm = mm.__enter__()
+
     def tearDown(self):
         inventory_to_records._candidates_build_folder.clear()
+        self.mm.__exit__(None, None, None)
 
 
 class FromArchiveFirefox(BaseTest):
@@ -191,6 +197,13 @@ class FromArchiveFirefox(BaseTest):
 
         assert not self.mock_create_record.called
 
+    async def test_metrics_incr(self):
+        """Tests that the metrics incr is called with 1 (as in, 1 event)"""
+        event = fake_event('pub/firefox/releases/55.0/mac/ar/Firefox 55.0.dmg')
+        await lambda_s3_event.main(self.loop, event)
+
+        assert self.mm.has_record(INCR, 'buildhub.s3_event_event', 1)
+
     async def test_from_nightly_archive_before_metadata(self):
         event = fake_event(
             'pub/firefox/nightly/2016/05/2016-05-02-03-02-07-'
@@ -286,6 +299,16 @@ class FromArchiveFirefox(BaseTest):
                 },
             },
             if_not_exists=True)
+
+    async def test_metrics_timing_used(self):
+        event = fake_event(
+            'pub/firefox/releases/54.0/win64/fr/Firefox Setup 54.0.exe'
+        )
+        await lambda_s3_event.main(self.loop, event)
+        assert self.mm.has_record(
+            TIMING,
+            'buildhub.s3_event_records_to_create'
+        )
 
     async def test_from_nightly_archive(self):
         event = fake_event(

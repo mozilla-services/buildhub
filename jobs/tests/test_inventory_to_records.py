@@ -212,11 +212,15 @@ class FetchNightlyMetadata(asynctest.TestCase):
             'id': 'a',
             'download': {'url': 'http://archive.org/firefox.fr.win32.exe'}
         }
-        # XXX: add ability to mock server.org/* on pnuckowski/aioresponses
-        received = await inventory_to_records.fetch_nightly_metadata(
-            self.session,
-            record
-        )
+        with aioresponses() as m:
+            m.get(
+                'http://archive.org/firefox.en-US.win32.json',
+                exception=aiohttp.ClientError
+            )
+            received = await inventory_to_records.fetch_nightly_metadata(
+                self.session,
+                record
+            )
         assert received is None
 
     async def test_fetch_nightly_metadata_from_installer_url(self):

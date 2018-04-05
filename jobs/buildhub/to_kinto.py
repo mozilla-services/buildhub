@@ -33,6 +33,7 @@ from urllib.parse import urlparse
 from kinto_http import cli_utils
 
 from buildhub.utils import stream_as_generator
+from buildhub.configure_markus import get_metrics
 
 
 DEFAULT_SERVER = 'http://localhost:8888/v1'
@@ -46,6 +47,7 @@ PREVIOUS_DUMP_FILENAME = '.records-{server}-{bucket}-{collection}.json'
 CACHE_FOLDER = os.getenv('CACHE_FOLDER', '.')
 
 logger = logging.getLogger(__name__)
+metrics = get_metrics('buildhub')
 
 done = object()
 
@@ -87,14 +89,17 @@ def fetch_existing(client, cache_file=PREVIOUS_DUMP_FILENAME):
     return records
 
 
+@metrics.timer_decorator('to_kinto_publish_records')
 def publish_records(client, records):
     """Synchronuous function that pushes records on Kinto in batch.
     """
     with client.batch() as batch:
         for record in records:
             if 'id' in record['data']:
+                metrics.incr('to_kinto_update_record')
                 batch.update_record(**record)
             else:
+                metrics.incr('to_kinto_create_record')
                 batch.create_record(**record)
     results = batch.results()
 

@@ -23,6 +23,7 @@ from kinto_wizard.yaml2kinto import initialize_server
 
 from buildhub.inventory_to_records import NB_RETRY_REQUEST, csv_to_records
 from buildhub.to_kinto import main as to_kinto
+from buildhub.configure_markus import get_metrics
 
 
 REGION_NAME = 'us-east-1'
@@ -44,6 +45,7 @@ SENTRY_DSN = os.getenv('SENTRY_DSN')
 sentry = raven.Client(SENTRY_DSN, transport=raven.transport.http.HTTPTransport)
 
 logger = logging.getLogger()  # root logger.
+metrics = get_metrics('buildhub')
 
 
 async def initialize_kinto(loop, kinto_client, bucket, collection):
@@ -204,10 +206,11 @@ async def main(loop, inventory):
         await to_kinto(loop, records_stream, kinto_client, skip_existing=True)
 
 
+@metrics.timer_decorator('s3_inventory_to_kinto_run')
 def run():
     # Log everything to stderr.
     logger.addHandler(logging.StreamHandler())
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
     # Add Sentry (no-op if no configured).
     handler = SentryHandler(sentry)

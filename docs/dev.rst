@@ -277,3 +277,39 @@ There's a script to check if any files have been missed:
     $ ./bin/sanspreamble.py
 
 Run it to check which files you might have missed.
+
+Adding/Updating Python packages to requirements files
+=====================================================
+
+You don't need a virtualenv on the host as long as you have
+`hashin <https://pypi.python.org/pypi/hashin>`_ installed globally.
+
+Alternatively you can use Docker. In this example we add a new package
+called ``markus``:
+
+.. code-block:: shell
+
+    $ docker-compose run --user 0 buildhub bash
+    root@2ec530633121:/app# pip install hashin
+    root@2ec530633121:/app# cd jobs/
+    root@2ec530633121:/app/jobs# hashin markus -r requirements/default.txt
+
+Some packages might require additonal "contraint packages". Best way to
+know is to find out by seeing if ``pip install ...`` fails:
+
+
+.. code-block:: shell
+
+    root@2ec530633121:/app# pip install -r requirements/default.txt -c requirements/constraints.txt
+
+If it fails because an extra constraint package is required add it like this:
+
+.. code-block:: shell
+
+    root@2ec530633121:/app/jobs# hashin some-extra-package -r requirements/constraints.txt
+
+Finally, exit the interactive Docker shell and try to rebuild:
+
+.. code-block:: shell
+
+    $ docker-compose build buildhub
