@@ -309,9 +309,10 @@ class CsvToRecordsTest(asynctest.TestCase):
             }
         }]
 
+        assert len(records) == 6, [r['data']['id'] for r in records]
         assert [
             r['data']['id'] for r in records
         ] == [
             r['data']['id'] for r in expected
-        ]
+        ], [r['data']['id'] for r in records]
         assert records == expected
