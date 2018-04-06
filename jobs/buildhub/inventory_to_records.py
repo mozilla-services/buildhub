@@ -61,6 +61,19 @@ async def fetch_json(
     timeout=TIMEOUT_SECONDS,
     retry_on_notfound=False
 ):
+    """Return response JSON by the URL.
+
+    By default, any response that is >=400 will raise a ClientResponseError
+    which is part of the backoff.on_exception configuration.
+    If you explicitly don't want that for status code 404, you can set
+    the `retry_on_notfound` parameter to True. Then it will raise a
+    JSONFileNotFound exception instead and will not retry automatically.
+
+    *Sometimes* a 404 status code is actually something that can
+    happen due to the latency of a slow update in
+    archive.mozilla.org so if you just back off and try again
+    in a couple of seconds it will work.
+    """
     headers = {
         'Accept': 'application/json',
         'Cache': 'no-cache',
@@ -74,13 +87,6 @@ async def fetch_json(
                 headers=headers,
                 timeout=None
             ) as response:
-                # Calling 'response.raise_for_status()' when the response
-                # status code is 404 will trigger a ClientResponseError
-                # which is part of the backoff (see decorator).
-                # *Sometimes* a 404 response is actually something that can
-                # happen due to the latency of a slow update in
-                # archive.mozilla.org so if you just back off and try again
-                # in a couple of minutes it will work.
                 if response.status == 404 and not retry_on_notfound:
                     raise JSONFileNotFound(url)
 
