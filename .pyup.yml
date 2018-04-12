@@ -1,0 +1,9 @@
+search: False
+label_prs: update
+requirements:
+  - jobs/requirements/default.txt
+  - jobs/requirements/constraints.txt:
+    update: insecure
+  - jobs/requirements/dev.txt
+  - docs/requirements.txt:
+    pin: False
