@@ -300,7 +300,7 @@ know is to find out by seeing if ``pip install ...`` fails:
 
 .. code-block:: shell
 
-    root@2ec530633121:/app# pip install -r requirements/default.txt -c requirements/constraints.txt
+    root@2ec530633121:/app/jobs# pip install -r requirements/default.txt -c requirements/constraints.txt
 
 If it fails because an extra constraint package is required add it like this:
 
