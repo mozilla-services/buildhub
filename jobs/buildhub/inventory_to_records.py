@@ -428,11 +428,8 @@ async def csv_to_records(
                 if not is_build_url(product, url):
                     continue
                 try:
-                    print("URL:", url)
                     record = record_from_url(url)
-
                 except Exception as e:
-                    raise
                     logger.exception(e)
                     continue
 
