@@ -407,18 +407,14 @@ async def csv_to_records(
         async for entries in inventory_by_folder(stdin):
             entries = deduplicate_entries(entries)
 
-            print("ENTRIES", entries)
             for entry in entries:
                 object_key = entry['Key']
-                print('\tKEY', object_key)
 
                 try:
                     # /pub/thunderbird/nightly/...
                     product = object_key.split('/')[1]
                 except IndexError:
                     continue  # e.g. https://archive.mozilla.org/favicon.ico
-
-                print("PRODUCT", repr(product))
 
                 if product not in PRODUCTS:
                     continue
@@ -432,8 +428,11 @@ async def csv_to_records(
                 if not is_build_url(product, url):
                     continue
                 try:
+                    print("URL:", url)
                     record = record_from_url(url)
+
                 except Exception as e:
+                    raise
                     logger.exception(e)
                     continue
 
@@ -443,7 +442,6 @@ async def csv_to_records(
                     entry['LastModifiedDate'],
                     '%Y-%m-%dT%H:%M:%S.%fZ'
                 )
-
                 if min_last_modified and lastmodified < min_last_modified:
                     continue
 

@@ -796,8 +796,11 @@ class CSVToRecords(asynctest.TestCase):
         mocked = aioresponses()
         mocked.start()
         for url, payload in self.remote_content.items():
+            print("MOCKED GET:", utils.ARCHIVE_URL + url)
             mocked.get(utils.ARCHIVE_URL + url, payload=payload)
         self.addCleanup(mocked.stop)
+
+        # inventory_to_records._candidates_build_folder.clear()
 
         async def async_gen():
             _csv_input = (
@@ -827,9 +830,9 @@ class CSVToRecords(asynctest.TestCase):
         async for r in output:
             records.append(r)
 
-        print("RECORDS")
-        from pprint import pprint
-        pprint(records)
+        # print("RECORDS")
+        # from pprint import pprint
+        # pprint(records)
 
         assert len(records) == 1
         assert records == [{

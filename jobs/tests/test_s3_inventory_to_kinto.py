@@ -93,11 +93,15 @@ class DownloadCSV(asynctest.TestCase):
 
     async def test_unzip_chunks(self):
 
-        async def keys():
-            yield 'key-1'
+        async def files_iterator():
+            yield {
+                'key': 'key-1',
+                'size': 123456,
+                'MD5checksum': 'deadbeef0123',
+            }
 
-        keys = keys()
+        files = files_iterator()
         results = []
-        async for r in download_csv(self.loop, self.client, keys):
+        async for r in download_csv(self.loop, self.client, files):
             results.append(r)
         assert results == [b"1;2;3;4\n5;6"]
