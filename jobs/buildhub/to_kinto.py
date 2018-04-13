@@ -122,6 +122,7 @@ def fetch_existing(
     # sit around. If the migration happens and is successful, the old
     # cache file gets deleted.
     if not os.path.exists(cache_file):
+
         # Perhaps the old file exists!
         # Prior to April 2018 we used dump ALL kinto records into a .json
         # file as a massive list of dicts.
@@ -140,17 +141,17 @@ def fetch_existing(
         if os.path.exists(old_cache_file):
             _migrate_old_dump_file(old_cache_file, cache_file)
         logger.info(f'Migrated dump file {old_cache_file} to {cache_file}')
-        #os.remove(old_cache_file)
+        os.remove(old_cache_file)
         # End dump file migration.
 
-    previous_run_cache = {}
+    records = {}
     previous_run_timestamp = None
 
     if os.path.exists(cache_file):
         with open(cache_file) as f:
-            previous_run_cache = json.load(f)
+            records = json.load(f)
             highest_timestamp = max(
-                [r[0] for r in previous_run_cache.values()]
+                [r[0] for r in records.values()]
             )
             # XXX Not sure why this needs to be a "quotation mark"
             # encoded thing
@@ -161,16 +162,14 @@ def fetch_existing(
         pages=float('inf')
     )
 
-    print(type(new_records))
-    print(new_records[0])
-    raise Exception(new_records)
-    merge_by_id = {r['id']: r for r in previous_run_cache + new_records}
-    records = list(merge_by_id.values())
+    for record in new_records:
+        records[record['id']] = hash_record(record)
 
     # Atomic write.
-    if len(records) > 0:
+    if records:
         tmpfilename = cache_file + '.tmp'
-        json.dump(records, open(tmpfilename, 'w'))
+        with open(tmpfilename, 'w') as f:
+            json.dump(records, f, sort_keys=True, indent=2)
         os.rename(tmpfilename, cache_file)
 
     return records

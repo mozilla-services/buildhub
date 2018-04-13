@@ -14,5 +14,5 @@ version.json
 buildhub-lambda-*.zip
 .docker-build
 .metadata-*.json
-.records-kinto-build-hub-releases.json
 csv-download-directory/
+.records-hashes-kinto-build-hub-releases.json
