@@ -31,6 +31,7 @@ class CacheValueTest(unittest.TestCase):
         assert isinstance(first, dict)
         assert len(first) == 1
         assert first['a'][0] == 1  # [0] is the last_modified
+        first_hash = first['a'][1]  # [1] is the hash string
 
         mocked.get_records.return_value = [
             {'id': 'a', 'title': 'b', 'last_modified': 2}
@@ -39,3 +40,5 @@ class CacheValueTest(unittest.TestCase):
         assert isinstance(first, dict)
         assert len(second) == 1
         assert second['a'][0] == 2
+        second_hash = second['a'][1]  # [1] is the hash string
+        assert first_hash != second_hash
