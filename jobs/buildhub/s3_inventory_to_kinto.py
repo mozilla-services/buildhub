@@ -173,8 +173,6 @@ async def download_csv(
     if not os.path.isdir(download_directory):
         os.mkdir(download_directory)
 
-    print("LOOKING AT", download_directory)
-
     # Look for old download junk in the download directory.
     too_old = 60 * 60 * 24 * 2  # two days
     for file_path in glob.glob(os.path.join(download_directory, '*.csv.gz')):
