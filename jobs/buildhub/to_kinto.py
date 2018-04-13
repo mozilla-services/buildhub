@@ -140,8 +140,8 @@ def fetch_existing(
             collection=client._collection_name))
         if os.path.exists(old_cache_file):
             _migrate_old_dump_file(old_cache_file, cache_file)
-        logger.info(f'Migrated dump file {old_cache_file} to {cache_file}')
-        os.remove(old_cache_file)
+            logger.info(f'Migrated dump file {old_cache_file} to {cache_file}')
+            os.remove(old_cache_file)
         # End dump file migration.
 
     records = {}
@@ -163,7 +163,10 @@ def fetch_existing(
     )
 
     for record in new_records:
-        records[record['id']] = hash_record(record)
+        records[record['id']] = [
+            record['last_modified'],
+            hash_record(record)
+        ]
 
     # Atomic write.
     if records:

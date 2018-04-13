@@ -27,12 +27,15 @@ class CacheValueTest(unittest.TestCase):
         mocked.get_records.return_value = [
             {'id': 'a', 'title': 'a', 'last_modified': 1}
         ]
-        fetch_existing(mocked, self.cache_file)
+        first = fetch_existing(mocked, self.cache_file)
+        assert isinstance(first, dict)
+        assert len(first) == 1
+        assert first['a'][0] == 1  # [0] is the last_modified
 
         mocked.get_records.return_value = [
             {'id': 'a', 'title': 'b', 'last_modified': 2}
         ]
         second = fetch_existing(mocked, self.cache_file)
-
+        assert isinstance(first, dict)
         assert len(second) == 1
-        assert second[0]['title'] == 'b'
+        assert second['a'][0] == 2
