@@ -54,6 +54,7 @@ services:
       - "kinto"
     environment:
       - SERVER_URL=http://kinto:8888/v1
+      - CSV_DOWNLOAD_DIRECTORY=./csv-download-directory
     volumes:
       - $PWD:/app
     # All things within the 'buildhub' directive are meant to be executed

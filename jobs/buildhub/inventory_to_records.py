@@ -321,7 +321,7 @@ async def fetch_release_metadata(session, record):
 
 async def process_batch(session, batch, skip_incomplete):
     # Parallel fetch of metadata for each item of the batch.
-    logger.info('Fetch metadata for {} releases...'.format(len(batch)))
+    logger.debug('Fetch metadata for {} releases...'.format(len(batch)))
     futures = [fetch_metadata(session, record) for record in batch]
     metadatas = await asyncio.gather(*futures)
     results = [merge_metadata(record, metadata)
