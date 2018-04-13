@@ -407,14 +407,18 @@ async def csv_to_records(
         async for entries in inventory_by_folder(stdin):
             entries = deduplicate_entries(entries)
 
+            print("ENTRIES", entries)
             for entry in entries:
                 object_key = entry['Key']
+                print('\tKEY', object_key)
 
                 try:
                     # /pub/thunderbird/nightly/...
                     product = object_key.split('/')[1]
                 except IndexError:
                     continue  # e.g. https://archive.mozilla.org/favicon.ico
+
+                print("PRODUCT", repr(product))
 
                 if product not in PRODUCTS:
                     continue

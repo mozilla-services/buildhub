@@ -143,14 +143,14 @@ async def list_manifest_entries(loop, s3_client, inventory):
         # Here, each 'f' is a dictionary that looks something like this:
         #
         #  {
-        #     "key" : "inventories/net-mozaw...ecf-b1a0-5fb25bb83752.csv.gz",
+        #     "key" : "inventories/net-mozaw...f-b1a0-5fb25bb83752.csv.gz",
         #     "size" : 7945521,
         #     "MD5checksum" : "7454b0d773000f790f15b867ee152049"
         #  }
         #
-        # We yield the whole thing. The key is used to download from S3. The
-        # MD5checksum is used to know how to store the file on disk for
-        # caching.
+        # We yield the whole thing. The key is used to download from S3.
+        # The MD5checksum is used to know how to store the file on
+        # disk for caching.
         yield f
 
 
@@ -172,6 +172,8 @@ async def download_csv(
     # Make sure the directory exists if it wasn't already created.
     if not os.path.isdir(download_directory):
         os.mkdir(download_directory)
+
+    print("LOOKING AT", download_directory)
 
     # Look for old download junk in the download directory.
     too_old = 60 * 60 * 24 * 2  # two days

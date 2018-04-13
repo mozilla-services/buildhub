@@ -3,6 +3,7 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 
 import base64
+import json
 
 import asynctest
 
@@ -33,7 +34,12 @@ class ListManifest(asynctest.TestCase):
                 return self
 
             async def read(self):
-                return b'{"files": [{"key": "a/b"}, {"key": "c/d"}]}'
+                return json.dumps({
+                    'files': [
+                        {'key': 'a/b', 'size': 1234, 'MD5checksum': 'eaf123'},
+                        {'key': 'c/d', 'size': 2222, 'MD5checksum': 'ef001'},
+                    ]
+                }).encode('utf-8')
 
         class FakeClient:
             def get_paginator(self, *args):
@@ -53,7 +59,10 @@ class ListManifest(asynctest.TestCase):
             'firefox'
         ):
             results.append(r)
-        assert results == ['a/b', 'c/d']
+        assert results == [
+            {'key': 'a/b', 'size': 1234, 'MD5checksum': 'eaf123'},
+            {'key': 'c/d', 'size': 2222, 'MD5checksum': 'ef001'},
+        ]
 
 
 class DownloadCSV(asynctest.TestCase):

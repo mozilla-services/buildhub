@@ -827,6 +827,11 @@ class CSVToRecords(asynctest.TestCase):
         async for r in output:
             records.append(r)
 
+        print("RECORDS")
+        from pprint import pprint
+        pprint(records)
+
+        assert len(records) == 1
         assert records == [{
             'data': {
                 'id': 'firefox_51-0_win64_fy-nl',
