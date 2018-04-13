@@ -3,7 +3,7 @@ label_prs: update
 requirements:
   - jobs/requirements/default.txt
   - jobs/requirements/constraints.txt:
-    update: insecure
+      update: insecure
   - jobs/requirements/dev.txt
   - docs/requirements.txt:
-    pin: False
+      pin: False
