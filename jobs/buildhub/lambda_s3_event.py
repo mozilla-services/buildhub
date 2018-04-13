@@ -12,8 +12,7 @@ import sys
 
 import aiohttp
 import kinto_http
-import raven
-from raven.handlers.logging import SentryHandler
+from raven.contrib.awslambda import LambdaClient
 
 from buildhub import utils
 from buildhub.inventory_to_records import (
@@ -28,7 +27,7 @@ from buildhub.configure_markus import get_metrics
 
 # Optional Sentry with synchronuous client.
 SENTRY_DSN = os.getenv('SENTRY_DSN')
-sentry = raven.Client(SENTRY_DSN, transport=raven.transport.http.HTTPTransport)
+sentry = LambdaClient(SENTRY_DSN)
 
 logger = logging.getLogger()  # root logger.
 metrics = get_metrics('buildhub')
@@ -242,15 +241,11 @@ async def main(loop, event):
                     metrics.incr('s3_event_record_created')
 
 
+@sentry.capture_exceptions
 def lambda_handler(event, context):
     # Log everything to stderr.
     logger.addHandler(logging.StreamHandler(stream=sys.stdout))
     logger.setLevel(logging.DEBUG)
-
-    # Add Sentry (no-op if no configured).
-    handler = SentryHandler(sentry)
-    handler.setLevel(logging.ERROR)
-    logger.addHandler(handler)
 
     loop = asyncio.get_event_loop_policy().new_event_loop()
 
