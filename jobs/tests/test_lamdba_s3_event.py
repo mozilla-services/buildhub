@@ -65,6 +65,13 @@ class BaseTest(asynctest.TestCase):
         self.mockresponses.start()
         for url, payload in self.remote_content.items():
             self.mockresponses.get(utils.ARCHIVE_URL + url, payload=payload)
+        # This will be attempted every time since the metadata cache_folder
+        # is always reset by the pytest fixture.
+        self.mockresponses.get(
+            utils.ARCHIVE_URL + 'pub/firefox/nightly/2016/05/2016-05-02-03-02'
+            '-07-mozilla-central/firefox-49.0a1.en-US.linux-i686.json',
+            status=404
+        )
         self.addCleanup(self.mockresponses.stop)
 
         mm = MetricsMock()

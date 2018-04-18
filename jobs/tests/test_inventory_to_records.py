@@ -7,6 +7,7 @@ import datetime
 import json
 from unittest import mock
 
+import pytest
 import aiohttp
 import asynctest
 from aioresponses import aioresponses
@@ -318,6 +319,10 @@ class FetchNightlyMetadata(asynctest.TestCase):
         }
         with aioresponses() as m:
             m.get(
+                'http://server.org/firefox-6.0a1.en-US.linux-x86_64.json',
+                status=404,
+            )
+            m.get(
                 'http://server.org/firefox-6.0a1.en-US.linux-x86_64.txt',
                 body=(
                     '20110505030608\n'
@@ -346,6 +351,10 @@ class FetchNightlyMetadata(asynctest.TestCase):
             }
         }
         with aioresponses() as m:
+            m.get(
+                'http://server.org/firefox-6.0a1.en-US.linux-x86_64.json',
+                status=404,
+            )
             m.get('http://server.org/firefox-6.0a1.en-US.linux-x86_64.txt',
                   body=('20100704054020 55f39d8d866c'),
                   headers={'Content-type': 'text/plain'})
@@ -861,11 +870,24 @@ class CSVToRecords(asynctest.TestCase):
 
     }
 
+    @pytest.fixture(autouse=True)
+    def init_cache_folder(self, tmpdir):
+        # Use str() on these LocalPath instances to turn them into plain
+        # strings since to_kinto.fetch_existing() expects it to be a string.
+        self.cache_folder = str(tmpdir)
+
     async def setUp(self):
         mocked = aioresponses()
         mocked.start()
         for url, payload in self.remote_content.items():
             mocked.get(utils.ARCHIVE_URL + url, payload=payload)
+        # This will be attempted every time since the metadata cache_folder
+        # is always reset by the pytest fixture.
+        mocked.get(
+            utils.ARCHIVE_URL + 'pub/firefox/nightly/2017/06/2017-06-16-03-02'
+            '-07-mozilla-central/firefox-56.0a1.en-US.win32.json',
+            status=404
+        )
         self.addCleanup(mocked.stop)
 
         # inventory_to_records._candidates_build_folder.clear()
@@ -893,7 +915,12 @@ class CSVToRecords(asynctest.TestCase):
         inventory_to_records._candidates_build_folder.clear()
 
     async def test_csv_to_records(self):
-        output = inventory_to_records.csv_to_records(self.loop, self.stdin)
+
+        output = inventory_to_records.csv_to_records(
+            self.loop,
+            self.stdin,
+            cache_folder=self.cache_folder,
+        )
         records = []
         async for r in output:
             records.append(r)
@@ -968,6 +995,7 @@ class CSVToRecords(asynctest.TestCase):
             self.loop,
             self.stdin,
             min_last_modified=recently,
+            cache_folder=self.cache_folder,
         )
         records = []
         async for r in output:
@@ -976,8 +1004,12 @@ class CSVToRecords(asynctest.TestCase):
         assert len(records) == 0
 
     async def test_csv_to_records_keep_incomplete(self):
-        output = inventory_to_records.csv_to_records(self.loop, self.stdin,
-                                                     skip_incomplete=False)
+        output = inventory_to_records.csv_to_records(
+            self.loop,
+            self.stdin,
+            skip_incomplete=False,
+            cache_folder=self.cache_folder,
+        )
         records = []
         async for r in output:
             records.append(r)
@@ -1010,8 +1042,12 @@ class CSVToRecords(asynctest.TestCase):
     async def test_csv_to_records_continues_on_error(self):
         with mock.patch('buildhub.utils.guess_mimetype',
                         side_effect=(ValueError, 'application/zip')):
-            output = inventory_to_records.csv_to_records(self.loop, self.stdin,
-                                                         skip_incomplete=False)
+            output = inventory_to_records.csv_to_records(
+                self.loop,
+                self.stdin,
+                skip_incomplete=False,
+                cache_folder=self.cache_folder,
+            )
             records = []
             async for r in output:
                 records.append(r)

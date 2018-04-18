@@ -368,7 +368,8 @@ async def csv_to_records(
     loop,
     stdin,
     skip_incomplete=True,
-    min_last_modified=None
+    min_last_modified=None,
+    cache_folder=CACHE_FOLDER,
 ):
     """
     :rtype: async generator of records (dict-like)
@@ -419,7 +420,7 @@ async def csv_to_records(
     # Read metadata of previous run, and warm up cache.
     # Will save a lot of hits to archive.mozilla.org.
     metadata_cache_file = os.path.join(
-        CACHE_FOLDER,
+        cache_folder,
         '.metadata-{}.json'.format(__version__)
     )
     if os.path.exists(metadata_cache_file):
@@ -500,7 +501,7 @@ async def csv_to_records(
     os.rename(tmpfilename, metadata_cache_file)
 
 
-async def main(loop):
+async def main(loop, cache_folder=CACHE_FOLDER):
     parser = argparse.ArgumentParser(
         description=(
             'Read S3 CSV inventory from stdin '
@@ -532,9 +533,13 @@ async def main(loop):
     else:
         logger.setLevel(logging.WARNING)
 
-    async for record in csv_to_records(loop, stream_as_generator(
-        loop, sys.stdin
-    )):
+    async for record in csv_to_records(
+        loop,
+        stream_as_generator(
+            loop, sys.stdin
+        ),
+        cache_folder=cache_folder,
+    ):
         sys.stdout.write(json.dumps(record) + '\n')
 
 
