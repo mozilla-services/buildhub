@@ -75,3 +75,19 @@ class CacheValueTest(unittest.TestCase):
             records = json.load(f)
             assert len(records) == 1
             assert records['a'][0] == 2  # [0] is last modified
+
+        # The migration is done, but let's make sure the fetch_existing
+        # continues to work as expected.
+        mocked.get_records.return_value = [
+            {'id': 'a', 'title': 'b', 'last_modified': 2},
+            {'id': 'b', 'title': 'bee', 'last_modified': 3},
+        ]
+        fetch_existing(
+            mocked,
+            cache_file=self.cache_file,
+            old_cache_file=self.old_cache_file
+        )
+        assert not os.path.exists(self.old_cache_file)  # still
+        with open(self.cache_file) as f:
+            records = json.load(f)
+            assert len(records) == 2
