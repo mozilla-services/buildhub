@@ -145,7 +145,7 @@ def fetch_existing(
         # End dump file migration.
 
     records = {}
-    previous_run_timestamp = None
+    previous_run_etag = None
 
     if os.path.exists(cache_file):
         with open(cache_file) as f:
@@ -153,12 +153,10 @@ def fetch_existing(
             highest_timestamp = max(
                 [r[0] for r in records.values()]
             )
-            # XXX Not sure why this needs to be a "quotation mark"
-            # encoded thing
-            previous_run_timestamp = '"%s"' % highest_timestamp
+            previous_run_etag = '"%s"' % highest_timestamp
 
     new_records = client.get_records(
-        _since=previous_run_timestamp,
+        _since=previous_run_etag,
         pages=float('inf')
     )
 
