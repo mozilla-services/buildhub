@@ -321,9 +321,13 @@ By default, all metrics logging goes to
 ``markus.backends.datadog.DatadogMetrics``. This requires that you have a
 ``statsd`` server running on ``$STATSD_HOST:STATSD_PORT``. If you don't
 have that locally you can change it to plain Python logging by setting
-``LOG_METRICS=true``. For example:
+``LOG_METRICS=logging``. For example:
 
 .. code-block:: shell
 
     $ docker-compose run buildhub bash
-    app@b95573edb130:~$ LOG_METRICS=true latest-inventory-to-kinto
+    app@b95573edb130:~$ LOG_METRICS=logging latest-inventory-to-kinto
+
+The current only allowed values for the ``LOG_METRICS`` environment variable
+is ``datadog`` (default) and ``logging``. Anything else will raise a
+``NotImplementedError`` exception.

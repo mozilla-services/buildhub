@@ -18,7 +18,8 @@ def get_metrics(namespace):
 
         # For more options see
         # http://markus.readthedocs.io/en/latest/usage.html#markus-configure
-        if config('LOG_METRICS', default=False):
+        log_metrics_config = config('LOG_METRICS', default='datadog')
+        if log_metrics_config == 'logging':
             markus.configure([
                 {
                     'class': 'markus.backends.logging.LoggingMetrics',
@@ -27,7 +28,7 @@ def get_metrics(namespace):
                     }
                 }
             ])
-        else:
+        elif log_metrics_config == 'datadog':
             markus.configure([
                 {
                     'class': 'markus.backends.datadog.DatadogMetrics',
@@ -38,6 +39,10 @@ def get_metrics(namespace):
                     }
                 }
             ])
+        else:
+            raise NotImplementedError(
+                f'Unrecognized LOG_METRICS value {log_metrics_config}'
+            )
         _configured = True
 
     return markus.get_metrics(namespace)
