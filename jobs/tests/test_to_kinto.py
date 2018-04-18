@@ -4,30 +4,25 @@
 
 import json
 import os
-import tempfile
 import unittest
-from unittest import mock
+
+import pytest
 
 from buildhub.to_kinto import fetch_existing
 
 
 class CacheValueTest(unittest.TestCase):
-    def setUp(self):
-        self.cache_file = os.path.join(tempfile.gettempdir(), 'cache.json')
-        self.old_cache_file = os.path.join(tempfile.gettempdir(), 'old.json')
 
-    def tearDown(self):
-        try:
-            os.path.remove(self.cache_file)
-        except Exception:
-            pass
-        try:
-            os.path.remove(self.old_cache_file)
-        except Exception:
-            pass
+    @pytest.fixture(autouse=True)
+    def init_cache_files(self, tmpdir):
+        # Use str() on these LocalPath instances to turn them into plain
+        # strings since to_kinto.fetch_existing() expects it to be a string.
+        self.cache_file = str(tmpdir.join('cache.json'))
+        self.old_cache_file = str(tmpdir.join('old.json'))
 
     def test_records_are_not_duplicated(self):
-        mocked = mock.MagicMock()
+        mocked = unittest.mock.MagicMock()
+
         mocked.session.server_url = 'http://localhost:8888/v1'
         # First, populate the cache.
         mocked.get_records.return_value = [
@@ -59,7 +54,7 @@ class CacheValueTest(unittest.TestCase):
                 {'id': 'a', 'last_modified': 1, 'title': 'a'}
             ]
             json.dump(records, f)
-        mocked = mock.MagicMock()
+        mocked = unittest.mock.MagicMock()
         mocked.session.server_url = 'http://localhost:8888/v1'
         # First, populate the cache.
         mocked.get_records.return_value = [
