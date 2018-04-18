@@ -153,7 +153,7 @@ async def fetch_nightly_metadata(session, record):
         metadata = await fetch_json(session, metadata_url)
         _nightly_metadata[nightly_url] = metadata
         return metadata
-    except aiohttp.ClientError:
+    except JSONFileNotFound:
 
         # Very old nightly metadata is published as .txt files.
         try:
