@@ -18,16 +18,31 @@ def get_metrics(namespace):
 
         # For more options see
         # http://markus.readthedocs.io/en/latest/usage.html#markus-configure
-        markus.configure([
-            {
-                'class': 'markus.backends.datadog.DatadogMetrics',
-                'options': {
-                    'statsd_host': STATSD_HOST,
-                    'statsd_port': STATSD_PORT,
-                    'statsd_namespace': STATSD_NAMESPACE,
+        log_metrics_config = config('LOG_METRICS', default='datadog')
+        if log_metrics_config == 'logging':
+            markus.configure([
+                {
+                    'class': 'markus.backends.logging.LoggingMetrics',
+                    'options': {
+                        'logger_name': 'metrics'
+                    }
                 }
-            }
-        ])
+            ])
+        elif log_metrics_config == 'datadog':
+            markus.configure([
+                {
+                    'class': 'markus.backends.datadog.DatadogMetrics',
+                    'options': {
+                        'statsd_host': STATSD_HOST,
+                        'statsd_port': STATSD_PORT,
+                        'statsd_namespace': STATSD_NAMESPACE,
+                    }
+                }
+            ])
+        else:
+            raise NotImplementedError(
+                f'Unrecognized LOG_METRICS value {log_metrics_config}'
+            )
         _configured = True
 
     return markus.get_metrics(namespace)
