@@ -424,6 +424,97 @@ class FromArchiveFirefox(BaseTest):
         assert not self.mock_create_record.called
 
 
+class FromMacBetaArchiveFirefox(BaseTest):
+    """
+    Mac archives missing.
+    See https://github.com/mozilla-services/buildhub/issues/327
+    """
+    remote_content = {
+        'pub/firefox/candidates/': {
+            'prefixes': [
+                '59.0b5-candidates/',
+                'archived/'
+            ], 'files': []
+        },
+        'pub/firefox/candidates/59.0b5-candidates/': {
+            'prefixes': [
+                'build1/',
+            ], 'files': []
+        },
+        'pub/firefox/candidates/59.0b5-candidates/build1/mac/en-US/': {
+            'prefixes': [], 'files': [
+                {'name': 'firefox-54.0.zip'},
+                {'name': 'firefox-59.0b5.json'},
+            ]
+        },
+        'pub/firefox/candidates/59.0b5-candidates/build1/mac/en-US/firefox-59.0b5.json': {
+            "as": "$(CC)",
+            "buildid": "20180128191456",
+            "cc": "/builds/worker/workspace/build/src/clang/bin/clang -target x86_64-ap",
+            "cxx": "/builds/worker/workspace/build/src/clang/bin/clang++ -target x86_64",
+            "host_alias": "x86_64-pc-linux-gnu",
+            "host_cpu": "x86_64",
+            "host_os": "linux-gnu",
+            "host_vendor": "pc",
+            "moz_app_id": "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}",
+            "moz_app_maxversion": "59.*",
+            "moz_app_name": "firefox",
+            "moz_app_vendor": "Mozilla",
+            "moz_app_version": "59.0",
+            "moz_pkg_platform": "mac",
+            "moz_source_repo": "MOZ_SOURCE_REPO=https://hg.mozilla.org/releases/mozilla-beta",
+            "moz_source_stamp": "64737c752ac4af4766ad6f82720818521f3aca24",
+            "moz_update_channel": "beta",
+            "target_alias": "x86_64-apple-darwin",
+            "target_cpu": "x86_64",
+            "target_os": "darwin",
+            "target_vendor": "apple"
+        }
+    }
+
+    async def test_from_mac_beta_archive(self):
+        event = fake_event('pub/firefox/releases/59.0b5/mac/en-US/Firefox 59.0b5.dmg')
+        await lambda_s3_event.main(self.loop, event)
+
+        self.mock_create_record.assert_called_with(
+            bucket='build-hub',
+            collection='releases',
+            data={
+                'source': {
+                    'product': 'firefox',
+                    'revision': '64737c752ac4af4766ad6f82720818521f3aca24',
+                    'repository': 'https://hg.mozilla.org/releases/mozilla-beta',
+                    'tree': 'releases/mozilla-beta'
+                },
+                'target': {
+                    'platform': 'macosx',
+                    'os': 'mac',
+                    'locale': 'en-US',
+                    'version': '59.0b5',
+                    'channel': 'beta'
+                },
+                'download': {
+                    'url': 'https://archive.mozilla.org/pub/firefox/releases/59.0b5/mac/'
+                           'en-US/Firefox 59.0b5.dmg',
+                    'mimetype': 'application/x-apple-diskimage',
+                    'size': 51001024,
+                    'date': '2017-08-08T17:06:52Z'
+                },
+                'id': 'firefox_beta_59-0b5_macosx_en-us',
+                'build': {
+                    'id': '20180128191456',
+                    'date': '2018-01-28T19:14:56Z',
+                    'as': '$(CC)',
+                    'cc': '/builds/worker/workspace/build/src/clang/bin/clang -target x86_64-ap',
+                    'cxx': '/builds/worker/workspace/build/src/clang/bin/clang++ -target x86_64',
+                    'host': 'x86_64-pc-linux-gnu',
+                    'target': 'x86_64-apple-darwin',
+                    'number': 1
+                }
+            },
+            if_not_exists=True)
+
+
 class FromRCMetadataFirefox(BaseTest):
     remote_content = {
         'pub/firefox/candidates/56.0b1-candidates/build4/linux-x86_64/': {
