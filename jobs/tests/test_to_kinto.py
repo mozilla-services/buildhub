@@ -5,6 +5,8 @@
 import json
 import os
 import unittest
+# Because you can't just import unittest and access 'unittest.mock.MagicMock'
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -21,7 +23,7 @@ class CacheValueTest(unittest.TestCase):
         self.old_cache_file = str(tmpdir.join('old.json'))
 
     def test_records_are_not_duplicated(self):
-        mocked = unittest.mock.MagicMock()
+        mocked = MagicMock()
 
         mocked.session.server_url = 'http://localhost:8888/v1'
         # First, populate the cache.
@@ -54,7 +56,7 @@ class CacheValueTest(unittest.TestCase):
                 {'id': 'a', 'last_modified': 1, 'title': 'a'}
             ]
             json.dump(records, f)
-        mocked = unittest.mock.MagicMock()
+        mocked = MagicMock()
         mocked.session.server_url = 'http://localhost:8888/v1'
         # First, populate the cache.
         mocked.get_records.return_value = [
@@ -73,8 +75,10 @@ class CacheValueTest(unittest.TestCase):
 
         # The migration is done, but let's make sure the fetch_existing
         # continues to work as expected.
+        # Prend the get_records() is more realistically called with an
+        # ?since=etag so this, second time, it won't include
+        # the previous `{'id': 'a', 'title': 'b', 'last_modified': 2}` record.
         mocked.get_records.return_value = [
-            {'id': 'a', 'title': 'b', 'last_modified': 2},
             {'id': 'b', 'title': 'bee', 'last_modified': 3},
         ]
         fetch_existing(

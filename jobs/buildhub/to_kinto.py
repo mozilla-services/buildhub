@@ -94,7 +94,7 @@ def _hash_record_mutate(record):
 
     NOTE! For performance, this function *will mutate* the record object.
     Yeah, that sucks but it's more performant than having to clone a copy
-    when you have to do it 1 million of these hashes.
+    when you have to do it 1 million of these records.
     """
     record.pop('last_modified', None)
     record.pop('schema', None)
