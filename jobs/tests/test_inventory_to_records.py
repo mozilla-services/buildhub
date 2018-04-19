@@ -799,6 +799,8 @@ class CSVToRecords(asynctest.TestCase):
             mocked.get(utils.ARCHIVE_URL + url, payload=payload)
         self.addCleanup(mocked.stop)
 
+        # inventory_to_records._candidates_build_folder.clear()
+
         async def async_gen():
             _csv_input = (
                 'net-mozaws-delivery-firefox,pub/firefox/releases/51.0/win64/'
@@ -827,6 +829,7 @@ class CSVToRecords(asynctest.TestCase):
         async for r in output:
             records.append(r)
 
+        assert len(records) == 1
         assert records == [{
             'data': {
                 'id': 'firefox_51-0_win64_fy-nl',

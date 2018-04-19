@@ -5,15 +5,21 @@
 import re
 import asyncio
 import datetime
+import glob
 import json
 import logging
 import os
 import pkgutil
+import tempfile
+import time
 import zlib
 from concurrent.futures import ThreadPoolExecutor
 
+import aiofiles
 import aiobotocore
 import botocore
+from decouple import config
+from aiohttp.client_exceptions import ClientPayloadError
 import kinto_http
 import raven
 from raven.handlers.logging import SentryHandler
@@ -33,12 +39,18 @@ FOLDER = (
     'delivery-{inventory}/'
 )
 CHUNK_SIZE = 1024 * 256  # 256 KB
+MAX_CSV_DOWNLOAD_AGE = 60 * 60 * 24 * 2  # two days
 
 INITIALIZE_SERVER = os.getenv('INITIALIZE_SERVER', 'true').lower() == 'true'
 
 # Minimum number of hours old an entry in the CSV files need to be
 # to NOT be skipped.
 MIN_AGE_LAST_MODIFIED_HOURS = int(os.getenv('MIN_AGE_LAST_MODIFIED_HOURS', 0))
+
+CSV_DOWNLOAD_DIRECTORY = config(
+    'CSV_DOWNLOAD_DIRECTORY',
+    tempfile.gettempdir()
+)
 
 # Optional Sentry with synchronuous client.
 SENTRY_DSN = os.getenv('SENTRY_DSN')
@@ -129,12 +141,28 @@ async def list_manifest_entries(loop, s3_client, inventory):
     async with manifest['Body'] as stream:
         body = await stream.read()
     manifest_content = json.loads(body.decode('utf-8'))
-    # Return keys of csv.gz files
     for f in manifest_content['files']:
-        yield f['key']
+        # Here, each 'f' is a dictionary that looks something like this:
+        #
+        #  {
+        #     "key" : "inventories/net-mozaw...f-b1a0-5fb25bb83752.csv.gz",
+        #     "size" : 7945521,
+        #     "MD5checksum" : "7454b0d773000f790f15b867ee152049"
+        #  }
+        #
+        # We yield the whole thing. The key is used to download from S3.
+        # The MD5checksum is used to know how to store the file on
+        # disk for caching.
+        yield f
 
 
-async def download_csv(loop, s3_client, keys_stream, chunk_size=CHUNK_SIZE):
+async def download_csv(
+    loop,
+    s3_client,
+    files_stream,
+    chunk_size=CHUNK_SIZE,
+    download_directory=CSV_DOWNLOAD_DIRECTORY,
+):
     """
     Download the S3 object of each key and return deflated data chunks (CSV).
     :param loop: asyncio event loop.
@@ -142,12 +170,53 @@ async def download_csv(loop, s3_client, keys_stream, chunk_size=CHUNK_SIZE):
     :param keys_stream async generator: List of object keys for
     the csv.gz manifests.
     """
-    async for key in keys_stream:
-        key = 'public/' + key
-        logger.info('Fetching inventory piece {}'.format(key))
-        file_csv_gz = await s3_client.get_object(Bucket=BUCKET, Key=key)
+
+    # Make sure the directory exists if it wasn't already created.
+    if not os.path.isdir(download_directory):
+        os.makedirs(download_directory, exists_ok=True)
+
+    # Look for old download junk in the download directory.
+    too_old = MAX_CSV_DOWNLOAD_AGE
+    for file_path in glob.glob(os.path.join(download_directory, '*.csv.gz')):
+        age = time.time() - os.stat(file_path).st_mtime
+        if age > too_old:
+            logger.info(
+                f'Delete old download file {file_path} '
+                f'({age} seconds old)'
+            )
+            os.remove(file_path)
+
+    async for files in files_stream:
+        # If it doesn't exist on disk, download to disk.
+        file_path = os.path.join(
+            download_directory,
+            files['MD5checksum'] + '.csv.gz'
+        )
+        # The file neither exists or has data.
+        if os.path.isfile(file_path) and os.stat(file_path).st_size:
+            logger.debug(f'{file_path} was already downloaded locally')
+        else:
+            key = 'public/' + files['key']
+            logger.info('Fetching inventory piece {}'.format(key))
+            file_csv_gz = await s3_client.get_object(Bucket=BUCKET, Key=key)
+            try:
+                async with aiofiles.open(file_path, 'wb') as destination:
+                    async with file_csv_gz['Body'] as source:
+                        while 'there are chunks to read':
+                            gzip_chunk = await source.read(chunk_size)
+                            if not gzip_chunk:
+                                break  # End of response.
+                            await destination.write(gzip_chunk)
+                size = os.stat(file_path).st_size
+                logger.info(f'Downloaded {key} to {file_path} ({size} bytes)')
+            except ClientPayloadError:
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                raise
+
+        # Now we expect the file to exist locally. Let's read it.
         gzip = zlib.decompressobj(zlib.MAX_WBITS | 16)
-        async with file_csv_gz['Body'] as stream:
+        async with aiofiles.open(file_path, 'rb') as stream:
             while 'there are chunks to read':
                 gzip_chunk = await stream.read(chunk_size)
                 if not gzip_chunk:
@@ -195,8 +264,8 @@ async def main(loop, inventory):
     async with session.create_client(
         's3', region_name=REGION_NAME, config=boto_config
     ) as client:
-        keys_stream = list_manifest_entries(loop, client, inventory)
-        csv_stream = download_csv(loop, client, keys_stream)
+        files_stream = list_manifest_entries(loop, client, inventory)
+        csv_stream = download_csv(loop, client, files_stream)
         records_stream = csv_to_records(
             loop,
             csv_stream,

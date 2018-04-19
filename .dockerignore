@@ -8,3 +8,4 @@ buildhub-lambda*.zip
 
 jobs/.cache
 ui/node_modules/
+csv-download-directory/
