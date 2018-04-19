@@ -7,6 +7,8 @@ jobs/.coverage
 docs/_build/
 .venv/
 lambda.zip
+settings.ini
+.env
 version.json
 .bash_history
 buildhub-lambda-*.zip

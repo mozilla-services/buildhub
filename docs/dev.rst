@@ -331,3 +331,39 @@ have that locally you can change it to plain Python logging by setting
 The current only allowed values for the ``LOG_METRICS`` environment variable
 is ``datadog`` (default) and ``logging``. Anything else will raise a
 ``NotImplementedError`` exception.
+
+
+Environment Variables and Settings files
+========================================
+
+Every environment variable that is defined and expected can obviously be
+changed on the command line. E.g.
+
+.. code-block:: shell
+
+    app@b95573edb130:~$ CSV_DOWNLOAD_DIRECTORY=/tmp/stuff latest-inventory-to-kinto
+
+But you can also, put all *your* preferences in a ``.env`` file or a
+``settings.ini`` file in the root of the project. These are yours to keep and
+not check in.
+
+The order of preference is as follows:
+
+1. Command line
+2. ``settings.ini`` file
+3. ``.env`` file
+
+See documentation on `python-decouple here
+<https://pypi.org/project/python-decouple/#id5>`_.
+
+The rule of thumb is that all environment variables defined in the Python
+code should **be for the purpose of production run**. Meaning, if you want
+something that is not how we run it, by default, in production it's up to you
+to override it.
+
+Also, this rule of thumb implies that environment variables should be
+secure by default. If there's a sensitive setting, don't leave insecure for
+developers and expecting OPs to make it explictly secure. It's the other
+way around. If you want to make some less secure (perhaps it's fine because
+you're running it on your laptop with fake data), it's up to you to either
+specify it on the command line or update your personal ``.env`` file.
