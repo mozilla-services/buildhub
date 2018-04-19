@@ -19,6 +19,7 @@ import aiofiles
 import aiobotocore
 import botocore
 from decouple import config
+from aiohttp.client_exceptions import ClientPayloadError
 import kinto_http
 import raven
 from raven.handlers.logging import SentryHandler
@@ -38,6 +39,7 @@ FOLDER = (
     'delivery-{inventory}/'
 )
 CHUNK_SIZE = 1024 * 256  # 256 KB
+MAX_CSV_DOWNLOAD_AGE = 60 * 60 * 24 * 2  # two days
 
 INITIALIZE_SERVER = os.getenv('INITIALIZE_SERVER', 'true').lower() == 'true'
 
@@ -171,14 +173,14 @@ async def download_csv(
 
     # Make sure the directory exists if it wasn't already created.
     if not os.path.isdir(download_directory):
-        os.mkdir(download_directory)
+        os.makedirs(download_directory, exists_ok=True)
 
     # Look for old download junk in the download directory.
-    too_old = 60 * 60 * 24 * 2  # two days
+    too_old = MAX_CSV_DOWNLOAD_AGE
     for file_path in glob.glob(os.path.join(download_directory, '*.csv.gz')):
         age = time.time() - os.stat(file_path).st_mtime
         if age > too_old:
-            logger.debug(
+            logger.info(
                 f'Delete old download file {file_path} '
                 f'({age} seconds old)'
             )
@@ -197,15 +199,20 @@ async def download_csv(
             key = 'public/' + files['key']
             logger.info('Fetching inventory piece {}'.format(key))
             file_csv_gz = await s3_client.get_object(Bucket=BUCKET, Key=key)
-            async with aiofiles.open(file_path, 'wb') as destination:
-                async with file_csv_gz['Body'] as source:
-                    while 'there are chunks to read':
-                        gzip_chunk = await source.read(chunk_size)
-                        if not gzip_chunk:
-                            break  # End of response.
-                        await destination.write(gzip_chunk)
-            size = os.stat(file_path).st_size
-            logger.info(f'Downloaded {key} to {file_path} ({size} bytes)')
+            try:
+                async with aiofiles.open(file_path, 'wb') as destination:
+                    async with file_csv_gz['Body'] as source:
+                        while 'there are chunks to read':
+                            gzip_chunk = await source.read(chunk_size)
+                            if not gzip_chunk:
+                                break  # End of response.
+                            await destination.write(gzip_chunk)
+                size = os.stat(file_path).st_size
+                logger.info(f'Downloaded {key} to {file_path} ({size} bytes)')
+            except ClientPayloadError:
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                raise
 
         # Now we expect the file to exist locally. Let's read it.
         gzip = zlib.decompressobj(zlib.MAX_WBITS | 16)
