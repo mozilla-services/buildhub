@@ -199,3 +199,5 @@ more-itertools==4.1.0 \
     --hash=sha256:0dd8f72eeab0d2c3bd489025bb2f6a1b8342f9b198f6fc37b52d15cfa4531fea \
     --hash=sha256:11a625025954c20145b37ff6309cd54e39ca94f72f6bb9576d1195db6fa2442e \
     --hash=sha256:c9ce7eccdcb901a2c75d326ea134e0886abfbea5f93e91cc95de9507c0816c44
+idna_ssl==1.0.1 \
+    --hash=sha256:1293f030bc608e9aa9cdee72aa93c1521bbb9c7698068c61c9ada6772162b979
