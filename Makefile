@@ -9,6 +9,7 @@ help:
 	@echo "  upload-to-s3                upload lambda.zip to AWS"
 	@echo "  shell                       enter a bash shell with volume mount"
 	@echo "  sudo-shell                  enter a bash shell, as root, with volume mount"
+	@echo "  psql                        open the psql cli"
 	@echo "\n"
 
 
@@ -56,3 +57,6 @@ shell:
 
 sudo-shell:
 	docker-compose run --user 0 buildhub bash
+
+psql:
+	docker-compose run db psql -h db -U postgres
