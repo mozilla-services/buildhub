@@ -3,6 +3,7 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 
 import markus
+from markus.backends import BackendBase
 from decouple import config
 
 
@@ -39,6 +40,12 @@ def get_metrics(namespace):
                     }
                 }
             ])
+        elif log_metrics_config == 'void':
+            markus.configure([
+                {
+                    'class': 'buildhub.configure_markus.VoidMetrics',
+                }
+            ])
         else:
             raise NotImplementedError(
                 f'Unrecognized LOG_METRICS value {log_metrics_config}'
@@ -46,3 +53,26 @@ def get_metrics(namespace):
         _configured = True
 
     return markus.get_metrics(namespace)
+
+
+class VoidMetrics(BackendBase):
+    """Use when you want nothing with the markus metrics. E.g.
+
+        markus.configure([
+            {
+                'class': 'buildhub.configure_markus.VoidMetrics',
+            }
+        ])
+    """
+
+    def incr(self, stat, value, tags=None):
+        pass
+
+    def gauge(self, stat, value, tags=None):
+        pass
+
+    def timing(self, stat, value, tags=None):
+        pass
+
+    def histogram(self, stat, value, tags=None):
+        pass

@@ -339,6 +339,11 @@ The current only allowed values for the ``LOG_METRICS`` environment variable
 is ``datadog`` (default) and ``logging``. Anything else will raise a
 ``NotImplementedError`` exception.
 
+.. note::
+
+    Another option if you want *no metrics output at all* is to set
+    ``LOG_METRICS=void`` and then all metrics logging is swallowed and
+    ignored.
 
 Environment Variables and Settings files
 ========================================
