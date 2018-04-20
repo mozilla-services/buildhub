@@ -31,6 +31,7 @@ import sys
 from urllib.parse import urlparse
 
 from kinto_http import cli_utils
+from decouple import config
 
 from buildhub.utils import stream_as_generator
 from buildhub.configure_markus import get_metrics
@@ -42,9 +43,9 @@ DEFAULT_COLLECTION = 'cid'
 NB_THREADS = 3
 NB_RETRY_REQUEST = 3
 WAIT_TIMEOUT = 5
-BATCH_MAX_REQUESTS = int(os.getenv('BATCH_MAX_REQUESTS', '9999'))
+BATCH_MAX_REQUESTS = config('BATCH_MAX_REQUESTS', default=9999, cast=int)
 PREVIOUS_DUMP_FILENAME = '.records-{server}-{bucket}-{collection}.json'
-CACHE_FOLDER = os.getenv('CACHE_FOLDER', '.')
+CACHE_FOLDER = config('CACHE_FOLDER', default='.')
 
 logger = logging.getLogger(__name__)
 metrics = get_metrics('buildhub')

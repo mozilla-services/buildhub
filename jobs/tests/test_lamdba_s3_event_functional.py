@@ -7,13 +7,14 @@ import os
 import json
 
 import kinto_http
+from decouple import config
 
 from buildhub import lambda_s3_event
 
 
 here = os.path.dirname(__file__)
 
-server = os.environ.get('SERVER_URL', 'http://localhost:8888/v1')
+server = config('SERVER_URL', default='http://localhost:8888/v1')
 bid = 'build-hub'
 cid = 'releases'
 

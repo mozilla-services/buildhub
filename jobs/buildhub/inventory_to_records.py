@@ -17,6 +17,7 @@ from collections import defaultdict
 
 import aiohttp
 import backoff
+from decouple import config
 
 from buildhub.utils import (
     archive_url, chunked, is_release_build_metadata, is_build_url,
@@ -25,11 +26,14 @@ from buildhub.utils import (
     ARCHIVE_URL, FILE_EXTENSIONS, DATETIME_FORMAT, ALL_PRODUCTS)
 
 
-NB_PARALLEL_REQUESTS = int(os.getenv('NB_PARALLEL_REQUESTS', 8))
-NB_RETRY_REQUEST = int(os.getenv('NB_RETRY_REQUEST', 3))
-TIMEOUT_SECONDS = int(os.getenv('TIMEOUT_SECONDS', 5 * 60))
-PRODUCTS = os.getenv('PRODUCTS', ' '.join(ALL_PRODUCTS)).split(' ')
-CACHE_FOLDER = os.getenv('CACHE_FOLDER', '.')
+NB_PARALLEL_REQUESTS = config('NB_PARALLEL_REQUESTS', default=8, cast=int)
+NB_RETRY_REQUEST = config('NB_RETRY_REQUEST', default=3, cast=int)
+TIMEOUT_SECONDS = config('TIMEOUT_SECONDS', default=5 * 60, cast=int)
+PRODUCTS = config(
+    'PRODUCTS', default=' '.join(ALL_PRODUCTS),
+    cast=lambda v: [s.strip() for s in v.split()]
+)
+CACHE_FOLDER = config('CACHE_FOLDER', default='.')
 
 logger = logging.getLogger()  # root logger.
 

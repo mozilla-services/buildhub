@@ -6,12 +6,12 @@ import asyncio
 import datetime
 import json
 import logging
-import os
 import re
 import sys
 
 import aiohttp
 import kinto_http
+from decouple import config
 from raven.contrib.awslambda import LambdaClient
 
 from buildhub import utils
@@ -26,7 +26,7 @@ from buildhub.configure_markus import get_metrics
 
 
 # Optional Sentry with synchronuous client.
-SENTRY_DSN = os.getenv('SENTRY_DSN')
+SENTRY_DSN = config('SENTRY_DSN', default=None)
 sentry = LambdaClient(SENTRY_DSN)
 
 logger = logging.getLogger()  # root logger.
@@ -38,10 +38,10 @@ async def main(loop, event):
     Trigger when S3 event kicks in.
     http://docs.aws.amazon.com/AmazonS3/latest/dev/notification-content-structure.html
     """
-    server_url = os.getenv('SERVER_URL', 'http://localhost:8888/v1')
-    bucket = os.getenv('BUCKET', 'build-hub')
-    collection = os.getenv('COLLECTION', 'releases')
-    kinto_auth = tuple(os.getenv('AUTH', 'user:pass').split(':'))
+    server_url = config('SERVER_URL', default='http://localhost:8888/v1')
+    bucket = config('BUCKET', default='build-hub')
+    collection = config('COLLECTION', default='releases')
+    kinto_auth = tuple(config('AUTH', 'user:pass').split(':'))
 
     kinto_client = kinto_http.Client(server_url=server_url, auth=kinto_auth,
                                      retry=NB_RETRY_REQUEST)

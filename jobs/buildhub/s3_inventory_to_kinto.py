@@ -41,19 +41,21 @@ FOLDER = (
 CHUNK_SIZE = 1024 * 256  # 256 KB
 MAX_CSV_DOWNLOAD_AGE = 60 * 60 * 24 * 2  # two days
 
-INITIALIZE_SERVER = os.getenv('INITIALIZE_SERVER', 'true').lower() == 'true'
+INITIALIZE_SERVER = config('INITIALIZE_SERVER', default=True, cast=bool)
 
 # Minimum number of hours old an entry in the CSV files need to be
 # to NOT be skipped.
-MIN_AGE_LAST_MODIFIED_HOURS = int(os.getenv('MIN_AGE_LAST_MODIFIED_HOURS', 0))
+MIN_AGE_LAST_MODIFIED_HOURS = config(
+    'MIN_AGE_LAST_MODIFIED_HOURS', default=0, cast=int
+)
 
 CSV_DOWNLOAD_DIRECTORY = config(
     'CSV_DOWNLOAD_DIRECTORY',
-    tempfile.gettempdir()
+    default=tempfile.gettempdir()
 )
 
 # Optional Sentry with synchronuous client.
-SENTRY_DSN = os.getenv('SENTRY_DSN')
+SENTRY_DSN = config('SENTRY_DSN', default=None)
 sentry = raven.Client(SENTRY_DSN, transport=raven.transport.http.HTTPTransport)
 
 logger = logging.getLogger()  # root logger.
@@ -237,10 +239,10 @@ async def main(loop, inventory):
     """
     Trigger to populate kinto with the last inventories.
     """
-    server_url = os.getenv('SERVER_URL', 'http://localhost:8888/v1')
-    bucket = os.getenv('BUCKET', 'build-hub')
-    collection = os.getenv('COLLECTION', 'releases')
-    kinto_auth = tuple(os.getenv('AUTH', 'user:pass').split(':'))
+    server_url = config('SERVER_URL', default='http://localhost:8888/v1')
+    bucket = config('BUCKET', default='build-hub')
+    collection = config('COLLECTION', default='releases')
+    kinto_auth = tuple(config('AUTH', default='user:pass').split(':'))
 
     kinto_client = kinto_http.Client(server_url=server_url, auth=kinto_auth,
                                      bucket=bucket, collection=collection,
