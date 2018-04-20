@@ -28,7 +28,7 @@ from kinto_wizard.async_kinto import AsyncKintoClient
 from kinto_wizard.yaml2kinto import initialize_server
 
 from buildhub.inventory_to_records import NB_RETRY_REQUEST, csv_to_records
-from buildhub.to_kinto import main as to_kinto
+from buildhub.to_kinto import fetch_existing, main as to_kinto_main
 from buildhub.configure_markus import get_metrics
 
 
@@ -235,7 +235,7 @@ async def download_csv(
                     yield csv_chunk
 
 
-async def main(loop, inventory):
+async def main(loop, inventories):
     """
     Trigger to populate kinto with the last inventories.
     """
@@ -260,21 +260,31 @@ async def main(loop, inventory):
             hours=MIN_AGE_LAST_MODIFIED_HOURS
         )
 
+    # Fetch all existing records as a big dict from kinto
+    existing = fetch_existing(kinto_client)
+
     # Download CSVs, deduce records and push to Kinto.
     session = aiobotocore.get_session(loop=loop)
     boto_config = botocore.config.Config(signature_version=botocore.UNSIGNED)
     async with session.create_client(
         's3', region_name=REGION_NAME, config=boto_config
     ) as client:
-        files_stream = list_manifest_entries(loop, client, inventory)
-        csv_stream = download_csv(loop, client, files_stream)
-        records_stream = csv_to_records(
-            loop,
-            csv_stream,
-            skip_incomplete=True,
-            min_last_modified=min_last_modified,
-        )
-        await to_kinto(loop, records_stream, kinto_client, skip_existing=True)
+        for inventory in inventories:
+            files_stream = list_manifest_entries(loop, client, inventory)
+            csv_stream = download_csv(loop, client, files_stream)
+            records_stream = csv_to_records(
+                loop,
+                csv_stream,
+                skip_incomplete=True,
+                min_last_modified=min_last_modified,
+            )
+            await to_kinto_main(
+                loop,
+                records_stream,
+                kinto_client,
+                existing=existing,
+                skip_existing=False
+            )
 
 
 @metrics.timer_decorator('s3_inventory_to_kinto_run')
@@ -289,9 +299,9 @@ def run():
     logger.addHandler(handler)
 
     loop = asyncio.get_event_loop()
-    futures = [main(loop, inventory) for inventory in ('firefox', 'archive')]
+    inventories = ('firefox', 'archive')
     try:
-        loop.run_until_complete(asyncio.gather(*futures))
+        loop.run_until_complete(main(loop, inventories))
     except Exception:
         logger.exception('Aborted.')
         raise

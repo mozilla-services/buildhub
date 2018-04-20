@@ -295,8 +295,14 @@ async def parse_json(lines):
         yield record
 
 
-async def main(loop, stdin_generator, client, skip_existing=True):
-    existing = {}
+async def main(
+    loop,
+    stdin_generator,
+    client,
+    skip_existing=True,
+    existing=None,
+):
+    existing = existing or {}  # Because it can't be a mutable default argument
     if skip_existing:
         # Fetch the list of records to skip records that exist
         # and haven't changed.
