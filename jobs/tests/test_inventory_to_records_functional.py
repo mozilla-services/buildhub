@@ -2,12 +2,15 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 
-import asynctest
+
 import os
 import io
 import json
 import sys
 from unittest import mock
+
+import asynctest
+import pytest
 
 from buildhub import inventory_to_records
 
@@ -43,8 +46,17 @@ class CsvToRecordsTest(asynctest.TestCase):
         sys.stdout = self.stdout
         sys.stdin = self.stdin
 
+    @pytest.fixture(autouse=True)
+    def init_cache_folder(self, tmpdir):
+        # Use str() on these LocalPath instances to turn them into plain
+        # strings since to_kinto.fetch_existing() expects it to be a string.
+        self.cache_folder = str(tmpdir)
+
     async def test_load_simple_file(self):
-        await inventory_to_records.main(self.loop)
+        await inventory_to_records.main(
+            self.loop,
+            cache_folder=self.cache_folder
+        )
 
         output = sys.stdout.getvalue()
         records = [json.loads(o) for o in output.split('\n') if o]
@@ -309,9 +321,10 @@ class CsvToRecordsTest(asynctest.TestCase):
             }
         }]
 
+        assert len(records) == 6, [r['data']['id'] for r in records]
         assert [
             r['data']['id'] for r in records
         ] == [
             r['data']['id'] for r in expected
-        ]
+        ], [r['data']['id'] for r in records]
         assert records == expected

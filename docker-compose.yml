@@ -57,6 +57,7 @@ services:
       - CSV_DOWNLOAD_DIRECTORY=./csv-download-directory
     volumes:
       - $PWD:/app
+      - ~/.bash_history:/root/.bash_history
     # All things within the 'buildhub' directive are meant to be executed
     # with 'docker-compose run buildhub ...'
     # By setting this to "true", it means we can run `docker-compose up`

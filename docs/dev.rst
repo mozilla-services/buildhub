@@ -217,7 +217,14 @@ For example:
 
 .. code-block:: shell
 
+    $ export SERVER_URL=http://testkinto:9999/v1
     $ pytest jobs/tests/ -x --ff --showlocals --tb=native
+
+.. note::
+
+    The ``SERVER_URL`` has to be set to point to the ``testkinto``
+    server if you're going to run functional tests from within this
+    bash session.
 
 And you can now install ``pytest-watch`` to have the tests run as soon
 as you save any of the relevant files:

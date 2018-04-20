@@ -41,6 +41,10 @@ logger = logging.getLogger()  # root logger.
 __version__ = pkg_resources.get_distribution(__package__).version
 
 
+class JSONFileNotFound(Exception):
+    """Happens when we try to fetch a JSON URL and the response is a 404"""
+
+
 async def read_csv(input_generator):
     """
     :param input_generator: async generator of raw bytes
@@ -55,7 +59,25 @@ async def read_csv(input_generator):
 @backoff.on_exception(backoff.expo,
                       (aiohttp.ClientResponseError, asyncio.TimeoutError),
                       max_tries=NB_RETRY_REQUEST)
-async def fetch_json(session, url, timeout=TIMEOUT_SECONDS):
+async def fetch_json(
+    session,
+    url,
+    timeout=TIMEOUT_SECONDS,
+    retry_on_notfound=False
+):
+    """Return response JSON by the URL.
+
+    By default, any response that is >=400 will raise a ClientResponseError
+    which is part of the backoff.on_exception configuration.
+    If you explicitly don't want that for status code 404, you can set
+    the `retry_on_notfound` parameter to True. Then it will raise a
+    JSONFileNotFound exception instead and will not retry automatically.
+
+    *Sometimes* a 404 status code is actually something that can
+    happen due to the latency of a slow update in
+    archive.mozilla.org so if you just back off and try again
+    in a couple of seconds it will work.
+    """
     headers = {
         'Accept': 'application/json',
         'Cache': 'no-cache',
@@ -69,6 +91,9 @@ async def fetch_json(session, url, timeout=TIMEOUT_SECONDS):
                 headers=headers,
                 timeout=None
             ) as response:
+                if response.status == 404 and not retry_on_notfound:
+                    raise JSONFileNotFound(url)
+
                 response.raise_for_status()
                 try:
                     return await response.json()
@@ -99,6 +124,8 @@ async def fetch_metadata(session, record):
         return await fetch_release_metadata(session, record)
     except ValueError as e:
         logger.warning(e)
+    except JSONFileNotFound as e:
+        logger.warning(f'Failed to download metadata file {e}')
     return None
 
 
@@ -130,7 +157,7 @@ async def fetch_nightly_metadata(session, record):
         metadata = await fetch_json(session, metadata_url)
         _nightly_metadata[nightly_url] = metadata
         return metadata
-    except aiohttp.ClientError:
+    except JSONFileNotFound:
 
         # Very old nightly metadata is published as .txt files.
         try:
@@ -345,7 +372,8 @@ async def csv_to_records(
     loop,
     stdin,
     skip_incomplete=True,
-    min_last_modified=None
+    min_last_modified=None,
+    cache_folder=CACHE_FOLDER,
 ):
     """
     :rtype: async generator of records (dict-like)
@@ -396,7 +424,7 @@ async def csv_to_records(
     # Read metadata of previous run, and warm up cache.
     # Will save a lot of hits to archive.mozilla.org.
     metadata_cache_file = os.path.join(
-        CACHE_FOLDER,
+        cache_folder,
         '.metadata-{}.json'.format(__version__)
     )
     if os.path.exists(metadata_cache_file):
@@ -477,7 +505,7 @@ async def csv_to_records(
     os.rename(tmpfilename, metadata_cache_file)
 
 
-async def main(loop):
+async def main(loop, cache_folder=CACHE_FOLDER):
     parser = argparse.ArgumentParser(
         description=(
             'Read S3 CSV inventory from stdin '
@@ -509,9 +537,13 @@ async def main(loop):
     else:
         logger.setLevel(logging.WARNING)
 
-    async for record in csv_to_records(loop, stream_as_generator(
-        loop, sys.stdin
-    )):
+    async for record in csv_to_records(
+        loop,
+        stream_as_generator(
+            loop, sys.stdin
+        ),
+        cache_folder=cache_folder,
+    ):
         sys.stdout.write(json.dumps(record) + '\n')
 
 

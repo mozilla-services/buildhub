@@ -63,8 +63,13 @@ class BaseTest(asynctest.TestCase):
 
         self.mockresponses = aioresponses()
         self.mockresponses.start()
-        for url, payload in self.remote_content.items():
-            self.mockresponses.get(utils.ARCHIVE_URL + url, payload=payload)
+        for url, payload_or_status in self.remote_content.items():
+            full_url = utils.ARCHIVE_URL + url
+            if isinstance(payload_or_status, int):
+                self.mockresponses.get(full_url, status=payload_or_status)
+            else:
+                self.mockresponses.get(full_url, payload=payload_or_status)
+
         self.addCleanup(self.mockresponses.stop)
 
         mm = MetricsMock()
@@ -77,6 +82,11 @@ class BaseTest(asynctest.TestCase):
 
 class FromArchiveFirefox(BaseTest):
     remote_content = {
+        # This will be attempted every time since the metadata cache_folder
+        # is always reset by the pytest fixture.
+        'pub/firefox/nightly/2016/05/2016-05-02-03-02'
+        '-07-mozilla-central/firefox-49.0a1.en-US.linux-i686.json': 404,
+
         'pub/firefox/candidates/': {
             'prefixes': [
                 '54.0-candidates/',
