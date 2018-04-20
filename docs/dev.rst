@@ -5,8 +5,8 @@ Developer Documentation
 
 To do development locally all you need is ``docker`` and ``docker-compose``.
 
-Quickstart
-==========
+Quick Start
+===========
 
 To start everything just run:
 
@@ -375,7 +375,7 @@ to override it.
 
 Also, this rule of thumb implies that environment variables should be
 secure by default. If there's a sensitive setting, don't leave insecure for
-developers and expecting OPs to make it explictly secure. It's the other
+developers and expecting OPs to make it explicitly secure. It's the other
 way around. If you want to make some less secure (perhaps it's fine because
 you're running it on your laptop with fake data), it's up to you to either
 specify it on the command line or update your personal ``.env`` file.
