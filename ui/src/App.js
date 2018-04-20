@@ -240,29 +240,34 @@ class App extends Component {
                   title="Version"
                   git
                   id="versions"
-                  size={20}
+                  size={1000}
                   operator="OR"
                   multi={true}
+                  orderKey={"_term"}
+                  orderDirection={"desc"}
                 />
                 <RefinementAutosuggest
                   field="target.platform"
                   title="Platform"
                   id="platform"
-                  size={20}
+                  size={1000}
+                  orderKey="_term"
                   multi={true}
                 />
                 <RefinementAutosuggest
                   field="target.channel"
                   title="Channel"
                   id="channel"
-                  size={20}
+                  size={1000}
+                  orderKey="_term"
                   multi={true}
                 />
                 <RefinementAutosuggest
                   field="target.locale"
                   title="Locale"
                   id="locale"
-                  size={20}
+                  size={1000}
+                  orderKey="_term"
                   multi={true}
                 />
               </SideBar>
