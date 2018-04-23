@@ -1,6 +1,73 @@
 Changelog
 =========
 
+1.2.0 (2018-04-23)
+------------------
+
+- run fetch_existing only once, fixes #412 (#414)
+
+- fix sorting in searchKit (#419)
+
+- add psql makefile target (#418)
+
+- docs typo (#416)
+
+- upgrade pytest to 3.5.0 (#415)
+
+- Ability to quiet markus, fixes 410 (#411)
+
+- Dump file is growing unsustainably fixes 394 (#404)
+
+- bail on 404 responses in cron job (#389)
+
+- use python-decouple everywhere (#409)
+
+- Disk cache the manifests, fixes #392 (#403)
+
+- Optionally configure markus to log fixes 402 (#405)
+
+- pluggy sha's changed since they added wheels (#408)
+
+- Update markus to 1.1.2 (#398)
+
+- do raven for lambda correctly, fixes #387 (#391)
+
+- Update .pyup.yml (#393)
+
+- add a .pyup.yml file (#390)
+
+- Add statsd metrics (#388)
+
+- 80 lines pep8 (#384)
+
+- refactor script name, fixes #377 (#383)
+
+- skip old csv entries, fixes #380 (#382)
+
+- drop css-animation, fixes #371 (#376)
+
+- Use dockerhub repo (#375)
+
+- change license to mpl 2.0, fixes #366 (#374)
+
+- remove leftover console warn (#373)
+
+- upgrade Prettier, fixes #369 (#372)
+
+- bundle searchkit css, fixes #368 (#370)
+
+- use yarn instead, fixes #365 (#367)
+
+- Feature: RefinementAutosuggest for perf (#304)
+
+- DOCKER_* env var names correction (#364)
+
+- circle only (#358)
+
+- pin all requirements, fixes #353 (#356)
+
+
+
 This document describes changes between each past release.
 
 1.1.5 (2018-02-22)
