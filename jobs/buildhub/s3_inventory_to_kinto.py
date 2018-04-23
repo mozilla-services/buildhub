@@ -18,7 +18,7 @@ from concurrent.futures import ThreadPoolExecutor
 import aiofiles
 import aiobotocore
 import botocore
-from decouple import config
+from decouple import config, Csv
 from aiohttp.client_exceptions import ClientPayloadError
 import kinto_http
 import raven
@@ -53,6 +53,12 @@ CSV_DOWNLOAD_DIRECTORY = config(
     'CSV_DOWNLOAD_DIRECTORY',
     default=tempfile.gettempdir()
 )
+
+INVENTORIES = tuple(config(
+    'INVENTORIES',
+    default='firefox, archive',
+    cast=Csv()
+))
 
 # Optional Sentry with synchronuous client.
 SENTRY_DSN = config('SENTRY_DSN', default=None)
@@ -235,7 +241,7 @@ async def download_csv(
                     yield csv_chunk
 
 
-async def main(loop, inventories):
+async def main(loop, inventories=INVENTORIES):
     """
     Trigger to populate kinto with the last inventories.
     """
@@ -299,9 +305,8 @@ def run():
     logger.addHandler(handler)
 
     loop = asyncio.get_event_loop()
-    inventories = ('firefox', 'archive')
     try:
-        loop.run_until_complete(main(loop, inventories))
+        loop.run_until_complete(main(loop))
     except Exception:
         logger.exception('Aborted.')
         raise
