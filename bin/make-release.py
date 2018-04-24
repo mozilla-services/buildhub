@@ -280,7 +280,7 @@ def _upload_lambda_zip(github_api_key, upload_url, release_id, filename):
 
 if __name__ == '__main__':
     import argparse
-    parser = argparse.ArgumentParser(description='Unleash Buildhub!')
+    parser = argparse.ArgumentParser(description='Release Buildhub!')
     parser.add_argument('part', type=str, help='major, minor or patch')
     parser.add_argument('-d', '--dry-run', action='store_true')
     parser.add_argument(
@@ -297,6 +297,6 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
     if args.part not in ('major', 'minor', 'patch'):
-        raise ValueError('invalid part. Must be major, minor, or patch')
+        parser.error("invalid part. Must be 'major', 'minor', or 'patch'")
     args = vars(args)
     main(args.pop('part'), **args)

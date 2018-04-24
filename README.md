@@ -50,3 +50,21 @@ make a tag and push that tag to GitHub.
 
 Then, it will create a Release and upload the latest `lambda.zip` as an
 attachment to that Release.
+
+## Deployment
+
+The outlined steps above only upgrade the cron job part of Buildhub.
+And only for Stage is it automatically upgraded simply by making a new
+Release.
+
+At the time of writing we still need to file a Bugzilla bug to have
+the Lambda job upgraded on Stage. [Issue #423](https://github.com/mozilla-services/buildhub/issues/423)
+is about automating this away.
+
+To upgrade the Lambda job on **Stage** run:
+
+    ./bin/deployment-bug.py stage-lambda
+
+To upgrade the cron job _and_ Lambda job on **Prod** run:
+
+    ./bin/deployment-bug.py prod
