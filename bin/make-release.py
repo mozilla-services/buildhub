@@ -78,10 +78,10 @@ def main(
         ok = input('Is this lambda.zip recently generated? [Y/n] ')
     except KeyboardInterrupt:
         print('\n\nTip! Generate it by running: make lambda.zip ')
-        return
+        return 3
     if ok.lower().strip() == 'n':
         print('Tip! Generate it by running: make lambda.zip ')
-        return
+        return 3
 
     # Figure out the current version
     current_version = pkg_resources.get_distribution('buildhub').version
@@ -117,7 +117,7 @@ def main(
 
     # Make sure we have all the old git tags
     check_output(
-        f'git pull {upstream_name} master --tags'.split(),
+        f'git pull {upstream_name} master --tags',
         stderr=subprocess.STDOUT
     )
 
@@ -238,6 +238,8 @@ def main(
         print(' 🎉  ALL DONE! 🎊 ')
         print('\n')
 
+    return 0
+
 
 def _create_release(github_api_key, tag_name, body, name=''):
     api_url = (
@@ -281,6 +283,7 @@ def _upload_lambda_zip(github_api_key, upload_url, release_id, filename):
 
 
 if __name__ == '__main__':
+    import sys
     import argparse
     parser = argparse.ArgumentParser(description='Release Buildhub!')
     parser.add_argument('part', type=str, help='major, minor or patch')
@@ -301,4 +304,4 @@ if __name__ == '__main__':
     if args.part not in ('major', 'minor', 'patch'):
         parser.error("invalid part. Must be 'major', 'minor', or 'patch'")
     args = vars(args)
-    main(args.pop('part'), **args)
+    sys.exit(main(args.pop('part'), **args))
