@@ -67,9 +67,6 @@ Changelog
 - pin all requirements, fixes #353 (#356)
 
 
-
-This document describes changes between each past release.
-
 1.1.5 (2018-02-22)
 ------------------
 
