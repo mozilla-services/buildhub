@@ -41,6 +41,12 @@ def _format_file_size(bytes):
         return '{}B'.format(bytes)
 
 
+def check_output(*args, **kwargs):
+    if len(args) == 1 and isinstance(args[0], str):
+        args = args[0].split()
+    return subprocess.check_output(*args, **kwargs).decode('utf-8').strip()
+
+
 def main(
     part,
     dry_run=False,
@@ -91,9 +97,7 @@ def main(
     # Figure out the CHANGELOG
 
     # Let's make sure we're up-to-date
-    current_branch = subprocess.check_output(
-        'git rev-parse --abbrev-ref HEAD'.split()
-    ).decode('utf-8').strip()
+    current_branch = check_output('git rev-parse --abbrev-ref HEAD')
     if current_branch != 'master':
         # print("WARNING, NOT ON MASTER BRANCH")# DELETE WHEN DONE HACKING
         print("Must be on the master branch to do this")
@@ -112,13 +116,13 @@ def main(
         return 2
 
     # Make sure we have all the old git tags
-    subprocess.check_output(
+    check_output(
         f'git pull {upstream_name} master --tags'.split(),
         stderr=subprocess.STDOUT
     )
 
     # We're going to use the last tag to help you write a tag message
-    last_tag, last_tag_message = subprocess.check_output([
+    last_tag, last_tag_message = check_output([
         'git',
         'for-each-ref',
         '--sort=-taggerdate',
@@ -126,11 +130,9 @@ def main(
         '--format',
         '%(tag)|%(contents:subject)',
         'refs/tags'
-    ]).decode('utf-8').strip().split('|', 1)
+    ]).split('|', 1)
 
-    commits_since = subprocess.check_output(
-        f'git log {last_tag}..HEAD --oneline'.split()
-    ).decode('utf-8')
+    commits_since = check_output(f'git log {last_tag}..HEAD --oneline')
     commit_messages = []
     for commit in commits_since.splitlines():
         wo_sha = re.sub('^[a-f0-9]{7} ', '', commit)
