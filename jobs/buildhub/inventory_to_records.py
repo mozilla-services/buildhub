@@ -440,6 +440,19 @@ async def csv_to_records(
             entries = deduplicate_entries(entries)
 
             for entry in entries:
+
+                # When you have a 'min_last_modified' set, and it's something
+                # like 24 hours, then probably 99% of records can be skipped
+                # with this little date comparison. So do this check
+                # for a skip as early as possible.
+                # See https://github.com/mozilla-services/buildhub/issues/427
+                lastmodified = datetime.datetime.strptime(
+                    entry['LastModifiedDate'],
+                    '%Y-%m-%dT%H:%M:%S.%fZ'
+                )
+                if min_last_modified and lastmodified < min_last_modified:
+                    continue
+
                 object_key = entry['Key']
 
                 try:
@@ -467,13 +480,6 @@ async def csv_to_records(
 
                 # Complete with info that can't be obtained from the URL.
                 filesize = int(float(entry['Size']))  # e.g. 2E+10
-                lastmodified = datetime.datetime.strptime(
-                    entry['LastModifiedDate'],
-                    '%Y-%m-%dT%H:%M:%S.%fZ'
-                )
-                if min_last_modified and lastmodified < min_last_modified:
-                    continue
-
                 lastmodified = lastmodified.strftime(DATETIME_FORMAT)
                 record['download']['size'] = filesize
                 record['download']['date'] = lastmodified
