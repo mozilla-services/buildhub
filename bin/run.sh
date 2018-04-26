@@ -25,7 +25,7 @@ case $1 in
     ./bin/wait-for ${@:2}
     ;;
   unit-tests)
-    py.test --ignore=jobs/tests/test_lamdba_s3_event_functional.py --override-ini="cache_dir=/tmp/tests" jobs/tests ${@:2}
+    py.test --ignore=jobs/tests/test_lamdba_s3_event_functional.py --ignore=jobs/tests/test_lamdba_s3_event_functional.py --override-ini="cache_dir=/tmp/tests" jobs/tests ${@:2}
     ;;
   functional-tests)
     SERVER_URL=http://testkinto:9999/v1 py.test --override-ini="cache_dir=/tmp/tests" jobs/tests ${@:2}
