@@ -23,6 +23,7 @@ services:
       - "testkinto"
     environment:
       - SERVER_URL=http://testkinto:9999/v1
+      - ARCHIVE_URL=https://example.arch.ive/
     command: functional-tests
 
   docs:

@@ -13,7 +13,7 @@ import asynctest
 import pytest
 
 from buildhub import inventory_to_records
-
+from buildhub.utils import ARCHIVE_URL
 
 here = os.path.dirname(__file__)
 
@@ -93,7 +93,7 @@ class CsvToRecordsTest(asynctest.TestCase):
                     'channel': 'nightly'
                 },
                 'download': {
-                    'url': ('https://archive.mozilla.org/pub/firefox/nightly/'
+                    'url': (f'{ARCHIVE_URL}pub/firefox/nightly/'
                             '2017/05/2017-05-15-10-02-38-mozilla-central/'
                             'firefox-55.0a1.en-US.linux-x86_64.tar.bz2'),
                     'mimetype': 'application/x-bzip2',
@@ -139,7 +139,7 @@ class CsvToRecordsTest(asynctest.TestCase):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/firefox/releases/'
+                        f'{ARCHIVE_URL}pub/firefox/releases/'
                         '52.0/linux-x86_64/fr/firefox-52.0.tar.bz2'
                     ),
                     'mimetype': 'application/x-bzip2',
@@ -155,7 +155,7 @@ class CsvToRecordsTest(asynctest.TestCase):
                     'mimetype': 'application/msdos-windows',
                     'size': 37219504,
                     'url': (
-                        'https://archive.mozilla.org/pub/firefox/candidates/'
+                        f'{ARCHIVE_URL}pub/firefox/candidates/'
                         '55.0b9-candidates/build2/win64/zh-TW/'
                         'Firefox Setup 55.0b9.exe'
                     ),
@@ -212,7 +212,7 @@ class CsvToRecordsTest(asynctest.TestCase):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/devedition/'
+                        f'{ARCHIVE_URL}pub/devedition/'
                         'candidates/55.0b1-candidates/build5/win64/'
                         'pt-BR/Firefox Setup 55.0b1.exe'
                     ),
@@ -265,7 +265,7 @@ class CsvToRecordsTest(asynctest.TestCase):
                     'mimetype': 'application/x-apple-diskimage',
                     'size': 85984611,
                     'url': (
-                        'https://archive.mozilla.org/pub/firefox/releases/'
+                        f'{ARCHIVE_URL}pub/firefox/releases/'
                         '51.0b11/mac-EME-free/mr/Firefox 51.0b11.dmg'
                     ),
                 },
@@ -292,7 +292,7 @@ class CsvToRecordsTest(asynctest.TestCase):
                     'mimetype': 'application/x-apple-diskimage',
                     'size': 18694173,
                     'url': (
-                        'https://archive.mozilla.org/pub/mobile/nightly/'
+                        f'{ARCHIVE_URL}pub/mobile/nightly/'
                         '2011/01/2011-01-27-03-mozilla-central-macosx/'
                         'fennec-4.0b5pre.en-US.mac.dmg'
                     )
