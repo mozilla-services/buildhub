@@ -27,7 +27,7 @@ from buildhub.utils import (
 
 
 NB_PARALLEL_REQUESTS = config('NB_PARALLEL_REQUESTS', default=8, cast=int)
-NB_RETRY_REQUEST = config('NB_RETRY_REQUEST', default=3, cast=int)
+NB_RETRY_REQUEST = config('NB_RETRY_REQUEST', default=6, cast=int)
 TIMEOUT_SECONDS = config('TIMEOUT_SECONDS', default=5 * 60, cast=int)
 PRODUCTS = config(
     'PRODUCTS', default=' '.join(ALL_PRODUCTS),
