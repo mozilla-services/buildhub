@@ -48,3 +48,4 @@ Table of contents
    jobs
    support
    dev
+   configuration
