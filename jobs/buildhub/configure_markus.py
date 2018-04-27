@@ -29,6 +29,12 @@ def get_metrics(namespace):
                     }
                 }
             ])
+        elif log_metrics_config == 'cloudwatch':
+            markus.configure([
+                {
+                    'class': 'markus.backends.cloudwatch.CloudwatchMetrics',
+                }
+            ])
         elif log_metrics_config == 'datadog':
             markus.configure([
                 {
