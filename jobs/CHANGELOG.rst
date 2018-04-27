@@ -1,6 +1,27 @@
 Changelog
 =========
 
+1.2.1 (2018-04-27)
+------------------
+
+- fix for subprocess
+
+- document all configurations (#436)
+
+- Use cloudwatch metrics for lambda 433 (#435)
+
+- use decouple for env vars to be able to read from .env
+
+- more default NB_RETRY_REQUEST, fixes #425 (#432)
+
+- Tests shouldn't depend on the network, fixes #429 (#430)
+
+- Skip based on date earlier, fixes #427 (#428)
+
+- Make release script (#422)
+
+
+
 1.2.0 (2018-04-23)
 ------------------
 
