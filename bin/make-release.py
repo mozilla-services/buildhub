@@ -11,9 +11,12 @@ import time
 import pkg_resources
 
 import requests
+from decouple import config
 
 OWNER = 'mozilla-services'
 REPO = 'buildhub'
+
+GITHUB_API_KEY = config('GITHUB_API_KEY', default='')
 
 
 def _format_age(seconds):
@@ -54,7 +57,7 @@ def main(
     tag_name_format='v{version}',
     upstream_name='master',
 ):
-    github_api_key = github_api_key or os.environ['GITHUB_API_KEY']
+    github_api_key = github_api_key or GITHUB_API_KEY
     assert github_api_key, 'GITHUB_API_KEY or --github-api-key not set.'
 
     # If this 401 errors, go here to generate a new personal access token:
