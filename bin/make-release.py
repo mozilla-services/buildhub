@@ -45,8 +45,11 @@ def _format_file_size(bytes):
 
 
 def check_output(*args, **kwargs):
-    if len(args) == 1 and isinstance(args[0], str):
-        args = args[0].split()
+    if len(args) == 1:
+        if isinstance(args[0], str):
+            args = args[0].split()
+        else:
+            args = args[0]
     return subprocess.check_output(args, **kwargs).decode('utf-8').strip()
 
 
