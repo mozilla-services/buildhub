@@ -16,3 +16,4 @@ buildhub-lambda-*.zip
 .metadata-*.json
 csv-download-directory/
 .records-hashes-kinto-build-hub-releases.json
+.pytest_cache/

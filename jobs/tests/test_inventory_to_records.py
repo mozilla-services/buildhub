@@ -13,6 +13,7 @@ import asynctest
 from aioresponses import aioresponses
 
 from buildhub import inventory_to_records, utils
+from buildhub.utils import ARCHIVE_URL  # shortcut
 
 
 class LongResponse:
@@ -926,6 +927,7 @@ class CSVToRecords(asynctest.TestCase):
             records.append(r)
 
         assert len(records) == 1
+        print(records[0]['data']['download'])
         assert records == [{
             'data': {
                 'id': 'firefox_51-0_win64_fy-nl',
@@ -964,7 +966,7 @@ class CSVToRecords(asynctest.TestCase):
                     'mimetype': 'application/msdos-windows',
                     'size': 67842,
                     'url': (
-                        'https://archive.mozilla.org/pub/firefox/releases/'
+                        f'{ARCHIVE_URL}pub/firefox/releases/'
                         '51.0/win64/fy-NL/Firefox Setup 51.0.exe'
                     )
                 },
@@ -1022,7 +1024,7 @@ class CSVToRecords(asynctest.TestCase):
                     'date': '2017-06-16T03:02:07Z',
                     'mimetype': 'application/msdos-windows',
                     'size': 45678,
-                    'url': ('https://archive.mozilla.org/pub/firefox/nightly/'
+                    'url': (f'{ARCHIVE_URL}pub/firefox/nightly/'
                             '2017/06/2017-06-16-03-02-07-mozilla-central-l10n/'
                             'firefox-56.0a1.ach.win32.installer.exe')
                 },

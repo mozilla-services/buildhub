@@ -19,17 +19,18 @@ from buildhub.utils import (
     merge_metadata,
     check_record,
     is_rc_build_metadata,
-    is_nightly_build_metadata
+    is_nightly_build_metadata,
+    ARCHIVE_URL,
 )
 
 
 ARCHIVE_URL_INFOS = [
     (('firefox', '55.0', 'win64', 'fr', False, None),
-     'https://archive.mozilla.org/pub/firefox/releases/55.0/win64/fr/'),
+     f'{ARCHIVE_URL}pub/firefox/releases/55.0/win64/fr/'),
     (('firefox', '55.0a1', 'win64', 'en-US', '2017/05', None),
-     'https://archive.mozilla.org/pub/firefox/nightly/2017/05/'),
+     f'{ARCHIVE_URL}pub/firefox/nightly/2017/05/'),
     (('firefox', '55.0', 'win64', 'fr', False, '/'),
-     'https://archive.mozilla.org/pub/firefox/candidates/55.0-candidates'
+     f'{ARCHIVE_URL}pub/firefox/candidates/55.0-candidates'
      '/win64/fr/'),
 ]
 
@@ -54,7 +55,7 @@ RECORDS = [
             'channel': 'release'
         },
         'download': {
-            'url': 'https://archive.mozilla.org/pub/firefox/releases/1.0rc1/'
+            'url': f'{ARCHIVE_URL}pub/firefox/releases/1.0rc1/'
             'firefox-1.0rc1.ca-AD.linux-i686.installer.tar.gz',
             'mimetype': 'application/x-gzip'
         }
@@ -75,7 +76,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/firefox/nightly/2017/05/'
+                f'{ARCHIVE_URL}pub/firefox/nightly/2017/05/'
                 '2017-05-15-10-02-38-mozilla-central/firefox-55.0a1.en-US.'
                 'linux-x86_64.tar.bz2'
             ),
@@ -97,7 +98,7 @@ RECORDS = [
             'channel': 'aurora'
         },
         'download': {
-            'url': 'https://archive.mozilla.org/pub/firefox/nightly/2017/04/'
+            'url': f'{ARCHIVE_URL}pub/firefox/nightly/2017/04/'
             '2017-04-03-00-40-02-mozilla-aurora/firefox-54.0a2.en-US.mac.dmg',
             'mimetype': 'application/x-apple-diskimage'
         }
@@ -118,7 +119,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/devedition/releases/55.0b3/'
+                f'{ARCHIVE_URL}pub/devedition/releases/55.0b3/'
                 'mac/en-US/Firefox%2055.0b3.dmg'
             ),
             'mimetype': 'application/x-apple-diskimage'
@@ -140,7 +141,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/firefox/releases/52.0b6/'
+                f'{ARCHIVE_URL}pub/firefox/releases/52.0b6/'
                 'linux-x86_64/en-US/firefox-52.0b6.tar.bz2'
             ),
             'mimetype': 'application/x-bzip2'
@@ -162,7 +163,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/firefox/candidates/50.0-'
+                f'{ARCHIVE_URL}pub/firefox/candidates/50.0-'
                 'candidates/build1/linux-x86_64/fr/firefox-50.0.tar.bz2'
             ),
             'mimetype': 'application/x-bzip2'
@@ -184,7 +185,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/firefox/candidates/55.0b9-'
+                f'{ARCHIVE_URL}pub/firefox/candidates/55.0b9-'
                 'candidates/build2/win64/zh-TW/firefox-55.0b9.zip'
             ),
             'mimetype': 'application/zip'
@@ -206,7 +207,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/firefox/releases/52.0/'
+                f'{ARCHIVE_URL}pub/firefox/releases/52.0/'
                 'linux-x86_64/fr/firefox-52.0.tar.bz2'
             ),
             'mimetype': 'application/x-bzip2'
@@ -228,7 +229,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/firefox/releases/52.0esr/'
+                f'{ARCHIVE_URL}pub/firefox/releases/52.0esr/'
                 'linux-x86_64/en-US/firefox-52.0esr.tar.bz2'
             ),
             'mimetype': 'application/x-bzip2'
@@ -250,7 +251,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/firefox/releases/16.0b6/'
+                f'{ARCHIVE_URL}pub/firefox/releases/16.0b6/'
                 'win32/bs/Firefox Setup 16.0b6.exe'
             ),
             'mimetype': 'application/msdos-windows'
@@ -272,7 +273,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/firefox/releases/50.0.1/mac/'
+                f'{ARCHIVE_URL}pub/firefox/releases/50.0.1/mac/'
                 'ko/Firefox 50.0.1.dmg'
             ),
             'mimetype': 'application/x-apple-diskimage'
@@ -294,7 +295,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/firefox/releases/57.0b6/mac/'
+                f'{ARCHIVE_URL}pub/firefox/releases/57.0b6/mac/'
                 'fr/Firefox 57.0b6.dmg'
             ),
             'mimetype': 'application/x-apple-diskimage'
@@ -315,7 +316,7 @@ RECORDS = [
             'channel': 'release'
         },
         'download': {
-            'url': 'https://archive.mozilla.org/pub/firefox/releases/56.0/'
+            'url': f'{ARCHIVE_URL}pub/firefox/releases/56.0/'
                    'mac-EME-free/br/Firefox 56.0.dmg',
             'mimetype': 'application/x-apple-diskimage'
         }
@@ -336,7 +337,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/firefox/releases/'
+                f'{ARCHIVE_URL}pub/firefox/releases/'
                 '22.0-funnelcake23/linux-i686/id/firefox-22.0.tar.bz2'
             ),
             'mimetype': 'application/x-bzip2',
@@ -355,7 +356,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/firefox/releases/'
+                f'{ARCHIVE_URL}pub/firefox/releases/'
                 '56.0.1-funnelcake131/v1/win64/en-US/Firefox Setup 56.0.1.exe'
             ),
             'mimetype': 'application/msdos-windows',
@@ -374,7 +375,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/firefox/releases/'
+                f'{ARCHIVE_URL}pub/firefox/releases/'
                 '46.0.1-funnelcake84/funnelcake84/win32/en-US/'
                 'Firefox Setup 46.0.1.exe'
             ),
@@ -394,7 +395,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/firefox/candidates/'
+                f'{ARCHIVE_URL}pub/firefox/candidates/'
                 '49.0.1-candidates/build3/funnelcake90/win32/en-US/'
                 'Firefox Setup 49.0.1.exe'
             ),
@@ -417,7 +418,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/firefox/releases/3.0.19-real'
+                f'{ARCHIVE_URL}pub/firefox/releases/3.0.19-real'
                 '-real/linux-i686/si/firefox-3.0.19.tar.bz2'
             ),
             'mimetype': 'application/x-bzip2'
@@ -439,7 +440,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/firefox/releases/3.6.3'
+                f'{ARCHIVE_URL}pub/firefox/releases/3.6.3'
                 'plugin1/linux-i686/fi/firefox-3.6.3plugin1.tar.bz2'
             ),
             'mimetype': 'application/x-bzip2'
@@ -461,7 +462,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/firefox/releases/38.0.5b1-2/'
+                f'{ARCHIVE_URL}pub/firefox/releases/38.0.5b1-2/'
                 'linux-i686/es-AR/firefox-38.0.5b1.tar.bz2'
             ),
             'mimetype': 'application/x-bzip2'
@@ -486,7 +487,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/firefox/nightly/2010/03/2010-'
+                f'{ARCHIVE_URL}pub/firefox/nightly/2010/03/2010-'
                 '03-28-03-mozilla-central/firefox-3.7a4pre.en-US.win32.zip'
             ),
             'mimetype': 'application/zip'
@@ -508,7 +509,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/thunderbird/releases/11.0b2/'
+                f'{ARCHIVE_URL}pub/thunderbird/releases/11.0b2/'
                 'win32/eu/Thunderbird Setup 11.0b2.exe'
             ),
             'mimetype': 'application/msdos-windows'
@@ -530,7 +531,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/thunderbird/releases/10.0.12'
+                f'{ARCHIVE_URL}pub/thunderbird/releases/10.0.12'
                 'esr/mac/pt-BR/Thunderbird 10.0.12esr.dmg'
             ),
             'mimetype': 'application/x-apple-diskimage'
@@ -552,7 +553,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/thunderbird/releases/17.0.8'
+                f'{ARCHIVE_URL}pub/thunderbird/releases/17.0.8'
                 'esr/linux-x86_64/gd/thunderbird-17.0.8esr.tar.bz2'
             ),
             'mimetype': 'application/x-bzip2'
@@ -574,7 +575,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/thunderbird/releases/17.0/'
+                f'{ARCHIVE_URL}pub/thunderbird/releases/17.0/'
                 'linux-x86_64/gd/thunderbird-17.0.tar.bz2'
             ),
             'mimetype': 'application/x-bzip2'
@@ -596,7 +597,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/thunderbird/releases/24.0/'
+                f'{ARCHIVE_URL}pub/thunderbird/releases/24.0/'
                 'linux-x86_64/gd/thunderbird-24.0.tar.bz2'
             ),
             'mimetype': 'application/x-bzip2'
@@ -618,7 +619,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/mobile/releases/39.0b5/'
+                f'{ARCHIVE_URL}pub/mobile/releases/39.0b5/'
                 'android-api-9/sl/fennec-39.0b5.sl.android-arm.apk'
             ),
             'mimetype': 'application/vnd.android.package-archive'
@@ -640,7 +641,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/mobile/releases/42.0b2/'
+                f'{ARCHIVE_URL}pub/mobile/releases/42.0b2/'
                 'android-api-9/fr/fennec-42.0b2.fr.android-arm.apk'
             ),
             'mimetype': 'application/vnd.android.package-archive'
@@ -663,7 +664,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-'
+                f'{ARCHIVE_URL}pub/mobile/nightly/2017/05/2017-'
                 '05-30-10-01-27-mozilla-central-android-api-15/fennec-55.0a1.'
                 'multi.android-arm.apk'
             ),
@@ -688,7 +689,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-'
+                f'{ARCHIVE_URL}pub/mobile/nightly/2017/05/2017-'
                 '05-30-10-01-27-mozilla-central-android-api-15-old-id/fennec-'
                 '55.0a1.multi.android-arm.apk'
             ),
@@ -711,7 +712,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-'
+                f'{ARCHIVE_URL}pub/mobile/nightly/2017/05/2017-'
                 '05-30-10-01-27-mozilla-central-android-x86/fennec-55.0a1.'
                 'multi.android-i386.apk'
             ),
@@ -735,7 +736,7 @@ RECORDS = [
         'download': {
             'mimetype': 'application/vnd.android.package-archive',
             'url': (
-                'https://archive.mozilla.org/pub/mobile/nightly/2011/08/2011-'
+                f'{ARCHIVE_URL}pub/mobile/nightly/2011/08/2011-'
                 '08-14-05-53-37-mozilla-aurora-android/fennec-7.0a2.multi.eabi'
                 '-arm.apk'
             ),
@@ -760,7 +761,7 @@ RECORDS = [
         },
         'download': {
             'url': (
-                'https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-'
+                f'{ARCHIVE_URL}pub/mobile/nightly/2017/05/2017-'
                 '05-30-10-01-27-mozilla-central-android-x86-old-id/fennec-55.'
                 '0a1.multi.android-i386.apk'
             ),
@@ -1103,69 +1104,69 @@ def test_chunked(iterable, size, chunks):
 
 NIGHTLY_URLS = [
     # Mobile ARM not localized
-    ('https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-05-30-10-01'
+    (f'{ARCHIVE_URL}pub/mobile/nightly/2017/05/2017-05-30-10-01'
      '-27-mozilla-central-android-x86-old-id/fennec-55.0a1.multi.android-i386'
      '.apk',
-     'https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-05-30-10-01'
+     f'{ARCHIVE_URL}pub/mobile/nightly/2017/05/2017-05-30-10-01'
      '-27-mozilla-central-android-x86-old-id/fennec-55.0a1.multi.android-i386'
      '.apk'),
 
     # Mobile ARM localized
-    ('https://archive.mozilla.org/pub/mobile/nightly/2017/06/2017-06-01-10-02'
+    (f'{ARCHIVE_URL}pub/mobile/nightly/2017/06/2017-06-01-10-02'
      '-05-mozilla-central-android-api-15-l10n/fennec-55.0a1.ar.android-arm'
      '.apk',
-     'https://archive.mozilla.org/pub/mobile/nightly/2017/06/2017-06-01-10-02'
+     f'{ARCHIVE_URL}pub/mobile/nightly/2017/06/2017-06-01-10-02'
      '-05-mozilla-central-android-api-15/fennec-55.0a1.multi.android-arm.apk'),
 
     # Mobile ARM english
-    ('https://archive.mozilla.org/pub/mobile/nightly/2017/06/2017-06-01-10-02'
+    (f'{ARCHIVE_URL}pub/mobile/nightly/2017/06/2017-06-01-10-02'
      '-05-mozilla-central-android-api-15/en-US/fennec-55.0a1.en-US.android'
      '-arm.apk',
-     'https://archive.mozilla.org/pub/mobile/nightly/2017/06/2017-06-01-10-02'
+     f'{ARCHIVE_URL}pub/mobile/nightly/2017/06/2017-06-01-10-02'
      '-05-mozilla-central-android-api-15/en-US/fennec-55.0a1.en-US.android'
      '-arm.apk'),
 
     # Mobile nightly en-US iOS (!!)
-    ('https://archive.mozilla.org/pub/mobile/nightly/2011/02/2011-02-08-03'
+    (f'{ARCHIVE_URL}pub/mobile/nightly/2011/02/2011-02-08-03'
      '-mozilla-central-macosx/fennec-4.0b5pre.en-US.mac.dmg',
-     'https://archive.mozilla.org/pub/mobile/nightly/2011/02/2011-02-08-03'
+     f'{ARCHIVE_URL}pub/mobile/nightly/2011/02/2011-02-08-03'
      '-mozilla-central-macosx/fennec-4.0b5pre.en-US.mac.dmg'),
 
     # Mobile i386 not localized
-    ('https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-05-30-10-01'
+    (f'{ARCHIVE_URL}pub/mobile/nightly/2017/05/2017-05-30-10-01'
      '-27-mozilla-central-android-x86/fennec-55.0a1.multi.android-i386.apk',
-     'https://archive.mozilla.org/pub/mobile/nightly/2017/05/2017-05-30-10-01'
+     f'{ARCHIVE_URL}pub/mobile/nightly/2017/05/2017-05-30-10-01'
      '-27-mozilla-central-android-x86/fennec-55.0a1.multi.android-i386.apk'),
 
     # firefox Mac not localized
-    ('https://archive.mozilla.org/pub/firefox/nightly/2017/05/2017-05-01-03-02'
+    (f'{ARCHIVE_URL}pub/firefox/nightly/2017/05/2017-05-01-03-02'
      '-04-mozilla-central/firefox-55.0a1.en-US.mac.dmg',
-     'https://archive.mozilla.org/pub/firefox/nightly/2017/05/2017-05-01-03-02'
+     f'{ARCHIVE_URL}pub/firefox/nightly/2017/05/2017-05-01-03-02'
      '-04-mozilla-central/firefox-55.0a1.en-US.mac.dmg'),
 
     # Firefox Mac localized
-    ('https://archive.mozilla.org/pub/firefox/nightly/2017/05/2017-05-01-03-02'
+    (f'{ARCHIVE_URL}pub/firefox/nightly/2017/05/2017-05-01-03-02'
      '-04-mozilla-central-l10n/firefox-55.0a1.ach.mac.dmg',
-     'https://archive.mozilla.org/pub/firefox/nightly/2017/05/2017-05-01-03-02'
+     f'{ARCHIVE_URL}pub/firefox/nightly/2017/05/2017-05-01-03-02'
      '-04-mozilla-central/firefox-55.0a1.en-US.mac.dmg'),
 
     # Firefox linux not localized
-    ('https://archive.mozilla.org/pub/firefox/nightly/2017/05/2017-05-'
+    (f'{ARCHIVE_URL}pub/firefox/nightly/2017/05/2017-05-'
      '15-10-02-38-mozilla-central/firefox-55.0a1.en-US.linux-x86_64.tar.bz2',
-     'https://archive.mozilla.org/pub/firefox/nightly/2017/05/2017-05-'
+     f'{ARCHIVE_URL}pub/firefox/nightly/2017/05/2017-05-'
      '15-10-02-38-mozilla-central/firefox-55.0a1.en-US.linux-x86_64.tar.bz2'),
 
     # Firefox linux localized
-    ('https://archive.mozilla.org/pub/firefox/nightly/2017/05/2017-05-15-10-02'
+    (f'{ARCHIVE_URL}pub/firefox/nightly/2017/05/2017-05-15-10-02'
      '-38-mozilla-central-l10n/firefox-55.0a1.ach.linux-x86_64.tar.bz2',
-     'https://archive.mozilla.org/pub/firefox/nightly/2017/05/2017-05-'
+     f'{ARCHIVE_URL}pub/firefox/nightly/2017/05/2017-05-'
      '15-10-02-38-mozilla-central/firefox-55.0a1.en-US.linux-x86_64.tar.bz2'
      ),
 
     # Some random Mac.
-    ('https://archive.mozilla.org/pub/firefox/nightly/2017/06/2017-06-20-03'
+    (f'{ARCHIVE_URL}pub/firefox/nightly/2017/06/2017-06-20-03'
      '-02-08-mozilla-central-l10n/firefox-56.0a1.ru.mac.dmg',
-     'https://archive.mozilla.org/pub/firefox/nightly/2017/06/2017-06-20-03'
+     f'{ARCHIVE_URL}pub/firefox/nightly/2017/06/2017-06-20-03'
      '-02-08-mozilla-central/firefox-56.0a1.en-US.mac.dmg'),
 ]
 
@@ -1176,22 +1177,22 @@ def test_localize_nightly_url(localized_url, american_url):
 
 
 RC_URLS = [
-    ('https://archive.mozilla.org/pub/firefox/candidates/54.0b9-candidates/'
+    (f'{ARCHIVE_URL}pub/firefox/candidates/54.0b9-candidates/'
      'build1/win64/ta/Firefox%20Setup%2054.0b9.exe',
-     'https://archive.mozilla.org/pub/firefox/candidates/54.0b9-candidates/'
+     f'{ARCHIVE_URL}pub/firefox/candidates/54.0b9-candidates/'
      'build1/win64/en-US/Firefox%20Setup%2054.0b9.exe'),
-    ('https://archive.mozilla.org/pub/firefox/candidates/52.0.2-candidates/'
+    (f'{ARCHIVE_URL}pub/firefox/candidates/52.0.2-candidates/'
      'build1/linux-x86_64-EME-free/cak/firefox-52.0.2.tar.bz2',
-     'https://archive.mozilla.org/pub/firefox/candidates/52.0.2-candidates/'
+     f'{ARCHIVE_URL}pub/firefox/candidates/52.0.2-candidates/'
      'build1/linux-x86_64/en-US/firefox-52.0.2.tar.bz2'),
     # Mobile RC
-    ('https://archive.mozilla.org/pub/mobile/candidates/49.0.2-candidates/'
+    (f'{ARCHIVE_URL}pub/mobile/candidates/49.0.2-candidates/'
      'build1/android-api-15/sk/fennec-49.0.2.sk.android-arm.apk',
-     'https://archive.mozilla.org/pub/mobile/candidates/49.0.2-candidates/'
+     f'{ARCHIVE_URL}pub/mobile/candidates/49.0.2-candidates/'
      'build1/android-api-15/en-US/fennec-49.0.2.en-US.android-arm.apk'),
-    ('https://archive.mozilla.org/pub/mobile/candidates/49.0-candidates/'
+    (f'{ARCHIVE_URL}pub/mobile/candidates/49.0-candidates/'
      'build2/android-api-15/ar/fennec-49.0.ar.android-arm.apk',
-     'https://archive.mozilla.org/pub/mobile/candidates/49.0-candidates/'
+     f'{ARCHIVE_URL}pub/mobile/candidates/49.0-candidates/'
      'build2/android-api-15/en-US/fennec-49.0.en-US.android-arm.apk'),
 ]
 

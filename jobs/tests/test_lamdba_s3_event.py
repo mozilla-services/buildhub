@@ -10,7 +10,8 @@ from aioresponses import aioresponses
 from markus.testing import MetricsMock
 from markus import INCR, TIMING
 
-from buildhub import utils, inventory_to_records, lambda_s3_event
+from buildhub import inventory_to_records, lambda_s3_event
+from buildhub.utils import ARCHIVE_URL  # shortcut to save typing
 
 
 def fake_event(key):
@@ -64,7 +65,7 @@ class BaseTest(asynctest.TestCase):
         self.mockresponses = aioresponses()
         self.mockresponses.start()
         for url, payload_or_status in self.remote_content.items():
-            full_url = utils.ARCHIVE_URL + url
+            full_url = ARCHIVE_URL + url
             if isinstance(payload_or_status, int):
                 self.mockresponses.get(full_url, status=payload_or_status)
             else:
@@ -300,7 +301,7 @@ class FromArchiveFirefox(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/firefox/releases/'
+                        f'{ARCHIVE_URL}pub/firefox/releases/'
                         '54.0/win64/fr/Firefox Setup 54.0.exe'
                     ),
                     'mimetype': 'application/msdos-windows',
@@ -360,7 +361,7 @@ class FromArchiveFirefox(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/firefox/nightly/2017/'
+                        f'{ARCHIVE_URL}pub/firefox/nightly/2017/'
                         '08/2017-08-05-10-03-34-mozilla-central-l10n/'
                         'firefox-57.0a1.ru.win32.installer.exe'
                     ),
@@ -415,7 +416,7 @@ class FromArchiveFirefox(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/firefox/candidates/'
+                        f'{ARCHIVE_URL}pub/firefox/candidates/'
                         '51.0-candidates/build1/linux-x86_64-EME-free/zh-TW/'
                         'firefox-51.0.tar.bz2'
                     ),
@@ -555,7 +556,7 @@ class FromRCMetadataFirefox(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/firefox/candidates/'
+                        f'{ARCHIVE_URL}pub/firefox/candidates/'
                         '56.0b1-candidates/build4/linux-x86_64/en-US/'
                         'firefox-56.0b1.tar.bz2'
                     ),
@@ -604,7 +605,7 @@ class FromRCMetadataFirefox(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/firefox/candidates/'
+                        f'{ARCHIVE_URL}pub/firefox/candidates/'
                         '56.0b1-candidates/build4/linux-x86_64/ca/'
                         'firefox-56.0b1.tar.bz2'
                     ),
@@ -629,7 +630,7 @@ class FromNightlyArchiveFirefox(BaseTest):
         super().setUp()
         self.mockresponses.get(
             (
-                utils.ARCHIVE_URL +
+                ARCHIVE_URL +
                 "pub/firefox/nightly/2017/08/2017-08-05-10-03-34-mozilla-"
                 "central/firefox-57.0a1.en-US.linux-x86_64.json"
             ),
@@ -886,7 +887,7 @@ class FromNightlyMetadataFirefox(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/firefox/nightly/2017/'
+                        f'{ARCHIVE_URL}pub/firefox/nightly/2017/'
                         '08/2017-08-05-10-03-34-mozilla-central/'
                         'firefox-57.0a1.en-US.linux-x86_64.tar.bz2'
                     ),
@@ -935,7 +936,7 @@ class FromNightlyMetadataFirefox(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/firefox/nightly/2017/'
+                        f'{ARCHIVE_URL}pub/firefox/nightly/2017/'
                         '08/2017-08-05-10-03-34-mozilla-central-l10n/'
                         'firefox-57.0a1.ru.linux-x86_64.tar.bz2'
                     ),
@@ -984,7 +985,7 @@ class FromNightlyMetadataFirefox(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/firefox/nightly/2017/'
+                        f'{ARCHIVE_URL}pub/firefox/nightly/2017/'
                         '08/2017-08-05-10-03-34-mozilla-central-l10n/'
                         'firefox-57.0a1.pt-PT.linux-x86_64.tar.bz2'
                     ),
@@ -1035,7 +1036,7 @@ class FromNightlyMetadataFirefox(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/firefox/nightly/2017/'
+                        f'{ARCHIVE_URL}pub/firefox/nightly/2017/'
                         '08/2017-08-05-10-03-34-mozilla-central/'
                         'firefox-57.0a1.en-US.win32.installer.exe'
                     ),
@@ -1096,7 +1097,7 @@ class FromNightlyMetadataFirefox(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/firefox/nightly/2017/'
+                        f'{ARCHIVE_URL}pub/firefox/nightly/2017/'
                         '08/2017-08-05-10-03-34-mozilla-central/firefox-'
                         '57.0a1.en-US.mac.dmg'
                     ),
@@ -1327,7 +1328,7 @@ class FromArchiveAndroid(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/mobile/releases/55.0/'
+                        f'{ARCHIVE_URL}pub/mobile/releases/55.0/'
                         'android-x86/en-US/fennec-55.0.en-US.android-i386.apk'
                     ),
                     'mimetype': 'application/vnd.android.package-archive',
@@ -1384,7 +1385,7 @@ class FromArchiveAndroid(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/mobile/releases/55.0/'
+                        f'{ARCHIVE_URL}pub/mobile/releases/55.0/'
                         'android-x86/multi/fennec-55.0.multi.android-i386.apk'
                     ),
                     'mimetype': 'application/vnd.android.package-archive',
@@ -1443,7 +1444,7 @@ class FromArchiveAndroid(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/mobile/nightly/2017/'
+                        f'{ARCHIVE_URL}pub/mobile/nightly/2017/'
                         '08/2017-08-09-10-03-39-mozilla-central-android-'
                         'aarch64/fennec-57.0a1.multi.android-aarch64.apk'
                     ),
@@ -1503,7 +1504,7 @@ class FromArchiveAndroid(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/mobile/nightly/2017/'
+                        f'{ARCHIVE_URL}pub/mobile/nightly/2017/'
                         '08/2017-08-09-10-03-39-mozilla-central-android-'
                         'aarch64/en-US/fennec-57.0a1.en-US.android-aarch64.apk'
                     ),
@@ -1561,7 +1562,7 @@ class FromArchiveAndroid(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/mobile/nightly/2017/'
+                        f'{ARCHIVE_URL}pub/mobile/nightly/2017/'
                         '08/2017-08-09-10-03-39-mozilla-central-android-'
                         'x86-old-id/fennec-57.0a1.multi.android-i386.apk'
                     ),
@@ -1740,7 +1741,7 @@ class FromRCMetadataAndroid(BaseTest):
                     'channel': 'beta'
                 },
                 'download': {
-                    'url': 'https://archive.mozilla.org/pub/mobile/candidates/'
+                    'url': f'{ARCHIVE_URL}pub/mobile/candidates/'
                            '56.0b1-candidates/build1/android-api-15/ca/'
                            'fennec-56.0b1.ca.android-arm.apk',
                     'mimetype': 'application/vnd.android.package-archive',
@@ -1791,7 +1792,7 @@ class FromRCMetadataAndroid(BaseTest):
                     'channel': 'beta'
                 },
                 'download': {
-                    'url': 'https://archive.mozilla.org/pub/mobile/candidates/'
+                    'url': f'{ARCHIVE_URL}pub/mobile/candidates/'
                            '56.0b1-candidates/build1/android-api-15/en-US/'
                            'fennec-56.0b1.en-US.android-arm.apk',
                     'mimetype': 'application/vnd.android.package-archive',
@@ -1831,7 +1832,7 @@ class FromRCMetadataAndroid(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/mobile/candidates/'
+                        f'{ARCHIVE_URL}pub/mobile/candidates/'
                         '56.0b1-candidates/build1/android-api-15/multi/'
                         'fennec-56.0b1.multi.android-arm.apk'
                     ),
@@ -2140,7 +2141,7 @@ class FromNightlyMetadataAndroid(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/mobile/nightly/2017/'
+                        f'{ARCHIVE_URL}pub/mobile/nightly/2017/'
                         '08/2017-08-01-15-03-46-mozilla-central'
                         '-android-api-15/fennec-56.0a1.multi.android-arm.apk'
                     ),
@@ -2203,7 +2204,7 @@ class FromNightlyMetadataAndroid(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/mobile/nightly/2017/'
+                        f'{ARCHIVE_URL}pub/mobile/nightly/2017/'
                         '08/2017-08-01-15-03-46-mozilla-central'
                         '-android-api-15/en-US/fennec-56.0a1.en-US.'
                         'android-arm.apk'
@@ -2264,7 +2265,7 @@ class FromNightlyMetadataAndroid(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/mobile/nightly/2017/'
+                        f'{ARCHIVE_URL}pub/mobile/nightly/2017/'
                         '08/2017-08-02-10-03-02-mozilla-central-android-api-'
                         '15-old-id/fennec-57.0a1.multi.android-arm.apk'
                     ),
@@ -2329,7 +2330,7 @@ class FromNightlyMetadataAndroid(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/mobile/nightly/2017/'
+                        f'{ARCHIVE_URL}pub/mobile/nightly/2017/'
                         '08/2017-08-09-10-03-39-mozilla-central-android-'
                         'api-15-l10n/fennec-57.0a1.hi-IN.android-arm.apk'
                     ),
@@ -2382,7 +2383,7 @@ class FromNightlyMetadataAndroid(BaseTest):
                 },
                 'download': {
                     'url': (
-                        'https://archive.mozilla.org/pub/mobile/nightly/'
+                        f'{ARCHIVE_URL}pub/mobile/nightly/'
                         '2017/08/2017-08-09-10-03-39-mozilla-central-'
                         'android-api-15-l10n/fennec-57.0a1.be.android-arm.apk'
                     ),
@@ -2406,10 +2407,8 @@ class FromNightlyArchiveFennec(BaseTest):
     def setUp(self):
         super().setUp()
         self.mockresponses.get(
-            utils.ARCHIVE_URL +
-            "pub/mobile/nightly/2017/10/2017-10-29-10-22-14-"
-            "mozilla-central-android-api-16/"
-            "fennec-58.0a1.multi.android-arm.json",
+            f'{ARCHIVE_URL}pub/mobile/nightly/2017/10/2017-10-29-10-22-14-mozi'
+            'lla-central-android-api-16/fennec-58.0a1.multi.android-arm.json',
             status=404,
             headers={
                 "Content-Type": "text/html"

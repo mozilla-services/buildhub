@@ -379,3 +379,21 @@ developers and expecting OPs to make it explicitly secure. It's the other
 way around. If you want to make some less secure (perhaps it's fine because
 you're running it on your laptop with fake data), it's up to you to either
 specify it on the command line or update your personal ``.env`` file.
+
+
+Network Leak Detection in Unit Tests
+====================================
+
+Some tests are unit tests where the network is attempted to be mocked. These
+tests should never depend on a working network connection. The functional
+tests though (files like ``test_something_functional.py``) depend on actually
+using the network.
+
+To test that the unit tests don't accidentally depend on a URL that hasn't
+been mocked, attempt to run the unit test exclusively but before you do that
+set ``ARCHIVE_URL`` to something that would never work. E.g.
+
+.. code-block:: shell
+
+    $ docker-compose run buildhub bash
+    app@b95573edb130:~$ ARCHIVE_URL=https://archive.example.xom/ py.test --ignore=jobs/tests/test_inventory_to_records_functional.py --ignore=jobs/tests/test_lamdba_s3_event_functional.py --override-ini="cache_dir=/tmp/tests" jobs/tests
