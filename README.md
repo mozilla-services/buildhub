@@ -68,3 +68,7 @@ To upgrade the Lambda job on **Stage** run:
 To upgrade the cron job _and_ Lambda job on **Prod** run:
 
     ./bin/deployment-bug.py prod
+
+## Datadog
+
+[Buildhub Performance](https://app.datadoghq.com/dash/794559/buildhub-performance)
