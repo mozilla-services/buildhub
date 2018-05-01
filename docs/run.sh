@@ -14,7 +14,7 @@ usage() {
 
 case $1 in
   build)
-    sphinx-build -a -W -n -b html -d docs/_build/doctrees docs docs/_build/html
+    cd docs && make html
     ;;
   *)
     exec "$@"

@@ -178,7 +178,7 @@ Or the Python client:
 
     import kinto_http
 
-    client = kinto_http.Client("https://buildhub.prod.mozaws.net/v1")
+    client = kinto_http.Client(server_url="https://buildhub.prod.mozaws.net/v1")
     records = client.get_records(**{"build.id": "20110110192031", "_limit": 1, "pages": 1},
                                  bucket="build-hub", collection="releases")
     print(len(records) >= 1)
@@ -188,7 +188,7 @@ What is the Mercurial commit ID of a build ID?
 
 .. code-block:: python
 
-    client = kinto_http.Client("https://buildhub.prod.mozaws.net/v1")
+    client = kinto_http.Client(server_url="https://buildhub.prod.mozaws.net/v1")
     records = client.get_records(**{"build.id": "20110110192031", "_limit": 1, "pages": 1},
                                  bucket="build-hub", collection="releases")
     try:
