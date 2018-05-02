@@ -3,13 +3,13 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 
 import asyncio
-import datetime
 import json
 import logging
 import re
 import sys
 
 import aiohttp
+import ciso8601
 import kinto_http
 from decouple import config
 from raven.contrib.awslambda import LambdaClient
@@ -59,10 +59,7 @@ async def main(loop, event):
             records_to_create = []
 
             # Use event time as archive publication.
-            event_time = datetime.datetime.strptime(
-                event_record['eventTime'],
-                '%Y-%m-%dT%H:%M:%S.%fZ'
-            )
+            event_time = ciso8601.parse_datetime(event_record['eventTime'])
             event_time = event_time.strftime(utils.DATETIME_FORMAT)
 
             key = event_record['s3']['object']['key']

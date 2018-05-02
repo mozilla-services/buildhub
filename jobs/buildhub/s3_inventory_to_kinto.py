@@ -265,6 +265,10 @@ async def main(loop, inventories=INVENTORIES):
         min_last_modified = datetime.datetime.utcnow() - datetime.timedelta(
             hours=MIN_AGE_LAST_MODIFIED_HOURS
         )
+        # Make it timezone aware (to UTC)
+        min_last_modified = min_last_modified.replace(
+            tzinfo=datetime.timezone.utc
+        )
 
     # Fetch all existing records as a big dict from kinto
     existing = fetch_existing(kinto_client)

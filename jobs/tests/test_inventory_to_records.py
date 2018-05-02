@@ -992,6 +992,8 @@ class CSVToRecords(asynctest.TestCase):
 
         today = datetime.datetime.utcnow()
         recently = today - datetime.timedelta(hours=1)
+        # Make it timezone aware (to UTC)
+        recently = recently.replace(tzinfo=datetime.timezone.utc)
 
         output = inventory_to_records.csv_to_records(
             self.loop,
