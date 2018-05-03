@@ -161,7 +161,17 @@ def main(
     # Edit jobs/setup.py
     with open('jobs/setup.py') as f:
         setup_py = f.read()
-    assert "version='{}',".format(current_version) in setup_py
+
+    if "version='{}',".format(current_version) not in setup_py:
+        print(
+            f"PROBLEM. You have {current_version} installed in your "
+            f"environment but appears there is a more recent version listed "
+            f"in jobs/setup.py.\n"
+            f"Consider running:\n\n"
+            f"    cd jobs && pip install -e . && cd ..\n\n"
+            f"And try again."
+        )
+        return 4
     setup_py = setup_py.replace(
         "version='{}',".format(current_version),
         "version='{}',".format(next_version),
