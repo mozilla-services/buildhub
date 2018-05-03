@@ -151,12 +151,14 @@ async def main(loop, event):
                     l10n_parent_url = re.sub('en-US/.+$', '', url)
                     l10n_folders, _ = await fetch_listing(
                         session,
-                        l10n_parent_url
+                        l10n_parent_url,
+                        retry_on_notfound=True,
                     )
                     for locale in l10n_folders:
                         _, files = await fetch_listing(
                             session,
-                            l10n_parent_url + locale
+                            l10n_parent_url + locale,
+                            retry_on_notfound=True,
                         )
                         for f in files:
                             rc_url = l10n_parent_url + locale + f['name']
