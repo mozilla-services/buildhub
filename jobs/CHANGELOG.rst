@@ -1,6 +1,15 @@
 Changelog
 =========
 
+1.3.1 (2018-05-03)
+------------------
+
+- fetch_listing by locale in lambda should retry on 404, fixes #424 (#449)
+
+- small fix for make-release script
+
+
+
 1.3.0 (2018-05-03)
 ------------------
 
