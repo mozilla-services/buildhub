@@ -6,7 +6,6 @@ import argparse
 import asyncio
 import async_timeout
 import csv
-import datetime
 import json
 import logging
 import os
@@ -17,6 +16,7 @@ from collections import defaultdict
 
 import aiohttp
 import backoff
+import ciso8601
 from decouple import config
 
 from buildhub.utils import (
@@ -446,9 +446,10 @@ async def csv_to_records(
                 # with this little date comparison. So do this check
                 # for a skip as early as possible.
                 # See https://github.com/mozilla-services/buildhub/issues/427
-                lastmodified = datetime.datetime.strptime(
-                    entry['LastModifiedDate'],
-                    '%Y-%m-%dT%H:%M:%S.%fZ'
+                # Note! ciso8601.parse_datetime will always return a timezone
+                # aware datetime.datetime instance with tzinfo=UTC.
+                lastmodified = ciso8601.parse_datetime(
+                    entry['LastModifiedDate']
                 )
                 if min_last_modified and lastmodified < min_last_modified:
                     continue
