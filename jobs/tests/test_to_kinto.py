@@ -18,22 +18,26 @@ class CacheValueTest(unittest.TestCase):
         # Use str() on these LocalPath instances to turn them into plain
         # strings since to_kinto.fetch_existing() expects it to be a string.
         self.cache_file = str(tmpdir.join('cache.json'))
-        self.old_cache_file = str(tmpdir.join('old.json'))
 
     def test_records_are_not_duplicated(self):
         mocked = MagicMock()
 
         mocked.session.server_url = 'http://localhost:8888/v1'
         # First, populate the cache.
-        mocked.get_records.return_value = [
-            {'id': 'a', 'title': 'a', 'last_modified': 1}
-        ]
+        mocked.session.request.return_value = (
+            {
+                'data': [{'id': 'a', 'title': 'a', 'last_modified': 1}]
+            },
+            {}  # headers
+        )
         first = fetch_existing(mocked, cache_file=self.cache_file)
         assert isinstance(first, dict)
         assert len(first) == 1
         assert first['a'][0] == 1  # [0] is the last_modified
         first_hash = first['a'][1]  # [1] is the hash string
 
+        # Now that the cache file exists, it will use the regular
+        # client.get_records call.
         mocked.get_records.return_value = [
             {'id': 'a', 'title': 'b', 'last_modified': 2}
         ]
