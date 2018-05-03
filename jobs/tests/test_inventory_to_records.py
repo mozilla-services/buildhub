@@ -228,6 +228,29 @@ class FetchListingTest(asynctest.TestCase):
                     self.url
                 )
 
+    async def test_jsonnotfound_exception(self):
+        with aioresponses() as m:
+            m.get(self.url, status=404)
+            with self.assertRaises(inventory_to_records.JSONFileNotFound):
+                await inventory_to_records.fetch_listing(
+                    self.session,
+                    self.url,
+                )
+
+    async def test_retries_in_case_of_404_response(self):
+        with aioresponses() as m:
+            m.get(self.url, status=404)
+            m.get(self.url, payload={
+                'prefixes': ['a/', 'b/'],
+                'files': [{'name': 'foo.txt'}]
+            })
+            received = await inventory_to_records.fetch_listing(
+                self.session,
+                self.url,
+                retry_on_notfound=True
+            )
+            assert received == (['a/', 'b/'], [{'name': 'foo.txt'}])
+
 
 class FetchNightlyMetadata(asynctest.TestCase):
     async def setUp(self):

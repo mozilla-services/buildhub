@@ -107,9 +107,13 @@ async def fetch_json(
         raise
 
 
-async def fetch_listing(session, url):
+async def fetch_listing(session, url, retry_on_notfound=False):
     try:
-        data = await fetch_json(session, url)
+        data = await fetch_json(
+            session,
+            url,
+            retry_on_notfound=retry_on_notfound,
+        )
         return data['prefixes'], data['files']
     except (aiohttp.ClientError, KeyError, ValueError) as e:
         raise ValueError("Could not fetch '{}': {}".format(url, e))

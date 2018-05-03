@@ -130,7 +130,11 @@ async def main(loop, event):
                     # For multi we just check the associated archive
                     # is here already.
                     parent_folder = re.sub('multi/.+$', 'multi/', url)
-                    _, files = await fetch_listing(session, parent_folder)
+                    _, files = await fetch_listing(
+                        session,
+                        parent_folder,
+                        retry_on_notfound=True
+                    )
                     for f in files:
                         rc_url = parent_folder + f['name']
                         if utils.is_build_url(product, rc_url):
