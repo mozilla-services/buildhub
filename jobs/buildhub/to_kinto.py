@@ -117,12 +117,8 @@ def fetch_existing(
     else:
         def new_records_iterator():
             params = {'_since': None}
-            next_url = None
+            endpoint = client.get_endpoint('records')
             while True:
-                if next_url is None:
-                    endpoint = client.get_endpoint('records')
-                else:
-                    endpoint = next_url
                 record_resp, headers = client.session.request(
                     'get',
                     endpoint,
@@ -130,12 +126,12 @@ def fetch_existing(
                 )
                 yield record_resp['data']
                 try:
-                    next_url = headers['Next-Page']
+                    endpoint = headers['Next-Page']
+                    if not endpoint:
+                        raise KeyError('exists but empty value')
                 except KeyError:
                     break
                 params.pop('_since', None)
-                if not next_url:
-                    break
 
         new_records_batches = new_records_iterator()
 
