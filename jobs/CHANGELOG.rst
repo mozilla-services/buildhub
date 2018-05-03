@@ -1,6 +1,23 @@
 Changelog
 =========
 
+1.3.0 (2018-05-03)
+------------------
+
+- optimize fetch_existing, fixes #447 #445 #446 (#448)
+
+- in lambda, fetch_listing with retry_on_notfound, fixes #424 (#442)
+
+- Use ciso8601 to parse CSV dates, fixes #443 (#444)
+
+- Fix readthedocs fixes 438 (#440)
+
+- add link to Datadog dashboard
+
+- fix for bad check_output in script
+
+
+
 1.2.1 (2018-04-27)
 ------------------
 
