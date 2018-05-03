@@ -46,7 +46,6 @@ NB_THREADS = 3
 NB_RETRY_REQUEST = 3
 WAIT_TIMEOUT = 5
 BATCH_MAX_REQUESTS = config('BATCH_MAX_REQUESTS', default=9999, cast=int)
-OLD_PREVIOUS_DUMP_FILENAME = '.records-{server}-{bucket}-{collection}.json'
 PREVIOUS_DUMP_FILENAME = '.records-hashes-{server}-{bucket}-{collection}.json'
 CACHE_FOLDER = config('CACHE_FOLDER', default='.')
 
@@ -56,40 +55,16 @@ metrics = get_metrics('buildhub')
 done = object()
 
 
-def _migrate_old_dump_file(old_file, new_file):
-    """The old file is a .json file that, when opened, is a massive list of
-    dictionaries. Open it and save to the new JSON file.
-
-    The format of the JSON file is like this:
-
-        ID --> [last_modified, md5_hash_string]
-
-    E.g.
-    """
-    with open(old_file) as f:
-        data = json.load(f)
-
-    new_data = {}
-    for record in data:
-        new_data[record['id']] = [
-            record['last_modified'],
-            _hash_record_mutate(record)
-        ]
-
-    with open(new_file, 'w') as f:
-        json.dump(new_data, f, sort_keys=True, indent=2)
-
-
 def hash_record(record):
     """Return a hash string (based of MD5) that is 32 characters long.
 
     This function does *not mutate* the record but needs to make a copy of
     the record (and mutate that) so it's less performant.
     """
-    return _hash_record_mutate(copy.deepcopy(record))
+    return hash_record_mutate(copy.deepcopy(record))
 
 
-def _hash_record_mutate(record):
+def hash_record_mutate(record):
     """Return a hash string (based of MD5) that is 32 characters long.
 
     NOTE! For performance, this function *will mutate* the record object.
@@ -103,10 +78,10 @@ def _hash_record_mutate(record):
     ).hexdigest()
 
 
+@metrics.timer_decorator('to_kinto_fetch_existing')
 def fetch_existing(
     client,
-    cache_file=PREVIOUS_DUMP_FILENAME,
-    old_cache_file=OLD_PREVIOUS_DUMP_FILENAME,
+    cache_file=PREVIOUS_DUMP_FILENAME
 ):
     """Fetch all records since last run. A JSON file on disk is used to store
     records from previous run.
@@ -115,34 +90,6 @@ def fetch_existing(
         server=urlparse(client.session.server_url).hostname,
         bucket=client._bucket_name,
         collection=client._collection_name))
-
-    # Note! Some time in late 2018 we can delete these lines. By then,
-    # Stage and Prod (and pretty much every active developers') will have
-    # switched to the new hash-based dump file. Till then, let these lines
-    # sit around. If the migration happens and is successful, the old
-    # cache file gets deleted.
-    if not os.path.exists(cache_file):
-
-        # Perhaps the old file exists!
-        # Prior to April 2018 we used dump ALL kinto records into a .json
-        # file as a massive list of dicts.
-        # The problem with that was that it bloated RAM badly.
-        # The .json file was around 700+MB and when loaded into Python as a
-        # list object it would take up about 2.4GB of RAM.
-        # (Note the .json file of hashes, when read in to Python becomes
-        # about 200MB)
-        # Also, by always hashing the records consistently we could just
-        # compare two hashes (as strings) instead of having to compare
-        # dictionaries.
-        old_cache_file = os.path.join(CACHE_FOLDER, old_cache_file.format(
-            server=urlparse(client.session.server_url).hostname,
-            bucket=client._bucket_name,
-            collection=client._collection_name))
-        if os.path.exists(old_cache_file):
-            _migrate_old_dump_file(old_cache_file, cache_file)
-            logger.info(f'Migrated dump file {old_cache_file} to {cache_file}')
-            os.remove(old_cache_file)
-        # End dump file migration.
 
     records = {}
     previous_run_etag = None
@@ -155,16 +102,49 @@ def fetch_existing(
             )
             previous_run_etag = '"%s"' % highest_timestamp
 
-    new_records = client.get_records(
-        _since=previous_run_etag,
-        pages=float('inf')
-    )
+    # The reason we can't use client.get_records() is because it is not
+    # an iterator and if the Kinto database has 1M objects we'll end up
+    # with a big fat Python list of 1M objects that has repeatedly caused
+    # OOM errors in our stage and prod admin nodes.
+    if previous_run_etag:
+        # However, we can use it if there was a previous_run_etag which
+        # means we only need to extract a limited amount of records. Not
+        # the whole Kinto database.
+        new_records_batches = [client.get_records(
+            _since=previous_run_etag,
+            pages=float('inf')
+        )]
+    else:
+        def new_records_iterator():
+            params = {'_since': None}
+            endpoint = client.get_endpoint('records')
+            while True:
+                record_resp, headers = client.session.request(
+                    'get',
+                    endpoint,
+                    params=params
+                )
+                yield record_resp['data']
+                try:
+                    endpoint = headers['Next-Page']
+                    if not endpoint:
+                        raise KeyError('exists but empty value')
+                except KeyError:
+                    break
+                params.pop('_since', None)
 
-    for record in new_records:
-        records[record['id']] = [
-            record['last_modified'],
-            hash_record(record)
-        ]
+        new_records_batches = new_records_iterator()
+
+    count_new_records = 0
+    for new_records in new_records_batches:
+        for record in new_records:
+            count_new_records += 1
+            records[record['id']] = [
+                record['last_modified'],
+                hash_record_mutate(record)
+            ]
+
+    metrics.gauge('to_kinto_fetched_new_records', count_new_records)
 
     # Atomic write.
     if records:
