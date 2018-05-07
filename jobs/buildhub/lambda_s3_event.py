@@ -7,7 +7,6 @@ import json
 import logging
 import re
 import sys
-import pkg_resources
 
 import aiohttp
 import ciso8601
@@ -17,6 +16,7 @@ from raven.contrib.awslambda import LambdaClient
 
 from buildhub import utils
 from buildhub.inventory_to_records import (
+    __version__,
     NB_RETRY_REQUEST,
     fetch_json,
     fetch_listing,
@@ -30,7 +30,7 @@ from buildhub.configure_markus import get_metrics
 SENTRY_DSN = config('SENTRY_DSN', default=None)
 sentry = LambdaClient(
     SENTRY_DSN,
-    release=pkg_resources.get_distribution('buildhub').version,
+    release=__version__,
 )
 
 logger = logging.getLogger()  # root logger.
