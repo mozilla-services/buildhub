@@ -222,7 +222,11 @@ async def main(loop, event):
                                          url)
                 logger.debug("Fetch l10n listing {}".format(l10n_folder_url))
                 try:
-                    _, files = await fetch_listing(session, l10n_folder_url)
+                    _, files = await fetch_listing(
+                        session,
+                        l10n_folder_url,
+                        retry_on_notfound=True,
+                    )
                 except ValueError:
                     files = []  # No -l10/ folder published yet.
                 for f in files:
