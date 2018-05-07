@@ -1,6 +1,15 @@
 Changelog
 =========
 
+1.3.2 (2018-05-07)
+------------------
+
+- insert buildhub release into raven config (#452)
+
+- more avoid JSONFileNotFound in lambda event, fixes #424 (#453)
+
+
+
 1.3.1 (2018-05-03)
 ------------------
 
