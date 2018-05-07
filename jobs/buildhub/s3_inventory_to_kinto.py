@@ -13,6 +13,7 @@ import pkgutil
 import tempfile
 import time
 import zlib
+import pkg_resources
 from concurrent.futures import ThreadPoolExecutor
 
 import aiofiles
@@ -62,7 +63,11 @@ INVENTORIES = tuple(config(
 
 # Optional Sentry with synchronuous client.
 SENTRY_DSN = config('SENTRY_DSN', default=None)
-sentry = raven.Client(SENTRY_DSN, transport=raven.transport.http.HTTPTransport)
+sentry = raven.Client(
+    SENTRY_DSN,
+    transport=raven.transport.http.HTTPTransport,
+    release=pkg_resources.get_distribution('buildhub').version,
+)
 
 logger = logging.getLogger()  # root logger.
 metrics = get_metrics('buildhub')
