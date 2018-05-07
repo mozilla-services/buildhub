@@ -16,6 +16,7 @@ from raven.contrib.awslambda import LambdaClient
 
 from buildhub import utils
 from buildhub.inventory_to_records import (
+    __version__,
     NB_RETRY_REQUEST,
     fetch_json,
     fetch_listing,
@@ -27,7 +28,10 @@ from buildhub.configure_markus import get_metrics
 
 # Optional Sentry with synchronuous client.
 SENTRY_DSN = config('SENTRY_DSN', default=None)
-sentry = LambdaClient(SENTRY_DSN)
+sentry = LambdaClient(
+    SENTRY_DSN,
+    release=__version__,
+)
 
 logger = logging.getLogger()  # root logger.
 metrics = get_metrics('buildhub')

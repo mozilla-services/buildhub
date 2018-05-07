@@ -27,7 +27,11 @@ from ruamel import yaml
 from kinto_wizard.async_kinto import AsyncKintoClient
 from kinto_wizard.yaml2kinto import initialize_server
 
-from buildhub.inventory_to_records import NB_RETRY_REQUEST, csv_to_records
+from buildhub.inventory_to_records import (
+    __version__,
+    NB_RETRY_REQUEST,
+    csv_to_records,
+)
 from buildhub.to_kinto import fetch_existing, main as to_kinto_main
 from buildhub.configure_markus import get_metrics
 
@@ -62,7 +66,11 @@ INVENTORIES = tuple(config(
 
 # Optional Sentry with synchronuous client.
 SENTRY_DSN = config('SENTRY_DSN', default=None)
-sentry = raven.Client(SENTRY_DSN, transport=raven.transport.http.HTTPTransport)
+sentry = raven.Client(
+    SENTRY_DSN,
+    transport=raven.transport.http.HTTPTransport,
+    release=__version__,
+)
 
 logger = logging.getLogger()  # root logger.
 metrics = get_metrics('buildhub')
