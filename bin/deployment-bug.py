@@ -23,6 +23,17 @@ def main(
     tag=None,
     dry_run=False,
 ):
+    if environment == 'stage':
+        print("""
+⚠️  NOTE! ⚠️
+
+Stage is automatically upgraded (both cron and Lambda) when a new GitHub
+release is made. Are you sure you need this bug?
+        """)
+        if not input("Sure? [y/N] ").strip().lower() in ('yes', 'y'):
+            print("Thought so.")
+            return 5
+
     api_url = f'https://api.github.com/repos/{OWNER}/{REPO}/releases'
     if not tag:
         api_url += '/latest'
@@ -120,7 +131,10 @@ if __name__ == '__main__':
     )
 
     parser.add_argument(
-        'environment', help='stage or prod', type=check_environment
+        '-e', '--environment',
+        type=check_environment,
+        default='prod',
+        help="Environment e.g. 'stage' or 'prod'. (Default 'prod')"
     )
     parser.add_argument(
         'task', help='cron or lambda or both', type=check_task,
