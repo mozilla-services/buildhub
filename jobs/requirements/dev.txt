@@ -1,6 +1,6 @@
-aioresponses==0.4.0 \
-    --hash=sha256:b901daac9f14165a9b42377a82dd92eb9a9687bb24c956ed545a2cf14a2a8b32 \
-    --hash=sha256:bdb5316e90522472258a8ba679708d30d1d8886ceec34ac192ba537a4672a7f3
+aioresponses==0.4.1 \
+    --hash=sha256:2de01d289bacb3da18440754ebb50690b96c77f15cb546d7f78dafae9af30b50 \
+    --hash=sha256:6c468badfdf71bd9bb9a49c724a176c95cc7bff38d6b0d4fc11abae1af0b8055
 asynctest==0.11.1 \
     --hash=sha256:f47eb8fd1f78a63a68709c2fd471bbde038deffd4e99b8d614b988a8610c09b2 \
     --hash=sha256:f7ef31994c5e751201bd6ce6f92f60f16ad798bfaed8e2b79a74afaa4475927b
