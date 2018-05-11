@@ -36,9 +36,20 @@ import {
 import "searchkit/release/theme.css";
 
 import contribute_json from "./contribute.json";
-const KINTO_COLLECTION_URL =
-  process.env.REACT_APP_KINTO_COLLECTION_URL ||
+
+let defaultCollectionURL =
   "https://buildhub.prod.mozaws.net/v1/buckets/build-hub/collections/releases/";
+// There is an exception to this rule, the default (when
+// REACT_APP_KINTO_COLLECTION_URL isn't set) depends on how this UI is rendered.
+if (
+  window.location.pathname &&
+  window.location.pathname.search(/\/stage\//) > -1
+) {
+  defaultCollectionURL =
+    "https://buildhub.stage.mozaws.net/v1/buckets/build-hub/collections/releases/";
+}
+const KINTO_COLLECTION_URL =
+  process.env.REACT_APP_KINTO_COLLECTION_URL || defaultCollectionURL;
 
 const searchkit = new SearchkitManager(KINTO_COLLECTION_URL, {
   searchUrlPath: "search"
