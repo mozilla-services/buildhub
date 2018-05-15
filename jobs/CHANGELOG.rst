@@ -1,6 +1,31 @@
 Changelog
 =========
 
+1.3.3 (2018-05-15)
+------------------
+
+- it's lambda not lamdba (#467)
+
+- backoff even longer (#466)
+
+- Update raven to 6.8.0 (#463)
+
+- web ui should use stage kinto, fixes #458 (#460)
+
+- Update backoff from 1.4.3 to 1.5.0 (#454)
+
+- Update raven to 6.7.0 (#455)
+
+- Update pytest from 3.5.0 to 3.5.1 (#426)
+
+- Update aioresponses from 0.4.0 to 0.4.1 (#399)
+
+- Update kinto-http from 9.1.1 to 9.1.2 (#420)
+
+- update to deployment-bug now that stage auto-upgrades Lambda
+
+
+
 1.3.2 (2018-05-07)
 ------------------
 
