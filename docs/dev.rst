@@ -396,4 +396,4 @@ set ``ARCHIVE_URL`` to something that would never work. E.g.
 .. code-block:: shell
 
     $ docker-compose run buildhub bash
-    app@b95573edb130:~$ ARCHIVE_URL=https://archive.example.xom/ py.test --ignore=jobs/tests/test_inventory_to_records_functional.py --ignore=jobs/tests/test_lamdba_s3_event_functional.py --override-ini="cache_dir=/tmp/tests" jobs/tests
+    app@b95573edb130:~$ ARCHIVE_URL=https://archive.example.xom/ py.test --ignore=jobs/tests/test_inventory_to_records_functional.py --ignore=jobs/tests/test_lambda_s3_event_functional.py --override-ini="cache_dir=/tmp/tests" jobs/tests
