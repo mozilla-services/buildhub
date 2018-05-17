@@ -311,6 +311,60 @@ class FromArchiveFirefox(BaseTest):
             },
             if_not_exists=True)
 
+    async def test_from_release_archive_with_plusses(self):
+        event = fake_event(
+            'pub/firefox/releases/54.0/win64/fr/Firefox+Setup+54.0.exe'
+        )
+        await lambda_s3_event.main(self.loop, event)
+
+        self.mock_create_record.assert_called_with(
+            bucket='build-hub',
+            collection='releases',
+            data={
+                'id': 'firefox_54-0_win64_fr',
+                'source': {
+                    'product': 'firefox',
+                    'revision': 'e832ed037a3c23004be73178e546d240e57b6ee1',
+                    'repository': (
+                        'https://hg.mozilla.org/releases/mozilla-release'
+                    ),
+                    'tree': 'releases/mozilla-release'
+                },
+                'build': {
+                    'id': '20170608105825',
+                    'date': '2017-06-08T10:58:25Z',
+                    'number': 2,
+                    'as': 'ml64.exe',
+                    'cc': (
+                        'c:/builds/moz2_slave/m-rel-w64-00000000000000000000/'
+                        'build/src/vs2015u3/VC/bin/amd64/cl.exe'
+                    ),
+                    'cxx': (
+                        'c:/builds/moz2_slave/m-rel-w64-00000000000000000000/'
+                        'build/src/vs2015u3/VC/bin/amd64/cl.exe'
+                    ),
+                    'host': 'x86_64-pc-mingw32',
+                    'target': 'x86_64-pc-mingw32',
+                },
+                'target': {
+                    'platform': 'win64',
+                    'os': 'win',
+                    'locale': 'fr',
+                    'version': '54.0',
+                    'channel': 'release'
+                },
+                'download': {
+                    'url': (
+                        f'{ARCHIVE_URL}pub/firefox/releases/'
+                        '54.0/win64/fr/Firefox Setup 54.0.exe'
+                    ),
+                    'mimetype': 'application/msdos-windows',
+                    'size': 51001024,
+                    'date': '2017-08-08T17:06:52Z'
+                },
+            },
+            if_not_exists=True)
+
     async def test_metrics_timing_used(self):
         event = fake_event(
             'pub/firefox/releases/54.0/win64/fr/Firefox Setup 54.0.exe'
