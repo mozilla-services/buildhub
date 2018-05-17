@@ -24,6 +24,14 @@ KNOWN_MIMETYPES = {
     }
 
 
+def key_to_archive_url(key):
+    # If the key (e.g.
+    # pub/firefox/releases/60.0.1/win32/en-US/Firefox+Setup+60.0.1.exe
+    # ) uses escaped spaced, we need to remove them. Otherwise it
+    # won't match on the regular expressions for is_build_url() etc.
+    return ARCHIVE_URL + key.replace('+', ' ')
+
+
 def archive_url(
     product,
     version=None,
