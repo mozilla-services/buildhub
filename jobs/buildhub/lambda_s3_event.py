@@ -67,8 +67,10 @@ async def main(loop, event):
             event_time = event_time.strftime(utils.DATETIME_FORMAT)
 
             key = event_record['s3']['object']['key']
+
             filesize = event_record['s3']['object']['size']
-            url = utils.ARCHIVE_URL + key
+            url = utils.key_to_archive_url(key)
+
             logger.debug("Event file {}".format(url))
 
             try:
