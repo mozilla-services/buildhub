@@ -31,7 +31,7 @@ ENTRY_POINTS = {
 
 setup(
     name='buildhub',
-    version='1.3.3',
+    version='1.3.4',
     description='Buildhub Python libraries.',
     long_description="{}\n\n{}\n\n{}".format(README, CHANGELOG, CONTRIBUTORS),
     license='MPL 2.0',
