@@ -1,5 +1,6 @@
 help:
 	@echo "Welcome to Buildhub\n"
+	@echo "  run                         start everything"
 	@echo "  clean                       delete local files"
 	@echo "  stop                        stop any docker containers"
 	@echo "  functional-tests            run the functional tests"
@@ -20,6 +21,9 @@ clean:
 	rm -fr lambda.zip
 	rm -fr .docker-build
 	rm -fr .metadata*.json
+
+run:
+	docker-compose up
 
 stop:
 	docker-compose stop
