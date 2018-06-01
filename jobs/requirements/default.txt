@@ -1,6 +1,5 @@
-aiobotocore==0.5.2 \
-    --hash=sha256:a06aea3aedb5e501f9625cdd10dd2645e6e70487837961c230530abe8860cfaf \
-    --hash=sha256:5400ef95d4f73b06cd2bb648a33f714cea682bcfea639b2af221a4bd1b8af962
+aiobotocore==0.9.0 \
+    --hash=sha256:2804e8d460c960fe134bca28ea3ce05d32063584618e6ac685d5c95aada5d25c
 aiohttp==2.3.0 \
     --hash=sha256:4ef8aa726fec5d8fa810e61c6c42b51276c7ae962391bcdc6ac1066b49c90e7c \
     --hash=sha256:4b1d216a1ef7b7f2b06172243b1361362b94fbdbc790479c7c4f97a3c7d2e76e \
