@@ -29,8 +29,8 @@ raven==6.8.0 \
 markus==1.2.0 \
     --hash=sha256:86bbeb16de1b1920d291c81a39b7a7c61c94b665cd8d10c6b69c994ce4fd5bcc \
     --hash=sha256:9bce7bd152578703a8e4aa5a765c7c0d94bcdd69f7bc5e42d29b893e3abf2e5a
-datadog==0.20.0 \
-    --hash=sha256:7bb4af836d7422a6138f983b81c16acd56c2d608913982602856cc273ae74768
+datadog==0.22.0 \
+    --hash=sha256:86cef95acd73543d18c417f1b0313c0a7274ed8f5ae9cceb46314f4e588085b1
 python-decouple==3.1 \
     --hash=sha256:1317df14b43efee4337a4aa02914bf004f010cd56d6c4bd894e6474ec8c4fe2d
 aiofiles==0.3.2 \
