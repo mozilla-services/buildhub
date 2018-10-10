@@ -262,7 +262,7 @@ async def fetch_release_candidate_metadata(session, record):
 _candidates_build_folder = defaultdict(dict)
 
 
-async def scan_candidates(session, product):
+async def scan_candidates(session, product, specific_version=None):
     # For each version take the latest build.
     global _candidates_build_folder
 
@@ -273,7 +273,8 @@ async def scan_candidates(session, product):
         return
 
     logger.info(
-        f"Scan '{product}' candidates to get their latest build folder..."
+        f"Scan '{product}' candidates to get their latest build folder..." +
+        f" (specifically for {specific_version})" if specific_version else ""
     )
     candidates_url = archive_url(product, candidate='/')
     candidates_folders, _ = await fetch_listing(session, candidates_url)
@@ -285,6 +286,8 @@ async def scan_candidates(session, product):
             if '-candidates' not in folder:
                 continue
             version = folder.replace('-candidates/', '')
+            if specific_version and version != specific_version:
+                continue
             versions.append(version)
             builds_url = archive_url(product, version, candidate='/')
             future = fetch_listing(session, builds_url)

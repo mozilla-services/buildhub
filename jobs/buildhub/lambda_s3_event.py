@@ -90,9 +90,14 @@ async def main(loop, event):
                 # Use S3 event infos for the archive.
                 record['download']['size'] = filesize
                 record['download']['date'] = event_time
+                version = record['target']['version']
 
                 # Fetch release metadata.
-                await scan_candidates(session, product)
+                await scan_candidates(
+                    session,
+                    product,
+                    specific_version=version,
+                )
                 logger.debug("Fetch record metadata")
                 # metadata = await fetch_metadata(session, record)
                 metadata = await fetch_metadata(session, record)
