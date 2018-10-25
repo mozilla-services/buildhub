@@ -1,6 +1,25 @@
 Changelog
 =========
 
+1.3.5 (2018-10-25)
+------------------
+
+- upgrade requests to 2.20.0 (#524)
+
+- the correct way to calm down pyup (#523)
+
+- Disable pyup
+
+- Merge pull request #492 from mozilla-services/pyup-update-backoff-1.5.0-to-1.6.0
+
+- Update backoff from 1.5.0 to 1.6.0
+
+- Update datadog to 0.22.0 (#489)
+
+- adding new make run command
+
+
+
 1.3.4 (2018-05-18)
 ------------------
 
