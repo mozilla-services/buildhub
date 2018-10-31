@@ -189,7 +189,7 @@ async def download_csv(
 
     # Make sure the directory exists if it wasn't already created.
     if not os.path.isdir(download_directory):
-        os.makedirs(download_directory, exists_ok=True)
+        os.makedirs(download_directory, exist_ok=True)
 
     # Look for old download junk in the download directory.
     too_old = MAX_CSV_DOWNLOAD_AGE
