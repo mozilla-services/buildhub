@@ -1,6 +1,15 @@
 Changelog
 =========
 
+1.4.0 (2018-11-16)
+------------------
+
+- fixes bug 1506862 - linux/mac nightlies missing since nov 5th (#527)
+
+- fix for inventory-to-kinto download_csv (#526)
+
+
+
 1.3.5 (2018-10-25)
 ------------------
 
