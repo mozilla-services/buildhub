@@ -478,9 +478,9 @@ async def csv_to_records(
                 record['download']['size'] = filesize
                 record['download']['date'] = lastmodified
 
-                if len(batch) < NB_PARALLEL_REQUESTS:
-                    batch.append(record)
-                else:
+                batch.append(record)
+
+                if len(batch) == NB_PARALLEL_REQUESTS:
                     async for result in process_batch(
                         session,
                         batch,
