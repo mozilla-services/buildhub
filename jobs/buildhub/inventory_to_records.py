@@ -403,23 +403,6 @@ async def csv_to_records(
         if result:
             yield result
 
-    def deduplicate_entries_in_folder(entries):
-        """
-        If there are two identical releases in the same folder, we keep the
-        ones that contain "setup" or "installer".
-        """
-        deduplicated = {}
-        for entry in entries:
-            identifier = entry['Key'].lower() \
-                                     .replace('+setup+', '-') \
-                                     .replace('.installer.exe', '') \
-                                     .replace('.exe', '')
-            dupped = deduplicated.get(identifier, {"Key": ""})
-            is_installer = 'installer' in dupped['Key'] or '+setup+' in dupped['Key']
-            if not is_installer:
-                deduplicated[identifier] = entry
-        return deduplicated.values()
-
     # Read metadata of previous run, and warm up cache.
     # Will save a lot of hits to archive.mozilla.org.
     metadata_cache_file = os.path.join(
@@ -437,8 +420,6 @@ async def csv_to_records(
         batch = []
 
         async for entries in inventory_by_folder(stdin):
-            entries = deduplicate_entries_in_folder(entries)
-
             for entry in entries:
                 object_key = entry['Key']
 
