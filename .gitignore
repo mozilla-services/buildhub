@@ -17,3 +17,4 @@ buildhub-lambda-*.zip
 csv-download-directory/
 .records-hashes-kinto-build-hub-releases.json
 .pytest_cache/
+.manifest-*.json

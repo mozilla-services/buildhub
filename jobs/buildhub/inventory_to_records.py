@@ -391,7 +391,6 @@ async def csv_to_records(
         async for entry in read_csv(stdin):
             object_key = entry['Key']
             folder = os.path.dirname(object_key)
-
             if previous is None:
                 previous = folder
 
@@ -404,29 +403,6 @@ async def csv_to_records(
         if result:
             yield result
 
-    def deduplicate_entries(entries):
-        # Windows releases are published as both .zip and .exe files.
-        # Deduplicate these (keep .exe only).
-        # Some old Linux versions (1.5b2) were published with installer.tar.gz.
-        filtered = [e for e in entries if e['Key'].endswith('.exe')]
-        if len(filtered) > 0:
-            entries = filtered
-        longer_first = sorted(
-            entries,
-            key=lambda e: len(e['Key']),
-            reverse=True
-        )
-        deduplicate = {
-            e['Key'].lower()
-                    .replace('+setup+', '-')
-                    .replace('.installer.exe', '')
-                    .replace('.exe', '')
-                    .replace('.installer.tar.gz', '')
-                    .replace('.tar.gz', '')
-                    .replace('.zip', ''): e
-            for e in longer_first}
-        return deduplicate.values()
-
     # Read metadata of previous run, and warm up cache.
     # Will save a lot of hits to archive.mozilla.org.
     metadata_cache_file = os.path.join(
@@ -434,7 +410,8 @@ async def csv_to_records(
         '.metadata-{}.json'.format(__version__)
     )
     if os.path.exists(metadata_cache_file):
-        metadata = json.load(open(metadata_cache_file))
+        with open(metadata_cache_file) as f:
+            metadata = json.load(f)
         _rc_metadata.update(metadata['rc'])
         _release_metadata.update(metadata['release'])
         _nightly_metadata.update(metadata['nightly'])
@@ -443,9 +420,21 @@ async def csv_to_records(
         batch = []
 
         async for entries in inventory_by_folder(stdin):
-            entries = deduplicate_entries(entries)
-
             for entry in entries:
+                object_key = entry['Key']
+
+                # This is the lowest barrier of entry (no pun intended).
+                # If the entry's 'Key" value doesn't end on any of the
+                # known FILE_EXTENSIONS it will never pass a build URL
+                # later in the loop.
+                if not any(
+                    object_key.endswith(ext) for ext in FILE_EXTENSIONS
+                ):
+                    # Actually, eventually that FILE_EXTENSION check will
+                    # be done again more detailed inside the is_build_url
+                    # function.
+                    # This step was just to weed out some easy ones.
+                    continue
 
                 # When you have a 'min_last_modified' set, and it's something
                 # like 24 hours, then probably 99% of records can be skipped
@@ -460,8 +449,6 @@ async def csv_to_records(
                 if min_last_modified and lastmodified < min_last_modified:
                     continue
 
-                object_key = entry['Key']
-
                 try:
                     # /pub/thunderbird/nightly/...
                     product = object_key.split('/')[1]
@@ -470,10 +457,6 @@ async def csv_to_records(
 
                 if product not in PRODUCTS:
                     continue
-
-                # Scan the list of candidates metadata (no-op if
-                # already initialized).
-                await scan_candidates(session, product)
 
                 url = key_to_archive_url(object_key)
 
@@ -485,15 +468,19 @@ async def csv_to_records(
                     logger.exception(e)
                     continue
 
+                # Scan the list of candidates metadata (no-op if
+                # already initialized).
+                await scan_candidates(session, product)
+
                 # Complete with info that can't be obtained from the URL.
                 filesize = int(float(entry['Size']))  # e.g. 2E+10
                 lastmodified = lastmodified.strftime(DATETIME_FORMAT)
                 record['download']['size'] = filesize
                 record['download']['date'] = lastmodified
 
-                if len(batch) < NB_PARALLEL_REQUESTS:
-                    batch.append(record)
-                else:
+                batch.append(record)
+
+                if len(batch) == NB_PARALLEL_REQUESTS:
                     async for result in process_batch(
                         session,
                         batch,

@@ -64,6 +64,10 @@ INVENTORIES = tuple(config(
     cast=Csv()
 ))
 
+LOG_LEVEL = config('LOG_LEVEL', default='INFO')
+
+STORE_DAILY_MANIFEST = config('STORE_DAILY_MANIFEST', default=False, cast=bool)
+
 # Optional Sentry with synchronuous client.
 SENTRY_DSN = config('SENTRY_DSN', default=None)
 sentry = raven.Client(
@@ -133,30 +137,44 @@ async def list_manifest_entries(loop, s3_client, inventory):
     :param s3_client: Initialized S3 client.
     :param inventory str: Either "archive" or "firefox".
     """
-    prefix = FOLDER.format(inventory=inventory)
-    paginator = s3_client.get_paginator('list_objects')
+    if STORE_DAILY_MANIFEST:
+        today_utc = datetime.datetime.utcnow().strftime('%Y%m%d')
+        manifest_content_file_path = f'.manifest-{today_utc}.json'
 
-    manifest_folders = []
-    async for result in paginator.paginate(
-        Bucket=BUCKET,
-        Prefix=prefix,
-        Delimiter='/'
-    ):
-        # Take latest inventory.
-        files = list(result.get('CommonPrefixes', []))
-        prefixes = [f['Prefix'] for f in files]
-        manifest_folders += [
-            prefix for prefix in prefixes if ends_with_date(prefix)
-        ]
+    if STORE_DAILY_MANIFEST and os.path.isfile(manifest_content_file_path):
+        logger.info(f"Using stored manifest file {manifest_content_file_path}")
+        with open(manifest_content_file_path) as f:
+            manifest_content = json.load(f)
+    else:
+        prefix = FOLDER.format(inventory=inventory)
+        paginator = s3_client.get_paginator('list_objects')
+        manifest_folders = []
+        async for result in paginator.paginate(
+            Bucket=BUCKET,
+            Prefix=prefix,
+            Delimiter='/'
+        ):
+            # Take latest inventory.
+            files = list(result.get('CommonPrefixes', []))
+            prefixes = [f['Prefix'] for f in files]
+            manifest_folders += [
+                prefix for prefix in prefixes if ends_with_date(prefix)
+            ]
 
-    # Download latest manifest.json
-    last_inventory = sorted(manifest_folders)[-1]
-    logger.info('Latest inventory is {}'.format(last_inventory))
-    key = last_inventory + 'manifest.json'
-    manifest = await s3_client.get_object(Bucket=BUCKET, Key=key)
-    async with manifest['Body'] as stream:
-        body = await stream.read()
-    manifest_content = json.loads(body.decode('utf-8'))
+        # Download latest manifest.json
+        last_inventory = sorted(manifest_folders)[-1]
+        logger.info('Latest inventory is {}'.format(last_inventory))
+        key = last_inventory + 'manifest.json'
+        manifest = await s3_client.get_object(Bucket=BUCKET, Key=key)
+        async with manifest['Body'] as stream:
+            body = await stream.read()
+        manifest_content = json.loads(body.decode('utf-8'))
+        if STORE_DAILY_MANIFEST:
+            logger.info(
+                f"Writing stored manifest file {manifest_content_file_path}"
+            )
+            with open(manifest_content_file_path, 'w') as f:
+                json.dump(manifest_content, f, indent=3)
     for f in manifest_content['files']:
         # Here, each 'f' is a dictionary that looks something like this:
         #
@@ -309,7 +327,10 @@ async def main(loop, inventories=INVENTORIES):
 def run():
     # Log everything to stderr.
     logger.addHandler(logging.StreamHandler())
-    logger.setLevel(logging.INFO)
+    if LOG_LEVEL.lower() == 'debug':
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
 
     # Add Sentry (no-op if no configured).
     handler = SentryHandler(sentry)
