@@ -952,6 +952,16 @@ RELEASE_FILENAMES = [
         'pub/thunderbird/nightly/2017/12/2017-12-13-04-12-17-comm-central/'
         'thunderbird-59.0a1.en-US.linux-x86_64.tar.bz2'
     ),
+    (
+        'firefox',
+        'pub/firefox/nightly/2018/11/2018-11-13-10-00-51-mozilla-central/'
+        'firefox-65.0a1.en-US.win32.exe'
+    ),
+    (
+        'firefox',
+        'pub/firefox/nightly/2018/11/2018-11-13-10-00-51-mozilla-central/'
+        'firefox-65.0a1.en-US.win32.installer.exe'
+    ),
 ]
 
 

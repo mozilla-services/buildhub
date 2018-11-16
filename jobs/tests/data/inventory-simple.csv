@@ -9,3 +9,8 @@
 "net-mozaws-prod-delivery-archive","pub/devedition/candidates/55.0b1-candidates/build5/win64/pt-BR/Firefox+Setup+55.0b1.exe","53718907","2017-06-14T00:41:56.000Z","8eb5c067a880ca9c63a1bf0a6c9a631d"
 "net-mozaws-prod-delivery-firefox","pub/firefox/releases/51.0b11/mac-EME-free/mr/Firefox+51.0b11.dmg","85984611","2017-01-04T00:05:18.000Z","9b4e5eccde90dcfd45730f810f5efc53"
 "net-mozaws-prod-delivery-archive","pub/mobile/nightly/2011/01/2011-01-27-03-mozilla-central-macosx/fennec-4.0b5pre.en-US.mac.dmg","18694173","2015-10-16T23:25:18.000Z","8a67ee7a7f0ce39f190bbedb4f882b00-3"
+"net-mozaws-delivery-firefox","pub/firefox/nightly/2018/11/2018-11-13-10-00-51-mozilla-central/firefox-65.0a1.en-US.win32.zip","50000","2018-11-13T13:10:00.51Z","f1aa742ef0973db098947bd6d875f193"
+"net-mozaws-delivery-firefox","pub/firefox/nightly/2018/11/2018-11-13-10-00-51-mozilla-central/firefox-65.0a1.en-US.win32.exe","50000","2018-11-13T13:10:00.51Z","f1aa742ef0973db098947bd6d875f193"
+"net-mozaws-delivery-firefox","pub/firefox/nightly/2018/11/2018-11-13-10-00-51-mozilla-central/firefox-65.0a1.en-US.win32.installer.exe","50000","2018-11-13T13:10:00.51Z","f1aa742ef0973db098947bd6d875f193"
+"net-mozaws-delivery-firefox","pub/firefox/nightly/2018/11/2018-11-13-10-00-51-mozilla-central/firefox-65.0a1.en-US.mac.dmg","50000","2018-11-13T13:10:00.51Z","f1aa742ef0973db098947bd6d875f193"
+"net-mozaws-delivery-firefox","pub/firefox/nightly/2018/11/2018-11-13-10-00-51-mozilla-central/firefox-65.0a1.en-US.linux-x86_64.tar.bz2","50000","2018-11-13T13:10:00.51Z","f1aa742ef0973db098947bd6d875f193"

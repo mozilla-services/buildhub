@@ -319,9 +319,138 @@ class CsvToRecordsTest(asynctest.TestCase):
                     'version': '4.0b5pre'
                 }
             }
+        }, {
+            'data': {
+                'source': {
+                    'product': 'firefox',
+                    'revision': 'f6df375b86987b2772067a61873ebfe3a98c353a',
+                    'repository': 'https://hg.mozilla.org/mozilla-central',
+                    'tree': 'mozilla-central',
+                },
+                'target': {
+                    'platform': 'win32',
+                    'os': 'win',
+                    'locale': 'en-US',
+                    'version': '65.0a1',
+                    'channel': 'nightly',
+                },
+                'download': {
+                    'url': (
+                        f'{ARCHIVE_URL}pub/firefox/nightly'
+                        '/2018/11/2018-11-13-10-00-51-mozilla-central/'
+                        'firefox-65.0a1.en-US.win32.installer.exe'
+                    ),
+                    'mimetype': 'application/msdos-windows',
+                    'size': 50000,
+                    'date': '2018-11-13T13:10:00Z',
+                },
+                'id': 'firefox_nightly_2018-11-13-10-00-51_65-0a1_win32_en-us',
+                'build': {
+                    'id': '20181113100051',
+                    'date': '2018-11-13T10:00:51Z',
+                    'as': 'z:/build/build/src/vs2017_15.8.4/VC/bin/Hostx64/x86/ml.exe',
+                    'cc': (
+                        'z:/build/build/src/clang/bin/clang-cl.exe -Xclang '
+                        '-std=gnu99 -fms-compatibility-version=19.15.26726 -m32'
+                    ),
+                    'cxx': (
+                        'z:/build/build/src/clang/bin/clang-cl.exe '
+                        '-fms-compatibility-version=19.15.26726 -m32'
+                    ),
+                    'host': 'x86_64-pc-mingw32',
+                    'target': 'i686-pc-mingw32',
+                },
+            }
+        }, {
+            'data': {
+                'source': {
+                    'product': 'firefox',
+                    'revision': 'f6df375b86987b2772067a61873ebfe3a98c353a',
+                    'repository': 'https://hg.mozilla.org/mozilla-central',
+                    'tree': 'mozilla-central',
+                },
+                'target': {
+                    'platform': 'macosx',
+                    'os': 'mac',
+                    'locale': 'en-US',
+                    'version': '65.0a1',
+                    'channel': 'nightly',
+                },
+                'download': {
+                    'url': (
+                        f'{ARCHIVE_URL}pub/firefox/nightly'
+                        '/2018/11/2018-11-13-10-00-51-mozilla-central/'
+                        'firefox-65.0a1.en-US.mac.dmg'
+                    ),
+                    'mimetype': 'application/x-apple-diskimage',
+                    'size': 50000,
+                    'date': '2018-11-13T13:10:00Z',
+                },
+                'id': 'firefox_nightly_2018-11-13-10-00-51_65-0a1_macosx_en-us',
+                'build': {
+                    'id': '20181113100051',
+                    'date': '2018-11-13T10:00:51Z',
+                    'as': (
+                        '/builds/worker/workspace/build/src/clang/bin/clang '
+                        '-target x86_64-apple-darwin11 -B /builds/worker/workspace/'
+                        'build/src/cctools/bin -isysroot /builds/worker/workspace/'
+                        'build/src/MacOSX10.11.sdk -std=gnu99'
+                    ),
+                    'cc': (
+                        '/builds/worker/workspace/build/src/clang/bin/clang '
+                        '-target x86_64-apple-darwin11 -B /builds/worker/workspace/'
+                        'build/src/cctools/bin -isysroot /builds/worker/workspace/'
+                        'build/src/MacOSX10.11.sdk -std=gnu99'
+                    ),
+                    'cxx': (
+                        '/builds/worker/workspace/build/src/clang/bin/clang++ '
+                        '-target x86_64-apple-darwin11 -B /builds/worker/workspace/'
+                        'build/src/cctools/bin -isysroot /builds/worker/workspace/'
+                        'build/src/MacOSX10.11.sdk'
+                    ),
+                    'host': 'x86_64-pc-linux-gnu',
+                    'target': 'x86_64-apple-darwin',
+                },
+            }
+        }, {
+            'data': {
+                'source': {
+                    'product': 'firefox',
+                    'revision': 'f6df375b86987b2772067a61873ebfe3a98c353a',
+                    'repository': 'https://hg.mozilla.org/mozilla-central',
+                    'tree': 'mozilla-central',
+                },
+                'target': {
+                    'platform': 'linux-x86_64',
+                    'os': 'linux',
+                    'locale': 'en-US',
+                    'version': '65.0a1',
+                    'channel': 'nightly',
+                },
+                'download': {
+                    'url': (
+                        f'{ARCHIVE_URL}pub/firefox/nightly'
+                        '/2018/11/2018-11-13-10-00-51-mozilla-central/'
+                        'firefox-65.0a1.en-US.linux-x86_64.tar.bz2'
+                    ),
+                    'mimetype': 'application/x-bzip2',
+                    'size': 50000,
+                    'date': '2018-11-13T13:10:00Z',
+                },
+                'id': 'firefox_nightly_2018-11-13-10-00-51_65-0a1_linux-x86_64_en-us',
+                'build': {
+                    'id': '20181113100051',
+                    'date': '2018-11-13T10:00:51Z',
+                    'as': '/builds/worker/workspace/build/src/clang/bin/clang -std=gnu99',
+                    'cc': '/builds/worker/workspace/build/src/clang/bin/clang -std=gnu99',
+                    'cxx': '/builds/worker/workspace/build/src/clang/bin/clang++',
+                    'host': 'x86_64-pc-linux-gnu',
+                    'target': 'x86_64-pc-linux-gnu',
+                },
+            }
         }]
 
-        assert len(records) == 6, [r['data']['id'] for r in records]
+        assert len(records) == len(expected), [r['data']['id'] for r in records]
         assert [
             r['data']['id'] for r in records
         ] == [
