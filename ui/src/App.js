@@ -177,6 +177,18 @@ const fullText = (query, options) => {
   };
 };
 
+class Deprecation extends React.PureComponent {
+  render() {
+    return (
+      <div className="deprecation-notice">
+        This project is deprecated and will be decommissioned soon. <a
+        href="https://github.com/mozilla-services/buildhub/issues/532">See deprecation
+        notice for details.</a>
+      </div>
+    );
+  }
+}
+
 class ProjectInfo extends React.PureComponent {
   render() {
     const {
@@ -188,10 +200,10 @@ class ProjectInfo extends React.PureComponent {
     return (
       <div className="project-info">
         <div>
-          <a href={documentation}>Documentation</a>
+          <a href={documentation}>Docs</a>
         </div>
         <div>
-          <a href={report}>Report a bug</a>
+          <a href={report}>Bugs</a>
         </div>
         <div>
           <a href={source} title={license}>
@@ -243,7 +255,6 @@ class App extends Component {
               </div>
               <ProjectInfo />
             </TopBar>
-
             <LayoutBody>
               <SideBar>
                 <RefinementAutosuggest
@@ -284,6 +295,7 @@ class App extends Component {
               </SideBar>
 
               <LayoutResults>
+                <Deprecation />
                 <ActionBar>
                   <ActionBarRow>
                     <HitsStats />
