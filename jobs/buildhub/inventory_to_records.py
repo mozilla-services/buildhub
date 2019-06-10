@@ -40,7 +40,10 @@ CACHE_FOLDER = config('CACHE_FOLDER', default='.')
 logger = logging.getLogger()  # root logger.
 
 # Module version, as defined in PEP-0396.
-__version__ = pkg_resources.get_distribution(__package__).version
+try:
+    __version__ = pkg_resources.get_distribution(__package__).version
+except pkg_resources.DistributionNotFound:
+    __version__ = '0.1.dev'
 
 
 class JSONFileNotFound(Exception):
