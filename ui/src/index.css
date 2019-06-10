@@ -26,6 +26,13 @@ body {
   color: #fff;
 }
 
+.deprecation-notice {
+  margin: 20px;
+  padding: 5px;
+  background: #ffaaaa;
+  font-weight: bold;
+}
+
 table a {
   text-decoration: none;
 }
