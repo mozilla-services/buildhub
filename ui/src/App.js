@@ -181,9 +181,10 @@ class Deprecation extends React.PureComponent {
   render() {
     return (
       <div className="deprecation-notice">
-        This project is deprecated and will be decommissioned soon. <a
-        href="https://github.com/mozilla-services/buildhub/issues/532">See deprecation
-        notice for details.</a>
+        This project is deprecated and will be decommissioned soon.{" "}
+        <a href="https://github.com/mozilla-services/buildhub/issues/532">
+          See deprecation notice for details.
+        </a>
       </div>
     );
   }
