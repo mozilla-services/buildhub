@@ -10,7 +10,10 @@ EXPOSE $PORT
 # install a few essentials and clean apt caches afterwards
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        apt-transport-https build-essential curl
+        apt-transport-https \
+        build-essential \
+        libpq-dev \
+        curl
 
 # Clean up apt
 RUN apt-get autoremove -y && \
