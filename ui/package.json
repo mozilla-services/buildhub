@@ -27,7 +27,7 @@
   "homepage": "https://mozilla-services.github.io/buildhub",
   "scripts": {
     "deploy":
-      "yarn run build && rimraf tmp && mkdir tmp && cp -R build/* tmp/ && cp -R build/* tmp/stage/ && ls tmp/stage/static/js/main* tmp/stage/index.html | xargs sed -i 's|/buildhub/|/buildhub/stage/|g' && ls tmp/stage/static/js/main* | xargs sed -i 's/buildhub.prod.mozaws.net/buildhub.stage.mozaws.net/' && gh-pages -d tmp --add && rimraf tmp",
+      "yarn run build && rimraf tmp && mkdir tmp && cp -R build/* tmp/ && gh-pages -d tmp --add && rimraf tmp",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
