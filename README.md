@@ -85,12 +85,6 @@ Then run:
     $ yarn install
     $ yarn deploy
 
-## Deployment
-
-The outlined steps above only upgrade the cron job part of Buildhub.
-And only for Stage is it automatically upgraded simply by making a new
-Release.
-
 ## Datadog
 
 [Buildhub Performance](https://app.datadoghq.com/dash/794559/buildhub-performance)
