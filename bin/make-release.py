@@ -8,7 +8,6 @@ import datetime
 import re
 import subprocess
 import time
-import pkg_resources
 
 import requests
 from decouple import config
@@ -17,6 +16,18 @@ OWNER = 'mozilla-services'
 REPO = 'buildhub'
 
 GITHUB_API_KEY = config('GITHUB_API_KEY', default='')
+
+
+def get_current_version():
+    with open("jobs/setup.py", "r") as fp:
+        lines = fp.readlines()
+
+    for line in lines:
+        if line.strip().startswith("version="):
+            version = line.strip().replace("version=", "").replace("\'", "").replace(",", "")
+            return version
+
+    raise Exception("Can't find version.")
 
 
 def _format_age(seconds):
@@ -90,7 +101,7 @@ def main(
         return 3
 
     # Figure out the current version
-    current_version = pkg_resources.get_distribution('buildhub').version
+    current_version = get_current_version()
     z, y, x = [int(x) for x in current_version.split('.')]
     if part == 'major':
         next_version = (z + 1, 0, 0)

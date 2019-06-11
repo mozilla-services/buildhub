@@ -41,9 +41,10 @@ is the "type" of the release. The choices are:
 * `minor` (e.g. '2.6.7' to '2.7.0')
 * `patch` (e.g. '2.6.7' to '2.6.8')
 
-Like this for example:
+Then do this:
 
-    GITHUB_API_KEY=895f...ce09 ./bin/make-release.py minor
+    $ make shell
+    $ GITHUB_API_KEY=895f...ce09 ./bin/make-release.py minor
 
 This will bump the version in `setup.py`, update the `CHANGELOG.rst` and
 make a tag and push that tag to GitHub.
