@@ -1,6 +1,35 @@
 Changelog
 =========
 
+1.4.1 (2019-06-10)
+------------------
+
+- Merge pull request #535 from willkg/release-fix
+
+- Fix release process
+
+- Merge pull request #534 from willkg/deprecation-notice
+
+- Fix lint issue
+
+- Add deprecation notice
+
+- Merge pull request #533 from willkg/update-deps
+
+- Update js dependencies
+
+- Update dependencies and fix building
+
+- Update makefile
+
+- Merge pull request #531 from willkg/coc
+
+- Add code of conduct
+
+- upgrade urllib3 (#529)
+
+
+
 1.4.0 (2018-11-16)
 ------------------
 
