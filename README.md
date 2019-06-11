@@ -83,7 +83,14 @@ Then run:
 
     $ cd ui
     $ yarn install
-    $ yarn deploy
+    $ yarn run build
+    $ rimraf tmp
+    $ mkdir tmp
+    $ cp -R build/* tmp/
+    $ gh-pages -d tmp --add
+
+Note: This only deploys a ui that connects to prod kinto--it doesn't deploy a
+ui that connects to the stage kinto.
 
 ## Datadog
 
