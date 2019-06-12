@@ -1,5 +1,12 @@
 # Buildhub
 
+## Status: June 11th, 2019
+
+This project is deprecated and will be decommissioned soon.
+If you're using Buildhub, please migrate to [Buildhub2](https://buildhub2.readthedocs.io/).
+
+## Details
+
 [![CircleCI](https://circleci.com/gh/mozilla-services/buildhub.svg?style=svg)](https://circleci.com/gh/mozilla-services/buildhub)
 
 _Buildhub_ aims to provide a public database of comprehensive information about releases and builds.
