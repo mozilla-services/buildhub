@@ -7,9 +7,9 @@ asynctest==0.11.1 \
 flake8==3.5.0 \
     --hash=sha256:c7841163e2b576d435799169b78703ad6ac1bbb0f199994fc05f700b2a90ea37 \
     --hash=sha256:7253265f7abd8b313e3892944044a365e3f4ac3fcdcfb4298f55ee9ddf188ba0
-pytest==3.5.1 \
-    --hash=sha256:829230122facf05a5f81a6d4dfe6454a04978ea3746853b2b84567ecf8e5c526 \
-    --hash=sha256:54713b26c97538db6ff0703a12b19aeaeb60b5e599de542e7fca0ec83b9038e8
+pytest==3.9.2 \
+    --hash=sha256:6f6c1efc8d0ccc21f8f6c34d8330baca883cf109b66b3df954b0a117e5528fb4 \
+    --hash=sha256:212be78a6fa5352c392738a49b18f74ae9aeec1040f47c81cadbfd8d1233c310
 pytest-cache==1.0 \
     --hash=sha256:be7468edd4d3d83f1e844959fd6e3fd28e77a481440a7118d430130ea31b07a9
 pytest-cover==3.0.0 \
